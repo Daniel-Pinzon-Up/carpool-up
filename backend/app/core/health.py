@@ -5,21 +5,21 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.core.db import engine
-from app.core.rate_limit import limiter
+from app.core.rate_limit import exempt
 from app.core.redis import redis_client
 
 router = APIRouter(prefix="/health", tags=["health"])
 
 
 @router.get("/live")
-@limiter.exempt
+@exempt
 async def live(request: Request) -> dict[str, str]:
     """El proceso responde."""
     return {"status": "ok"}
 
 
 @router.get("/ready", responses={503: {"description": "Alguna dependencia no responde"}})
-@limiter.exempt
+@exempt
 async def ready(request: Request) -> JSONResponse:
     """Base de datos con PostGIS y Redis disponibles."""
     checks: dict[str, Any] = {}
