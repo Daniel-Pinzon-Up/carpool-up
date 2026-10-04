@@ -1,6 +1,7 @@
 import asyncio
 from logging.config import fileConfig
 
+from geoalchemy2 import alembic_helpers
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -26,7 +27,9 @@ POSTGIS_TABLES = {"spatial_ref_sys", "layer", "topology"}
 def include_object(
     obj: object, name: str | None, type_: str, reflected: bool, compare_to: object
 ) -> bool:
-    return not (type_ == "table" and name in POSTGIS_TABLES)
+    if type_ == "table" and name in POSTGIS_TABLES:
+        return False
+    return bool(alembic_helpers.include_object(obj, name, type_, reflected, compare_to))
 
 
 def do_run_migrations(connection: Connection) -> None:
@@ -34,6 +37,8 @@ def do_run_migrations(connection: Connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
         include_object=include_object,
+        process_revision_directives=alembic_helpers.writer,
+        render_item=alembic_helpers.render_item,
         compare_type=True,
     )
     with context.begin_transaction():
