@@ -1,0 +1,142 @@
+@if (user(); as me) {
+  <div class="mx-auto flex max-w-4xl flex-col gap-6 py-2">
+    <header class="flex items-center gap-4">
+      <cp-avatar [name]="me.full_name" size="lg" />
+      <div class="min-w-0">
+        <h1 class="truncate text-2xl font-bold sm:text-3xl">{{ me.full_name }}</h1>
+        <p class="truncate text-muted">{{ me.email }}</p>
+        <p class="mt-1 text-sm font-semibold">{{ 'roles.' + me.role | transloco }}</p>
+      </div>
+    </header>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <cp-glass-card>
+        <h2 class="mb-4 text-lg font-bold">{{ 'profile.details' | transloco }}</h2>
+        <form [formGroup]="details" (ngSubmit)="saveDetails()" class="flex flex-col gap-4">
+          <cp-glass-input
+            formControlName="program"
+            [label]="'fields.program' | transloco"
+            [hint]="'fields.programHint' | transloco"
+          />
+          @if (isDriver()) {
+            <cp-glass-input
+              formControlName="payment_note"
+              [label]="'profile.paymentNote' | transloco"
+              [hint]="'profile.paymentNoteHint' | transloco"
+            />
+          }
+          <p class="text-sm text-muted">{{ 'profile.verifiedFields' | transloco }}</p>
+          <button cp-button type="submit" [loading]="saving()" class="self-start">
+            {{ 'profile.save' | transloco }}
+          </button>
+        </form>
+      </cp-glass-card>
+
+      <cp-glass-card>
+        <h2 class="mb-4 text-lg font-bold">{{ 'profile.preferences' | transloco }}</h2>
+        <div class="flex flex-col gap-4">
+          <div>
+            <p class="mb-1.5 text-sm font-medium">{{ 'layout.language' | transloco }}</p>
+            <cp-language-select />
+          </div>
+          <cp-glass-select
+            [formControl]="themeControl"
+            [label]="'layout.theme.label' | transloco"
+            [options]="themeOptions()"
+          />
+          <label class="flex min-h-11 cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              class="size-5 accent-[var(--accent)]"
+              [checked]="theme.reduceTransparency()"
+              (change)="theme.setReduceTransparency($any($event.target).checked)"
+            />
+            <span class="text-sm font-medium">{{
+              'catalog.controls.reduceTransparency' | transloco
+            }}</span>
+          </label>
+        </div>
+      </cp-glass-card>
+
+      <cp-glass-card>
+        <h2 class="mb-4 text-lg font-bold">{{ 'profile.document' | transloco }}</h2>
+        @if (me.document; as doc) {
+          <div class="flex flex-wrap items-center gap-3">
+            <cp-status-badge [variant]="docTone()">{{
+              'documentStatus.' + doc.status | transloco
+            }}</cp-status-badge>
+            <span class="text-sm text-muted">{{
+              'register.document.' + doc.kind + '.title' | transloco
+            }}</span>
+          </div>
+        } @else {
+          <p class="text-muted">{{ 'profile.noDocument' | transloco }}</p>
+        }
+        <a
+          routerLink="/cuenta/estado"
+          class="mt-4 inline-block text-sm font-semibold text-primary underline underline-offset-4"
+        >
+          {{ 'profile.updateDocument' | transloco }}
+        </a>
+      </cp-glass-card>
+
+      <cp-glass-card>
+        <h2 class="mb-1 text-lg font-bold">{{ 'profile.sessions.title' | transloco }}</h2>
+        <p class="mb-4 text-sm text-muted">{{ 'profile.sessions.help' | transloco }}</p>
+        @if (sessions.isLoading()) {
+          <div aria-busy="true"><cp-skeleton [lines]="3" /></div>
+        } @else {
+          <ul class="mb-4 flex flex-col gap-3">
+            @for (session of sessions.value() ?? []; track session.id) {
+              <li class="flex items-center gap-3">
+                <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/15">
+                  <svg lucideLaptop class="size-5 text-primary" aria-hidden="true"></svg>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-medium">{{ session.device_label }}</p>
+                  <p class="text-sm text-muted">
+                    {{
+                      'profile.sessions.lastSeen'
+                        | transloco: { date: lastSeen(session.last_seen_at) }
+                    }}
+                  </p>
+                </div>
+                @if (session.current) {
+                  <cp-status-badge variant="success">{{
+                    'profile.sessions.current' | transloco
+                  }}</cp-status-badge>
+                }
+              </li>
+            }
+          </ul>
+        }
+        <button
+          cp-button
+          variant="secondary"
+          type="button"
+          [loading]="closingOthers()"
+          [disabled]="(sessions.value()?.length ?? 0) < 2"
+          (click)="closeOthers()"
+        >
+          <svg lucideShieldOff class="size-4" aria-hidden="true"></svg>
+          {{ 'profile.sessions.closeOthers' | transloco }}
+        </button>
+      </cp-glass-card>
+    </div>
+
+    <cp-glass-card class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        <a routerLink="/legal/terminos" class="text-primary underline underline-offset-4">{{
+          'legal.terms' | transloco
+        }}</a>
+        <a routerLink="/legal/datos" class="text-primary underline underline-offset-4">{{
+          'legal.dataPolicy' | transloco
+        }}</a>
+      </div>
+      <button cp-button variant="danger" type="button" (click)="logout()">
+        <svg lucideLogOut class="size-4" aria-hidden="true"></svg>
+        {{ 'profile.logout' | transloco }}
+      </button>
+    </cp-glass-card>
+  </div>
+}
