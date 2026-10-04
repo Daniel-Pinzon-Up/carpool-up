@@ -1,0 +1,301 @@
+<div class="mx-auto flex max-w-6xl flex-col gap-8 py-2">
+  <header class="flex flex-col gap-2">
+    <h1 class="text-2xl font-bold sm:text-3xl">{{ 'catalog.title' | transloco }}</h1>
+    <p class="max-w-2xl text-muted">{{ 'catalog.subtitle' | transloco }}</p>
+  </header>
+
+  <!-- Controles globales -->
+  <cp-glass-card [level]="2">
+    <h2 class="mb-4 text-lg font-bold">{{ 'catalog.controls.title' | transloco }}</h2>
+    <div class="flex flex-wrap items-center gap-3">
+      @for (pref of ['system', 'light', 'dark']; track pref) {
+        <button
+          cp-button
+          type="button"
+          [variant]="theme.preference() === pref ? 'primary' : 'secondary'"
+          [attr.aria-pressed]="theme.preference() === pref"
+          (click)="theme.setPreference($any(pref))"
+        >
+          {{ 'layout.theme.' + pref | transloco }}
+        </button>
+      }
+      <label
+        class="glass-1 !rounded-full inline-flex min-h-11 cursor-pointer items-center gap-3 px-4"
+      >
+        <input
+          type="checkbox"
+          class="size-5 accent-[var(--accent)]"
+          [checked]="theme.reduceTransparency()"
+          (change)="theme.setReduceTransparency($any($event.target).checked)"
+        />
+        <span class="text-sm font-semibold">{{
+          'catalog.controls.reduceTransparency' | transloco
+        }}</span>
+      </label>
+    </div>
+  </cp-glass-card>
+
+  <!-- Comparacion de temas -->
+  <section aria-labelledby="themes-title">
+    <h2 id="themes-title" class="mb-1 text-xl font-bold">
+      {{ 'catalog.themes.title' | transloco }}
+    </h2>
+    <p class="mb-4 text-muted">{{ 'catalog.themes.description' | transloco }}</p>
+    <div class="grid gap-4 md:grid-cols-2">
+      @for (preview of previews; track preview.key) {
+        <div
+          [class]="preview.classes + ' relative isolate overflow-hidden rounded-[1.75rem] p-5'"
+          style="background: var(--bg)"
+        >
+          <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+            <span
+              class="absolute -top-16 -left-10 size-56 rounded-full opacity-[var(--blob-opacity)] blur-3xl"
+              style="background: var(--bg-blob-1)"
+            ></span>
+            <span
+              class="absolute -right-10 -bottom-20 size-56 rounded-full opacity-[var(--blob-opacity)] blur-3xl"
+              style="background: var(--bg-blob-3)"
+            ></span>
+          </div>
+          <p class="mb-3 text-sm font-semibold text-muted">
+            {{ 'catalog.themes.' + preview.key | transloco }}
+          </p>
+          <cp-glass-card>
+            <div class="mb-3 flex items-center gap-3">
+              <cp-avatar name="Laura Mendoza" size="sm" />
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold">Laura Mendoza</p>
+                <cp-star-rating [readonly]="true" [display]="4.8" />
+              </div>
+              <cp-status-badge variant="success">{{
+                'catalog.badges.accepted' | transloco
+              }}</cp-status-badge>
+            </div>
+            <p class="mb-4 text-sm text-muted">{{ 'catalog.sample.route' | transloco }}</p>
+            <div class="flex flex-wrap gap-2">
+              <button cp-button type="button">{{ 'catalog.buttons.primary' | transloco }}</button>
+              <button cp-button variant="secondary" type="button">
+                {{ 'catalog.buttons.secondary' | transloco }}
+              </button>
+            </div>
+          </cp-glass-card>
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <!-- Botones -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.buttons.title' | transloco }}</h2>
+      <div class="flex flex-wrap gap-3">
+        <button cp-button type="button">{{ 'catalog.buttons.primary' | transloco }}</button>
+        <button cp-button variant="secondary" type="button">
+          {{ 'catalog.buttons.secondary' | transloco }}
+        </button>
+        <button cp-button variant="danger" type="button">
+          <svg lucideTrash2 class="size-4" aria-hidden="true"></svg>
+          {{ 'catalog.buttons.danger' | transloco }}
+        </button>
+        <button cp-button variant="ghost" type="button">
+          {{ 'catalog.buttons.ghost' | transloco }}
+        </button>
+        <button cp-button type="button" [disabled]="true">
+          {{ 'catalog.buttons.disabled' | transloco }}
+        </button>
+        <button cp-button type="button" [loading]="loadingButton()" (click)="simulateLoading()">
+          {{ 'catalog.buttons.loading' | transloco }}
+        </button>
+        <button cp-button size="lg" [block]="true" type="button">
+          {{ 'catalog.buttons.block' | transloco }}
+        </button>
+      </div>
+    </cp-glass-card>
+
+    <!-- Campos -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.fields.title' | transloco }}</h2>
+      <div class="flex flex-col gap-4">
+        <cp-glass-input
+          [label]="'catalog.fields.email' | transloco"
+          type="email"
+          autocomplete="email"
+          [placeholder]="'catalog.fields.emailPlaceholder' | transloco"
+          [icon]="icons.mail"
+          [required]="true"
+          [hint]="'catalog.fields.emailHint' | transloco"
+          [formControl]="email"
+        />
+        <cp-glass-input
+          [label]="'catalog.fields.email' | transloco"
+          type="email"
+          [icon]="icons.mail"
+          [error]="'catalog.fields.emailError' | transloco"
+          [formControl]="emailInvalid"
+        />
+        <cp-glass-select
+          [label]="'catalog.select.label' | transloco"
+          [options]="vehicleOptions()"
+          [formControl]="vehicle"
+        />
+      </div>
+    </cp-glass-card>
+
+    <!-- Chips -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.chips.title' | transloco }}</h2>
+      <div class="flex flex-wrap gap-2">
+        <cp-glass-chip [(selected)]="pets" [icon]="icons.pets">{{
+          'catalog.chips.pets' | transloco
+        }}</cp-glass-chip>
+        <cp-glass-chip [(selected)]="luggage" [icon]="icons.luggage">{{
+          'catalog.chips.luggage' | transloco
+        }}</cp-glass-chip>
+        <cp-glass-chip [(selected)]="noSmoking" [icon]="icons.smoking">{{
+          'catalog.chips.noSmoking' | transloco
+        }}</cp-glass-chip>
+        <cp-glass-chip [(selected)]="music" [icon]="icons.music">{{
+          'catalog.chips.music' | transloco
+        }}</cp-glass-chip>
+        <cp-glass-chip [(selected)]="womenOnly" [icon]="icons.women">{{
+          'catalog.chips.womenOnly' | transloco
+        }}</cp-glass-chip>
+      </div>
+    </cp-glass-card>
+
+    <!-- Pestanas -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.tabs.title' | transloco }}</h2>
+      <cp-glass-tabs
+        #tabsRef
+        [tabs]="tabs()"
+        [(selected)]="selectedTab"
+        [label]="'catalog.tabs.title' | transloco"
+      />
+      <div
+        role="tabpanel"
+        [id]="tabsRef.panelId(selectedTab())"
+        [attr.aria-labelledby]="tabsRef.tabId(selectedTab())"
+        class="mt-4 text-muted"
+      >
+        {{
+          'catalog.tabs.panel' | transloco: { tab: ('catalog.tabs.' + selectedTab() | transloco) }
+        }}
+      </div>
+    </cp-glass-card>
+
+    <!-- Estados -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.badges.title' | transloco }}</h2>
+      <div class="flex flex-wrap gap-2">
+        <cp-status-badge variant="pending">{{
+          'catalog.badges.requested' | transloco
+        }}</cp-status-badge>
+        <cp-status-badge variant="success">{{
+          'catalog.badges.accepted' | transloco
+        }}</cp-status-badge>
+        <cp-status-badge variant="danger">{{
+          'catalog.badges.rejected' | transloco
+        }}</cp-status-badge>
+        <cp-status-badge variant="warning">{{
+          'catalog.badges.picoPlaca' | transloco
+        }}</cp-status-badge>
+        <cp-status-badge variant="info">{{
+          'catalog.badges.inProgress' | transloco
+        }}</cp-status-badge>
+        <cp-status-badge>{{ 'catalog.badges.completed' | transloco }}</cp-status-badge>
+      </div>
+    </cp-glass-card>
+
+    <!-- Avatares y calificacion -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.rating.title' | transloco }}</h2>
+      <div class="mb-5 flex items-center gap-3">
+        <cp-avatar name="Laura Mendoza" size="sm" />
+        <cp-avatar name="Andres Rojas" />
+        <cp-avatar name="Camila Pabon" size="lg" />
+      </div>
+      <cp-star-rating [label]="'catalog.rating.punctuality' | transloco" [formControl]="rating" />
+      <p class="mt-2 text-sm text-muted">
+        {{ 'catalog.rating.value' | transloco: { value: ratingValue() ?? 0 } }}
+      </p>
+    </cp-glass-card>
+
+    <!-- Asistente y puestos -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.stepper.title' | transloco }}</h2>
+      <cp-stepper
+        [steps]="[
+          'catalog.stepper.route' | transloco,
+          'catalog.stepper.schedule' | transloco,
+          'catalog.stepper.vehicle' | transloco,
+          'catalog.stepper.summary' | transloco,
+        ]"
+        [current]="step()"
+      />
+      <div class="mt-4 flex gap-2">
+        <button
+          cp-button
+          variant="secondary"
+          type="button"
+          [disabled]="step() === 0"
+          (click)="step.set(step() - 1)"
+        >
+          {{ 'catalog.stepper.back' | transloco }}
+        </button>
+        <button cp-button type="button" [disabled]="step() === 3" (click)="step.set(step() + 1)">
+          {{ 'catalog.stepper.next' | transloco }}
+        </button>
+      </div>
+      <div class="mt-6">
+        <cp-seat-picker
+          [label]="'catalog.seats.label' | transloco"
+          [formControl]="seats"
+          [max]="4"
+        />
+      </div>
+    </cp-glass-card>
+
+    <!-- Carga y vacio -->
+    <cp-glass-card>
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.loading.title' | transloco }}</h2>
+      <div class="flex items-start gap-4" aria-busy="true">
+        <cp-skeleton shape="circle" />
+        <cp-skeleton class="flex-1" [lines]="3" />
+      </div>
+      <cp-empty-state
+        [icon]="icons.empty"
+        [title]="'catalog.empty.title' | transloco"
+        [description]="'catalog.empty.description' | transloco"
+      >
+        <button cp-button variant="secondary" type="button">
+          {{ 'catalog.empty.action' | transloco }}
+        </button>
+      </cp-empty-state>
+    </cp-glass-card>
+
+    <!-- Dialogos y avisos -->
+    <cp-glass-card class="lg:col-span-2">
+      <h2 class="mb-4 text-lg font-bold">{{ 'catalog.dialogs.title' | transloco }}</h2>
+      <div class="flex flex-wrap gap-3">
+        <button cp-button variant="secondary" type="button" (click)="openModal()">
+          {{ 'catalog.dialogs.modal' | transloco }}
+        </button>
+        <button cp-button variant="secondary" type="button" (click)="openSheet()">
+          {{ 'catalog.dialogs.sheet' | transloco }}
+        </button>
+        <button cp-button variant="danger" type="button" (click)="confirmDelete()">
+          {{ 'catalog.dialogs.confirm' | transloco }}
+        </button>
+      </div>
+      <h3 class="mt-6 mb-3 font-semibold">{{ 'catalog.toasts.title' | transloco }}</h3>
+      <div class="flex flex-wrap gap-3">
+        @for (tone of ['info', 'success', 'warning', 'danger']; track tone) {
+          <button cp-button variant="ghost" type="button" (click)="toast($any(tone))">
+            {{ 'catalog.toasts.' + tone | transloco }}
+          </button>
+        }
+      </div>
+    </cp-glass-card>
+  </div>
+</div>
