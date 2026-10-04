@@ -2,7 +2,9 @@
 # Uso: .\make.ps1 up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | clean
 param([Parameter(Position = 0)][string]$Target = 'help')
 
-$ErrorActionPreference = 'Stop'
+# Docker y npm escriben progreso en stderr; en Windows PowerShell 5.1 'Stop' lo convierte en error.
+# Los fallos se detectan con $LASTEXITCODE.
+$ErrorActionPreference = 'Continue'
 Set-Location $PSScriptRoot
 
 $Compose = @('compose', '--env-file', '.env', '-f', 'infra/docker-compose.yml', '-f', 'infra/docker-compose.dev.yml')
