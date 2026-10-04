@@ -1,7 +1,4 @@
-"""Dependencias de autenticacion y autorizacion por rol.
-
-El login y la emision de tokens llegan en el paso 2; aqui solo se valida el token de acceso.
-"""
+"""Dependencias de autenticacion y autorizacion por rol."""
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -10,10 +7,12 @@ from typing import Annotated
 from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.core.clock import utcnow
 from app.core.deps import DbSession
 from app.core.enums import UserRole, UserStatus
 from app.core.errors import AppError, ForbiddenError
-from app.core.security import decode_access_token
+from app.core.security import AccessClaims, decode_access_token
+from app.modules.auth.models import UserSession
 from app.modules.users.models import User
 
 _bearer = HTTPBearer(auto_error=False)
@@ -24,15 +23,31 @@ class UnauthorizedError(AppError):
         super().__init__("UNAUTHORIZED", "Authentication required", 401)
 
 
-async def get_current_user(
-    session: DbSession,
+async def get_access_claims(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
-) -> User:
+) -> AccessClaims:
     if credentials is None:
         raise UnauthorizedError()
     claims = decode_access_token(credentials.credentials)
     if claims is None:
         raise UnauthorizedError()
+    return claims
+
+
+Claims = Annotated[AccessClaims, Depends(get_access_claims)]
+
+
+async def get_current_user(session: DbSession, claims: Claims) -> User:
+    if claims.session_id is not None:
+        # Revocar la sesion (logout, cerrar otras sesiones, cambio de clave) corta el acceso ya.
+        user_session = await session.get(UserSession, claims.session_id)
+        if (
+            user_session is None
+            or user_session.user_id != claims.user_id
+            or user_session.revoked_at is not None
+            or user_session.expires_at <= utcnow()
+        ):
+            raise UnauthorizedError()
     user = await session.get(User, claims.user_id)
     if user is None or user.deleted_at is not None or user.status == UserStatus.BLOCKED:
         raise UnauthorizedError()
