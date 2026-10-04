@@ -1,8 +1,9 @@
 import uuid
 from collections.abc import AsyncIterator
 from datetime import datetime
+from enum import Enum as PyEnum
 
-from sqlalchemy import DateTime, MetaData, func
+from sqlalchemy import DateTime, Enum, MetaData, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -20,6 +21,11 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+def pg_enum(enum_cls: type[PyEnum], name: str) -> Enum:
+    """Enum de PostgreSQL que guarda el valor (no el nombre) de cada miembro."""
+    return Enum(enum_cls, name=name, values_callable=lambda cls: [m.value for m in cls])
 
 
 class UUIDPrimaryKey:
