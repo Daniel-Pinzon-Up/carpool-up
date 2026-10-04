@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { getTranslocoTestingModule } from '../../../testing/transloco-testing';
@@ -8,7 +10,7 @@ describe('Shell', () => {
   it('muestra los destinos del pasajero en la barra lateral y la inferior', () => {
     TestBed.configureTestingModule({
       imports: [Shell, getTranslocoTestingModule()],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     });
     const fixture = TestBed.createComponent(Shell);
     fixture.detectChanges();
