@@ -1,0 +1,181 @@
+<cp-glass-card [level]="2" class="!p-6 sm:!p-8">
+  <h1 class="mb-5 text-2xl font-bold">{{ 'register.title' | transloco }}</h1>
+  <cp-stepper class="mb-6" [steps]="stepLabels()" [current]="index()" />
+
+  @if (error()) {
+    <div role="alert" class="mb-5 flex gap-3 rounded-2xl bg-danger/10 p-4 text-sm text-danger">
+      <svg lucideCircleAlert class="size-5 shrink-0" aria-hidden="true"></svg>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form (ngSubmit)="next()" novalidate>
+    <h2 id="register-step-title" tabindex="-1" class="mb-1 text-lg font-bold focus:outline-none">
+      {{ 'register.steps.' + step() | transloco }}
+    </h2>
+    <p class="mb-5 text-sm text-muted">{{ 'register.help.' + step() | transloco }}</p>
+
+    @switch (step()) {
+      @case ('data') {
+        <div [formGroup]="data" class="flex flex-col gap-4">
+          <cp-glass-input
+            formControlName="full_name"
+            autocomplete="name"
+            [icon]="icons.user"
+            [required]="true"
+            [label]="'fields.fullName' | transloco"
+            [hint]="'fields.fullNameHint' | transloco"
+            [error]="err('full_name')"
+          />
+          <cp-glass-input
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            [icon]="icons.mail"
+            [required]="true"
+            [label]="'fields.institutionalEmail' | transloco"
+            [placeholder]="'fields.emailPlaceholder' | transloco"
+            [hint]="
+              'fields.emailHint' | transloco: { suffix: meta.settings().allowed_email_suffix }
+            "
+            [error]="err('email')"
+          />
+          <cp-glass-input
+            formControlName="password"
+            type="password"
+            autocomplete="new-password"
+            [revealable]="true"
+            [icon]="icons.lock"
+            [required]="true"
+            [label]="'fields.password' | transloco"
+            [hint]="'fields.passwordHint' | transloco: { min: meta.settings().password_min_length }"
+            [error]="err('password')"
+          />
+          <cp-glass-input
+            formControlName="confirm"
+            type="password"
+            autocomplete="new-password"
+            [revealable]="true"
+            [icon]="icons.lock"
+            [required]="true"
+            [label]="'fields.confirmPassword' | transloco"
+            [error]="err('confirm')"
+          />
+          <cp-glass-select
+            formControlName="sex"
+            [label]="'fields.sex' | transloco"
+            [placeholder]="'fields.choose' | transloco"
+            [options]="sexOptions()"
+            [error]="err('sex')"
+          />
+          <p class="-mt-2 text-sm text-muted">{{ 'fields.sexHint' | transloco }}</p>
+          <cp-glass-input
+            formControlName="program"
+            [label]="'fields.program' | transloco"
+            [hint]="'fields.programHint' | transloco"
+            [error]="err('program')"
+          />
+        </div>
+      }
+      @case ('role') {
+        <div [formGroup]="role">
+          <cp-choice-cards
+            formControlName="role"
+            [label]="'register.role.label' | transloco"
+            [choices]="roleChoices()"
+            [error]="err('role')"
+          />
+          <p class="mt-4 text-sm text-muted">{{ 'register.role.note' | transloco }}</p>
+        </div>
+      }
+      @case ('document') {
+        <div [formGroup]="document" class="flex flex-col gap-5">
+          <cp-choice-cards
+            formControlName="doc_kind"
+            [label]="'register.document.label' | transloco"
+            [choices]="docChoices()"
+            [error]="err('doc_kind')"
+          />
+          <cp-file-drop
+            formControlName="file"
+            [label]="'register.document.file' | transloco"
+            [maxMb]="meta.settings().max_upload_mb"
+            [typeError]="fileErrors().type"
+            [sizeError]="fileErrors().size"
+            [error]="err('file')"
+          />
+          <p class="text-sm text-muted">{{ 'register.document.privacy' | transloco }}</p>
+        </div>
+      }
+      @case ('terms') {
+        <div [formGroup]="terms" class="flex flex-col gap-5">
+          <dl class="glass-1 !rounded-2xl grid gap-3 p-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt class="text-muted">{{ 'fields.fullName' | transloco }}</dt>
+              <dd class="font-semibold">{{ data.value.full_name }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-muted">{{ 'fields.institutionalEmail' | transloco }}</dt>
+              <dd class="truncate font-semibold">{{ data.value.email }}</dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'register.role.label' | transloco }}</dt>
+              <dd class="font-semibold">{{ summaryValue('role') }}</dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'register.document.label' | transloco }}</dt>
+              <dd class="font-semibold">{{ summaryValue('doc_kind') }}</dd>
+            </div>
+          </dl>
+          <cp-glass-checkbox formControlName="accept_terms" [error]="err('accept_terms')">
+            {{ 'register.terms.acceptTerms' | transloco }}
+            <a
+              routerLink="/legal/terminos"
+              target="_blank"
+              class="font-semibold text-primary underline underline-offset-4"
+            >
+              {{ 'legal.terms' | transloco }}
+            </a>
+          </cp-glass-checkbox>
+          <cp-glass-checkbox
+            formControlName="accept_data_policy"
+            [error]="err('accept_data_policy')"
+          >
+            {{ 'register.terms.acceptData' | transloco }}
+            <a
+              routerLink="/legal/datos"
+              target="_blank"
+              class="font-semibold text-primary underline underline-offset-4"
+            >
+              {{ 'legal.dataPolicy' | transloco }}
+            </a>
+          </cp-glass-checkbox>
+          <p class="rounded-2xl bg-primary/10 p-4 text-sm">
+            {{ 'register.terms.contribution' | transloco }}
+          </p>
+        </div>
+      }
+    }
+
+    <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+      @if (index() > 0) {
+        <button cp-button variant="secondary" type="button" (click)="back()">
+          <svg lucideArrowLeft class="size-4" aria-hidden="true"></svg>
+          {{ 'register.back' | transloco }}
+        </button>
+      } @else {
+        <a cp-button variant="ghost" routerLink="/ingresar">{{
+          'register.haveAccount' | transloco
+        }}</a>
+      }
+      <button cp-button type="submit" [loading]="busy()">
+        @if (step() === 'terms') {
+          {{ 'register.submit' | transloco }}
+        } @else {
+          {{ 'register.next' | transloco }}
+          <svg lucideArrowRight class="size-4" aria-hidden="true"></svg>
+        }
+      </button>
+    </div>
+  </form>
+</cp-glass-card>
