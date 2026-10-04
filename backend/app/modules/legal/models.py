@@ -1,6 +1,8 @@
+import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Index, Text, UniqueConstraint, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Text, UniqueConstraint, func, text
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
@@ -31,3 +33,23 @@ class LegalDocument(UUIDPrimaryKey, Timestamps, Base):
     body_markdown: Mapped[str] = mapped_column(Text, nullable=False)
     published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     is_current: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class TermsAcceptance(UUIDPrimaryKey, Base):
+    """Evidencia de que un usuario acepto una version concreta de un documento legal."""
+
+    __tablename__ = "terms_acceptances"
+    __table_args__ = (
+        UniqueConstraint("user_id", "legal_document_id", name="uq_terms_acceptances_user_doc"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    legal_document_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("legal_documents.id", ondelete="RESTRICT"), nullable=False
+    )
+    accepted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    ip: Mapped[str | None] = mapped_column(Text)
