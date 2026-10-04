@@ -5,8 +5,7 @@ from pydantic import BaseModel
 
 from app.core.errors import AppError
 from app.main import create_app
-
-API = "/api/v1"
+from tests.conftest import API
 
 
 async def test_liveness(client: AsyncClient) -> None:
