@@ -13,6 +13,12 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestLogMiddleware, SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 from app.core.redis import redis_client
+from app.modules.audit import router as audit
+from app.modules.legal import router as legal
+from app.modules.pico_placa import router as pico_placa
+from app.modules.places import router as places
+from app.modules.semesters import router as semesters
+from app.modules.settings import router as settings_module
 
 
 @asynccontextmanager
@@ -52,6 +58,17 @@ def create_app() -> FastAPI:
 
     api = APIRouter(prefix=settings.api_prefix)
     api.include_router(health.router)
+    for public in (settings_module.router, semesters.router, places.router, legal.router):
+        api.include_router(public)
+    for admin in (
+        settings_module.admin_router,
+        semesters.admin_router,
+        places.admin_router,
+        pico_placa.admin_router,
+        legal.admin_router,
+        audit.admin_router,
+    ):
+        api.include_router(admin)
     app.include_router(api)
     return app
 
