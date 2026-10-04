@@ -1,9 +1,9 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 
-from app.core.auth import SuperAdmin, SuperAdminActor
+from app.core.auth import CurrentUser, SuperAdmin, SuperAdminActor, client_ip
 from app.core.deps import DbSession
 from app.core.enums import Language
-from app.modules.legal.schemas import LegalDocumentOut, LegalPublish
+from app.modules.legal.schemas import LegalAccept, LegalDocumentOut, LegalPublish
 from app.modules.legal.service import LegalService
 
 router = APIRouter(prefix="/legal", tags=["legal"])
@@ -17,6 +17,14 @@ async def current_documents(
     """Terminos y politica de datos vigentes. Publico: se muestran antes del registro."""
     docs = await LegalService(session).current(language)
     return [LegalDocumentOut.model_validate(d) for d in docs]
+
+
+@router.post("/accept", status_code=status.HTTP_204_NO_CONTENT)
+async def accept_documents(
+    body: LegalAccept, request: Request, user: CurrentUser, session: DbSession
+) -> None:
+    """Acepta versiones vigentes nuevas (cuando cambian los terminos tras el registro)."""
+    await LegalService(session).accept(user, body.document_ids, client_ip(request))
 
 
 @admin_router.get("")

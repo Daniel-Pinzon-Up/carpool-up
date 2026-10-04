@@ -1,8 +1,10 @@
+import uuid
+
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import Language, LegalKind
-from app.modules.legal.models import LegalDocument
+from app.modules.legal.models import LegalDocument, TermsAcceptance
 
 
 class LegalRepository:
@@ -43,3 +45,12 @@ class LegalRepository:
 
     def add(self, document: LegalDocument) -> None:
         self.session.add(document)
+
+    async def accepted_ids(self, user_id: uuid.UUID) -> set[uuid.UUID]:
+        rows = await self.session.scalars(
+            select(TermsAcceptance.legal_document_id).where(TermsAcceptance.user_id == user_id)
+        )
+        return set(rows.all())
+
+    def add_acceptance(self, acceptance: TermsAcceptance) -> None:
+        self.session.add(acceptance)

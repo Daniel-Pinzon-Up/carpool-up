@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Actor
@@ -5,9 +7,10 @@ from app.core.clock import utcnow
 from app.core.enums import Language
 from app.core.errors import AppError
 from app.modules.audit.service import AuditService
-from app.modules.legal.models import LegalDocument
+from app.modules.legal.models import LegalDocument, TermsAcceptance
 from app.modules.legal.repository import LegalRepository
 from app.modules.legal.schemas import LegalPublish
+from app.modules.users.models import User
 
 FALLBACK_LANGUAGE = Language.ES
 
@@ -51,3 +54,36 @@ class LegalService:
         )
         await self.session.commit()
         return document
+
+    async def pending_for(self, user: User) -> list[LegalDocument]:
+        """Versiones vigentes (en su idioma o en espanol) que el usuario no ha aceptado."""
+        accepted = await self.repo.accepted_ids(user.id)
+        return [
+            doc for doc in await self.current(user.preferred_language) if doc.id not in accepted
+        ]
+
+    def record_acceptance(
+        self, user_id: uuid.UUID, documents: list[LegalDocument], ip: str | None
+    ) -> None:
+        """No hace commit: se confirma junto con el registro o con la aceptacion."""
+        for document in documents:
+            self.repo.add_acceptance(
+                TermsAcceptance(user_id=user_id, legal_document_id=document.id, ip=ip)
+            )
+
+    async def accept(self, user: User, document_ids: list[uuid.UUID], ip: str | None) -> None:
+        """Acepta versiones vigentes pendientes. Ids de versiones no vigentes se rechazan."""
+        pending = {doc.id: doc for doc in await self.pending_for(user)}
+        current_ids = {doc.id for doc in await self.current(user.preferred_language)}
+        unknown = [doc_id for doc_id in document_ids if doc_id not in current_ids]
+        if unknown:
+            raise AppError(
+                "LEGAL_VERSION_NOT_CURRENT",
+                "Only current versions can be accepted",
+                422,
+                {"document_ids": [str(doc_id) for doc_id in unknown]},
+            )
+        self.record_acceptance(
+            user.id, [pending[doc_id] for doc_id in document_ids if doc_id in pending], ip
+        )
+        await self.session.commit()

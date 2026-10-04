@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from app.core.enums import Language, LegalKind
 
@@ -27,3 +27,7 @@ class LegalDocumentOut(BaseModel):
     body_markdown: str
     published_at: datetime
     is_current: bool
+
+
+class LegalAccept(BaseModel):
+    document_ids: list[uuid.UUID] = Field(min_length=1, max_length=10)
