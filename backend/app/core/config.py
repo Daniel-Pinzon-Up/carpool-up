@@ -1,8 +1,10 @@
 from functools import lru_cache
 from typing import Annotated, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+
+from app.core.enums import Sex
 
 
 class Settings(BaseSettings):
@@ -20,7 +22,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://carpool:carpool@localhost:5432/carpool"
     redis_url: str = "redis://localhost:6379/0"
 
-    secret_key: str = Field(default="dev-insecure-key-change-me", min_length=16)
+    # HS256 requiere al menos 32 bytes de clave (RFC 7518).
+    secret_key: str = Field(default="dev-insecure-key-change-me-0123456789", min_length=32)
     access_token_minutes: int = 15
     refresh_token_days: int = 30
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:4200"]
@@ -36,6 +39,11 @@ class Settings(BaseSettings):
 
     storage_dir: str = "./storage"
     osrm_url: str = "http://localhost:5000"
+
+    superadmin_email: str | None = None
+    superadmin_password: SecretStr | None = None
+    superadmin_name: str = "Superadministrador"
+    superadmin_sex: Sex = Sex.FEMALE
 
     rate_limit_default: str = "120/minute"
     rate_limit_storage: str | None = None
