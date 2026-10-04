@@ -26,3 +26,29 @@ Registro de decisiones tomadas durante la construcción que no estaban cerradas 
 | 0.18 | El contenedor `backup` hace `pg_dump` diario y conserva los 7 últimos en `backups/`. | Requisito de respaldo diario. |
 | 0.19 | Las pruebas de backend usan la base `carpool_test` (creada por `infra/db/init`); las que necesitan servicios reales llevan la marca `integration`. | Separar datos de desarrollo y de pruebas. |
 | 0.20 | Las rutas de la interfaz están en español (`/buscar`, `/mis-viajes`); los títulos de página se traducen. | Público principal hispanohablante; las URL no cambian con el idioma. |
+
+## Paso 1. Configuración y catálogos
+
+| # | Decisión | Motivo |
+|---|----------|--------|
+| 1.1 | La tabla `users` (completa según la sección 5.3) y la validación del token de acceso JWT se adelantan a este paso. Login, registro, sesiones y 2FA siguen en el paso 2. | Los endpoints del superadmin necesitan autorización por rol y la auditoría necesita `actor_id`. |
+| 1.2 | Para probar la API a mano antes del paso 2 existe `python -m app.cli token <correo>` (`make token EMAIL=...`), que se niega a correr en producción. | No hay login todavía. |
+| 1.3 | Módulos nuevos además de los del plan: `audit`, `semesters` y `pico_placa`. | Cada tabla de configuración tiene sus propias reglas y su propio router; meterlas en `settings` o `admin` mezclaría responsabilidades. |
+| 1.4 | `system_settings` usa la clave como llave primaria (sin `id` uuid). | Es un identificador natural, estable y único. |
+| 1.5 | El tipo y la validación de cada parámetro viven en `settings/definitions.py`; el valor vigente siempre se lee de la tabla. La validación es estricta (`true` no vale como `1`, `"2"` no vale como `2`). | Cumple "toda regla configurable vive en system_settings" sin perder validación. |
+| 1.6 | `cost_per_km_car`, `cost_per_km_motorcycle` y `max_price_per_seat` se siembran vacíos (`null`). | El plan dice que los define el superadmin; no se inventan valores. El paso 5 debe rechazar el cálculo de precio mientras estén vacíos. |
+| 1.7 | Parámetro nuevo `service_area`: caja geográfica de Pamplona y alrededores (lat 7.33 a 7.43, lon -72.70 a -72.59). Los puntos fuera de ella se rechazan con `PLACE_OUT_OF_AREA`. | "Solo trayectos dentro de Pamplona" necesita un límite configurable. |
+| 1.8 | Todos los parámetros se exponen en `GET /meta/settings/public`. | Ninguno es secreto y la interfaz los necesita para explicar reglas y prevenir errores. |
+| 1.9 | Los semestres no se pueden solapar: lo valida el servicio (`SEMESTER_OVERLAP`) y, ante carreras, una restricción de exclusión `EXCLUDE USING gist` en PostgreSQL. Dos semestres sí pueden ser contiguos. | Requisito del plan; la base tiene la última palabra. |
+| 1.10 | `revalidation_deadline` por defecto es `starts_on + revalidation_days`, sin pasar de `ends_on`. | El plan dice "por defecto starts_on + 1 mes, configurable". |
+| 1.11 | El "hoy" del semestre actual y de pico y placa se calcula en hora de `America/Bogota`. Se agrega la dependencia `tzdata`. | La base guarda UTC; las fechas de calendario son locales. Windows y algunas imágenes no traen la base de zonas horarias. |
+| 1.12 | Los lugares no se borran: `DELETE /admin/places/{id}` los desactiva. | Viajes y reservas pasadas pueden apuntar a ellos. |
+| 1.13 | Los pines libres (`kind = custom`) solo los crean cuentas activas, nunca aparecen en el catálogo y el superadmin no los edita desde el catálogo. | Sección 5.4: "no aparecen en el catálogo público". |
+| 1.14 | Pico y placa: `weekday` 0 = lunes (igual que Python). Se usa el último dígito numérico de la placa. Una regla tiene vigencia `valid_from`/`valid_to` y puede desactivarse. | Las placas de moto terminan en letra. |
+| 1.15 | El job `recheck_pico_placa` al editar reglas se conecta en el paso 6. | Todavía no existen viajes que recalcular. |
+| 1.16 | Los documentos legales no se editan: cada cambio es una versión nueva (`1.0`, `1.1`...). Publicar una versión la deja vigente y retira la anterior del mismo tipo e idioma. Si falta un idioma se sirve el español. | Evidencia de qué versión aceptó cada usuario (Ley 1581). |
+| 1.17 | El seed publica la versión 1.0 en español de los términos y de la autorización de datos como **borradores pendientes de revisión jurídica**. | El plan recomienda revisión de la oficina jurídica. |
+| 1.18 | `audit_log` es inmutable: un trigger bloquea UPDATE y DELETE. La única excepción es el `SET NULL` de `actor_id` al borrar un usuario. Su `created_at` usa `clock_timestamp()`. | "Solo se inserta". `now()` es igual para toda la transacción y desordenaba las entradas de una misma operación. |
+| 1.19 | Datos semilla de ejemplo: semestre por mes (febrero a junio, agosto al 15 de diciembre), 7 puntos con **coordenadas aproximadas** y pico y placa de ejemplo de lunes a viernes, dos dígitos por día, para carro y moto. | El equipo debe cargar los datos reales desde el panel. |
+| 1.20 | `SECRET_KEY` debe tener al menos 32 caracteres. | HS256 requiere claves de 32 bytes o más (RFC 7518). |
+| 1.21 | La cobertura se mide con `concurrency = ["greenlet", "thread"]`. | Sin esto coverage pierde las líneas que SQLAlchemy asíncrono ejecuta en greenlets. |

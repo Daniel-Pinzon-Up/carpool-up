@@ -7,7 +7,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | Paso | Contenido | Estado |
 |------|-----------|--------|
 | 0 | Cimientos: monorepo, Docker Compose, FastAPI modular, Angular con sistema de diseño glass | Hecho |
-| 1 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 1 | Configuración y catálogos: parámetros, semestres, lugares, pico y placa, documentos legales y auditoría | Hecho |
+| 2 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
@@ -32,6 +33,17 @@ make up          # Windows: .\make.ps1 up
 | Redis | localhost:6379 |
 
 El catálogo de componentes del sistema de diseño está en `/catalogo` en modo desarrollo.
+
+### Primeros pasos con datos
+
+```sh
+make seed                                         # parametros, superadmin, semestre, lugares, pico y placa y terminos
+make token EMAIL=superadmin@unipamplona.edu.co    # token para probar /admin/* desde /api/v1/docs (boton Authorize)
+```
+
+En Windows: `.\make.ps1 seed` y `.\make.ps1 token superadmin@unipamplona.edu.co`.
+
+El superadmin inicial se toma de `SUPERADMIN_EMAIL` y `SUPERADMIN_PASSWORD` en `.env`.
 
 ## Desarrollo
 
@@ -58,7 +70,8 @@ uv run python -m pytest -m "not integration"   # pruebas que no necesitan servic
 | `make up` / `make down` | Levantar o detener todo |
 | `make logs` | Ver logs |
 | `make migrate` | Aplicar migraciones |
-| `make seed` | Cargar datos semilla |
+| `make seed` | Cargar datos semilla (idempotente) |
+| `make token EMAIL=...` | Token de acceso de desarrollo para probar la API |
 | `make test` | Pruebas de backend (con PostGIS real) y frontend |
 | `make lint` | ruff, mypy, ESLint y Prettier |
 | `make clean` | Detener y borrar volúmenes |
