@@ -8,7 +8,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 |------|-----------|--------|
 | 0 | Cimientos: monorepo, Docker Compose, FastAPI modular, Angular con sistema de diseño glass | Hecho |
 | 1 | Configuración y catálogos: parámetros, semestres, lugares, pico y placa, documentos legales y auditoría | Hecho |
-| 2 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 2 | Autenticación y cuentas: registro con documento, verificación de correo, 2FA, sesiones, recuperación, términos y pantallas | Hecho |
+| 3 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
@@ -44,6 +45,8 @@ make token EMAIL=superadmin@unipamplona.edu.co    # token para probar /admin/* d
 En Windows: `.\make.ps1 seed` y `.\make.ps1 token superadmin@unipamplona.edu.co`.
 
 El superadmin inicial se toma de `SUPERADMIN_EMAIL` y `SUPERADMIN_PASSWORD` en `.env`.
+
+Los correos de verificación y recuperación llegan a Mailpit en desarrollo: http://localhost:8025.
 
 ## Desarrollo
 
