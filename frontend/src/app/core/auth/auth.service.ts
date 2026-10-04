@@ -1,0 +1,228 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import {
+  AuthResult,
+  ChallengePurpose,
+  DocKind,
+  DocumentSummary,
+  Me,
+  PURPOSE_BY_RESULT,
+  PendingChallenge,
+  SessionInfo,
+} from './auth.models';
+
+const API = '/api/v1';
+const CHALLENGE_KEY = 'cp.challenge';
+
+const VERIFY_ENDPOINT: Record<ChallengePurpose, string> = {
+  email_verification: `${API}/auth/verify-email`,
+  two_factor: `${API}/auth/2fa/verify`,
+  password_reset: `${API}/auth/password/reset`,
+};
+
+function readChallenge(): PendingChallenge | null {
+  try {
+    const raw = sessionStorage.getItem(CHALLENGE_KEY);
+    return raw ? (JSON.parse(raw) as PendingChallenge) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeChallenge(challenge: PendingChallenge | null): void {
+  try {
+    if (challenge) sessionStorage.setItem(CHALLENGE_KEY, JSON.stringify(challenge));
+    else sessionStorage.removeItem(CHALLENGE_KEY);
+  } catch {
+    // Sin sessionStorage el desafio vive solo en memoria.
+  }
+}
+
+/**
+ * Sesion del usuario. El token de acceso vive solo en memoria (nunca en localStorage);
+ * el refresh token es una cookie HttpOnly que el navegador envia a /api/v1/auth.
+ */
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private token: string | null = null;
+  private refreshing: Promise<void> | null = null;
+
+  readonly user = signal<Me | null>(null);
+  readonly challenge = signal<PendingChallenge | null>(readChallenge());
+  readonly isAuthenticated = computed(() => this.user() !== null);
+  readonly isActive = computed(() => this.user()?.status === 'active');
+  readonly needsLegal = computed(() => (this.user()?.pending_legal.length ?? 0) > 0);
+
+  accessToken(): string | null {
+    return this.token;
+  }
+
+  /** Intenta recuperar la sesion con la cookie al abrir la app. Nunca falla. */
+  async restore(): Promise<void> {
+    try {
+      await this.refresh();
+    } catch {
+      this.clearSession();
+    }
+  }
+
+  /** Renueva el token de acceso. Peticiones simultaneas comparten la misma renovacion. */
+  refresh(): Promise<void> {
+    this.refreshing ??= firstValueFrom(this.http.post<AuthResult>(`${API}/auth/refresh`, {}))
+      .then((result) => this.apply(result))
+      .finally(() => (this.refreshing = null));
+    return this.refreshing;
+  }
+
+  async login(email: string, password: string): Promise<AuthResult> {
+    const result = await firstValueFrom(
+      this.http.post<AuthResult>(`${API}/auth/login`, { email, password }),
+    );
+    this.handle(result);
+    return result;
+  }
+
+  async register(data: FormData): Promise<AuthResult> {
+    const result = await firstValueFrom(this.http.post<AuthResult>(`${API}/auth/register`, data));
+    this.handle(result);
+    return result;
+  }
+
+  /** Verifica el codigo del desafio en curso (correo o segundo factor). */
+  async verifyCode(code: string): Promise<AuthResult> {
+    const challenge = this.requireChallenge();
+    const result = await firstValueFrom(
+      this.http.post<AuthResult>(VERIFY_ENDPOINT[challenge.purpose], {
+        challenge_id: challenge.id,
+        code,
+      }),
+    );
+    this.handle(result);
+    return result;
+  }
+
+  async resendCode(): Promise<void> {
+    const challenge = this.requireChallenge();
+    const { resend_after_seconds } = await firstValueFrom(
+      this.http.post<{ resend_after_seconds: number }>(`${API}/auth/codes/resend`, {
+        challenge_id: challenge.id,
+      }),
+    );
+    this.setChallenge({ ...challenge, resendAt: Date.now() + resend_after_seconds * 1000 });
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const result = await firstValueFrom(
+      this.http.post<AuthResult>(`${API}/auth/password/forgot`, { email }),
+    );
+    this.handle(result);
+  }
+
+  async resetPassword(code: string, newPassword: string): Promise<void> {
+    const challenge = this.requireChallenge();
+    await firstValueFrom(
+      this.http.post<void>(VERIFY_ENDPOINT.password_reset, {
+        challenge_id: challenge.id,
+        code,
+        new_password: newPassword,
+      }),
+    );
+    this.setChallenge(null);
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.post<void>(`${API}/auth/logout`, {}));
+    } finally {
+      this.clearSession();
+    }
+  }
+
+  async logoutOthers(): Promise<number> {
+    const { revoked } = await firstValueFrom(
+      this.http.post<{ revoked: number }>(`${API}/auth/logout-others`, {}),
+    );
+    return revoked;
+  }
+
+  sessions(): Promise<SessionInfo[]> {
+    return firstValueFrom(this.http.get<SessionInfo[]>(`${API}/auth/sessions`));
+  }
+
+  async reloadMe(): Promise<Me> {
+    const me = await firstValueFrom(this.http.get<Me>(`${API}/users/me`));
+    this.user.set(me);
+    return me;
+  }
+
+  async updateMe(
+    changes: Partial<
+      Pick<Me, 'program' | 'payment_note' | 'preferred_language' | 'theme_preference'>
+    >,
+  ): Promise<Me> {
+    const me = await firstValueFrom(this.http.patch<Me>(`${API}/users/me`, changes));
+    this.user.set(me);
+    return me;
+  }
+
+  async uploadDocument(kind: DocKind, file: File): Promise<DocumentSummary> {
+    const data = new FormData();
+    data.append('kind', kind);
+    data.append('document', file);
+    const document = await firstValueFrom(
+      this.http.post<DocumentSummary>(`${API}/users/me/documents`, data),
+    );
+    await this.reloadMe();
+    return document;
+  }
+
+  async acceptLegal(documentIds: string[]): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${API}/legal/accept`, { document_ids: documentIds }),
+    );
+    await this.reloadMe();
+  }
+
+  clearSession(): void {
+    this.token = null;
+    this.user.set(null);
+  }
+
+  private handle(result: AuthResult): void {
+    if (result.result === 'authenticated') {
+      this.apply(result);
+      return;
+    }
+    const purpose = PURPOSE_BY_RESULT[result.result];
+    if (purpose && result.challenge_id) {
+      this.setChallenge({
+        id: result.challenge_id,
+        purpose,
+        emailHint: result.email_hint ?? '',
+        resendAt: Date.now() + (result.resend_after_seconds ?? 60) * 1000,
+      });
+    }
+  }
+
+  private apply(result: AuthResult): void {
+    if (result.result !== 'authenticated' || !result.access_token || !result.user) {
+      throw new Error('Respuesta de autenticacion incompleta');
+    }
+    this.token = result.access_token;
+    this.user.set(result.user);
+    this.setChallenge(null);
+  }
+
+  private setChallenge(challenge: PendingChallenge | null): void {
+    this.challenge.set(challenge);
+    writeChallenge(challenge);
+  }
+
+  private requireChallenge(): PendingChallenge {
+    const challenge = this.challenge();
+    if (!challenge) throw { code: 'CHALLENGE_EXPIRED', message: '', details: {} };
+    return challenge;
+  }
+}
