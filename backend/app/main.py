@@ -14,16 +14,21 @@ from app.core.middleware import RequestLogMiddleware, SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 from app.core.redis import redis_client
 from app.modules.audit import router as audit
+from app.modules.auth import router as auth
 from app.modules.legal import router as legal
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
 from app.modules.semesters import router as semesters
 from app.modules.settings import router as settings_module
+from app.modules.users import router as users
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
+    arq_pool = getattr(app.state, "arq", None)
+    if arq_pool is not None:
+        await arq_pool.aclose()
     await redis_client.aclose()
     await engine.dispose()
 
@@ -58,7 +63,14 @@ def create_app() -> FastAPI:
 
     api = APIRouter(prefix=settings.api_prefix)
     api.include_router(health.router)
-    for public in (settings_module.router, semesters.router, places.router, legal.router):
+    for public in (
+        auth.router,
+        users.router,
+        settings_module.router,
+        semesters.router,
+        places.router,
+        legal.router,
+    ):
         api.include_router(public)
     for admin in (
         settings_module.admin_router,
