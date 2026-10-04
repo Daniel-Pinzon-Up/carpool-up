@@ -20,7 +20,8 @@ coverage/
 infra/osrm/data/*
 !infra/osrm/data/.gitkeep
 infra/tiles/*.pmtiles
-storage/
+/storage/
+/backend/storage/
 backups/
 # editores
 .vscode/
