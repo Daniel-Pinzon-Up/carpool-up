@@ -1,0 +1,319 @@
+@import 'tailwindcss';
+
+/*
+ * Sistema de diseno liquid glass.
+ * Los colores salen solo de tokens CSS; no se usan variantes dark: de Tailwind para que
+ * un contenedor con .theme-light o .theme-dark pueda forzar un tema (catalogo).
+ */
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-border: var(--glass-border);
+  --radius-glass: 1.5rem;
+  --font-sans: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+
+/* Tema claro (por defecto) */
+:root,
+.theme-light {
+  --bg: #eaf3ff;
+  --bg-blob-1: #9cc8ff;
+  --bg-blob-2: #c8e0ff;
+  --bg-blob-3: #b8f0dc;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-strong: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-shine: rgba(255, 255, 255, 0.7);
+  --surface-1-solid: #f7fbff;
+  --surface-2-solid: #ffffff;
+  --text: #0a1f44;
+  --text-muted: #3b5378;
+  --primary: #1e5aa8;
+  --accent: #0b7a5a;
+  --on-accent: #ffffff;
+  --danger: #c0392b;
+  --warning: #865c00;
+  --success: #0b7a5a;
+  --focus-ring: #1e5aa8;
+  --shadow: 0 8px 32px rgba(10, 31, 68, 0.12);
+  --scrim: rgba(10, 31, 68, 0.35);
+  --blob-opacity: 0.85;
+  color-scheme: light;
+}
+
+/* Tema oscuro */
+.dark,
+.theme-dark {
+  --bg: #0a1f44;
+  --bg-blob-1: #1e5aa8;
+  --bg-blob-2: #0f2e5c;
+  --bg-blob-3: #0f5e5a;
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-shine: rgba(255, 255, 255, 0.35);
+  --surface-1-solid: #12305f;
+  --surface-2-solid: #183a6f;
+  --text: #f2f7ff;
+  --text-muted: #b9cce8;
+  --primary: #5aa9ff;
+  --accent: #3ddba7;
+  --on-accent: #0a1f44;
+  --danger: #ff6b6b;
+  --warning: #ffc857;
+  --success: #3ddba7;
+  --focus-ring: #3ddba7;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --blob-opacity: 0.55;
+  color-scheme: dark;
+}
+
+.theme-light,
+.theme-dark {
+  color: var(--text);
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Fondo con manchas difuminadas fijas para que el vidrio tenga algo que refractar */
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--bg);
+  pointer-events: none;
+}
+.app-backdrop::before,
+.app-backdrop::after,
+.app-backdrop > span {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: var(--blob-opacity);
+}
+.app-backdrop::before {
+  width: 55vmax;
+  height: 55vmax;
+  top: -18vmax;
+  left: -12vmax;
+  background: var(--bg-blob-1);
+}
+.app-backdrop::after {
+  width: 50vmax;
+  height: 50vmax;
+  bottom: -20vmax;
+  right: -14vmax;
+  background: var(--bg-blob-2);
+}
+.app-backdrop > span {
+  width: 30vmax;
+  height: 30vmax;
+  top: 40%;
+  left: 55%;
+  background: var(--bg-blob-3);
+  opacity: calc(var(--blob-opacity) * 0.6);
+}
+
+/* Superficies de vidrio */
+@utility glass-1 {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--glass-shine) 18%, transparent),
+      transparent 40%
+    ),
+    var(--glass);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-glass);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+@utility glass-2 {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--glass-shine) 22%, transparent),
+      transparent 45%
+    ),
+    var(--glass-strong);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-glass);
+  box-shadow:
+    var(--shadow),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+/* Respaldo solido: sin soporte, preferencia del sistema o interruptor propio */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-1 {
+    background: var(--surface-1-solid);
+  }
+  .glass-2 {
+    background: var(--surface-2-solid);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-1,
+  .glass-2 {
+    background: var(--surface-1-solid);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .glass-2 {
+    background: var(--surface-2-solid);
+  }
+}
+
+.reduce-transparency .glass-1,
+.reduce-transparency .glass-2,
+.glass-1.reduce-transparency,
+.glass-2.reduce-transparency {
+  background: var(--surface-1-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.reduce-transparency .glass-2,
+.glass-2.reduce-transparency {
+  background: var(--surface-2-solid);
+}
+.reduce-transparency .app-backdrop::before,
+.reduce-transparency .app-backdrop::after,
+.reduce-transparency .app-backdrop > span {
+  opacity: 0;
+}
+
+/* Interaccion */
+@utility glass-interactive {
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 200ms ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 40px color-mix(in srgb, var(--primary) 25%, transparent),
+      inset 0 1px 0 var(--glass-shine);
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Texto solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dialogos de Angular CDK */
+.cdk-overlay-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+.cdk-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: var(--scrim);
+  transition: opacity 200ms ease;
+}
+.cdk-global-overlay-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+.cdk-overlay-pane {
+  position: absolute;
+  pointer-events: auto;
+  max-width: 100%;
+}
+.cdk-dialog-container {
+  display: block;
+  outline: none;
+}
+.cp-sheet-pane {
+  width: 100%;
+}
+
+@keyframes cp-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes cp-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes cp-shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
