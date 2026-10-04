@@ -1,13 +1,27 @@
-import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  forwardRef,
+  input,
+  signal,
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { LucideCircleAlert, LucideDynamicIcon, LucideIcon } from '@lucide/angular';
+import { TranslocoPipe } from '@jsverse/transloco';
+import {
+  LucideCircleAlert,
+  LucideDynamicIcon,
+  LucideEye,
+  LucideEyeOff,
+  LucideIcon,
+} from '@lucide/angular';
 import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
 
 /** Campo de texto con etiqueta, ayuda y error accesibles. */
 @Component({
   selector: 'cp-glass-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LucideDynamicIcon, LucideCircleAlert],
+  imports: [LucideDynamicIcon, LucideCircleAlert, LucideEye, LucideEyeOff, TranslocoPipe],
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => GlassInput), multi: true },
   ],
@@ -29,7 +43,7 @@ import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
       }
       <input
         [id]="id"
-        [type]="type()"
+        [type]="effectiveType()"
         [class]="fieldClasses()"
         [value]="value() ?? ''"
         [placeholder]="placeholder()"
@@ -37,11 +51,28 @@ import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
         [required]="required()"
         [attr.autocomplete]="autocomplete()"
         [attr.inputmode]="inputmode()"
+        [attr.maxlength]="maxlength()"
         [attr.aria-invalid]="error() ? true : null"
         [attr.aria-describedby]="describedBy()"
         (input)="update($any($event.target).value)"
         (blur)="onTouched()"
       />
+      @if (revealable()) {
+        <button
+          type="button"
+          class="absolute top-1/2 right-1.5 grid size-10 -translate-y-1/2 place-items-center rounded-full text-muted transition hover:text-text"
+          [attr.aria-pressed]="shown()"
+          [attr.aria-controls]="id"
+          [attr.aria-label]="(shown() ? 'ui.password.hide' : 'ui.password.show') | transloco"
+          (click)="shown.set(!shown())"
+        >
+          @if (shown()) {
+            <svg lucideEyeOff class="size-5" aria-hidden="true"></svg>
+          } @else {
+            <svg lucideEye class="size-5" aria-hidden="true"></svg>
+          }
+        </button>
+      }
     </div>
     @if (error()) {
       <p [id]="id + '-error'" class="mt-1.5 flex items-center gap-1.5 text-sm text-danger">
@@ -64,11 +95,20 @@ export class GlassInput extends FormControlBase<string> {
   readonly required = input(false);
   readonly autocomplete = input<string | null>(null);
   readonly inputmode = input<string | null>(null);
+  readonly maxlength = input<number | null>(null);
   readonly icon = input<LucideIcon | null>(null);
+  /** En campos de contrasena muestra un boton para ver lo escrito. */
+  readonly revealable = input(false);
 
+  protected readonly shown = signal(false);
   protected readonly id = uniqueId('cp-input');
+  protected readonly effectiveType = computed(() =>
+    this.revealable() && this.shown() ? 'text' : this.type(),
+  );
   protected readonly fieldClasses = computed(
-    () => `${FIELD_CLASSES} ${this.icon() ? 'pl-11' : ''} ${this.error() ? '!border-danger' : ''}`,
+    () =>
+      `${FIELD_CLASSES} ${this.icon() ? 'pl-11' : ''} ${this.revealable() ? 'pr-12' : ''} ` +
+      `${this.error() ? '!border-danger' : ''}`,
   );
   protected readonly describedBy = computed(() => {
     if (this.error()) return `${this.id}-error`;
