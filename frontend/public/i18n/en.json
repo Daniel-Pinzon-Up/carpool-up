@@ -86,7 +86,20 @@
     "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
     "NOT_FOUND": "We could not find what you are looking for.",
     "FORBIDDEN": "You do not have permission to do this.",
-    "UNAUTHORIZED": "Your session ended. Please sign in again."
+    "UNAUTHORIZED": "Your session ended. Please sign in again.",
+    "ACCOUNT_NOT_ACTIVE": "Your account is not active yet. Check your document status in your profile.",
+    "INVALID_CURSOR": "We could not load more results. Open the list again.",
+    "SETTING_UNKNOWN": "That setting does not exist.",
+    "SETTING_INVALID": "The value is not valid for this setting. Check the format and try again.",
+    "SEMESTER_OVERLAP": "The dates overlap another semester. Adjust the start or end date.",
+    "SEMESTER_INVALID_DATES": "Check the dates: the end must be after the start and the revalidation deadline must fall inside the semester.",
+    "SEMESTER_NAME_TAKEN": "A semester with that name already exists.",
+    "SEMESTER_IN_USE": "It cannot be deleted: there are records linked to this semester.",
+    "NO_CURRENT_SEMESTER": "There is no current semester. The administration must set it up.",
+    "PLACE_OUT_OF_AREA": "That point is outside Pamplona. Choose a place inside the service area.",
+    "PLACE_NAME_TAKEN": "A place with that name already exists.",
+    "PICO_PLACA_INVALID_DATES": "The rule end date cannot be before its start date.",
+    "LEGAL_VERSION_EXISTS": "That version is already published. Use a new version number."
   },
   "catalog": {
     "title": "Component catalog",

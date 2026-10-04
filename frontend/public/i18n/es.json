@@ -86,7 +86,20 @@
     "RATE_LIMITED": "Hiciste demasiados intentos. Espera un momento y vuelve a intentarlo.",
     "NOT_FOUND": "No encontramos lo que buscas.",
     "FORBIDDEN": "No tienes permiso para hacer esto.",
-    "UNAUTHORIZED": "Tu sesión terminó. Inicia sesión de nuevo."
+    "UNAUTHORIZED": "Tu sesión terminó. Inicia sesión de nuevo.",
+    "ACCOUNT_NOT_ACTIVE": "Tu cuenta aún no está activa. Revisa el estado de tu documento en tu perfil.",
+    "INVALID_CURSOR": "No pudimos cargar más resultados. Vuelve a abrir la lista.",
+    "SETTING_UNKNOWN": "Ese parámetro no existe.",
+    "SETTING_INVALID": "El valor no es válido para este parámetro. Revisa el formato e inténtalo de nuevo.",
+    "SEMESTER_OVERLAP": "Las fechas se cruzan con otro semestre. Ajusta el inicio o el fin.",
+    "SEMESTER_INVALID_DATES": "Revisa las fechas: el fin debe ser posterior al inicio y el plazo de revalidación debe quedar dentro del semestre.",
+    "SEMESTER_NAME_TAKEN": "Ya existe un semestre con ese nombre.",
+    "SEMESTER_IN_USE": "No se puede eliminar: hay registros asociados a este semestre.",
+    "NO_CURRENT_SEMESTER": "No hay un semestre vigente. La administración debe registrarlo.",
+    "PLACE_OUT_OF_AREA": "Ese punto está fuera de Pamplona. Elige un lugar dentro del área de servicio.",
+    "PLACE_NAME_TAKEN": "Ya existe un lugar con ese nombre.",
+    "PICO_PLACA_INVALID_DATES": "La fecha final de la regla no puede ser anterior a la inicial.",
+    "LEGAL_VERSION_EXISTS": "Esa versión ya está publicada. Usa un número de versión nuevo."
   },
   "catalog": {
     "title": "Catálogo de componentes",

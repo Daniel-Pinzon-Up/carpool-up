@@ -86,7 +86,20 @@
     "RATE_LIMITED": "Trop de tentatives. Patientez un instant puis réessayez.",
     "NOT_FOUND": "Nous n'avons pas trouvé ce que vous cherchez.",
     "FORBIDDEN": "Vous n'avez pas l'autorisation de faire cela.",
-    "UNAUTHORIZED": "Votre session a expiré. Reconnectez-vous."
+    "UNAUTHORIZED": "Votre session a expiré. Reconnectez-vous.",
+    "ACCOUNT_NOT_ACTIVE": "Votre compte n'est pas encore actif. Vérifiez l'état de votre document dans votre profil.",
+    "INVALID_CURSOR": "Impossible de charger plus de résultats. Rouvrez la liste.",
+    "SETTING_UNKNOWN": "Ce paramètre n'existe pas.",
+    "SETTING_INVALID": "La valeur n'est pas valide pour ce paramètre. Vérifiez le format et réessayez.",
+    "SEMESTER_OVERLAP": "Les dates chevauchent un autre semestre. Ajustez le début ou la fin.",
+    "SEMESTER_INVALID_DATES": "Vérifiez les dates : la fin doit suivre le début et la date limite de revalidation doit être dans le semestre.",
+    "SEMESTER_NAME_TAKEN": "Un semestre porte déjà ce nom.",
+    "SEMESTER_IN_USE": "Suppression impossible : des enregistrements sont liés à ce semestre.",
+    "NO_CURRENT_SEMESTER": "Aucun semestre en cours. L'administration doit l'enregistrer.",
+    "PLACE_OUT_OF_AREA": "Ce point est hors de Pamplona. Choisissez un lieu dans la zone de service.",
+    "PLACE_NAME_TAKEN": "Un lieu porte déjà ce nom.",
+    "PICO_PLACA_INVALID_DATES": "La date de fin de la règle ne peut pas précéder sa date de début.",
+    "LEGAL_VERSION_EXISTS": "Cette version est déjà publiée. Utilisez un nouveau numéro de version."
   },
   "catalog": {
     "title": "Catalogue de composants",
