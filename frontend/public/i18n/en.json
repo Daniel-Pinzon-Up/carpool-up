@@ -76,6 +76,15 @@
       "decrease": "Remove a seat",
       "increase": "Add a seat",
       "range": "Between {{min}} and {{max}} seats"
+    },
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password"
+    },
+    "file": {
+      "choose": "Choose a file or drag it here",
+      "rules": "{{types}}, up to {{max}} MB",
+      "remove": "Remove {{name}}"
     }
   },
   "errors": {
@@ -99,7 +108,27 @@
     "PLACE_OUT_OF_AREA": "That point is outside Pamplona. Choose a place inside the service area.",
     "PLACE_NAME_TAKEN": "A place with that name already exists.",
     "PICO_PLACA_INVALID_DATES": "The rule end date cannot be before its start date.",
-    "LEGAL_VERSION_EXISTS": "That version is already published. Use a new version number."
+    "LEGAL_VERSION_EXISTS": "That version is already published. Use a new version number.",
+    "INVALID_CREDENTIALS": "The email or password is incorrect.",
+    "ACCOUNT_LOCKED": "Too many attempts. For security, wait {{minutes}} minutes and try again.",
+    "ACCOUNT_BLOCKED": "This account is blocked. Contact the administration if you think this is a mistake.",
+    "CODE_INVALID": "The code is wrong or expired. Check the latest email or request a new code.",
+    "CODE_RESEND_TOO_SOON": "Wait {{seconds}} seconds before requesting another code.",
+    "CHALLENGE_EXPIRED": "The verification expired. Start the process again.",
+    "EMAIL_NOT_INSTITUTIONAL": "Use your university email (ends in {{suffix}}).",
+    "EMAIL_TAKEN": "There is already an account with this email. Sign in or recover your password.",
+    "PASSWORD_TOO_SHORT": "The password must have at least {{min_length}} characters.",
+    "PASSWORD_TOO_WEAK": "The password cannot be the same as your email.",
+    "TERMS_NOT_ACCEPTED": "You must accept the terms and the data authorization.",
+    "LEGAL_DOCUMENTS_UNAVAILABLE": "Sign-up is not available yet. Try again later.",
+    "FILE_TOO_LARGE": "The file is larger than {{max_mb}} MB. Use a smaller one.",
+    "FILE_TYPE_NOT_ALLOWED": "Only JPG, PNG, WebP or PDF files are accepted.",
+    "FILE_EMPTY": "The file is empty. Choose another one.",
+    "FILE_INVALID": "We could not read the image. Take another photo and try again.",
+    "REFRESH_INVALID": "Your session ended. Sign in again.",
+    "REFRESH_REUSED": "For security we closed your sessions. Sign in again.",
+    "PAYMENT_NOTE_DRIVERS_ONLY": "Only drivers can save transfer details.",
+    "LEGAL_VERSION_NOT_CURRENT": "That version is no longer current. Reload the page."
   },
   "catalog": {
     "title": "Component catalog",
@@ -214,5 +243,232 @@
       "warningMessage": "The driver is 15 minutes late.",
       "dangerMessage": "There are no seats left on this trip."
     }
+  },
+  "legal": {
+    "terms": "Terms and conditions",
+    "dataPolicy": "Personal data policy",
+    "back": "Back",
+    "version": "Version {{version}}, published on {{date}}.",
+    "unavailable": "This document is not published yet.",
+    "pageTitle": "Legal documents"
+  },
+  "roles": {
+    "passenger": "Passenger",
+    "driver": "Driver",
+    "admin": "Administrator",
+    "superadmin": "Super administrator"
+  },
+  "documentStatus": {
+    "pending": "Under review",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "expired": "Expired"
+  },
+  "onboarding": {
+    "pageTitle": "Welcome",
+    "step": "Step {{current}} of {{total}}",
+    "value": {
+      "title": "Share your rides in Pamplona",
+      "body": "Ride with students, faculty and staff of the Universidad de Pamplona. Get to class together and spend less."
+    },
+    "how": {
+      "title": "How it works",
+      "body": "Drivers publish their trips and passengers request a seat. The driver approves, and the cost contribution is paid outside the app."
+    },
+    "safety": {
+      "title": "Your safety first",
+      "body": "Only the university community with a verified ID can join. You can share your trip live and there is an emergency button."
+    },
+    "createAccount": "Create my account",
+    "haveAccount": "I already have an account",
+    "skip": "Skip",
+    "next": "Next"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Use your university email.",
+    "forgot": "Forgot your password?",
+    "submit": "Sign in",
+    "noAccount": "No account yet?",
+    "register": "Sign up"
+  },
+  "fields": {
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "confirmPassword": "Repeat the password",
+    "passwordHint": "At least {{min}} characters. Use a phrase you remember.",
+    "institutionalEmail": "University email",
+    "emailPlaceholder": "name@unipamplona.edu.co",
+    "emailHint": "It must end in {{suffix}}.",
+    "fullName": "Full name",
+    "fullNameHint": "As it appears on your ID or certificate.",
+    "sex": "Sex",
+    "sexHint": "It must match your document. It enables women-only trips.",
+    "sexOptions": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "choose": "Choose an option",
+    "program": "Program or department",
+    "programHint": "Optional. For example: Systems Engineering."
+  },
+  "form": {
+    "required": "This field is required.",
+    "email": "Enter a valid email.",
+    "institutional": "Use your university email (ends in {{suffix}}).",
+    "minLength": "It must have at least {{min}} characters.",
+    "maxLength": "It must have at most {{max}} characters.",
+    "passwordMismatch": "The passwords do not match.",
+    "code": "The code has 6 digits.",
+    "invalid": "Check this field."
+  },
+  "verify": {
+    "pageTitle": "Verification",
+    "sentTo": "We sent a code to {{email}}.",
+    "email_verification": {
+      "title": "Verify your email",
+      "why": "This confirms the university email is yours."
+    },
+    "two_factor": {
+      "title": "Confirm it is you",
+      "why": "We ask for it on your first sign-in and after a password change."
+    },
+    "password_reset": {
+      "title": "Reset your password",
+      "why": "Enter it together with your new password."
+    },
+    "code": "6-digit code",
+    "codeHint": "It expires in {{minutes}} minutes. Check your spam folder too.",
+    "submit": "Verify",
+    "resend": "Send a new code",
+    "resendIn": "You can request another code in {{seconds}} s",
+    "resent": "We sent you a new code.",
+    "backToLogin": "Back to sign in",
+    "expired": {
+      "title": "Your verification expired",
+      "body": "For security the process lasts a few minutes. Sign in again and we will send you another code."
+    }
+  },
+  "register": {
+    "title": "Create account",
+    "steps": {
+      "data": "Your details",
+      "role": "Your role",
+      "document": "Your document",
+      "terms": "Confirmation"
+    },
+    "help": {
+      "data": "Use your real name and your university email.",
+      "role": "Choose how you will use the app. An administrator can change it later.",
+      "document": "An administrator will review your document before activating your account.",
+      "terms": "Review your details and accept the terms to finish."
+    },
+    "role": {
+      "label": "How will you use the app?",
+      "passenger": {
+        "title": "Passenger",
+        "body": "I look for trips and request seats from drivers."
+      },
+      "driver": {
+        "title": "Driver",
+        "body": "I offer seats in my car or motorcycle."
+      },
+      "note": "If you are a driver, after your account is active you will upload your license and vehicle details."
+    },
+    "document": {
+      "label": "Document type",
+      "student_card": {
+        "title": "Student ID card",
+        "body": "If you are a student."
+      },
+      "institutional_proof": {
+        "title": "Institutional certificate",
+        "body": "If you are faculty or administrative staff."
+      },
+      "file": "Photo or PDF of the document",
+      "privacy": "Only administrators can see it. We remove hidden data from photos, such as location."
+    },
+    "terms": {
+      "acceptTerms": "I have read and accept the",
+      "acceptData": "I authorize the processing of my data under the",
+      "contribution": "Each trip price is a contribution to cover costs, not a commercial payment. The app does not charge or receive money."
+    },
+    "back": "Back",
+    "next": "Continue",
+    "submit": "Create account",
+    "haveAccount": "I already have an account"
+  },
+  "forgot": {
+    "title": "Recover your password",
+    "subtitle": "Enter your university email and we will send you a code.",
+    "submit": "Send code"
+  },
+  "reset": {
+    "title": "Create a new password",
+    "subtitle": "Enter the code and your new password.",
+    "sessionsNote": "For security we will sign you out on every device.",
+    "submit": "Change password",
+    "done": "Done. Sign in with your new password."
+  },
+  "account": {
+    "pageTitle": "Account status",
+    "hello": "Hi, {{name}}",
+    "review": {
+      "title": "We are reviewing your document",
+      "body": "An administrator will review it soon. We will let you know when your account is active; you can check the status any time."
+    },
+    "rejected": {
+      "title": "Your document was rejected",
+      "body": "Upload a new, readable document to continue."
+    },
+    "expired": {
+      "title": "Your document expired",
+      "body": "Every semester you must upload your current ID or certificate to keep using the app."
+    },
+    "missing": {
+      "title": "Your document is missing",
+      "body": "Upload your ID or certificate so we can activate your account."
+    },
+    "suspended": {
+      "title": "Your account is suspended",
+      "body": "While the suspension lasts you cannot publish or book trips. If you think this is a mistake, contact the administration."
+    },
+    "reason": "Reason",
+    "replaceTitle": "Wrong file? Replace it",
+    "uploadTitle": "Upload your document",
+    "send": "Send document",
+    "sent": "Document sent. We will review it soon.",
+    "check": "Check status"
+  },
+  "acceptTerms": {
+    "title": "We updated our documents",
+    "body": "To keep using the app, read and accept the new versions.",
+    "version": "version {{version}}",
+    "checkbox": "I have read and accept the new versions.",
+    "submit": "Accept and continue"
+  },
+  "profile": {
+    "details": "Your details",
+    "paymentNote": "Transfer details",
+    "paymentNoteHint": "Optional. Only passengers with an accepted booking will see it.",
+    "verifiedFields": "Your name, email, sex and role are verified by the administration and cannot be changed here.",
+    "save": "Save changes",
+    "saved": "Changes saved.",
+    "preferences": "Preferences",
+    "document": "Your document",
+    "noDocument": "You have not uploaded a document yet.",
+    "updateDocument": "Upload or replace document",
+    "sessions": {
+      "title": "Active sessions",
+      "help": "Devices where you are signed in.",
+      "lastSeen": "Last activity: {{date}}",
+      "current": "This device",
+      "closeOthers": "Sign out of other sessions",
+      "confirmTitle": "Sign out of other sessions?",
+      "confirmBody": "You will be signed out on every device except this one.",
+      "closed": "We closed {{count}} sessions."
+    },
+    "logout": "Sign out"
   }
 }

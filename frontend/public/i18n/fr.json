@@ -76,6 +76,15 @@
       "decrease": "Retirer une place",
       "increase": "Ajouter une place",
       "range": "Entre {{min}} et {{max}} places"
+    },
+    "password": {
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe"
+    },
+    "file": {
+      "choose": "Choisissez un fichier ou glissez-le ici",
+      "rules": "{{types}}, {{max}} Mo maximum",
+      "remove": "Retirer {{name}}"
     }
   },
   "errors": {
@@ -99,7 +108,27 @@
     "PLACE_OUT_OF_AREA": "Ce point est hors de Pamplona. Choisissez un lieu dans la zone de service.",
     "PLACE_NAME_TAKEN": "Un lieu porte déjà ce nom.",
     "PICO_PLACA_INVALID_DATES": "La date de fin de la règle ne peut pas précéder sa date de début.",
-    "LEGAL_VERSION_EXISTS": "Cette version est déjà publiée. Utilisez un nouveau numéro de version."
+    "LEGAL_VERSION_EXISTS": "Cette version est déjà publiée. Utilisez un nouveau numéro de version.",
+    "INVALID_CREDENTIALS": "L'e-mail ou le mot de passe est incorrect.",
+    "ACCOUNT_LOCKED": "Trop de tentatives. Par sécurité, attendez {{minutes}} minutes et réessayez.",
+    "ACCOUNT_BLOCKED": "Ce compte est bloqué. Contactez l'administration si vous pensez qu'il s'agit d'une erreur.",
+    "CODE_INVALID": "Le code est erroné ou a expiré. Vérifiez le dernier e-mail ou demandez un nouveau code.",
+    "CODE_RESEND_TOO_SOON": "Attendez {{seconds}} secondes avant de demander un autre code.",
+    "CHALLENGE_EXPIRED": "La vérification a expiré. Recommencez la procédure.",
+    "EMAIL_NOT_INSTITUTIONAL": "Utilisez votre e-mail universitaire (se termine par {{suffix}}).",
+    "EMAIL_TAKEN": "Un compte existe déjà avec cet e-mail. Connectez-vous ou récupérez votre mot de passe.",
+    "PASSWORD_TOO_SHORT": "Le mot de passe doit comporter au moins {{min_length}} caractères.",
+    "PASSWORD_TOO_WEAK": "Le mot de passe ne peut pas être identique à votre e-mail.",
+    "TERMS_NOT_ACCEPTED": "Vous devez accepter les conditions et l'autorisation de traitement des données.",
+    "LEGAL_DOCUMENTS_UNAVAILABLE": "L'inscription n'est pas encore disponible. Réessayez plus tard.",
+    "FILE_TOO_LARGE": "Le fichier dépasse {{max_mb}} Mo. Utilisez-en un plus léger.",
+    "FILE_TYPE_NOT_ALLOWED": "Seuls les fichiers JPG, PNG, WebP ou PDF sont acceptés.",
+    "FILE_EMPTY": "Le fichier est vide. Choisissez-en un autre.",
+    "FILE_INVALID": "Nous n'avons pas pu lire l'image. Prenez une autre photo et réessayez.",
+    "REFRESH_INVALID": "Votre session a expiré. Reconnectez-vous.",
+    "REFRESH_REUSED": "Par sécurité, nous avons fermé vos sessions. Reconnectez-vous.",
+    "PAYMENT_NOTE_DRIVERS_ONLY": "Seuls les conducteurs peuvent enregistrer des informations de virement.",
+    "LEGAL_VERSION_NOT_CURRENT": "Cette version n'est plus en vigueur. Rechargez la page."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -214,5 +243,232 @@
       "warningMessage": "Le conducteur a 15 minutes de retard.",
       "dangerMessage": "Il n'y a plus de places sur ce trajet."
     }
+  },
+  "legal": {
+    "terms": "Conditions générales",
+    "dataPolicy": "Traitement des données personnelles",
+    "back": "Retour",
+    "version": "Version {{version}}, publiée le {{date}}.",
+    "unavailable": "Ce document n'est pas encore publié.",
+    "pageTitle": "Documents juridiques"
+  },
+  "roles": {
+    "passenger": "Passager",
+    "driver": "Conducteur",
+    "admin": "Administrateur",
+    "superadmin": "Super administrateur"
+  },
+  "documentStatus": {
+    "pending": "En vérification",
+    "approved": "Approuvé",
+    "rejected": "Refusé",
+    "expired": "Expiré"
+  },
+  "onboarding": {
+    "pageTitle": "Bienvenue",
+    "step": "Étape {{current}} sur {{total}}",
+    "value": {
+      "title": "Partagez vos trajets à Pamplona",
+      "body": "Voyagez avec des étudiants, enseignants et membres du personnel de l'Universidad de Pamplona. Arrivez en cours accompagné et dépensez moins."
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "body": "Les conducteurs publient leurs trajets et les passagers demandent une place. Le conducteur accepte et la participation aux frais se règle en dehors de l'app."
+    },
+    "safety": {
+      "title": "Votre sécurité d'abord",
+      "body": "Seule la communauté universitaire avec une carte vérifiée peut entrer. Vous pouvez partager votre trajet en direct et un bouton d'urgence est disponible."
+    },
+    "createAccount": "Créer mon compte",
+    "haveAccount": "J'ai déjà un compte",
+    "skip": "Passer",
+    "next": "Suivant"
+  },
+  "login": {
+    "title": "Connexion",
+    "subtitle": "Utilisez votre e-mail universitaire.",
+    "forgot": "Mot de passe oublié ?",
+    "submit": "Se connecter",
+    "noAccount": "Pas encore de compte ?",
+    "register": "Inscrivez-vous"
+  },
+  "fields": {
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Répétez le mot de passe",
+    "passwordHint": "Au moins {{min}} caractères. Utilisez une phrase dont vous vous souvenez.",
+    "institutionalEmail": "E-mail universitaire",
+    "emailPlaceholder": "nom@unipamplona.edu.co",
+    "emailHint": "Il doit se terminer par {{suffix}}.",
+    "fullName": "Nom complet",
+    "fullNameHint": "Tel qu'il figure sur votre carte ou attestation.",
+    "sex": "Sexe",
+    "sexHint": "Il doit correspondre à votre document. Il permet les trajets réservés aux femmes.",
+    "sexOptions": {
+      "female": "Femme",
+      "male": "Homme"
+    },
+    "choose": "Choisissez une option",
+    "program": "Programme ou service",
+    "programHint": "Facultatif. Par exemple : Génie informatique."
+  },
+  "form": {
+    "required": "Ce champ est obligatoire.",
+    "email": "Saisissez un e-mail valide.",
+    "institutional": "Utilisez votre e-mail universitaire (se termine par {{suffix}}).",
+    "minLength": "Au moins {{min}} caractères.",
+    "maxLength": "{{max}} caractères maximum.",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "code": "Le code comporte 6 chiffres.",
+    "invalid": "Vérifiez ce champ."
+  },
+  "verify": {
+    "pageTitle": "Vérification",
+    "sentTo": "Nous avons envoyé un code à {{email}}.",
+    "email_verification": {
+      "title": "Vérifiez votre e-mail",
+      "why": "Cela confirme que l'e-mail universitaire vous appartient."
+    },
+    "two_factor": {
+      "title": "Confirmez que c'est vous",
+      "why": "Nous le demandons à la première connexion et après un changement de mot de passe."
+    },
+    "password_reset": {
+      "title": "Réinitialisez votre mot de passe",
+      "why": "Saisissez-le avec votre nouveau mot de passe."
+    },
+    "code": "Code à 6 chiffres",
+    "codeHint": "Il expire dans {{minutes}} minutes. Vérifiez aussi vos spams.",
+    "submit": "Vérifier",
+    "resend": "Envoyer un nouveau code",
+    "resendIn": "Vous pourrez demander un autre code dans {{seconds}} s",
+    "resent": "Nous vous avons envoyé un nouveau code.",
+    "backToLogin": "Retour à la connexion",
+    "expired": {
+      "title": "Votre vérification a expiré",
+      "body": "Par sécurité, la procédure dure quelques minutes. Reconnectez-vous et nous vous enverrons un autre code."
+    }
+  },
+  "register": {
+    "title": "Créer un compte",
+    "steps": {
+      "data": "Vos informations",
+      "role": "Votre rôle",
+      "document": "Votre document",
+      "terms": "Confirmation"
+    },
+    "help": {
+      "data": "Utilisez votre vrai nom et votre e-mail universitaire.",
+      "role": "Choisissez comment vous utiliserez l'app. Un administrateur peut le modifier ensuite.",
+      "document": "Un administrateur vérifiera votre document avant d'activer votre compte.",
+      "terms": "Vérifiez vos informations et acceptez les conditions pour terminer."
+    },
+    "role": {
+      "label": "Comment utiliserez-vous l'app ?",
+      "passenger": {
+        "title": "Passager",
+        "body": "Je cherche des trajets et demande une place aux conducteurs."
+      },
+      "driver": {
+        "title": "Conducteur",
+        "body": "Je propose des places dans ma voiture ou ma moto."
+      },
+      "note": "Si vous êtes conducteur, une fois le compte activé vous enverrez votre permis et les informations de votre véhicule."
+    },
+    "document": {
+      "label": "Type de document",
+      "student_card": {
+        "title": "Carte d'étudiant",
+        "body": "Si vous êtes étudiant."
+      },
+      "institutional_proof": {
+        "title": "Attestation institutionnelle",
+        "body": "Si vous êtes enseignant ou personnel administratif."
+      },
+      "file": "Photo ou PDF du document",
+      "privacy": "Seuls les administrateurs le voient. Nous retirons les données cachées des photos, comme la localisation."
+    },
+    "terms": {
+      "acceptTerms": "J'ai lu et j'accepte les",
+      "acceptData": "J'autorise le traitement de mes données selon la politique de",
+      "contribution": "Le prix de chaque trajet est une participation aux frais, pas un paiement commercial. L'app n'encaisse ni ne reçoit d'argent."
+    },
+    "back": "Retour",
+    "next": "Continuer",
+    "submit": "Créer le compte",
+    "haveAccount": "J'ai déjà un compte"
+  },
+  "forgot": {
+    "title": "Récupérez votre mot de passe",
+    "subtitle": "Saisissez votre e-mail universitaire et nous vous enverrons un code.",
+    "submit": "Envoyer le code"
+  },
+  "reset": {
+    "title": "Créez un nouveau mot de passe",
+    "subtitle": "Saisissez le code et votre nouveau mot de passe.",
+    "sessionsNote": "Par sécurité, nous vous déconnecterons de tous vos appareils.",
+    "submit": "Changer le mot de passe",
+    "done": "C'est fait. Connectez-vous avec votre nouveau mot de passe."
+  },
+  "account": {
+    "pageTitle": "État de votre compte",
+    "hello": "Bonjour, {{name}}",
+    "review": {
+      "title": "Nous vérifions votre document",
+      "body": "Un administrateur le vérifiera bientôt. Nous vous préviendrons quand votre compte sera actif ; vous pouvez consulter l'état à tout moment."
+    },
+    "rejected": {
+      "title": "Votre document a été refusé",
+      "body": "Envoyez un nouveau document lisible pour continuer."
+    },
+    "expired": {
+      "title": "Votre document a expiré",
+      "body": "Chaque semestre, vous devez envoyer votre carte ou attestation en cours de validité pour continuer à utiliser l'app."
+    },
+    "missing": {
+      "title": "Votre document manque",
+      "body": "Envoyez votre carte ou attestation pour que nous puissions activer votre compte."
+    },
+    "suspended": {
+      "title": "Votre compte est suspendu",
+      "body": "Pendant la suspension, vous ne pouvez ni publier ni réserver de trajets. Si vous pensez qu'il s'agit d'une erreur, contactez l'administration."
+    },
+    "reason": "Motif",
+    "replaceTitle": "Mauvais fichier ? Remplacez-le",
+    "uploadTitle": "Envoyez votre document",
+    "send": "Envoyer le document",
+    "sent": "Document envoyé. Nous le vérifierons bientôt.",
+    "check": "Vérifier l'état"
+  },
+  "acceptTerms": {
+    "title": "Nous avons mis à jour nos documents",
+    "body": "Pour continuer à utiliser l'app, lisez et acceptez les nouvelles versions.",
+    "version": "version {{version}}",
+    "checkbox": "J'ai lu et j'accepte les nouvelles versions.",
+    "submit": "Accepter et continuer"
+  },
+  "profile": {
+    "details": "Vos informations",
+    "paymentNote": "Informations pour les virements",
+    "paymentNoteHint": "Facultatif. Seuls les passagers avec une réservation acceptée le verront.",
+    "verifiedFields": "Votre nom, e-mail, sexe et rôle sont vérifiés par l'administration et ne peuvent pas être modifiés ici.",
+    "save": "Enregistrer",
+    "saved": "Modifications enregistrées.",
+    "preferences": "Préférences",
+    "document": "Votre document",
+    "noDocument": "Vous n'avez pas encore envoyé de document.",
+    "updateDocument": "Envoyer ou remplacer le document",
+    "sessions": {
+      "title": "Sessions actives",
+      "help": "Appareils sur lesquels vous êtes connecté.",
+      "lastSeen": "Dernière activité : {{date}}",
+      "current": "Cet appareil",
+      "closeOthers": "Fermer les autres sessions",
+      "confirmTitle": "Fermer les autres sessions ?",
+      "confirmBody": "Vous serez déconnecté de tous les appareils sauf celui-ci.",
+      "closed": "Nous avons fermé {{count}} sessions."
+    },
+    "logout": "Se déconnecter"
   }
 }

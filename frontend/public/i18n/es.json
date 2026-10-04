@@ -76,6 +76,15 @@
       "decrease": "Quitar un puesto",
       "increase": "Agregar un puesto",
       "range": "Entre {{min}} y {{max}} puestos"
+    },
+    "password": {
+      "show": "Mostrar contraseña",
+      "hide": "Ocultar contraseña"
+    },
+    "file": {
+      "choose": "Elige un archivo o arrástralo aquí",
+      "rules": "{{types}}, máximo {{max}} MB",
+      "remove": "Quitar {{name}}"
     }
   },
   "errors": {
@@ -99,7 +108,27 @@
     "PLACE_OUT_OF_AREA": "Ese punto está fuera de Pamplona. Elige un lugar dentro del área de servicio.",
     "PLACE_NAME_TAKEN": "Ya existe un lugar con ese nombre.",
     "PICO_PLACA_INVALID_DATES": "La fecha final de la regla no puede ser anterior a la inicial.",
-    "LEGAL_VERSION_EXISTS": "Esa versión ya está publicada. Usa un número de versión nuevo."
+    "LEGAL_VERSION_EXISTS": "Esa versión ya está publicada. Usa un número de versión nuevo.",
+    "INVALID_CREDENTIALS": "El correo o la contraseña no son correctos.",
+    "ACCOUNT_LOCKED": "Hiciste demasiados intentos. Por seguridad espera {{minutes}} minutos e inténtalo de nuevo.",
+    "ACCOUNT_BLOCKED": "Esta cuenta está bloqueada. Escribe a la administración si crees que es un error.",
+    "CODE_INVALID": "El código no es correcto o ya venció. Revisa el último correo o pide un código nuevo.",
+    "CODE_RESEND_TOO_SOON": "Espera {{seconds}} segundos antes de pedir otro código.",
+    "CHALLENGE_EXPIRED": "La verificación expiró. Inicia el proceso de nuevo.",
+    "EMAIL_NOT_INSTITUTIONAL": "Usa tu correo institucional (termina en {{suffix}}).",
+    "EMAIL_TAKEN": "Ya existe una cuenta con este correo. Inicia sesión o recupera tu contraseña.",
+    "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos {{min_length}} caracteres.",
+    "PASSWORD_TOO_WEAK": "La contraseña no puede ser igual a tu correo.",
+    "TERMS_NOT_ACCEPTED": "Debes aceptar los términos y la autorización de datos.",
+    "LEGAL_DOCUMENTS_UNAVAILABLE": "El registro aún no está disponible. Inténtalo más tarde.",
+    "FILE_TOO_LARGE": "El archivo pesa más de {{max_mb}} MB. Usa uno más liviano.",
+    "FILE_TYPE_NOT_ALLOWED": "Solo se aceptan archivos JPG, PNG, WebP o PDF.",
+    "FILE_EMPTY": "El archivo está vacío. Elige otro.",
+    "FILE_INVALID": "No pudimos leer la imagen. Toma otra foto e inténtalo de nuevo.",
+    "REFRESH_INVALID": "Tu sesión terminó. Inicia sesión de nuevo.",
+    "REFRESH_REUSED": "Por seguridad cerramos tus sesiones. Inicia sesión de nuevo.",
+    "PAYMENT_NOTE_DRIVERS_ONLY": "Solo los conductores pueden guardar datos para transferencias.",
+    "LEGAL_VERSION_NOT_CURRENT": "Esa versión ya no está vigente. Recarga la página."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -214,5 +243,232 @@
       "warningMessage": "El conductor lleva 15 minutos de retraso.",
       "dangerMessage": "No hay cupos disponibles en este viaje."
     }
+  },
+  "legal": {
+    "terms": "Términos y condiciones",
+    "dataPolicy": "Tratamiento de datos personales",
+    "back": "Volver",
+    "version": "Versión {{version}}, publicada el {{date}}.",
+    "unavailable": "Este documento todavía no está publicado.",
+    "pageTitle": "Documentos legales"
+  },
+  "roles": {
+    "passenger": "Pasajero",
+    "driver": "Conductor",
+    "admin": "Administrador",
+    "superadmin": "Superadministrador"
+  },
+  "documentStatus": {
+    "pending": "En revisión",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "expired": "Vencido"
+  },
+  "onboarding": {
+    "pageTitle": "Bienvenida",
+    "step": "Paso {{current}} de {{total}}",
+    "value": {
+      "title": "Comparte tus trayectos en Pamplona",
+      "body": "Viaja con estudiantes, docentes y personal de la Universidad de Pamplona. Llega a clase acompañado y gasta menos."
+    },
+    "how": {
+      "title": "Así funciona",
+      "body": "Los conductores publican sus viajes y los pasajeros solicitan un cupo. El conductor aprueba y el aporte para gastos se paga fuera de la app."
+    },
+    "safety": {
+      "title": "Tu seguridad primero",
+      "body": "Solo entra la comunidad universitaria con carnet verificado. Puedes compartir tu viaje en vivo y tienes un botón de emergencia."
+    },
+    "createAccount": "Crear mi cuenta",
+    "haveAccount": "Ya tengo cuenta",
+    "skip": "Omitir",
+    "next": "Siguiente"
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Entra con tu correo institucional.",
+    "forgot": "¿Olvidaste tu contraseña?",
+    "submit": "Entrar",
+    "noAccount": "¿Aún no tienes cuenta?",
+    "register": "Regístrate"
+  },
+  "fields": {
+    "email": "Correo",
+    "password": "Contraseña",
+    "newPassword": "Contraseña nueva",
+    "confirmPassword": "Repite la contraseña",
+    "passwordHint": "Mínimo {{min}} caracteres. Usa una frase que recuerdes.",
+    "institutionalEmail": "Correo institucional",
+    "emailPlaceholder": "nombre@unipamplona.edu.co",
+    "emailHint": "Debe terminar en {{suffix}}.",
+    "fullName": "Nombre completo",
+    "fullNameHint": "Como aparece en tu carnet o constancia.",
+    "sex": "Sexo",
+    "sexHint": "Debe coincidir con tu documento. Permite ofrecer y reservar viajes solo para mujeres.",
+    "sexOptions": {
+      "female": "Mujer",
+      "male": "Hombre"
+    },
+    "choose": "Elige una opción",
+    "program": "Programa o dependencia",
+    "programHint": "Opcional. Por ejemplo: Ingeniería de Sistemas."
+  },
+  "form": {
+    "required": "Este campo es obligatorio.",
+    "email": "Escribe un correo válido.",
+    "institutional": "Usa tu correo institucional (termina en {{suffix}}).",
+    "minLength": "Debe tener al menos {{min}} caracteres.",
+    "maxLength": "Debe tener máximo {{max}} caracteres.",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "code": "El código tiene 6 números.",
+    "invalid": "Revisa este campo."
+  },
+  "verify": {
+    "pageTitle": "Verificación",
+    "sentTo": "Enviamos un código a {{email}}.",
+    "email_verification": {
+      "title": "Verifica tu correo",
+      "why": "Así confirmamos que el correo institucional es tuyo."
+    },
+    "two_factor": {
+      "title": "Confirma que eres tú",
+      "why": "Lo pedimos en tu primer ingreso y después de cambiar la contraseña."
+    },
+    "password_reset": {
+      "title": "Restablece tu contraseña",
+      "why": "Escríbelo junto con tu contraseña nueva."
+    },
+    "code": "Código de 6 números",
+    "codeHint": "Vence en {{minutes}} minutos. Revisa también la carpeta de spam.",
+    "submit": "Verificar",
+    "resend": "Enviar un código nuevo",
+    "resendIn": "Podrás pedir otro código en {{seconds}} s",
+    "resent": "Te enviamos un código nuevo.",
+    "backToLogin": "Volver a iniciar sesión",
+    "expired": {
+      "title": "Tu verificación expiró",
+      "body": "Por seguridad el proceso dura unos minutos. Inicia sesión de nuevo y te enviaremos otro código."
+    }
+  },
+  "register": {
+    "title": "Crear cuenta",
+    "steps": {
+      "data": "Tus datos",
+      "role": "Tu rol",
+      "document": "Tu documento",
+      "terms": "Confirmación"
+    },
+    "help": {
+      "data": "Usa tu nombre real y tu correo institucional.",
+      "role": "Elige cómo vas a usar la app. Un administrador puede cambiarlo después.",
+      "document": "Un administrador revisará tu documento antes de activar tu cuenta.",
+      "terms": "Revisa tus datos y acepta los términos para terminar."
+    },
+    "role": {
+      "label": "¿Cómo vas a usar la app?",
+      "passenger": {
+        "title": "Pasajero",
+        "body": "Busco viajes y pido cupo a los conductores."
+      },
+      "driver": {
+        "title": "Conductor",
+        "body": "Ofrezco puestos en mi carro o moto."
+      },
+      "note": "Si eres conductor, después de activar tu cuenta subirás tu licencia y los datos de tu vehículo."
+    },
+    "document": {
+      "label": "Tipo de documento",
+      "student_card": {
+        "title": "Carnet estudiantil",
+        "body": "Si eres estudiante."
+      },
+      "institutional_proof": {
+        "title": "Constancia institucional",
+        "body": "Si eres docente o personal administrativo."
+      },
+      "file": "Foto o PDF del documento",
+      "privacy": "Solo lo ven los administradores. Quitamos los datos ocultos de las fotos, como la ubicación."
+    },
+    "terms": {
+      "acceptTerms": "Leí y acepto los",
+      "acceptData": "Autorizo el tratamiento de mis datos según la política de",
+      "contribution": "El valor de cada viaje es un aporte para cubrir gastos, no un pago comercial. La app no cobra ni recibe dinero."
+    },
+    "back": "Atrás",
+    "next": "Continuar",
+    "submit": "Crear cuenta",
+    "haveAccount": "Ya tengo cuenta"
+  },
+  "forgot": {
+    "title": "Recupera tu contraseña",
+    "subtitle": "Escribe tu correo institucional y te enviaremos un código.",
+    "submit": "Enviar código"
+  },
+  "reset": {
+    "title": "Crea una contraseña nueva",
+    "subtitle": "Escribe el código y tu contraseña nueva.",
+    "sessionsNote": "Por seguridad cerraremos tu sesión en todos los dispositivos.",
+    "submit": "Cambiar contraseña",
+    "done": "Listo. Inicia sesión con tu contraseña nueva."
+  },
+  "account": {
+    "pageTitle": "Estado de tu cuenta",
+    "hello": "Hola, {{name}}",
+    "review": {
+      "title": "Estamos revisando tu documento",
+      "body": "Un administrador lo revisará pronto. Te avisaremos cuando tu cuenta esté activa; puedes volver a revisar el estado cuando quieras."
+    },
+    "rejected": {
+      "title": "Tu documento fue rechazado",
+      "body": "Sube un documento nuevo y legible para continuar."
+    },
+    "expired": {
+      "title": "Tu documento venció",
+      "body": "Cada semestre debes subir tu carnet o constancia vigente para seguir usando la app."
+    },
+    "missing": {
+      "title": "Falta tu documento",
+      "body": "Sube tu carnet o constancia para que podamos activar tu cuenta."
+    },
+    "suspended": {
+      "title": "Tu cuenta está suspendida",
+      "body": "Mientras dure la suspensión no puedes publicar ni reservar viajes. Si crees que es un error, escribe a la administración."
+    },
+    "reason": "Motivo",
+    "replaceTitle": "¿Te equivocaste de archivo? Reemplázalo",
+    "uploadTitle": "Sube tu documento",
+    "send": "Enviar documento",
+    "sent": "Documento enviado. Lo revisaremos pronto.",
+    "check": "Revisar estado"
+  },
+  "acceptTerms": {
+    "title": "Actualizamos nuestros documentos",
+    "body": "Para seguir usando la app lee y acepta las nuevas versiones.",
+    "version": "versión {{version}}",
+    "checkbox": "Leí y acepto las nuevas versiones.",
+    "submit": "Aceptar y continuar"
+  },
+  "profile": {
+    "details": "Tus datos",
+    "paymentNote": "Datos para transferencias",
+    "paymentNoteHint": "Opcional. Solo lo verán tus pasajeros con reserva aceptada.",
+    "verifiedFields": "Tu nombre, correo, sexo y rol los valida la administración y no se pueden cambiar aquí.",
+    "save": "Guardar cambios",
+    "saved": "Cambios guardados.",
+    "preferences": "Preferencias",
+    "document": "Tu documento",
+    "noDocument": "Todavía no has subido un documento.",
+    "updateDocument": "Subir o reemplazar documento",
+    "sessions": {
+      "title": "Sesiones activas",
+      "help": "Dispositivos donde tienes la sesión abierta.",
+      "lastSeen": "Última actividad: {{date}}",
+      "current": "Este dispositivo",
+      "closeOthers": "Cerrar las demás sesiones",
+      "confirmTitle": "¿Cerrar las demás sesiones?",
+      "confirmBody": "Saldrás de la app en todos los dispositivos menos en este.",
+      "closed": "Cerramos {{count}} sesiones."
+    },
+    "logout": "Cerrar sesión"
   }
 }
