@@ -22,6 +22,7 @@
     "@jsverse/transloco": "^8.4.0",
     "@lucide/angular": "^1.51.0",
     "@tailwindcss/postcss": "^4.3.3",
+    "marked": "^18.0.14",
     "postcss": "^8.5.28",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.3.3",
