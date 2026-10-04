@@ -1,0 +1,38 @@
+# Desarrollo: recarga en caliente, dependencias de desarrollo, puertos expuestos y Mailpit.
+services:
+  db:
+    ports:
+      - '5432:5432'
+
+  redis:
+    ports:
+      - '6379:6379'
+
+  api:
+    build:
+      args:
+        INSTALL_DEV: 'true'
+    command: ['sh', '-c', 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips=*']
+    ports:
+      - '8000:8000'
+    volumes:
+      - ../backend:/app
+      - /app/.venv
+      - storage:/data/storage
+
+  worker:
+    build:
+      args:
+        INSTALL_DEV: 'true'
+    command: ['arq', 'app.workers.main.WorkerSettings', '--watch', 'app']
+    volumes:
+      - ../backend:/app
+      - /app/.venv
+      - storage:/data/storage
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - '8025:8025'
+      - '1025:1025'
