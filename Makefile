@@ -1,0 +1,62 @@
+# Comandos del proyecto. En Windows sin make: .\make.ps1 <objetivo>
+DC = docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml
+DC_TEST_DB = sh -c 'export DATABASE_URL=$${DATABASE_URL%/*}/carpool_test && alembic upgrade head && pytest --cov=app --cov-report=term-missing'
+
+.PHONY: help env up down restart logs ps migrate seed test test-backend test-frontend lint build osrm clean
+
+help:
+	@echo "env            crea .env desde .env.example si no existe"
+	@echo "up             levanta todos los servicios (desarrollo)"
+	@echo "down           detiene los servicios"
+	@echo "logs           sigue los logs"
+	@echo "migrate        aplica migraciones de Alembic"
+	@echo "seed           carga datos semilla"
+	@echo "test           pruebas de backend (con PostGIS real) y frontend"
+	@echo "lint           ruff, mypy, eslint y prettier"
+	@echo "osrm           descarga y procesa el mapa de Pamplona para OSRM"
+
+env:
+	@test -f .env || cp .env.example .env
+
+up: env
+	$(DC) up -d --build
+	@echo "Web: https://localhost  API: http://localhost:8000/api/v1/docs  Correo: http://localhost:8025"
+
+down:
+	$(DC) down
+
+restart: down up
+
+logs:
+	$(DC) logs -f --tail=100
+
+ps:
+	$(DC) ps
+
+migrate:
+	$(DC) exec api alembic upgrade head
+
+seed:
+	$(DC) exec api python -m app.seed
+
+test: test-backend test-frontend
+
+test-backend: env
+	$(DC) up -d db redis
+	$(DC) run --rm --no-deps api $(DC_TEST_DB)
+
+test-frontend:
+	cd frontend && npm ci && npx ng test --watch=false
+
+lint:
+	$(DC) run --rm --no-deps api sh -c 'ruff check . && ruff format --check . && mypy app'
+	cd frontend && npx ng lint && npx prettier --check "src/**/*.{ts,html,css}"
+
+build:
+	$(DC) build
+
+osrm:
+	sh infra/scripts/build_osrm.sh
+
+clean:
+	$(DC) down -v
