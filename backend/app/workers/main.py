@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 import structlog
 from arq.connections import RedisSettings
@@ -23,6 +23,6 @@ async def startup(ctx: dict[str, Any]) -> None:
 
 class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(get_settings().redis_url)
-    functions = [heartbeat]
-    cron_jobs = [cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True)]
+    functions: ClassVar[list[Any]] = [heartbeat]
+    cron_jobs: ClassVar[list[Any]] = [cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True)]
     on_startup = startup

@@ -23,7 +23,9 @@ target_metadata = Base.metadata
 POSTGIS_TABLES = {"spatial_ref_sys", "layer", "topology"}
 
 
-def include_object(obj: object, name: str | None, type_: str, reflected: bool, compare_to: object) -> bool:
+def include_object(
+    obj: object, name: str | None, type_: str, reflected: bool, compare_to: object
+) -> bool:
     return not (type_ == "table" and name in POSTGIS_TABLES)
 
 
