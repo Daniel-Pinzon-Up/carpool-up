@@ -1,0 +1,205 @@
+{
+  "app": {
+    "name": "University Carpool",
+    "shortName": "Carpool"
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English",
+    "pt": "Português",
+    "fr": "Français"
+  },
+  "layout": {
+    "skipToContent": "Skip to content",
+    "mainNav": "Main navigation",
+    "language": "Language",
+    "expandNav": "Expand menu",
+    "collapseNav": "Collapse menu",
+    "theme": {
+      "label": "Theme",
+      "system": "Match system",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "nav": {
+    "search": "Search",
+    "home": "Home",
+    "publish": "Publish",
+    "myTrips": "My trips",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "approvals": "Approvals",
+    "users": "Users",
+    "trips": "Trips",
+    "emergencies": "Emergencies",
+    "settings": "Settings",
+    "catalog": "Component catalog"
+  },
+  "navShort": {
+    "search": "Search",
+    "home": "Home",
+    "publish": "Publish",
+    "myTrips": "My trips",
+    "messages": "Messages",
+    "notifications": "Alerts",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "approvals": "Approve",
+    "users": "Users",
+    "trips": "Trips",
+    "emergencies": "SOS",
+    "settings": "Settings"
+  },
+  "placeholder": {
+    "title": "We are building this section",
+    "description": "It will be available soon. In the meantime, explore the other menu options."
+  },
+  "ui": {
+    "rating": {
+      "readLabel": "Rating: {{value}} out of {{max}} stars",
+      "starLabel": "{{count}} out of 5 stars"
+    },
+    "stepper": {
+      "label": "Progress",
+      "done": "Completed",
+      "progress": "Step {{current}} of {{total}}"
+    },
+    "seats": {
+      "decrease": "Remove a seat",
+      "increase": "Add a seat",
+      "range": "Between {{min}} and {{max}} seats"
+    }
+  },
+  "errors": {
+    "NETWORK_ERROR": "Cannot reach the server. Check your connection and try again.",
+    "UNKNOWN_ERROR": "Something went wrong. Try again in a few seconds.",
+    "INTERNAL_ERROR": "The server had a problem. Try again in a few minutes.",
+    "VALIDATION_ERROR": "Check the highlighted fields and fix them.",
+    "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
+    "NOT_FOUND": "We could not find what you are looking for.",
+    "FORBIDDEN": "You do not have permission to do this.",
+    "UNAUTHORIZED": "Your session ended. Please sign in again."
+  },
+  "catalog": {
+    "title": "Component catalog",
+    "subtitle": "Every component of the liquid glass design system in one place. Change the theme, language and transparency to review them.",
+    "controls": {
+      "title": "Appearance",
+      "reduceTransparency": "Reduce transparency"
+    },
+    "themes": {
+      "title": "Theme comparison",
+      "description": "The same card in light and dark themes, with glass and with solid surfaces.",
+      "light": "Light with glass",
+      "dark": "Dark with glass",
+      "lightSolid": "Light with reduced transparency",
+      "darkSolid": "Dark with reduced transparency"
+    },
+    "sample": {
+      "route": "Main campus to El Carmen neighborhood, leaving at 7:30 a.m."
+    },
+    "buttons": {
+      "title": "Buttons",
+      "primary": "Request seat",
+      "secondary": "View details",
+      "danger": "Cancel trip",
+      "ghost": "Later",
+      "disabled": "Unavailable",
+      "loading": "Save",
+      "block": "Publish trip"
+    },
+    "fields": {
+      "title": "Form fields",
+      "email": "University email",
+      "emailPlaceholder": "name@unipamplona.edu.co",
+      "emailHint": "Use your email ending in .edu.co",
+      "emailError": "The email must end in .edu.co"
+    },
+    "select": {
+      "label": "Vehicle type",
+      "car": "Car",
+      "motorcycle": "Motorcycle"
+    },
+    "chips": {
+      "title": "Preferences",
+      "pets": "Pets",
+      "luggage": "Luggage",
+      "noSmoking": "No smoking",
+      "music": "Music",
+      "womenOnly": "Women only"
+    },
+    "tabs": {
+      "title": "Tabs",
+      "upcoming": "Upcoming",
+      "inProgress": "In progress",
+      "history": "History",
+      "panel": "Content of the {{tab}} tab"
+    },
+    "badges": {
+      "title": "Statuses",
+      "requested": "Requested",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "picoPlaca": "Pico y placa",
+      "inProgress": "In progress",
+      "completed": "Completed"
+    },
+    "rating": {
+      "title": "Avatars and rating",
+      "punctuality": "Punctuality",
+      "value": "You selected {{value}} out of 5"
+    },
+    "stepper": {
+      "title": "Wizard and seats",
+      "route": "Route",
+      "schedule": "Schedule",
+      "vehicle": "Vehicle",
+      "summary": "Summary",
+      "back": "Back",
+      "next": "Next"
+    },
+    "seats": {
+      "label": "Seats"
+    },
+    "loading": {
+      "title": "Loading and empty state"
+    },
+    "empty": {
+      "title": "No trips found",
+      "description": "Try another time or widen the search area.",
+      "action": "Change search"
+    },
+    "dialogs": {
+      "title": "Dialogs",
+      "modal": "Open modal",
+      "sheet": "Open bottom sheet",
+      "confirm": "Confirm deletion",
+      "sampleTitle": "Choose your seats",
+      "sampleBody": "Tell us how many seats you need for this trip.",
+      "confirmTitle": "Cancel this trip",
+      "confirmMessage": "Passengers with a booking will be notified. This cannot be undone.",
+      "confirmAction": "Yes, cancel trip",
+      "confirmed": "Trip cancelled",
+      "cancelled": "Nothing was changed"
+    },
+    "toasts": {
+      "title": "Notices",
+      "info": "Info",
+      "success": "Success",
+      "warning": "Warning",
+      "danger": "Error",
+      "infoMessage": "Your request was sent to the driver.",
+      "successMessage": "Booking accepted. You can now see the vehicle plate.",
+      "warningMessage": "The driver is 15 minutes late.",
+      "dangerMessage": "There are no seats left on this trip."
+    }
+  }
+}

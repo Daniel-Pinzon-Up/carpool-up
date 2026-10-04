@@ -1,0 +1,205 @@
+{
+  "app": {
+    "name": "Covoiturage Universitaire",
+    "shortName": "Covoiturage"
+  },
+  "common": {
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English",
+    "pt": "Português",
+    "fr": "Français"
+  },
+  "layout": {
+    "skipToContent": "Aller au contenu",
+    "mainNav": "Navigation principale",
+    "language": "Langue",
+    "expandNav": "Développer le menu",
+    "collapseNav": "Réduire le menu",
+    "theme": {
+      "label": "Thème",
+      "system": "Selon le système",
+      "light": "Clair",
+      "dark": "Sombre"
+    }
+  },
+  "nav": {
+    "search": "Rechercher",
+    "home": "Accueil",
+    "publish": "Publier",
+    "myTrips": "Mes trajets",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "dashboard": "Tableau de bord",
+    "approvals": "Validations",
+    "users": "Utilisateurs",
+    "trips": "Trajets",
+    "emergencies": "Urgences",
+    "settings": "Paramètres",
+    "catalog": "Catalogue de composants"
+  },
+  "navShort": {
+    "search": "Chercher",
+    "home": "Accueil",
+    "publish": "Publier",
+    "myTrips": "Trajets",
+    "messages": "Messages",
+    "notifications": "Alertes",
+    "profile": "Profil",
+    "dashboard": "Tableau",
+    "approvals": "Valider",
+    "users": "Membres",
+    "trips": "Trajets",
+    "emergencies": "Urgences",
+    "settings": "Réglages"
+  },
+  "placeholder": {
+    "title": "Cette section est en construction",
+    "description": "Elle sera bientôt disponible. En attendant, explorez les autres options du menu."
+  },
+  "ui": {
+    "rating": {
+      "readLabel": "Note : {{value}} sur {{max}} étoiles",
+      "starLabel": "{{count}} sur 5 étoiles"
+    },
+    "stepper": {
+      "label": "Progression",
+      "done": "Terminé",
+      "progress": "Étape {{current}} sur {{total}}"
+    },
+    "seats": {
+      "decrease": "Retirer une place",
+      "increase": "Ajouter une place",
+      "range": "Entre {{min}} et {{max}} places"
+    }
+  },
+  "errors": {
+    "NETWORK_ERROR": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez.",
+    "UNKNOWN_ERROR": "Une erreur est survenue. Réessayez dans quelques secondes.",
+    "INTERNAL_ERROR": "Le serveur a rencontré un problème. Réessayez dans quelques minutes.",
+    "VALIDATION_ERROR": "Vérifiez les champs signalés et corrigez-les.",
+    "RATE_LIMITED": "Trop de tentatives. Patientez un instant puis réessayez.",
+    "NOT_FOUND": "Nous n'avons pas trouvé ce que vous cherchez.",
+    "FORBIDDEN": "Vous n'avez pas l'autorisation de faire cela.",
+    "UNAUTHORIZED": "Votre session a expiré. Reconnectez-vous."
+  },
+  "catalog": {
+    "title": "Catalogue de composants",
+    "subtitle": "Tous les composants du système de design liquid glass au même endroit. Changez le thème, la langue et la transparence pour les vérifier.",
+    "controls": {
+      "title": "Apparence",
+      "reduceTransparency": "Réduire la transparence"
+    },
+    "themes": {
+      "title": "Comparaison des thèmes",
+      "description": "La même carte en thème clair et sombre, avec verre et avec surfaces opaques.",
+      "light": "Clair avec verre",
+      "dark": "Sombre avec verre",
+      "lightSolid": "Clair avec transparence réduite",
+      "darkSolid": "Sombre avec transparence réduite"
+    },
+    "sample": {
+      "route": "Campus principal vers le quartier El Carmen, départ à 7 h 30."
+    },
+    "buttons": {
+      "title": "Boutons",
+      "primary": "Demander une place",
+      "secondary": "Voir le détail",
+      "danger": "Annuler le trajet",
+      "ghost": "Plus tard",
+      "disabled": "Indisponible",
+      "loading": "Enregistrer",
+      "block": "Publier le trajet"
+    },
+    "fields": {
+      "title": "Champs de formulaire",
+      "email": "E-mail universitaire",
+      "emailPlaceholder": "nom@unipamplona.edu.co",
+      "emailHint": "Utilisez votre e-mail se terminant par .edu.co",
+      "emailError": "L'e-mail doit se terminer par .edu.co"
+    },
+    "select": {
+      "label": "Type de véhicule",
+      "car": "Voiture",
+      "motorcycle": "Moto"
+    },
+    "chips": {
+      "title": "Préférences",
+      "pets": "Animaux",
+      "luggage": "Bagages",
+      "noSmoking": "Non-fumeur",
+      "music": "Musique",
+      "womenOnly": "Femmes uniquement"
+    },
+    "tabs": {
+      "title": "Onglets",
+      "upcoming": "À venir",
+      "inProgress": "En cours",
+      "history": "Historique",
+      "panel": "Contenu de l'onglet {{tab}}"
+    },
+    "badges": {
+      "title": "États",
+      "requested": "Demandée",
+      "accepted": "Acceptée",
+      "rejected": "Refusée",
+      "picoPlaca": "Pico y placa",
+      "inProgress": "En cours",
+      "completed": "Terminé"
+    },
+    "rating": {
+      "title": "Avatars et notes",
+      "punctuality": "Ponctualité",
+      "value": "Vous avez choisi {{value}} sur 5"
+    },
+    "stepper": {
+      "title": "Assistant et places",
+      "route": "Itinéraire",
+      "schedule": "Horaire",
+      "vehicle": "Véhicule",
+      "summary": "Récapitulatif",
+      "back": "Retour",
+      "next": "Suivant"
+    },
+    "seats": {
+      "label": "Places"
+    },
+    "loading": {
+      "title": "Chargement et état vide"
+    },
+    "empty": {
+      "title": "Aucun trajet trouvé",
+      "description": "Essayez un autre horaire ou élargissez la zone de recherche.",
+      "action": "Modifier la recherche"
+    },
+    "dialogs": {
+      "title": "Boîtes de dialogue",
+      "modal": "Ouvrir une fenêtre",
+      "sheet": "Ouvrir le panneau inférieur",
+      "confirm": "Confirmer la suppression",
+      "sampleTitle": "Choisissez vos places",
+      "sampleBody": "Indiquez combien de places il vous faut pour ce trajet.",
+      "confirmTitle": "Annuler ce trajet",
+      "confirmMessage": "Les passagers ayant réservé seront prévenus. Cette action est irréversible.",
+      "confirmAction": "Oui, annuler le trajet",
+      "confirmed": "Trajet annulé",
+      "cancelled": "Aucune modification"
+    },
+    "toasts": {
+      "title": "Notifications",
+      "info": "Information",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "danger": "Erreur",
+      "infoMessage": "Votre demande a été envoyée au conducteur.",
+      "successMessage": "Réservation acceptée. Vous pouvez voir la plaque du véhicule.",
+      "warningMessage": "Le conducteur a 15 minutes de retard.",
+      "dangerMessage": "Il n'y a plus de places sur ce trajet."
+    }
+  }
+}

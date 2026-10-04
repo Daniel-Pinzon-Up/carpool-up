@@ -1,0 +1,205 @@
+{
+  "app": {
+    "name": "Carona Universitária",
+    "shortName": "Carona"
+  },
+  "common": {
+    "close": "Fechar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "languages": {
+    "es": "Español",
+    "en": "English",
+    "pt": "Português",
+    "fr": "Français"
+  },
+  "layout": {
+    "skipToContent": "Pular para o conteúdo",
+    "mainNav": "Navegação principal",
+    "language": "Idioma",
+    "expandNav": "Expandir menu",
+    "collapseNav": "Recolher menu",
+    "theme": {
+      "label": "Tema",
+      "system": "Conforme o sistema",
+      "light": "Claro",
+      "dark": "Escuro"
+    }
+  },
+  "nav": {
+    "search": "Buscar",
+    "home": "Início",
+    "publish": "Publicar",
+    "myTrips": "Minhas viagens",
+    "messages": "Mensagens",
+    "notifications": "Notificações",
+    "profile": "Perfil",
+    "dashboard": "Painel",
+    "approvals": "Aprovações",
+    "users": "Usuários",
+    "trips": "Viagens",
+    "emergencies": "Emergências",
+    "settings": "Configurações",
+    "catalog": "Catálogo de componentes"
+  },
+  "navShort": {
+    "search": "Buscar",
+    "home": "Início",
+    "publish": "Publicar",
+    "myTrips": "Viagens",
+    "messages": "Mensagens",
+    "notifications": "Avisos",
+    "profile": "Perfil",
+    "dashboard": "Painel",
+    "approvals": "Aprovar",
+    "users": "Usuários",
+    "trips": "Viagens",
+    "emergencies": "Alertas",
+    "settings": "Ajustes"
+  },
+  "placeholder": {
+    "title": "Estamos construindo esta seção",
+    "description": "Em breve você poderá usá-la. Enquanto isso, explore as outras opções do menu."
+  },
+  "ui": {
+    "rating": {
+      "readLabel": "Avaliação: {{value}} de {{max}} estrelas",
+      "starLabel": "{{count}} de 5 estrelas"
+    },
+    "stepper": {
+      "label": "Progresso",
+      "done": "Concluído",
+      "progress": "Etapa {{current}} de {{total}}"
+    },
+    "seats": {
+      "decrease": "Remover um lugar",
+      "increase": "Adicionar um lugar",
+      "range": "Entre {{min}} e {{max}} lugares"
+    }
+  },
+  "errors": {
+    "NETWORK_ERROR": "Sem conexão com o servidor. Verifique sua internet e tente novamente.",
+    "UNKNOWN_ERROR": "Algo deu errado. Tente novamente em alguns segundos.",
+    "INTERNAL_ERROR": "O servidor teve um problema. Tente novamente em alguns minutos.",
+    "VALIDATION_ERROR": "Revise os campos marcados e corrija-os.",
+    "RATE_LIMITED": "Muitas tentativas. Aguarde um momento e tente novamente.",
+    "NOT_FOUND": "Não encontramos o que você procura.",
+    "FORBIDDEN": "Você não tem permissão para fazer isso.",
+    "UNAUTHORIZED": "Sua sessão terminou. Entre novamente."
+  },
+  "catalog": {
+    "title": "Catálogo de componentes",
+    "subtitle": "Todos os componentes do sistema de design liquid glass em um só lugar. Mude o tema, o idioma e a transparência para revisá-los.",
+    "controls": {
+      "title": "Aparência",
+      "reduceTransparency": "Reduzir transparência"
+    },
+    "themes": {
+      "title": "Comparação de temas",
+      "description": "O mesmo cartão nos temas claro e escuro, com vidro e com superfícies sólidas.",
+      "light": "Claro com vidro",
+      "dark": "Escuro com vidro",
+      "lightSolid": "Claro com transparência reduzida",
+      "darkSolid": "Escuro com transparência reduzida"
+    },
+    "sample": {
+      "route": "Campus principal para o bairro El Carmen, saída às 7h30."
+    },
+    "buttons": {
+      "title": "Botões",
+      "primary": "Solicitar lugar",
+      "secondary": "Ver detalhes",
+      "danger": "Cancelar viagem",
+      "ghost": "Mais tarde",
+      "disabled": "Indisponível",
+      "loading": "Salvar",
+      "block": "Publicar viagem"
+    },
+    "fields": {
+      "title": "Campos de formulário",
+      "email": "E-mail institucional",
+      "emailPlaceholder": "nome@unipamplona.edu.co",
+      "emailHint": "Use seu e-mail que termina em .edu.co",
+      "emailError": "O e-mail deve terminar em .edu.co"
+    },
+    "select": {
+      "label": "Tipo de veículo",
+      "car": "Carro",
+      "motorcycle": "Moto"
+    },
+    "chips": {
+      "title": "Preferências",
+      "pets": "Animais",
+      "luggage": "Bagagem",
+      "noSmoking": "Proibido fumar",
+      "music": "Música",
+      "womenOnly": "Só mulheres"
+    },
+    "tabs": {
+      "title": "Abas",
+      "upcoming": "Próximas",
+      "inProgress": "Em andamento",
+      "history": "Histórico",
+      "panel": "Conteúdo da aba {{tab}}"
+    },
+    "badges": {
+      "title": "Estados",
+      "requested": "Solicitada",
+      "accepted": "Aceita",
+      "rejected": "Recusada",
+      "picoPlaca": "Pico y placa",
+      "inProgress": "Em andamento",
+      "completed": "Concluída"
+    },
+    "rating": {
+      "title": "Avatares e avaliação",
+      "punctuality": "Pontualidade",
+      "value": "Você selecionou {{value}} de 5"
+    },
+    "stepper": {
+      "title": "Assistente e lugares",
+      "route": "Rota",
+      "schedule": "Horário",
+      "vehicle": "Veículo",
+      "summary": "Resumo",
+      "back": "Voltar",
+      "next": "Próximo"
+    },
+    "seats": {
+      "label": "Lugares"
+    },
+    "loading": {
+      "title": "Carregamento e estado vazio"
+    },
+    "empty": {
+      "title": "Nenhuma viagem encontrada",
+      "description": "Tente outro horário ou amplie a área de busca.",
+      "action": "Mudar busca"
+    },
+    "dialogs": {
+      "title": "Diálogos",
+      "modal": "Abrir modal",
+      "sheet": "Abrir painel inferior",
+      "confirm": "Confirmar exclusão",
+      "sampleTitle": "Escolha seus lugares",
+      "sampleBody": "Indique quantos lugares você precisa para esta viagem.",
+      "confirmTitle": "Cancelar esta viagem",
+      "confirmMessage": "Os passageiros com reserva serão avisados. Esta ação não pode ser desfeita.",
+      "confirmAction": "Sim, cancelar viagem",
+      "confirmed": "Viagem cancelada",
+      "cancelled": "Nada foi alterado"
+    },
+    "toasts": {
+      "title": "Avisos",
+      "info": "Informativo",
+      "success": "Sucesso",
+      "warning": "Atenção",
+      "danger": "Erro",
+      "infoMessage": "Sua solicitação foi enviada ao motorista.",
+      "successMessage": "Reserva aceita. Você já pode ver a placa do veículo.",
+      "warningMessage": "O motorista está 15 minutos atrasado.",
+      "dangerMessage": "Não há lugares disponíveis nesta viagem."
+    }
+  }
+}
