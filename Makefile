@@ -2,7 +2,7 @@
 DC = docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml
 DC_TEST_DB = sh -c 'export DATABASE_URL=$${DATABASE_URL%/*}/carpool_test && alembic upgrade head && pytest --cov=app --cov-report=term-missing'
 
-.PHONY: help env up down restart logs ps migrate seed test test-backend test-frontend lint build osrm clean
+.PHONY: help env up down restart logs ps migrate seed token test test-backend test-frontend lint build osrm clean
 
 help:
 	@echo "env            crea .env desde .env.example si no existe"
@@ -11,6 +11,7 @@ help:
 	@echo "logs           sigue los logs"
 	@echo "migrate        aplica migraciones de Alembic"
 	@echo "seed           carga datos semilla"
+	@echo "token          token de desarrollo: make token EMAIL=correo"
 	@echo "test           pruebas de backend (con PostGIS real) y frontend"
 	@echo "lint           ruff, mypy, eslint y prettier"
 	@echo "osrm           descarga y procesa el mapa de Pamplona para OSRM"
@@ -38,6 +39,9 @@ migrate:
 
 seed:
 	$(DC) exec api python -m app.seed
+
+token:
+	@$(DC) exec api python -m app.cli token $(EMAIL)
 
 test: test-backend test-frontend
 

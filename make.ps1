@@ -1,6 +1,9 @@
 # Equivalente del Makefile para Windows sin make.
-# Uso: .\make.ps1 up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | clean
-param([Parameter(Position = 0)][string]$Target = 'help')
+# Uso: .\make.ps1 token <correo> | up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | clean
+param(
+    [Parameter(Position = 0)][string]$Target = 'help',
+    [Parameter(Position = 1)][string]$Email = ''
+)
 
 # Docker y npm escriben progreso en stderr; en Windows PowerShell 5.1 'Stop' lo convierte en error.
 # Los fallos se detectan con $LASTEXITCODE.
@@ -39,6 +42,7 @@ switch ($Target) {
     'ps' { Invoke-Compose @('ps') }
     'migrate' { Invoke-Compose @('exec', 'api', 'alembic', 'upgrade', 'head') }
     'seed' { Invoke-Compose @('exec', 'api', 'python', '-m', 'app.seed') }
+    'token' { Invoke-Compose @('exec', 'api', 'python', '-m', 'app.cli', 'token', $Email) }
     'test-backend' {
         Ensure-Env
         Invoke-Compose @('up', '-d', 'db', 'redis')
@@ -60,6 +64,6 @@ switch ($Target) {
     'osrm' { & bash infra/scripts/build_osrm.sh }
     'clean' { Invoke-Compose @('down', '-v') }
     default {
-        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, test, test-backend, test-frontend, lint, build, osrm, clean'
+        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, token <correo>, test, test-backend, test-frontend, lint, build, osrm, clean'
     }
 }
