@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, isDevMode, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  isDevMode,
+  signal,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
@@ -10,12 +17,13 @@ import {
 } from '@lucide/angular';
 import { LanguageSelect } from '../../shared/ui/language-select';
 import { ThemeToggle } from '../../shared/ui/theme-toggle';
-import { NAV_BY_ROLE, UserRole } from './navigation';
+import { AuthService } from '../auth/auth.service';
+import { NAV_BY_ROLE } from './navigation';
 
 /**
  * Estructura de la app autenticada.
  * Movil (< 640 px): barra inferior de vidrio. Tablet y escritorio: barra lateral plegable.
- * El rol se conectara a la sesion en el paso 2; por ahora es pasajero.
+ * Los destinos dependen del rol del usuario con sesion.
  */
 @Component({
   selector: 'cp-shell',
@@ -172,8 +180,8 @@ import { NAV_BY_ROLE, UserRole } from './navigation';
   `,
 })
 export class Shell {
-  readonly role = signal<UserRole>('passenger');
-  protected readonly items = computed(() => NAV_BY_ROLE[this.role()]);
+  private readonly auth = inject(AuthService);
+  protected readonly items = computed(() => NAV_BY_ROLE[this.auth.user()?.role ?? 'passenger']);
   protected readonly mobileItems = computed(() => this.items().slice(0, 5));
   protected readonly collapsed = signal(
     globalThis.innerWidth !== undefined && globalThis.innerWidth < 1024,

@@ -15,8 +15,7 @@ import {
   LucideSquarePlus,
   LucideUsers,
 } from '@lucide/angular';
-
-export type UserRole = 'passenger' | 'driver' | 'admin' | 'superadmin';
+import { UserRole } from '../auth/auth.models';
 
 export interface NavItem {
   /** Clave de traduccion bajo nav.* */

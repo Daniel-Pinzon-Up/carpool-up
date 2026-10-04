@@ -1,5 +1,11 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  isDevMode,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import {
   TitleStrategy,
   provideRouter,
@@ -8,6 +14,8 @@ import {
 } from '@angular/router';
 import { provideTransloco } from '@jsverse/transloco';
 import { routes } from './app.routes';
+import { authInterceptor } from './core/auth/auth.interceptor';
+import { AuthService } from './core/auth/auth.service';
 import { errorInterceptor } from './core/http/error.interceptor';
 import { languageInterceptor } from './core/http/language.interceptor';
 import { DEFAULT_LANGUAGE, LANGUAGES, initialLanguage } from './core/i18n/language.service';
@@ -23,7 +31,14 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
     ),
     { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
-    provideHttpClient(withFetch(), withInterceptors([languageInterceptor, errorInterceptor])),
+    // errorInterceptor va primero para ver la respuesta al final, despues de que authInterceptor
+    // haya intentado renovar el token ante un 401.
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([errorInterceptor, languageInterceptor, authInterceptor]),
+    ),
+    // Recupera la sesion con la cookie antes de evaluar las rutas.
+    provideAppInitializer(() => inject(AuthService).restore()),
     provideTransloco({
       config: {
         availableLangs: [...LANGUAGES],
