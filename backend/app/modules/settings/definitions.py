@@ -128,6 +128,48 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             "Dias desde el inicio del semestre para revalidar el carnet.",
         ),
         _define(
+            "password_min_length",
+            Annotated[int, Field(ge=8, le=64)],
+            10,
+            "Longitud minima de la contrasena.",
+        ),
+        _define(
+            "login_max_attempts",
+            Annotated[int, Field(ge=3, le=20)],
+            5,
+            "Intentos fallidos de contrasena antes del bloqueo temporal.",
+        ),
+        _define(
+            "login_lockout_minutes",
+            PositiveInt,
+            15,
+            "Minutos de bloqueo tras agotar los intentos de contrasena.",
+        ),
+        _define(
+            "auth_code_minutes",
+            Annotated[int, Field(ge=1, le=60)],
+            10,
+            "Vigencia de los codigos enviados por correo.",
+        ),
+        _define(
+            "auth_code_max_attempts",
+            Annotated[int, Field(ge=1, le=10)],
+            5,
+            "Intentos para escribir un codigo antes de que deje de servir.",
+        ),
+        _define(
+            "auth_code_resend_seconds",
+            Annotated[int, Field(ge=10, le=600)],
+            60,
+            "Espera minima entre dos envios de codigo al mismo usuario.",
+        ),
+        _define(
+            "max_upload_mb",
+            Annotated[int, Field(ge=1, le=20)],
+            5,
+            "Tamano maximo de documentos e imagenes subidos.",
+        ),
+        _define(
             "service_area",
             ServiceArea,
             {"min_lat": 7.33, "max_lat": 7.43, "min_lon": -72.70, "max_lon": -72.59},

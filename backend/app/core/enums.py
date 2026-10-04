@@ -54,3 +54,21 @@ class ThemePreference(StrEnum):
 
 
 ADMIN_ROLES = frozenset({UserRole.ADMIN, UserRole.SUPERADMIN})
+
+
+class DocKind(StrEnum):
+    STUDENT_CARD = "student_card"
+    INSTITUTIONAL_PROOF = "institutional_proof"
+
+
+class ReviewStatus(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
+
+
+class AuthPurpose(StrEnum):
+    EMAIL_VERIFICATION = "email_verification"
+    TWO_FACTOR = "two_factor"
+    PASSWORD_RESET = "password_reset"  # noqa: S105 - proposito del codigo, no un secreto
