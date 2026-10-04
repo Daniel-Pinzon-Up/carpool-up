@@ -1,0 +1,28 @@
+# entorno
+.env
+.env.*
+!.env.example
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# node
+node_modules/
+dist/
+.angular/
+coverage/
+# datos locales
+infra/osrm/data/*
+!infra/osrm/data/.gitkeep
+infra/tiles/*.pmtiles
+storage/
+backups/
+# editores
+.vscode/
+.idea/
+*.log
