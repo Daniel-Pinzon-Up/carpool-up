@@ -317,3 +317,15 @@ body {
     background-position: 200% 0;
   }
 }
+
+/* Marcadores del mapa: el color identifica el tipo y el texto alternativo lo nombra. */
+.cp-map-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(10, 31, 68, 0.45);
+}
+.maplibregl-ctrl-attrib {
+  font-size: 11px;
+}

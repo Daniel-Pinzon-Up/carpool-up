@@ -1,4 +1,5 @@
 {
   "/api": { "target": "http://localhost:8000", "secure": false },
-  "/ws": { "target": "ws://localhost:8000", "ws": true, "secure": false }
+  "/ws": { "target": "ws://localhost:8000", "ws": true, "secure": false },
+  "/tiles": { "target": "https://localhost", "secure": false, "changeOrigin": true }
 }
