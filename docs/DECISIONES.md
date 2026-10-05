@@ -147,3 +147,18 @@ Registro de decisiones tomadas durante la construcción que no estaban cerradas 
 | 6.14 | Un vehículo con viajes programados o en curso no se puede borrar ni desactivar (`VEHICLE_HAS_TRIPS`). | Sección 5.4. |
 | 6.15 | El asistente de publicación reemplaza al planificador del paso 5: tipo, ruta, fecha u horario (con las fechas de pico y placa marcadas), vehículo y puestos, aporte (sugerido, editable, con tope), reglas y resumen. El mismo asistente edita viajes y series. Mis viajes del conductor tiene Próximos, Series e Historial; la vista del pasajero llega en el paso 8. | Sección 13. |
 | 6.16 | `driver_cancellations` se calculará en el paso 11 a partir de `trips.status = cancelled_by_driver`. | `user_stats` llega en el paso 11. |
+
+## Paso 7. Búsqueda de viajes
+
+| # | Decisión | Motivo |
+|---|----------|--------|
+| 7.1 | Un viaje coincide si su ruta pasa a `search_radius_meters` (500) o menos del origen y del destino pedidos, y en ese orden (`ST_LineLocatePoint` de la recogida menor que el de la bajada). Se mide en `geography` con un índice GiST parcial sobre la ruta de los viajes programados. | Sección 8: búsqueda por cercanía a la ruta, no solo a los extremos. El índice mantiene la consulta por debajo de 500 ms. |
+| 7.2 | Ventana horaria: salida entre la hora pedida menos y más `search_time_window_minutes` (60), nunca antes de ahora. Si toda la ventana ya pasó: `SEARCH_IN_PAST`. | Tolerancia del plan y sin resultados imposibles de tomar. |
+| 7.3 | Punto de recogida y bajada: la parada del viaje más cercana dentro del radio; si no hay, el punto de la ruta más cercano, con ETA = salida + fracción de la ruta × duración. Se informa la distancia a pie (`walk_m`). | Las paradas son puntos acordados por el conductor; el punto en la ruta cubre trayectos sin paradas cercanas. |
+| 7.4 | Orden: distancia a pie de la recogida, luego diferencia con la hora pedida, luego salida. | Lo que más le importa al pasajero es caminar poco y llegar a tiempo. |
+| 7.5 | Las preferencias filtran contra las reglas del viaje: con mascota, equipaje o música se excluyen viajes que lo prohíben; "sin humo" excluye los que permiten fumar. Una regla ausente no excluye. | No castigar a los conductores que no marcaron todas las reglas. |
+| 7.6 | Los viajes "Solo mujeres" no aparecen a usuarios que no son mujeres; el filtro "Solo mujeres" solo se ofrece a pasajeras. Nunca aparecen los viajes propios. | Sección 7.2 y 11. |
+| 7.7 | El resultado expone del conductor solo id, nombre, calificación y viajes completados, y del vehículo tipo, marca, modelo, color y si tiene foto; nunca placa, correo ni teléfono. | Sección 11. |
+| 7.8 | `seats_available` es por ahora `seats_total`; el paso 8 resta las reservas aceptadas. La calificación es `null` ("Conductor nuevo") hasta el paso 11. | Reservas y calificaciones llegan en esos pasos. |
+| 7.9 | La última búsqueda se guarda en el dispositivo (`cp.lastSearch`) y se repite al volver; una fecha vencida se reemplaza por hoy. El resultado viaja al detalle del viaje en el estado de navegación para mostrar recogida y bajada. | Flexibilidad sin guardar datos de búsqueda en el servidor. |
+

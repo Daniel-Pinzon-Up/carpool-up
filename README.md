@@ -13,7 +13,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 4 | Vehículos: CRUD con foto, reglas de placa y capacidad, requisitos para publicar e inicio del conductor | Hecho |
 | 5 | Rutas y mapas: OSRM con el mapa de Pamplona, ETA con factor de tráfico, aporte sugerido, mapa base propio y planificador de rutas | Hecho |
 | 6 | Publicación de viajes y series: asistente, ocurrencias, pico y placa, edición, cancelación, duplicado y Mis viajes del conductor | Hecho |
-| 7 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 7 | Búsqueda de viajes: coincidencia geográfica con la ruta, ventana horaria, preferencias, solo mujeres y punto de recogida | Hecho |
+| 8 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 

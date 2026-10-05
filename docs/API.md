@@ -237,6 +237,16 @@ Serie: los mismos campos salvo `departs_at`, más `weekdays` (0 = lunes), `depar
 
 Reglas: `women_only`, `pets`, `luggage`, `smoking`, `music` con `allowed` o `not_allowed`, y `custom` con texto libre.
 
+### Búsqueda (paso 7)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /search/trips` | Usuario activo, 60 por minuto | Viajes programados que pasan cerca del origen y destino pedidos. |
+
+Parámetros: `origin_place_id` u `origin_lat` y `origin_lon`; lo mismo para el destino; `date` (`YYYY-MM-DD`), `time` (`HH:MM`, hora de Pamplona), `seats` (1 a 7) y las preferencias booleanas `pets`, `luggage`, `no_smoking`, `music` y `women_only` (esta última solo para usuarias).
+
+Cada resultado trae `trip_id`, `series_id`, `departs_at`, `arrives_at`, `origin`, `destination`, `price_per_seat`, `seats_available`, `pickup` y `dropoff` (`kind` `stop` o `route`, `name`, `lat`, `lon`, `eta`, `walk_m`), `minutes_from_requested`, `driver` (`id`, `full_name`, `rating`, `trips_as_driver`), `vehicle` sin placa y `rules`. Error propio: `SEARCH_IN_PAST` (422).
+
 ## Cabeceras
 
 - `X-Request-ID`: se acepta del cliente o se genera, y se devuelve en cada respuesta para correlacionar logs.
