@@ -10,6 +10,7 @@ from app.core.db import SessionLocal
 from app.core.email import OutgoingEmail, send_smtp
 from app.core.logging import configure_logging
 from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
+from app.modules.chat.service import close_finished_conversations, purge_chat
 from app.modules.documents.revalidation import run_revalidation
 from app.modules.series.service import finish_past_series
 from app.modules.trips.service import recheck_pico_placa
@@ -64,6 +65,14 @@ async def offer_waitlist(ctx: dict[str, Any]) -> dict[str, int]:
         return await run_waitlist(session)
 
 
+async def chat_retention(ctx: dict[str, Any]) -> dict[str, int]:
+    """Diario: cierra los chats de viajes y series terminados y borra los vencidos."""
+    async with SessionLocal() as session:
+        closed = await close_finished_conversations(session)
+        purged = await purge_chat(session)
+    return {"closed": closed, "purged": purged}
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging(json_output=get_settings().environment != "development")
     logger.info("worker_started")
@@ -79,6 +88,7 @@ class WorkerSettings:
         expire_pending_requests,
         auto_cancel_late,
         offer_waitlist,
+        chat_retention,
     ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True),
@@ -89,6 +99,8 @@ class WorkerSettings:
         cron(expire_pending_requests, minute=set(range(0, 60, 5))),
         cron(auto_cancel_late),
         cron(offer_waitlist),
+        # 10:25 UTC = 5:25 a. m. en Pamplona.
+        cron(chat_retention, hour={10}, minute={25}),
     ]
     on_startup = startup
     max_tries = 5

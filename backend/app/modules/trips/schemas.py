@@ -250,6 +250,9 @@ class TripOut(TripSummary):
     )
     my_booking: MyBooking | None = Field(default=None, description="Reserva del que consulta")
     my_waitlist: MyWaitlist | None = None
+    chat_id: uuid.UUID | None = Field(
+        default=None, description="Chat grupal del viaje, si quien consulta participa"
+    )
 
 
 class OccurrenceCounts(BaseModel):

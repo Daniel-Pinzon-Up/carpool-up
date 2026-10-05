@@ -144,3 +144,8 @@ class CancelRequestStatus(StrEnum):
 class SuspensionKind(StrEnum):
     BOOKING_BAN = "booking_ban"
     ACCOUNT = "account"
+
+
+class ConversationKind(StrEnum):
+    TRIP_GROUP = "trip_group"
+    DIRECT = "direct"

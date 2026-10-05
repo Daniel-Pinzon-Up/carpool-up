@@ -14,6 +14,7 @@ from app.modules.bookings.matching import apply_meeting, meeting_points
 from app.modules.bookings.models import HOLDING_STATUSES, Booking
 from app.modules.bookings.queries import active_bookings
 from app.modules.cancellations.models import CancellationRequest
+from app.modules.chat.membership import close_trip_chats
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.search.service import Point
 from app.modules.settings.service import SettingsService
@@ -70,6 +71,7 @@ async def end_trip_bookings(
             {"trip_id": str(trip.id), "booking_id": str(booking.id), "reason": reason},
         )
     await close_waitlist(session, trip.id)
+    await close_trip_chats(session, trip)
     return len(bookings)
 
 

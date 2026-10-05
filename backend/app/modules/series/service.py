@@ -12,6 +12,7 @@ from app.core.errors import AppError, NotFoundError
 from app.modules.bookings.lifecycle import end_trip_bookings, trip_changed
 from app.modules.bookings.models import ACTIVE_STATUSES, Booking, SeriesSubscription
 from app.modules.bookings.queries import booked_seats, pending_requests
+from app.modules.chat.membership import close_series_chats
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.routing.osrm import RouteProvider
 from app.modules.semesters.models import Semester
@@ -474,6 +475,7 @@ class SeriesService:
                     self.session, trip, BookingStatus.CANCELLED_BY_DRIVER, reason
                 )
         await self.close_subscriptions(series, reason)
+        await close_series_chats(self.session, series.id)
         await self.session.commit()
         return await self.reload(series.id)
 

@@ -17,6 +17,7 @@ from app.core.pagination import Page, decode_cursor, encode_cursor
 from app.modules.bookings.lifecycle import end_trip_bookings, trip_changed
 from app.modules.bookings.models import ACTIVE_STATUSES, HOLDING_STATUSES, Booking
 from app.modules.bookings.queries import active_bookings, booked_seats, pending_requests
+from app.modules.chat.service import ChatService
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.pico_placa.service import PicoPlacaService
 from app.modules.routing.osrm import RouteProvider
@@ -253,6 +254,7 @@ class TripService:
                 WaitlistEntry.status.in_(WAITLIST_OPEN),
             )
         )
+        out.chat_id = await ChatService(self.session).for_trip(viewer, trip.id)
         if entry is not None:
             out.my_waitlist = MyWaitlist(
                 id=entry.id,

@@ -35,6 +35,7 @@ from app.modules.bookings.service import (
     require_can_book,
     resolve_places,
 )
+from app.modules.chat.membership import join_trip_chats
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.series.models import TripSeries
 from app.modules.settings.service import SettingsService
@@ -325,6 +326,8 @@ class SubscriptionService:
                 continue  # Fuera de la ruta o cruzada con otra reserva del pasajero.
             self.session.add(booking)
             await self.session.flush()
+            booking.trip = trip
+            await join_trip_chats(self.session, booking)
             booked.append(day)
         sub.status = SubscriptionStatus.ACTIVE
         sub.decided_at = utcnow()

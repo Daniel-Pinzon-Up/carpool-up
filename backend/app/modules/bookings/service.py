@@ -35,6 +35,7 @@ from app.modules.bookings.schemas import (
     TripBrief,
 )
 from app.modules.cancellations.models import CancellationRequest
+from app.modules.chat.membership import join_trip_chats, leave_trip_chat
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.places.models import Place
 from app.modules.routing.schemas import RoutePoint
@@ -457,7 +458,7 @@ class BookingService:
             raise AppError("TRIP_FULL", "Not enough seats left", 409, {"seats_available": free})
         booking.status = BookingStatus.ACCEPTED
         booking.decided_at = utcnow()
-        # El chat grupal y el directo se crean aqui en el paso 9.
+        await join_trip_chats(self.session, booking)
         self.notifications.notify(
             booking.passenger_id,
             Kind.BOOKING_ACCEPTED,
@@ -534,6 +535,7 @@ class BookingService:
                 )
                 self.notifications.notify(booking.trip.driver_id, kind, payload)
             if was_holding:
+                await leave_trip_chat(self.session, booking)
                 await offer_next(self.session, booking.trip)
             return booking.status
         if not reason:
@@ -573,6 +575,7 @@ class BookingService:
             booking.cancelled_at = utcnow()
             booking.cancel_reason = request.reason
             self.notifications.notify(booking.passenger_id, Kind.CANCELLATION_ACCEPTED, payload)
+            await leave_trip_chat(self.session, booking)
             await offer_next(self.session, booking.trip)
         else:
             booking.status = BookingStatus.ACCEPTED
