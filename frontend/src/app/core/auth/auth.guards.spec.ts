@@ -1,9 +1,13 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Me } from './auth.models';
 import { homeFor } from './auth.guards';
 import { AuthService } from './auth.service';
 import { ME } from '../../../testing/auth-fixtures';
+import { getTranslocoTestingModule } from '../../../testing/transloco-testing';
+import { routes } from '../../app.routes';
 
 describe('homeFor', () => {
   let auth: AuthService;
@@ -49,5 +53,32 @@ describe('homeFor', () => {
       as({ role: role as Me['role'] });
       expect(path()).toBe(home);
     }
+  });
+});
+
+describe('navegacion con las rutas reales', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      imports: [getTranslocoTestingModule()],
+      providers: [provideRouter(routes), provideHttpClient(), provideHttpClientTesting()],
+    });
+  });
+
+  // Regresion: el guard de invitados redirigia a casa y, como su grupo tiene path '', se
+  // volvia a evaluar en esa misma navegacion sin fin (la pagina se congelaba al entrar).
+  it('con sesion entra a la app y las pantallas de acceso llevan a casa', async () => {
+    TestBed.inject(AuthService).user.set({ ...ME, role: 'passenger' });
+    const router = TestBed.inject(Router);
+    expect(await router.navigateByUrl('/perfil')).toBe(true);
+    expect(router.url).toBe('/perfil');
+    await router.navigateByUrl('/ingresar');
+    expect(router.url).toBe('/buscar');
+  });
+
+  it('sin sesion la app lleva a la bienvenida', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/perfil');
+    expect(router.url).toBe('/bienvenida');
   });
 });

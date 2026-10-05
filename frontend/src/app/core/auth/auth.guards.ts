@@ -27,11 +27,12 @@ export function homeFor(auth: AuthService, router: Router): UrlTree {
 /** Ruta raiz: redirige siempre. */
 export const homeRedirect: CanActivateFn = () => homeFor(inject(AuthService), inject(Router));
 
-/** Pantallas de acceso: solo sin sesion. */
-export const guestGuard: CanMatchFn = () => {
-  const auth = inject(AuthService);
-  return auth.isAuthenticated() ? homeFor(auth, inject(Router)) : true;
-};
+/**
+ * Pantallas de acceso: solo sin sesion. Con sesion devuelve false (no redirige): el grupo
+ * tiene path '' y se evalua en cada navegacion, asi que redirigir a casa volveria a pasar
+ * por aqui sin fin. Sin coincidencia, la URL cae en '**' -> '' -> homeRedirect.
+ */
+export const guestGuard: CanMatchFn = () => !inject(AuthService).isAuthenticated();
 
 /** Cualquier sesion, incluso pendiente o suspendida (estado de cuenta, terminos). */
 export const signedInGuard: CanMatchFn = () =>
