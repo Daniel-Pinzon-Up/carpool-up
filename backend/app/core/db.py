@@ -5,6 +5,7 @@ from enum import Enum as PyEnum
 
 from sqlalchemy import DateTime, Enum, MetaData, func
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -48,3 +49,13 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with SessionLocal() as session:
         yield session
+
+
+async def add_unique(session: AsyncSession, row: object, conflict: Exception) -> None:
+    """Inserta dentro de un savepoint: si choca con un indice unico (carrera entre dos
+    peticiones) la sesion sigue usable y se lanza el error de negocio."""
+    try:
+        async with session.begin_nested():
+            session.add(row)
+    except IntegrityError as exc:
+        raise conflict from exc

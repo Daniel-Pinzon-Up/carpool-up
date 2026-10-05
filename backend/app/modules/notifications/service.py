@@ -25,6 +25,29 @@ class Kind:
     ROLE_CHANGED = "role_changed"
     TRIP_PICO_PLACA_CANCELLED = "trip_pico_placa_cancelled"
     TRIP_PICO_PLACA_RESTORED = "trip_pico_placa_restored"
+    # Reservas (paso 8). Al conductor:
+    BOOKING_REQUESTED = "booking_requested"
+    BOOKING_WITHDRAWN = "booking_withdrawn"
+    BOOKING_CANCELLED_BY_PASSENGER = "booking_cancelled_by_passenger"
+    CANCELLATION_REQUESTED = "cancellation_requested"
+    SUBSCRIPTION_REQUESTED = "subscription_requested"
+    SUBSCRIPTION_CANCELLED = "subscription_cancelled"
+    # Al pasajero:
+    BOOKING_ACCEPTED = "booking_accepted"
+    BOOKING_REJECTED = "booking_rejected"
+    BOOKING_EXPIRED = "booking_expired"
+    BOOKING_CANCELLED_BY_DRIVER = "booking_cancelled_by_driver"
+    BOOKING_AUTO_CANCELLED_LATE = "booking_auto_cancelled_late"
+    BOOKING_PICO_PLACA_CANCELLED = "booking_pico_placa_cancelled"
+    CANCELLATION_ACCEPTED = "cancellation_accepted"
+    CANCELLATION_REJECTED = "cancellation_rejected"
+    TRIP_CHANGED = "trip_changed"
+    SUBSCRIPTION_ACCEPTED = "subscription_accepted"
+    SUBSCRIPTION_REJECTED = "subscription_rejected"
+    SUBSCRIPTION_EXPIRED = "subscription_expired"
+    SUBSCRIPTION_ENDED = "subscription_ended"
+    WAITLIST_OFFER = "waitlist_offer"
+    WAITLIST_OFFER_EXPIRED = "waitlist_offer_expired"
 
 
 class NotificationService:
