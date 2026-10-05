@@ -109,7 +109,17 @@ export const routes: Routes = [
       },
       comingSoon('mis-viajes', 'myTrips'),
       comingSoon('mensajes', 'messages'),
-      comingSoon('notificaciones', 'notifications'),
+      {
+        path: 'notificaciones',
+        loadComponent: () => import('./features/notifications/notifications-page'),
+        title: 'nav.notifications',
+      },
+      {
+        path: 'licencia',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/license/license-page'),
+        title: 'license.title',
+      },
       comingSoon('buscar', 'search', { canMatch: [roleGuard('passenger')] }),
       comingSoon('inicio', 'home', { canMatch: [roleGuard('driver')] }),
       comingSoon('publicar', 'publish', { canMatch: [roleGuard('driver')] }),
@@ -118,7 +128,11 @@ export const routes: Routes = [
         canMatch: [roleGuard('admin', 'superadmin')],
         children: [
           comingSoon('', 'dashboard', { pathMatch: 'full' }),
-          comingSoon('aprobaciones', 'approvals'),
+          {
+            path: 'aprobaciones',
+            loadComponent: () => import('./features/admin/approvals'),
+            title: 'nav.approvals',
+          },
           comingSoon('usuarios', 'users'),
           comingSoon('viajes', 'trips'),
           comingSoon('emergencias', 'emergencies'),
