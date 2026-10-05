@@ -23,6 +23,7 @@ from app.modules.places import router as places
 from app.modules.semesters import router as semesters
 from app.modules.settings import router as settings_module
 from app.modules.users import router as users
+from app.modules.vehicles import router as vehicles
 
 
 @asynccontextmanager
@@ -69,6 +70,7 @@ def create_app() -> FastAPI:
         auth.router,
         users.router,
         notifications.router,
+        vehicles.router,
         settings_module.router,
         semesters.router,
         places.router,
