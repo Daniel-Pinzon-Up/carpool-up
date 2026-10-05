@@ -1,8 +1,10 @@
+import json
 import os
 import re
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from datetime import timedelta
 from pathlib import Path
+from typing import Any
 
 # Configuracion de prueba antes de importar la app.
 os.environ.setdefault("ENVIRONMENT", "test")
@@ -12,6 +14,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
+from app.core import realtime
 from app.core.clock import local_today, utcnow
 from app.core.config import get_settings
 from app.core.db import get_session
@@ -101,6 +104,28 @@ class Outbox:
 @pytest.fixture
 def outbox() -> Outbox:
     return Outbox()
+
+
+class EventLog:
+    """Eventos en tiempo real publicados durante la prueba (en vez de Redis)."""
+
+    def __init__(self) -> None:
+        self.published: list[tuple[str, dict[str, Any]]] = []
+
+    async def publish(self, channel: str, data: str) -> None:
+        self.published.append((channel, json.loads(data)))
+
+    async def on(self, channel: str) -> list[dict[str, Any]]:
+        await realtime.drain()
+        return [payload for name, payload in self.published if name == channel]
+
+
+@pytest.fixture(autouse=True)
+def events() -> Iterator[EventLog]:
+    log = EventLog()
+    previous = realtime.set_publisher(log.publish)
+    yield log
+    realtime.set_publisher(previous)
 
 
 @pytest.fixture(autouse=True)

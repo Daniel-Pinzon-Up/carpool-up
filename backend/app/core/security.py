@@ -5,7 +5,7 @@ import hmac
 import secrets
 import uuid
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from argon2 import PasswordHasher
@@ -56,6 +56,8 @@ class AccessClaims:
     user_id: uuid.UUID
     role: UserRole
     session_id: uuid.UUID | None
+    # Vencimiento: el WebSocket cierra la conexion a esa hora para que el cliente renueve.
+    expires_at: datetime | None = None
 
 
 def create_access_token(
@@ -86,6 +88,7 @@ def decode_access_token(token: str) -> AccessClaims | None:
             user_id=uuid.UUID(str(payload["sub"])),
             role=UserRole(str(payload["role"])),
             session_id=uuid.UUID(str(sid)) if sid else None,
+            expires_at=datetime.fromtimestamp(int(str(payload["exp"])), UTC),
         )
     except (KeyError, ValueError):
         return None

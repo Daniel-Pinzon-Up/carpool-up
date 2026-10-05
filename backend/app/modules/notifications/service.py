@@ -1,4 +1,4 @@
-"""Notificaciones internas. Los pasos siguientes agregan tipos; el paso 9 las envia en vivo."""
+"""Notificaciones internas: se guardan en la bandeja y llegan en vivo por WebSocket."""
 
 import uuid
 from typing import Any
@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.clock import utcnow
 from app.core.errors import NotFoundError
 from app.core.pagination import Page, decode_cursor, encode_cursor
+from app.core.realtime import emit, user_channel
 from app.modules.notifications.models import Notification
 from app.modules.notifications.schemas import NotificationOut
 
@@ -48,6 +49,8 @@ class Kind:
     SUBSCRIPTION_ENDED = "subscription_ended"
     WAITLIST_OFFER = "waitlist_offer"
     WAITLIST_OFFER_EXPIRED = "waitlist_offer_expired"
+    # Chat (paso 9): uno por conversacion mientras haya mensajes sin leer.
+    MESSAGE_NEW = "message_new"
 
 
 class NotificationService:
@@ -55,8 +58,26 @@ class NotificationService:
         self.session = session
 
     def notify(self, user_id: uuid.UUID, kind: str, payload: dict[str, Any] | None = None) -> None:
-        """Agrega la notificacion a la transaccion en curso (sin commit)."""
-        self.session.add(Notification(user_id=user_id, kind=kind, payload=payload or {}))
+        """Agrega la notificacion a la transaccion en curso (sin commit). Al confirmarse llega
+        en vivo por el canal del usuario."""
+        notification = Notification(
+            id=uuid.uuid4(), user_id=user_id, kind=kind, payload=payload or {}
+        )
+        self.session.add(notification)
+        emit(
+            self.session,
+            user_channel(user_id),
+            {
+                "type": "notification",
+                "notification": {
+                    "id": str(notification.id),
+                    "kind": kind,
+                    "payload": notification.payload,
+                    "read_at": None,
+                    "created_at": utcnow().isoformat(),
+                },
+            },
+        )
 
     async def list_for(
         self, user_id: uuid.UUID, limit: int, cursor: str | None, unread_only: bool
@@ -93,6 +114,12 @@ class NotificationService:
             raise NotFoundError("notification")
         if notification.read_at is None:
             notification.read_at = utcnow()
+            # Las demas pestanas y dispositivos actualizan su contador.
+            emit(
+                self.session,
+                user_channel(user_id),
+                {"type": "notification.read", "id": str(notification_id)},
+            )
             await self.session.commit()
 
     async def mark_all_read(self, user_id: uuid.UUID) -> int:
@@ -101,5 +128,6 @@ class NotificationService:
             .where(Notification.user_id == user_id, Notification.read_at.is_(None))
             .values(read_at=utcnow())
         )
+        emit(self.session, user_channel(user_id), {"type": "notification.read_all"})
         await self.session.commit()
         return int(result.rowcount or 0)  # type: ignore[attr-defined]
