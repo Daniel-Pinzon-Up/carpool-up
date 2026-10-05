@@ -323,7 +323,7 @@ class TripService:
     async def update(self, driver: User, trip_id: uuid.UUID, data: TripUpdate) -> Trip:
         """Hasta trip_edit_cutoff_minutes antes de salir.
 
-        Los puestos no bajan de los ya aceptados. Si cambian hora, ruta o vehiculo se
+        Los puestos no bajan de los ya aceptados. Si cambian hora, ruta, vehiculo o aporte se
         recalcula el punto de encuentro de cada reserva y los pasajeros pueden cancelar sin
         penalizacion. Si suben los puestos se ofrece el cupo a la lista de espera.
         """
@@ -352,7 +352,12 @@ class TripService:
         await check_bookings_fit(self.session, trip, seats, rules)
         planned = await self.planner.plan_route(driver, place_ids)
 
-        before = (trip.departs_at, [stop.place_id for stop in trip.stops], trip.vehicle_id)
+        before = (
+            trip.departs_at,
+            [stop.place_id for stop in trip.stops],
+            trip.vehicle_id,
+            trip.price_per_seat,
+        )
         more_seats = seats > trip.seats_total
         trip.vehicle_id = vehicle.id
         trip.vehicle = vehicle
@@ -362,7 +367,7 @@ class TripService:
         await self.planner.check_overlaps(
             driver.id, [(trip.departs_at, trip.est_duration_s)], exclude={trip.id}
         )
-        if before != (trip.departs_at, planned.place_ids, trip.vehicle_id):
+        if before != (trip.departs_at, planned.place_ids, trip.vehicle_id, trip.price_per_seat):
             await trip_changed(self.session, trip)
         if more_seats:
             await offer_next(self.session, trip)

@@ -505,6 +505,16 @@ async def test_trip_changes_respect_bookings(
         "cancelled_by_passenger"
     )
 
+    # Cambiar el aporte tambien avisa y libera de penalizacion.
+    other = await make_user(UserRole.PASSENGER)
+    second = (await book(routing_api, other, trip["id"], places)).json()
+    await decide(routing_api, driver[0], second["id"], "accept")
+    response = await routing_api.patch(url, json={"price_per_seat": 1500}, headers=auth(driver[0]))
+    assert response.status_code == 200, response.text
+    mine = (await routing_api.get(f"{API}/bookings/{second['id']}", headers=auth(other))).json()
+    assert mine["penalty_free"] is True
+    assert mine["amount"] == 1500
+
 
 # --- Lista de espera ------------------------------------------------------------------
 
