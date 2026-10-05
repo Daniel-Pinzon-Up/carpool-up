@@ -1,0 +1,64 @@
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LucideArrowRight, LucideRepeat, LucideUsers } from '@lucide/angular';
+import { LanguageService } from '../../core/i18n/language.service';
+import { formatCop } from '../../shared/map/routing.api';
+import { StatusBadge } from '../../shared/ui/status-badge';
+import { TRIP_STATUS_TONE, formatDeparture } from './trip-status';
+import { TripSummary } from './trips.api';
+
+/** Tarjeta enlazada de un viaje: fecha, trayecto, estado, puestos y aporte. */
+@Component({
+  selector: 'cp-trip-card',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, TranslocoPipe, StatusBadge, LucideArrowRight, LucideRepeat, LucideUsers],
+  host: { class: 'block' },
+  template: `
+    <a
+      [routerLink]="['/viajes', trip().id]"
+      class="glass-1 !rounded-2xl flex flex-col gap-2 p-4 transition hover:bg-glass-strong focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <span class="font-semibold">{{ when() }}</span>
+        <cp-status-badge [variant]="tone()">{{
+          'trips.status.' + trip().status | transloco
+        }}</cp-status-badge>
+      </div>
+      <p class="flex min-w-0 items-center gap-2">
+        <span class="truncate">{{ trip().origin }}</span>
+        <svg lucideArrowRight class="size-4 shrink-0 text-muted" aria-hidden="true"></svg>
+        <span class="sr-only">{{ 'trips.to' | transloco }}</span>
+        <span class="truncate">{{ trip().destination }}</span>
+      </p>
+      <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
+        <span class="inline-flex items-center gap-1">
+          <svg lucideUsers class="size-4" aria-hidden="true"></svg>
+          {{ 'trips.seats' | transloco: { count: trip().seats_total } }}
+        </span>
+        <span>{{ money() }}</span>
+        @if (trip().stop_count) {
+          <span>{{ 'trips.stops' | transloco: { count: trip().stop_count } }}</span>
+        }
+        @if (trip().series_id) {
+          <span class="inline-flex items-center gap-1">
+            <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
+            {{ 'trips.fromSeries' | transloco }}
+          </span>
+        }
+      </p>
+    </a>
+  `,
+})
+export class TripCard {
+  readonly trip = input.required<TripSummary>();
+  private readonly language = inject(LanguageService);
+
+  protected readonly tone = computed(() => TRIP_STATUS_TONE[this.trip().status]);
+  protected readonly when = computed(() =>
+    formatDeparture(this.trip().departs_at, this.language.current()),
+  );
+  protected readonly money = computed(() =>
+    formatCop(this.trip().price_per_seat, this.language.current()),
+  );
+}
