@@ -3,11 +3,12 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query, Request, status
 
-from app.core.auth import ActiveUser
+from app.core.auth import ActiveUser, Driver
 from app.core.deps import DbSession
 from app.core.pagination import DEFAULT_LIMIT, MAX_LIMIT, Page
 from app.core.rate_limit import limiter
 from app.modules.routing.router import Provider
+from app.modules.trips.lifecycle import TripLifecycle
 from app.modules.trips.schemas import (
     CancelRequest,
     TripCreate,
@@ -106,3 +107,34 @@ async def duplicate_trip(
     service = TripService(session, provider)
     trip = await service.duplicate(user, trip_id, body.departs_at)
     return await service.view(trip, user)
+
+
+@router.post(
+    "/{trip_id}/start",
+    responses={
+        409: {
+            "description": "TRIP_NOT_STARTABLE, TRIP_START_TOO_EARLY, TRIP_START_TOO_LATE, "
+            "PICO_PLACA_RESTRICTED"
+        }
+    },
+)
+async def start_trip(
+    trip_id: uuid.UUID, user: Driver, session: DbSession, provider: Provider
+) -> TripOut:
+    """Desde trip_start_lead_minutes antes de la salida. Habilita la ubicacion en vivo."""
+    await TripLifecycle(session).start(user, trip_id)
+    service = TripService(session, provider)
+    return await service.view(await service.reload(trip_id), user)
+
+
+@router.post(
+    "/{trip_id}/finish",
+    responses={409: {"description": "TRIP_NOT_IN_PROGRESS, PASSENGERS_UNMARKED"}},
+)
+async def finish_trip(
+    trip_id: uuid.UUID, user: Driver, session: DbSession, provider: Provider
+) -> TripOut:
+    """Emite los tickets de quienes abordaron y cierra los chats del viaje."""
+    await TripLifecycle(session).finish(user, trip_id)
+    service = TripService(session, provider)
+    return await service.view(await service.reload(trip_id), user)

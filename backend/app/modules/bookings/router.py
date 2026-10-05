@@ -18,6 +18,7 @@ from app.modules.bookings.schemas import (
 )
 from app.modules.bookings.service import BookingService
 from app.modules.bookings.subscriptions import SubscriptionService, subscription_outs
+from app.modules.trips.lifecycle import TripLifecycle
 
 router = APIRouter(tags=["bookings"])
 
@@ -132,6 +133,27 @@ async def reject_cancellation(
 ) -> BookingOut:
     service = BookingService(session)
     return await service.out(await service.resolve_cancellation(user, request_id, False), user)
+
+
+BOARDING_ERRORS: dict[int | str, dict[str, str]] = {
+    409: {"description": "TRIP_NOT_IN_PROGRESS, BOOKING_NOT_BOARDABLE, NO_SHOW_TOO_EARLY"}
+}
+
+
+@router.post("/bookings/{booking_id}/boarded", responses=BOARDING_ERRORS)
+async def mark_boarded(booking_id: uuid.UUID, user: Driver, session: DbSession) -> BookingOut:
+    """El conductor marca que el pasajero subio (viaje en curso)."""
+    booking = await TripLifecycle(session).board(user, booking_id)
+    service = BookingService(session)
+    return await service.out(await service.reload(booking.id), user)
+
+
+@router.post("/bookings/{booking_id}/no-show", responses=BOARDING_ERRORS)
+async def mark_no_show(booking_id: uuid.UUID, user: Driver, session: DbSession) -> BookingOut:
+    """Desde la salida mas no_show_wait_minutes. Varios no-shows suspenden las reservas."""
+    booking = await TripLifecycle(session).no_show(user, booking_id)
+    service = BookingService(session)
+    return await service.out(await service.reload(booking.id), user)
 
 
 # --- Suscripciones a series -----------------------------------------------------------
