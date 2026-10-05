@@ -1,0 +1,23 @@
+{
+  "name": "Carpool UP",
+  "short_name": "Carpool UP",
+  "description": "Viajes compartidos entre la comunidad de la Universidad de Pamplona.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A1F44",
+  "theme_color": "#0A1F44",
+  "icons": [
+    {
+      "src": "brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

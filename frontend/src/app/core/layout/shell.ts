@@ -10,12 +10,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   LucideBell,
-  LucideCarFront,
   LucideDynamicIcon,
   LucidePalette,
   LucidePanelLeftClose,
   LucidePanelLeftOpen,
 } from '@lucide/angular';
+import { Brand } from '../../shared/ui/brand';
 import { LanguageSelect } from '../../shared/ui/language-select';
 import { ThemeToggle } from '../../shared/ui/theme-toggle';
 import { AuthService } from '../auth/auth.service';
@@ -30,13 +30,13 @@ import { NAV_BY_ROLE } from './navigation';
   selector: 'cp-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    Brand,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
     TranslocoPipe,
     LucideDynamicIcon,
     LucideBell,
-    LucideCarFront,
     LucidePalette,
     LucidePanelLeftClose,
     LucidePanelLeftOpen,
@@ -58,15 +58,8 @@ import { NAV_BY_ROLE } from './navigation';
         [class]="collapsed() ? 'w-20' : 'w-64'"
         [attr.aria-label]="'layout.mainNav' | transloco"
       >
-        <div class="mb-4 flex items-center gap-3 px-2 pt-2" [class.justify-center]="collapsed()">
-          <span
-            class="grid size-10 shrink-0 place-items-center rounded-2xl bg-accent text-on-accent"
-          >
-            <svg lucideCarFront class="size-6" aria-hidden="true"></svg>
-          </span>
-          @if (!collapsed()) {
-            <span class="text-lg leading-tight font-bold">{{ 'app.name' | transloco }}</span>
-          }
+        <div class="mb-4 flex items-center px-2 pt-2" [class.justify-center]="collapsed()">
+          <cp-brand [size]="44" [showName]="!collapsed()" />
         </div>
 
         @for (item of items(); track item.path) {
@@ -124,12 +117,7 @@ import { NAV_BY_ROLE } from './navigation';
         <header
           class="relative z-30 flex items-center gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-8"
         >
-          <span class="flex items-center gap-2 font-bold sm:hidden">
-            <span class="grid size-9 place-items-center rounded-xl bg-accent text-on-accent">
-              <svg lucideCarFront class="size-5" aria-hidden="true"></svg>
-            </span>
-            {{ 'app.shortName' | transloco }}
-          </span>
+          <cp-brand class="sm:hidden" [size]="36" />
           <div class="ml-auto flex items-center gap-2">
             @if (devMode) {
               <a

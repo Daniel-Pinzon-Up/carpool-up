@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideCarFront } from '@lucide/angular';
+import { Brand } from '../../shared/ui/brand';
 import { LanguageSelect } from '../../shared/ui/language-select';
 import { ThemeToggle } from '../../shared/ui/theme-toggle';
 
@@ -9,16 +9,12 @@ import { ThemeToggle } from '../../shared/ui/theme-toggle';
 @Component({
   selector: 'cp-auth-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, TranslocoPipe, LucideCarFront, LanguageSelect, ThemeToggle],
+  imports: [RouterOutlet, RouterLink, TranslocoPipe, Brand, LanguageSelect, ThemeToggle],
   template: `
     <div class="flex min-h-dvh flex-col px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-8 sm:px-8">
       <header class="flex items-center gap-3 py-2">
-        <a routerLink="/" class="flex items-center gap-2 rounded-xl font-bold">
-          <span class="grid size-10 place-items-center rounded-2xl bg-accent text-on-accent">
-            <svg lucideCarFront class="size-6" aria-hidden="true"></svg>
-          </span>
-          <span class="hidden sm:inline">{{ 'app.name' | transloco }}</span>
-          <span class="sm:hidden">{{ 'app.shortName' | transloco }}</span>
+        <a routerLink="/" class="rounded-xl">
+          <cp-brand [size]="44" [wordmark]="true" />
         </a>
         <div class="ml-auto flex items-center gap-2">
           <cp-language-select />
