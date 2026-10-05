@@ -19,6 +19,7 @@ export const ME: Me = {
   document: null,
   license: null,
   can_publish: false,
+  publish_blockers: [],
   pending_legal: [],
 };
 
