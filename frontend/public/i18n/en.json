@@ -136,7 +136,11 @@
     "VEHICLES_DRIVERS_ONLY": "Only drivers register vehicles.",
     "VEHICLE_PLATE_TAKEN": "That plate is already registered in the app.",
     "VEHICLE_INVALID": "Check the vehicle details: they do not meet the rules for its type.",
-    "PUBLISH_NOT_ALLOWED": "You cannot publish trips yet. Check the pending steps on your home screen."
+    "PUBLISH_NOT_ALLOWED": "You cannot publish trips yet. Check the pending steps on your home screen.",
+    "ROUTING_UNAVAILABLE": "The routing service is unavailable. Try again in a few minutes.",
+    "ROUTE_NOT_FOUND": "We could not find a road route between those points. Try a nearby point.",
+    "TOO_MANY_STOPS": "The route has more stops than allowed.",
+    "PLACE_NOT_FOUND": "One of the places no longer exists. Choose it again."
   },
   "catalog": {
     "title": "Component catalog",
@@ -642,5 +646,62 @@
       "problem": "Needs attention"
     },
     "locked": "You can publish once you complete the steps above."
+  },
+  "map": {
+    "label": "Map of Pamplona",
+    "unavailable": "The map could not be loaded. You can still choose places from the list.",
+    "pickTitle": "Choose a point on the map",
+    "pickHint": "Tap the map where you want the point. Only points inside Pamplona are accepted.",
+    "pickedAt": "Chosen point: {{lat}}, {{lon}}",
+    "pinName": "Point name",
+    "pinNameHint": "Passengers will see this, for example: Bakery corner.",
+    "defaultPinName": "Point on the map",
+    "selectedPoint": "Chosen point",
+    "usePoint": "Use this point"
+  },
+  "places": {
+    "placeholder": "Search for a place",
+    "noMatches": "No places with that name. You can choose it on the map.",
+    "pickOnMap": "Choose on the map",
+    "clear": "Remove {{name}}",
+    "groups": {
+      "recent": "Recent",
+      "campus": "Campuses",
+      "sector": "Neighborhoods",
+      "landmark": "Landmarks"
+    }
+  },
+  "planner": {
+    "title": "Plan route",
+    "subtitle": "Choose origin, stops and destination to see the distance, time and suggested contribution.",
+    "origin": "Origin",
+    "destination": "Destination",
+    "stop": "Stop {{n}}",
+    "addStop": "Add stop",
+    "removeStop": "Remove stop {{n}}",
+    "departure": "Departure",
+    "departureHint": "Optional. With a time, the arrival at each stop is calculated.",
+    "vehicle": "Vehicle",
+    "seats": "Seats offered",
+    "mapLabel": "Map with the trip route",
+    "empty": "Choose an origin and a destination to see the route.",
+    "calculating": "Calculating the route..."
+  },
+  "routeSummary": {
+    "distance": "Distance",
+    "duration": "Duration",
+    "minutes": "{{count}} min",
+    "price": "Suggested contribution per seat",
+    "priceNotConfigured": "The suggested contribution is not configured yet.",
+    "priceNeedsSeats": "Choose a vehicle and seats to calculate it.",
+    "cap": "Maximum allowed: {{max}}",
+    "stops": "Route stops",
+    "origin": "Origin",
+    "destination": "Destination",
+    "stop": "Stop",
+    "pin": "Point on the map",
+    "etaNote": "Times are estimates and may vary with traffic.",
+    "factor": "Includes a x{{factor}} traffic adjustment for that time.",
+    "contribution": "This is a contribution to share fuel costs, not a fare."
   }
 }

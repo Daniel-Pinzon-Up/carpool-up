@@ -136,7 +136,11 @@
     "VEHICLES_DRIVERS_ONLY": "Só os motoristas cadastram veículos.",
     "VEHICLE_PLATE_TAKEN": "Essa placa já está cadastrada no app.",
     "VEHICLE_INVALID": "Verifique os dados do veículo: não cumprem as regras do tipo.",
-    "PUBLISH_NOT_ALLOWED": "Você ainda não pode publicar viagens. Veja as etapas pendentes no início."
+    "PUBLISH_NOT_ALLOWED": "Você ainda não pode publicar viagens. Veja as etapas pendentes no início.",
+    "ROUTING_UNAVAILABLE": "O serviço de rotas não está disponível. Tente novamente em alguns minutos.",
+    "ROUTE_NOT_FOUND": "Não encontramos uma rota por estrada entre esses pontos. Tente um ponto próximo.",
+    "TOO_MANY_STOPS": "A rota tem mais paradas do que o permitido.",
+    "PLACE_NOT_FOUND": "Um dos lugares não existe mais. Escolha-o novamente."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -642,5 +646,62 @@
       "problem": "Requer atenção"
     },
     "locked": "Você poderá publicar quando concluir as etapas acima."
+  },
+  "map": {
+    "label": "Mapa de Pamplona",
+    "unavailable": "Não foi possível carregar o mapa. Você ainda pode escolher lugares da lista.",
+    "pickTitle": "Escolher um ponto no mapa",
+    "pickHint": "Toque no mapa onde quer o ponto. Só são aceitos pontos dentro de Pamplona.",
+    "pickedAt": "Ponto escolhido: {{lat}}, {{lon}}",
+    "pinName": "Nome do ponto",
+    "pinNameHint": "É assim que os passageiros o verão, por exemplo: Esquina da padaria.",
+    "defaultPinName": "Ponto no mapa",
+    "selectedPoint": "Ponto escolhido",
+    "usePoint": "Usar este ponto"
+  },
+  "places": {
+    "placeholder": "Procure um lugar",
+    "noMatches": "Não há lugares com esse nome. Você pode escolhê-lo no mapa.",
+    "pickOnMap": "Escolher no mapa",
+    "clear": "Remover {{name}}",
+    "groups": {
+      "recent": "Recentes",
+      "campus": "Sedes",
+      "sector": "Bairros",
+      "landmark": "Pontos de referência"
+    }
+  },
+  "planner": {
+    "title": "Planejar rota",
+    "subtitle": "Escolha origem, paradas e destino para ver a distância, o tempo e a contribuição sugerida.",
+    "origin": "Origem",
+    "destination": "Destino",
+    "stop": "Parada {{n}}",
+    "addStop": "Adicionar parada",
+    "removeStop": "Remover parada {{n}}",
+    "departure": "Saída",
+    "departureHint": "Opcional. Com o horário, calcula-se a chegada a cada parada.",
+    "vehicle": "Veículo",
+    "seats": "Vagas oferecidas",
+    "mapLabel": "Mapa com a rota da viagem",
+    "empty": "Escolha origem e destino para ver a rota.",
+    "calculating": "Calculando a rota..."
+  },
+  "routeSummary": {
+    "distance": "Distância",
+    "duration": "Duração",
+    "minutes": "{{count}} min",
+    "price": "Contribuição sugerida por vaga",
+    "priceNotConfigured": "A contribuição sugerida ainda não está configurada.",
+    "priceNeedsSeats": "Escolha veículo e vagas para calculá-la.",
+    "cap": "Máximo permitido: {{max}}",
+    "stops": "Paradas da rota",
+    "origin": "Origem",
+    "destination": "Destino",
+    "stop": "Parada",
+    "pin": "Ponto no mapa",
+    "etaNote": "Os tempos são estimados e podem variar com o trânsito.",
+    "factor": "Inclui um ajuste de trânsito de x{{factor}} para esse horário.",
+    "contribution": "É uma contribuição para dividir o combustível, não uma tarifa."
   }
 }

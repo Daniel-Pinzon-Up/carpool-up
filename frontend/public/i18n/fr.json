@@ -136,7 +136,11 @@
     "VEHICLES_DRIVERS_ONLY": "Seuls les conducteurs enregistrent des véhicules.",
     "VEHICLE_PLATE_TAKEN": "Cette plaque est déjà enregistrée dans l'app.",
     "VEHICLE_INVALID": "Vérifiez les données du véhicule : elles ne respectent pas les règles de son type.",
-    "PUBLISH_NOT_ALLOWED": "Vous ne pouvez pas encore publier de trajets. Consultez les étapes en attente sur votre accueil."
+    "PUBLISH_NOT_ALLOWED": "Vous ne pouvez pas encore publier de trajets. Consultez les étapes en attente sur votre accueil.",
+    "ROUTING_UNAVAILABLE": "Le service d'itinéraires est indisponible. Réessayez dans quelques minutes.",
+    "ROUTE_NOT_FOUND": "Aucun itinéraire routier trouvé entre ces points. Essayez un point proche.",
+    "TOO_MANY_STOPS": "L'itinéraire comporte plus d'arrêts que permis.",
+    "PLACE_NOT_FOUND": "L'un des lieux n'existe plus. Choisissez-le à nouveau."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -642,5 +646,62 @@
       "problem": "À corriger"
     },
     "locked": "Vous pourrez publier une fois les étapes ci-dessus terminées."
+  },
+  "map": {
+    "label": "Carte de Pamplona",
+    "unavailable": "La carte n'a pas pu être chargée. Vous pouvez toujours choisir des lieux dans la liste.",
+    "pickTitle": "Choisir un point sur la carte",
+    "pickHint": "Touchez la carte à l'endroit voulu. Seuls les points dans Pamplona sont acceptés.",
+    "pickedAt": "Point choisi : {{lat}}, {{lon}}",
+    "pinName": "Nom du point",
+    "pinNameHint": "Les passagers le verront ainsi, par exemple : Coin de la boulangerie.",
+    "defaultPinName": "Point sur la carte",
+    "selectedPoint": "Point choisi",
+    "usePoint": "Utiliser ce point"
+  },
+  "places": {
+    "placeholder": "Rechercher un lieu",
+    "noMatches": "Aucun lieu avec ce nom. Vous pouvez le choisir sur la carte.",
+    "pickOnMap": "Choisir sur la carte",
+    "clear": "Retirer {{name}}",
+    "groups": {
+      "recent": "Récents",
+      "campus": "Campus",
+      "sector": "Quartiers",
+      "landmark": "Points de repère"
+    }
+  },
+  "planner": {
+    "title": "Planifier l'itinéraire",
+    "subtitle": "Choisissez départ, arrêts et destination pour voir la distance, la durée et la participation suggérée.",
+    "origin": "Départ",
+    "destination": "Destination",
+    "stop": "Arrêt {{n}}",
+    "addStop": "Ajouter un arrêt",
+    "removeStop": "Retirer l'arrêt {{n}}",
+    "departure": "Heure de départ",
+    "departureHint": "Facultatif. Avec l'heure, l'arrivée à chaque arrêt est calculée.",
+    "vehicle": "Véhicule",
+    "seats": "Places proposées",
+    "mapLabel": "Carte avec l'itinéraire du trajet",
+    "empty": "Choisissez un départ et une destination pour voir l'itinéraire.",
+    "calculating": "Calcul de l'itinéraire..."
+  },
+  "routeSummary": {
+    "distance": "Distance",
+    "duration": "Durée",
+    "minutes": "{{count}} min",
+    "price": "Participation suggérée par place",
+    "priceNotConfigured": "La participation suggérée n'est pas encore configurée.",
+    "priceNeedsSeats": "Choisissez un véhicule et des places pour la calculer.",
+    "cap": "Maximum autorisé : {{max}}",
+    "stops": "Arrêts de l'itinéraire",
+    "origin": "Départ",
+    "destination": "Destination",
+    "stop": "Arrêt",
+    "pin": "Point sur la carte",
+    "etaNote": "Les durées sont estimées et peuvent varier selon la circulation.",
+    "factor": "Inclut un ajustement de circulation de x{{factor}} pour cette heure.",
+    "contribution": "C'est une participation aux frais de carburant, pas un tarif."
   }
 }
