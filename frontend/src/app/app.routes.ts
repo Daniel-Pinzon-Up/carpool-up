@@ -114,7 +114,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/trips/driver-trips'),
         title: 'nav.myTrips',
       },
-      comingSoon('mis-viajes', 'myTrips'),
+      {
+        path: 'mis-viajes',
+        canMatch: [roleGuard('passenger')],
+        loadComponent: () => import('./features/bookings/passenger-trips'),
+        title: 'nav.myTrips',
+      },
+      {
+        path: 'solicitudes',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/bookings/driver-inbox'),
+        title: 'bookings.inbox.title',
+      },
       {
         path: 'viajes/:id',
         loadComponent: () => import('./features/trips/trip-detail'),

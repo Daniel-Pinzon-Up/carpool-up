@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideArrowRight, LucideCarFront, LucidePlus, LucideTriangleAlert } from '@lucide/angular';
+import {
+  LucideArrowRight,
+  LucideCarFront,
+  LucideInbox,
+  LucidePlus,
+  LucideTriangleAlert,
+} from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';
@@ -31,6 +37,7 @@ type Tab = 'upcoming' | 'series' | 'history';
     StatusBadge,
     TripCard,
     LucideArrowRight,
+    LucideInbox,
     LucidePlus,
     LucideTriangleAlert,
   ],
@@ -41,10 +48,16 @@ type Tab = 'upcoming' | 'series' | 'history';
           <h1 class="text-2xl font-bold sm:text-3xl">{{ 'trips.title' | transloco }}</h1>
           <p class="text-muted">{{ 'trips.subtitle' | transloco }}</p>
         </div>
-        <a cp-button routerLink="/publicar">
-          <svg lucidePlus class="size-4" aria-hidden="true"></svg>
-          {{ 'nav.publish' | transloco }}
-        </a>
+        <div class="flex flex-wrap gap-2">
+          <a cp-button variant="secondary" routerLink="/solicitudes">
+            <svg lucideInbox class="size-4" aria-hidden="true"></svg>
+            {{ 'bookings.inbox.title' | transloco }}
+          </a>
+          <a cp-button routerLink="/publicar">
+            <svg lucidePlus class="size-4" aria-hidden="true"></svg>
+            {{ 'nav.publish' | transloco }}
+          </a>
+        </div>
       </header>
 
       <cp-glass-tabs

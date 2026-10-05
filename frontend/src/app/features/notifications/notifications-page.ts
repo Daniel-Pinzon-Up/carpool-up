@@ -9,6 +9,10 @@ import {
   LucideCheckCheck,
   LucideCircleCheck,
   LucideCircleX,
+  LucideHourglass,
+  LucideInbox,
+  LucideRoute,
+  LucideTicket,
   LucideDynamicIcon,
   LucideIcon,
   LucideUserCog,
@@ -37,6 +41,21 @@ const ICONS: Record<string, LucideIcon> = {
   document_expired: LucideCalendarX,
   account_revalidation_required: LucideCalendarX,
   role_changed: LucideUserCog,
+  booking_requested: LucideInbox,
+  cancellation_requested: LucideInbox,
+  subscription_requested: LucideInbox,
+  booking_accepted: LucideTicket,
+  subscription_accepted: LucideTicket,
+  cancellation_accepted: LucideCircleCheck,
+  booking_rejected: LucideCircleX,
+  subscription_rejected: LucideCircleX,
+  cancellation_rejected: LucideCircleX,
+  booking_cancelled_by_driver: LucideCalendarX,
+  booking_auto_cancelled_late: LucideCalendarX,
+  booking_pico_placa_cancelled: LucideCalendarX,
+  trip_pico_placa_cancelled: LucideCalendarX,
+  trip_changed: LucideRoute,
+  waitlist_offer: LucideHourglass,
 };
 
 /** A donde lleva cada aviso al abrirlo. */
@@ -46,6 +65,15 @@ const LINKS: Record<string, string> = {
   license_approved: '/licencia',
   license_rejected: '/licencia',
   role_changed: '/perfil',
+  booking_requested: '/solicitudes',
+  cancellation_requested: '/solicitudes',
+  subscription_requested: '/solicitudes',
+  waitlist_offer: '/mis-viajes',
+  waitlist_offer_expired: '/mis-viajes',
+  subscription_accepted: '/mis-viajes',
+  subscription_rejected: '/mis-viajes',
+  subscription_expired: '/mis-viajes',
+  subscription_ended: '/mis-viajes',
 };
 
 /** Bandeja de avisos. El paso 9 agrega la llegada en vivo. */
@@ -167,8 +195,14 @@ export default class NotificationsPage {
     return ICONS[item.kind] ?? LucideBell;
   }
 
+  /** Destino fijo del tipo o, si el aviso trae un viaje o una serie, su detalle. */
   protected link(item: AppNotification): string {
-    return LINKS[item.kind] ?? '/notificaciones';
+    const fixed = LINKS[item.kind];
+    if (fixed) return fixed;
+    const { trip_id: trip, series_id: series } = item.payload;
+    if (typeof trip === 'string') return `/viajes/${trip}`;
+    if (typeof series === 'string') return `/series/${series}`;
+    return '/notificaciones';
   }
 
   protected when(iso: string): string {

@@ -598,6 +598,8 @@ export default class PublishWizard {
           ...template,
           weekdays: this.selectedWeekdays(),
           departure_time: v.time,
+          // Ya lo confirmo en el dialogo, que avisa de las reservas afectadas.
+          confirm: true,
         });
         target = `/series/${id}`;
       } else if (this.isSeries()) {

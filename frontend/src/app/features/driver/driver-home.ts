@@ -9,6 +9,7 @@ import {
   LucideDynamicIcon,
   LucideIcon,
   LucideIdCard,
+  LucideInbox,
   LucideSquarePlus,
   LucideTriangleAlert,
 } from '@lucide/angular';
@@ -52,7 +53,15 @@ const STATE_TONE: Record<StepState, string> = {
 @Component({
   selector: 'cp-driver-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, GlassButton, GlassCard, LucideDynamicIcon, LucideSquarePlus],
+  imports: [
+    RouterLink,
+    TranslocoPipe,
+    GlassButton,
+    GlassCard,
+    LucideDynamicIcon,
+    LucideInbox,
+    LucideSquarePlus,
+  ],
   template: `
     <div class="mx-auto flex max-w-3xl flex-col gap-6 py-2">
       <header>
@@ -64,10 +73,16 @@ const STATE_TONE: Record<StepState, string> = {
         @if (canPublish()) {
           <h2 class="mb-1 text-lg font-bold">{{ 'driverHome.ready.title' | transloco }}</h2>
           <p class="mb-5 text-muted">{{ 'driverHome.ready.body' | transloco }}</p>
-          <a cp-button size="lg" routerLink="/publicar">
-            <svg lucideSquarePlus class="size-5" aria-hidden="true"></svg>
-            {{ 'nav.publish' | transloco }}
-          </a>
+          <div class="flex flex-wrap gap-3">
+            <a cp-button size="lg" routerLink="/publicar">
+              <svg lucideSquarePlus class="size-5" aria-hidden="true"></svg>
+              {{ 'nav.publish' | transloco }}
+            </a>
+            <a cp-button size="lg" variant="secondary" routerLink="/solicitudes">
+              <svg lucideInbox class="size-5" aria-hidden="true"></svg>
+              {{ 'bookings.inbox.title' | transloco }}
+            </a>
+          </div>
         } @else {
           <h2 class="mb-1 text-lg font-bold">{{ 'driverHome.setup.title' | transloco }}</h2>
           <p class="mb-5 text-muted">{{ 'driverHome.setup.body' | transloco }}</p>

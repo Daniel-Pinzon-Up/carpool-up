@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideArrowRight, LucideRepeat, LucideUsers } from '@lucide/angular';
+import { LucideArrowRight, LucideBellDot, LucideRepeat, LucideUsers } from '@lucide/angular';
 import { LanguageService } from '../../core/i18n/language.service';
 import { formatCop } from '../../shared/map/routing.api';
 import { StatusBadge } from '../../shared/ui/status-badge';
@@ -12,7 +12,15 @@ import { TripSummary } from './trips.api';
 @Component({
   selector: 'cp-trip-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, StatusBadge, LucideArrowRight, LucideRepeat, LucideUsers],
+  imports: [
+    RouterLink,
+    TranslocoPipe,
+    StatusBadge,
+    LucideArrowRight,
+    LucideBellDot,
+    LucideRepeat,
+    LucideUsers,
+  ],
   host: { class: 'block' },
   template: `
     <a
@@ -34,11 +42,20 @@ import { TripSummary } from './trips.api';
       <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
         <span class="inline-flex items-center gap-1">
           <svg lucideUsers class="size-4" aria-hidden="true"></svg>
-          {{ 'trips.seats' | transloco: { count: trip().seats_total } }}
+          {{
+            'trips.seatsLeft'
+              | transloco: { free: trip().seats_available, total: trip().seats_total }
+          }}
         </span>
         <span>{{ money() }}</span>
         @if (trip().stop_count) {
           <span>{{ 'trips.stops' | transloco: { count: trip().stop_count } }}</span>
+        }
+        @if (trip().pending_requests) {
+          <span class="inline-flex items-center gap-1 font-semibold text-accent">
+            <svg lucideBellDot class="size-4" aria-hidden="true"></svg>
+            {{ 'trips.pendingRequests' | transloco: { count: trip().pending_requests } }}
+          </span>
         }
         @if (trip().series_id) {
           <span class="inline-flex items-center gap-1">
