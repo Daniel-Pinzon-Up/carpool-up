@@ -180,6 +180,25 @@ describe('TripDetail', () => {
     expect(fixture.nativeElement.querySelector('a[href="/viajes/t1/editar"]')).toBeNull();
   });
 
+  it('muestra la recogida y bajada que llega desde la busqueda', async () => {
+    const match = {
+      trip_id: 't1',
+      seats_available: 2,
+      pickup: { kind: 'stop', name: 'Sede Casona', eta: '2026-10-06T12:04:00Z', walk_m: 80 },
+      dropoff: { kind: 'route', name: null, eta: '2026-10-06T12:10:00Z', walk_m: 10 },
+    };
+    history.replaceState({ match }, '');
+    try {
+      const fixture = await create();
+      const text = fixture.nativeElement.textContent as string;
+      expect(text).toContain('Sede Casona');
+      expect(text).toContain('A 80 m de tu punto');
+      expect(text).toContain('Punto en la ruta');
+    } finally {
+      history.replaceState(null, '');
+    }
+  });
+
   it('otros usuarios no ven acciones de conductor', async () => {
     TestBed.inject(AuthService).user.set({ ...ME, id: 'otro' });
     api['trip'].mockResolvedValue({
