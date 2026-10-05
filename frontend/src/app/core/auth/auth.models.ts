@@ -24,6 +24,15 @@ export interface LicenseSummary {
   reviewed_at: string | null;
 }
 
+export type PublishBlocker =
+  | 'not_driver'
+  | 'account_not_active'
+  | 'license_missing'
+  | 'license_pending'
+  | 'license_rejected'
+  | 'license_expired'
+  | 'no_active_vehicle';
+
 export interface PendingLegal {
   id: string;
   kind: LegalKind;
@@ -46,6 +55,7 @@ export interface Me {
   document: DocumentSummary | null;
   license: LicenseSummary | null;
   can_publish: boolean;
+  publish_blockers: PublishBlocker[];
   pending_legal: PendingLegal[];
 }
 
