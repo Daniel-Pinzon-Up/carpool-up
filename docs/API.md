@@ -71,6 +71,22 @@ Los códigos de negocio se documentan aquí en el paso que los introduce.
 | `TOO_MANY_STOPS` | 422 | 5 | Más paradas intermedias que `max_trip_stops` (`details.max_stops`). |
 | `ROUTE_NOT_FOUND` | 422 | 5 | No hay ruta por carretera entre los puntos. |
 | `ROUTING_UNAVAILABLE` | 503 | 5 | OSRM no responde o no está levantado. |
+| `DEPARTURE_TOO_SOON` | 422 | 6 | La salida no cumple la antelación mínima (`details.min_lead_minutes`). |
+| `DEPARTURE_TOO_FAR` | 422 | 6 | Viaje puntual más allá de `trip_max_days_ahead` (`details.max_days`). |
+| `SEATS_INVALID` | 422 | 6 | Más puestos que capacidad - 1 (`details.max_seats`). |
+| `PRICE_ABOVE_MAX` | 422 | 6 | Aporte por encima de `max_price_per_seat` (`details.max`). |
+| `VEHICLE_INACTIVE` | 422 | 6 | El vehículo está inactivo. |
+| `WOMEN_ONLY_FEMALE_DRIVERS` | 403 | 6 | Solo conductoras publican viajes solo para mujeres. |
+| `PICO_PLACA_RESTRICTED` | 422 | 6 | El vehículo tiene pico y placa ese día (`details.date`). |
+| `TRIP_OVERLAP` | 409 | 6 | El conductor ya tiene un viaje a esa hora (`details.dates`). |
+| `TRIP_NOT_EDITABLE` | 409 | 6 | El viaje no está programado o ya pasó el corte de edición. |
+| `SERIES_OUTSIDE_SEMESTER` | 422 | 6 | La fecha de inicio no está en un semestre. |
+| `SERIES_WINDOW_INVALID` | 422 | 6 | Ventana fuera de `series_window_options_days` (`details.options`). |
+| `SERIES_START_IN_PAST` | 422 | 6 | La serie empezaría en el pasado. |
+| `SERIES_EMPTY` | 422 | 6 | Ninguna ocurrencia reservable (`details.pico_placa_dates`). |
+| `SERIES_NOT_ACTIVE` | 409 | 6 | La serie está cancelada o terminada. |
+| `VEHICLE_HAS_TRIPS` | 409 | 6 | El vehículo tiene viajes programados o en curso. |
+| `INVALID_RANGE` | 422 | 6 | Rango de fechas inválido o mayor a 200 días. |
 
 ## Endpoints
 
@@ -185,6 +201,41 @@ Cuerpo:
 `points` tiene origen, paradas intermedias y destino (al menos 2). Cada punto lleva `place_id` o `lat` y `lon`, nunca ambos. `departs_at`, `vehicle_type` y `seats` son opcionales.
 
 Respuesta: `geometry` (GeoJSON `[[lon, lat], ...]`), `distance_m`, `osrm_duration_s`, `traffic_factor`, `duration_s` (ya con el factor), `points` (cada uno con `eta_offset_s` y `eta` si hubo hora de salida), `pricing_configured`, `suggested_price` y `max_price_per_seat`.
+
+### Viajes y series (paso 6)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `POST /trips` | Conductor que puede publicar, 20 por minuto | Viaje puntual. |
+| `GET /trips/mine?scope=upcoming\|history&limit&cursor` | Conductor | Viajes propios (puntuales y ocurrencias), paginados por salida. |
+| `GET /trips/{id}` | Usuario activo | Detalle con geometría, paradas con ETA, reglas, vehículo y conductor. Los demás solo ven viajes programados o en curso; la placa solo la ve el conductor. |
+| `PATCH /trips/{id}` | Dueño | `{place_ids?, departs_at?, vehicle_id?, seats?, price_per_seat?, rules?}` hasta el corte de edición. |
+| `POST /trips/{id}/cancel` | Dueño | `{reason}`. |
+| `POST /trips/{id}/duplicate` | Dueño | `{departs_at}`. Publica una copia. |
+| `POST /series` | Conductor que puede publicar, 10 por minuto | Serie y todas sus ocurrencias. |
+| `GET /series/mine` | Conductor | Resumen de cada serie con conteos y próxima salida. |
+| `GET /series/{id}` | Usuario activo | Plantilla y ocurrencias (los demás solo ven series activas y ocurrencias programadas). |
+| `PATCH /series/{id}` | Dueño | `{place_ids?, weekdays?, departure_time?, vehicle_id?, seats?, price_per_seat?, rules?}`. Rehace las ocurrencias futuras. |
+| `POST /series/{id}/cancel` | Dueño | `{reason}`. Cancela las ocurrencias futuras. |
+| `POST /series/{id}/duplicate` | Dueño | `{start_date, window}`. |
+| `GET /vehicles/{id}/pico-placa?from&to` | Dueño | Fechas del rango en que el vehículo tiene pico y placa. |
+
+Viaje puntual:
+
+```json
+{
+  "place_ids": ["origen", "parada", "destino"],
+  "departs_at": "2026-10-06T07:30:00-05:00",
+  "vehicle_id": "uuid",
+  "seats": 3,
+  "price_per_seat": 2000,
+  "rules": [{"kind": "pets", "value": "not_allowed"}, {"kind": "custom", "value": "Espero 5 minutos"}]
+}
+```
+
+Serie: los mismos campos salvo `departs_at`, más `weekdays` (0 = lunes), `departure_time` (`"07:00"`, hora de Pamplona), `start_date` y `window` (`15`, `28` o `"semester"`, según `series_window_options_days`).
+
+Reglas: `women_only`, `pets`, `luggage`, `smoking`, `music` con `allowed` o `not_allowed`, y `custom` con texto libre.
 
 ## Cabeceras
 
