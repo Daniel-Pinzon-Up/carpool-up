@@ -1,11 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.enums import UserRole
+from app.core.clock import local_today
+from app.core.enums import UserRole, UserStatus
 from app.core.errors import AppError
-from app.modules.documents.service import DocumentService
+from app.modules.documents.service import DocumentService, LicenseService
 from app.modules.legal.service import LegalService
 from app.modules.users.models import User
-from app.modules.users.schemas import DocumentSummary, MeOut, MeUpdate, PendingLegal
+from app.modules.users.schemas import (
+    DocumentSummary,
+    LicenseSummary,
+    MeOut,
+    MeUpdate,
+    PendingLegal,
+)
 
 
 class UserService:
@@ -15,6 +22,16 @@ class UserService:
     async def me(self, user: User) -> MeOut:
         document = await DocumentService(self.session).latest(user)
         pending = await LegalService(self.session).pending_for(user)
+        license_ = (
+            await LicenseService(self.session).get(user) if user.role == UserRole.DRIVER else None
+        )
+        # El paso 4 agrega el requisito de tener al menos un vehiculo activo.
+        can_publish = (
+            user.role == UserRole.DRIVER
+            and user.status == UserStatus.ACTIVE
+            and license_ is not None
+            and license_.is_valid_on(local_today())
+        )
         return MeOut(
             id=user.id,
             email=user.email,
@@ -28,6 +45,8 @@ class UserService:
             theme_preference=user.theme_preference,
             last_login_at=user.last_login_at,
             document=DocumentSummary.model_validate(document) if document else None,
+            license=LicenseSummary.model_validate(license_) if license_ else None,
+            can_publish=can_publish,
             pending_legal=[
                 PendingLegal(id=d.id, kind=d.kind, version=d.version, language=d.language)
                 for d in pending

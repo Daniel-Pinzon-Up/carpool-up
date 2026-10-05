@@ -1,12 +1,17 @@
+import uuid
+from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi.responses import FileResponse
 
 from app.core.auth import CurrentUser
 from app.core.deps import DbSession
 from app.core.enums import DocKind
-from app.modules.documents.service import DocumentService
-from app.modules.users.schemas import DocumentSummary, MeOut, MeUpdate
+from app.core.errors import NotFoundError
+from app.core.storage import private_file_response
+from app.modules.documents.service import DocumentService, LicenseService
+from app.modules.users.schemas import DocumentSummary, LicenseSummary, MeOut, MeUpdate
 from app.modules.users.service import UserService
 
 router = APIRouter(prefix="/users/me", tags=["users"])
@@ -43,3 +48,42 @@ async def upload_document(
     return DocumentSummary.model_validate(
         await DocumentService(session).upload(user, kind, document)
     )
+
+
+@router.get("/documents/{document_id}/file", response_class=FileResponse)
+async def own_document_file(
+    document_id: uuid.UUID, user: CurrentUser, session: DbSession
+) -> FileResponse:
+    """El dueno puede ver lo que subio."""
+    documents = await DocumentService(session).history(user)
+    document = next((d for d in documents if d.id == document_id), None)
+    if document is None:
+        raise NotFoundError("document")
+    return private_file_response(document.file_path, document.content_type)
+
+
+@router.get("/license")
+async def get_license(user: CurrentUser, session: DbSession) -> LicenseSummary | None:
+    license_ = await LicenseService(session).get(user)
+    return LicenseSummary.model_validate(license_) if license_ else None
+
+
+@router.put("/license")
+async def upload_license(
+    user: CurrentUser,
+    session: DbSession,
+    expires_on: Annotated[date, Form(description="Fecha de vencimiento de la licencia")],
+    document: Annotated[UploadFile, File(description="JPG, PNG, WebP o PDF")],
+) -> LicenseSummary:
+    """Sube o reemplaza la licencia de conduccion. Queda pendiente de aprobacion."""
+    return LicenseSummary.model_validate(
+        await LicenseService(session).upload(user, expires_on, document)
+    )
+
+
+@router.get("/license/file", response_class=FileResponse)
+async def own_license_file(user: CurrentUser, session: DbSession) -> FileResponse:
+    license_ = await LicenseService(session).get(user)
+    if license_ is None:
+        raise NotFoundError("license")
+    return private_file_response(license_.file_path, license_.content_type)

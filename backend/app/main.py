@@ -13,9 +13,11 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestLogMiddleware, SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 from app.core.redis import redis_client
+from app.modules.admin import router as admin
 from app.modules.audit import router as audit
 from app.modules.auth import router as auth
 from app.modules.legal import router as legal
+from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
 from app.modules.semesters import router as semesters
@@ -63,24 +65,26 @@ def create_app() -> FastAPI:
 
     api = APIRouter(prefix=settings.api_prefix)
     api.include_router(health.router)
-    for public in (
+    for public_router in (
         auth.router,
         users.router,
+        notifications.router,
         settings_module.router,
         semesters.router,
         places.router,
         legal.router,
     ):
-        api.include_router(public)
-    for admin in (
+        api.include_router(public_router)
+    for admin_router in (
         settings_module.admin_router,
         semesters.admin_router,
         places.admin_router,
         pico_placa.admin_router,
         legal.admin_router,
         audit.admin_router,
+        admin.router,
     ):
-        api.include_router(admin)
+        api.include_router(admin_router)
     app.include_router(api)
     return app
 
