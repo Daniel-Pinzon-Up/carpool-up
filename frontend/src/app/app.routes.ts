@@ -1,6 +1,7 @@
 import { Route, Routes } from '@angular/router';
 import {
   activeGuard,
+  canPublishGuard,
   guestGuard,
   homeRedirect,
   roleGuard,
@@ -121,8 +122,34 @@ export const routes: Routes = [
         title: 'license.title',
       },
       comingSoon('buscar', 'search', { canMatch: [roleGuard('passenger')] }),
-      comingSoon('inicio', 'home', { canMatch: [roleGuard('driver')] }),
-      comingSoon('publicar', 'publish', { canMatch: [roleGuard('driver')] }),
+      {
+        path: 'inicio',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/driver/driver-home'),
+        title: 'nav.home',
+      },
+      comingSoon('publicar', 'publish', { canMatch: [roleGuard('driver'), canPublishGuard] }),
+      {
+        path: 'vehiculos',
+        canMatch: [roleGuard('driver')],
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./features/vehicles/vehicles-page'),
+            title: 'vehicles.title',
+          },
+          {
+            path: 'nuevo',
+            loadComponent: () => import('./features/vehicles/vehicle-form'),
+            title: 'vehicles.newTitle',
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./features/vehicles/vehicle-form'),
+            title: 'vehicles.editTitle',
+          },
+        ],
+      },
       {
         path: 'admin',
         canMatch: [roleGuard('admin', 'superadmin')],

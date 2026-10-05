@@ -90,12 +90,20 @@
           } @else {
             <p class="text-muted">{{ 'license.none' | transloco }}</p>
           }
-          <a
-            routerLink="/licencia"
-            class="mt-4 inline-block text-sm font-semibold text-primary underline underline-offset-4"
-          >
-            {{ 'license.manage' | transloco }}
-          </a>
+          <div class="mt-4 flex flex-col gap-2">
+            <a
+              routerLink="/licencia"
+              class="text-sm font-semibold text-primary underline underline-offset-4"
+            >
+              {{ 'license.manage' | transloco }}
+            </a>
+            <a
+              routerLink="/vehiculos"
+              class="text-sm font-semibold text-primary underline underline-offset-4"
+            >
+              {{ 'vehicles.manage' | transloco }}
+            </a>
+          </div>
         </cp-glass-card>
       }
 

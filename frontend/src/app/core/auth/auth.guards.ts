@@ -43,6 +43,10 @@ export const activeGuard: CanMatchFn = () => {
   return (auth.isActive() && !auth.needsLegal()) || homeFor(auth, inject(Router));
 };
 
+/** Publicar exige licencia aprobada y vigente y un vehiculo activo; si no, al inicio. */
+export const canPublishGuard: CanMatchFn = () =>
+  inject(AuthService).user()?.can_publish === true || inject(Router).parseUrl('/inicio');
+
 /** Restringe una seccion a ciertos roles (se usa junto con activeGuard). */
 export function roleGuard(...roles: UserRole[]): CanMatchFn {
   return () => {
