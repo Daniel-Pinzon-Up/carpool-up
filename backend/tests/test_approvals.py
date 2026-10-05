@@ -262,7 +262,8 @@ async def test_driver_license_flow(
     )
     assert approved.json()["status"] == "approved"
     me = (await api.get(f"{API}/users/me", headers=auth(driver))).json()
-    assert me["license"]["status"] == "approved" and me["can_publish"] is True
+    assert me["license"]["status"] == "approved"
+    assert me["publish_blockers"] == ["no_active_vehicle"]  # el paso 4 exige un vehiculo
 
     replaced = await upload_license(api, driver, future + timedelta(days=30))
     assert replaced["status"] == "pending" and replaced["id"] == license_id
