@@ -92,7 +92,10 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
               [icon]="emptyIcon"
               [title]="'bookings.empty.' + tab() | transloco"
               [description]="'bookings.empty.hint' | transloco"
-            />
+              image="brand/car.webp"
+            >
+              <a cp-button routerLink="/buscar">{{ 'search.title' | transloco }}</a>
+            </cp-empty-state>
           }
           @if (nextCursor()) {
             <button

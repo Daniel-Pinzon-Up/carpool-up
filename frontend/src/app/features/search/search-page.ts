@@ -54,9 +54,18 @@ interface SavedSearch extends SearchPreferences {
   ],
   template: `
     <div class="mx-auto flex max-w-5xl flex-col gap-5 py-2">
-      <header>
-        <h1 class="text-2xl font-bold sm:text-3xl">{{ 'search.title' | transloco }}</h1>
-        <p class="text-muted">{{ 'search.subtitle' | transloco }}</p>
+      <header class="flex items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold sm:text-3xl">{{ 'search.title' | transloco }}</h1>
+          <p class="text-muted">{{ 'search.subtitle' | transloco }}</p>
+        </div>
+        <img
+          src="brand/pickup.webp"
+          alt=""
+          width="720"
+          height="536"
+          class="hidden h-28 w-auto shrink-0 md:block"
+        />
       </header>
 
       <cp-glass-card [level]="2">
@@ -145,6 +154,7 @@ interface SavedSearch extends SearchPreferences {
               [title]="'search.empty.title' | transloco"
               [description]="'search.empty.hint' | transloco"
               [icon]="emptyIcon"
+              image="brand/car.webp"
             />
           }
         }

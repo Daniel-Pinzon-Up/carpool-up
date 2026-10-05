@@ -122,6 +122,7 @@ type Tab = 'upcoming' | 'series' | 'history';
             </a>
           } @empty {
             <cp-empty-state
+              image="brand/car.webp"
               [title]="'trips.empty.series' | transloco"
               [description]="'trips.empty.seriesHint' | transloco"
               [icon]="carIcon"
@@ -132,6 +133,7 @@ type Tab = 'upcoming' | 'series' | 'history';
             <cp-trip-card [trip]="trip" />
           } @empty {
             <cp-empty-state
+              image="brand/car.webp"
               [title]="'trips.empty.' + tab() | transloco"
               [description]="'trips.empty.hint' | transloco"
               [icon]="carIcon"

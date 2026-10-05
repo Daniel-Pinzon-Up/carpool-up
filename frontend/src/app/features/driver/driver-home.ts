@@ -71,6 +71,13 @@ const STATE_TONE: Record<StepState, string> = {
 
       <cp-glass-card [level]="2">
         @if (canPublish()) {
+          <img
+            src="brand/car-watercolor.webp"
+            alt=""
+            width="560"
+            height="510"
+            class="float-right ml-4 hidden h-36 w-auto sm:block"
+          />
           <h2 class="mb-1 text-lg font-bold">{{ 'driverHome.ready.title' | transloco }}</h2>
           <p class="mb-5 text-muted">{{ 'driverHome.ready.body' | transloco }}</p>
           <div class="flex flex-wrap gap-3">

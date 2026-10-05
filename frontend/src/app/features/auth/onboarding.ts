@@ -14,9 +14,9 @@ import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 
 const SLIDES = [
-  { key: 'value', icon: LucideRoute },
-  { key: 'how', icon: LucideHandCoins },
-  { key: 'safety', icon: LucideShieldCheck },
+  { key: 'value', icon: LucideRoute, image: 'brand/pickup.webp' },
+  { key: 'how', icon: LucideHandCoins, image: 'brand/car-watercolor.webp' },
+  { key: 'safety', icon: LucideShieldCheck, image: null },
 ] as const;
 
 /** Tres pasos de bienvenida: propuesta de valor, como funciona y seguridad. */
@@ -27,9 +27,13 @@ const SLIDES = [
   template: `
     <cp-glass-card [level]="2" class="!p-8">
       <section aria-live="polite" class="flex flex-col items-center text-center">
-        <span class="mb-6 grid size-24 place-items-center rounded-[2rem] bg-accent/15">
-          <svg [lucideIcon]="slide().icon" class="size-12 text-accent" aria-hidden="true"></svg>
-        </span>
+        @if (slide().image; as src) {
+          <img [src]="src" alt="" width="720" height="536" class="mb-6 h-44 w-auto sm:h-52" />
+        } @else {
+          <span class="mb-6 grid size-24 place-items-center rounded-[2rem] bg-accent/15">
+            <svg [lucideIcon]="slide().icon" class="size-12 text-accent" aria-hidden="true"></svg>
+          </span>
+        }
         <p class="mb-2 text-sm font-semibold text-muted">
           {{ 'onboarding.step' | transloco: { current: index() + 1, total: slides.length } }}
         </p>
