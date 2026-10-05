@@ -75,6 +75,7 @@ const TRIP: Trip = {
   payment_note: null,
   my_booking: null,
   my_waitlist: null,
+  chat_id: null,
 };
 
 const BOOKING: Booking = {
