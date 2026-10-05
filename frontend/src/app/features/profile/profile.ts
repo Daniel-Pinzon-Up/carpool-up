@@ -67,6 +67,9 @@ export default class Profile {
   protected readonly docTone = computed(
     () => DOC_TONES[this.user()?.document?.status ?? ''] ?? 'neutral',
   );
+  protected readonly licenseTone = computed(
+    () => DOC_TONES[this.user()?.license?.status ?? ''] ?? 'neutral',
+  );
   protected readonly saving = signal(false);
   protected readonly closingOthers = signal(false);
 

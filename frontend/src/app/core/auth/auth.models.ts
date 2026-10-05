@@ -15,6 +15,15 @@ export interface DocumentSummary {
   reviewed_at: string | null;
 }
 
+export interface LicenseSummary {
+  id: string;
+  status: ReviewStatus;
+  expires_on: string;
+  rejection_reason: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
 export interface PendingLegal {
   id: string;
   kind: LegalKind;
@@ -35,6 +44,8 @@ export interface Me {
   theme_preference: ThemeValue;
   last_login_at: string | null;
   document: DocumentSummary | null;
+  license: LicenseSummary | null;
+  can_publish: boolean;
   pending_legal: PendingLegal[];
 }
 

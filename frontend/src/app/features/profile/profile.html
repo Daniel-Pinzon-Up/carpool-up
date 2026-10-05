@@ -80,6 +80,25 @@
         </a>
       </cp-glass-card>
 
+      @if (isDriver()) {
+        <cp-glass-card>
+          <h2 class="mb-4 text-lg font-bold">{{ 'license.title' | transloco }}</h2>
+          @if (me.license; as license) {
+            <cp-status-badge [variant]="licenseTone()">{{
+              'documentStatus.' + license.status | transloco
+            }}</cp-status-badge>
+          } @else {
+            <p class="text-muted">{{ 'license.none' | transloco }}</p>
+          }
+          <a
+            routerLink="/licencia"
+            class="mt-4 inline-block text-sm font-semibold text-primary underline underline-offset-4"
+          >
+            {{ 'license.manage' | transloco }}
+          </a>
+        </cp-glass-card>
+      }
+
       <cp-glass-card>
         <h2 class="mb-1 text-lg font-bold">{{ 'profile.sessions.title' | transloco }}</h2>
         <p class="mb-4 text-sm text-muted">{{ 'profile.sessions.help' | transloco }}</p>
