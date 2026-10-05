@@ -3,7 +3,7 @@ import { provideRouter, Router, UrlTree } from '@angular/router';
 import { canPublishGuard } from '../../core/auth/auth.guards';
 import { Me, PublishBlocker } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
-import { ME } from '../../core/auth/auth.service.spec';
+import { ME } from '../../../testing/auth-fixtures';
 import { getTranslocoTestingModule } from '../../../testing/transloco-testing';
 import DriverHome from './driver-home';
 

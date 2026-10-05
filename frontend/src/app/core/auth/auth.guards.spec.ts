@@ -3,7 +3,7 @@ import { Router, provideRouter } from '@angular/router';
 import { Me } from './auth.models';
 import { homeFor } from './auth.guards';
 import { AuthService } from './auth.service';
-import { ME } from './auth.service.spec';
+import { ME } from '../../../testing/auth-fixtures';
 
 describe('homeFor', () => {
   let auth: AuthService;
