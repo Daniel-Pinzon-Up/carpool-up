@@ -28,20 +28,6 @@ pytestmark = pytest.mark.integration
 # --- Datos ----------------------------------------------------------------------------
 
 
-@pytest.fixture
-async def semester(db: AsyncSession) -> Semester:
-    today = local_today()
-    row = Semester(
-        name="2026-T",
-        starts_on=today - timedelta(days=30),
-        ends_on=today + timedelta(days=90),
-        revalidation_deadline=today,
-    )
-    db.add(row)
-    await db.flush()
-    return row
-
-
 async def pico_placa(db: AsyncSession, weekday: int, digits: list[int]) -> PicoPlacaRule:
     rule = PicoPlacaRule(
         vehicle_type=VehicleType.CAR,

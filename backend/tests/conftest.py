@@ -36,6 +36,7 @@ from app.modules.legal.models import LegalDocument
 from app.modules.places.models import Place
 from app.modules.routing.osrm import Leg, RouteResult
 from app.modules.routing.router import get_route_provider
+from app.modules.semesters.models import Semester
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 
@@ -275,3 +276,17 @@ async def make_driver(
 @pytest.fixture
 async def driver(db: AsyncSession, make_user: UserFactory) -> tuple[User, Vehicle]:
     return await make_driver(db, make_user)
+
+
+@pytest.fixture
+async def semester(db: AsyncSession) -> Semester:
+    today = local_today()
+    row = Semester(
+        name="2026-T",
+        starts_on=today - timedelta(days=30),
+        ends_on=today + timedelta(days=90),
+        revalidation_deadline=today,
+    )
+    db.add(row)
+    await db.flush()
+    return row
