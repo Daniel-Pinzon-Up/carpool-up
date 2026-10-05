@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from fastapi import UploadFile
+from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from app.core.config import get_settings
@@ -113,3 +114,21 @@ def delete_private_file(relative_path: str) -> None:
     root = storage_root().resolve()
     if root in target.parents and target.is_file():
         target.unlink()
+
+
+def private_file_response(relative_path: str, content_type: str) -> FileResponse:
+    """Sirve un archivo privado sin cache y sin permitir que el navegador adivine el tipo."""
+    target = (storage_root() / relative_path).resolve()
+    root = storage_root().resolve()
+    if root not in target.parents or not target.is_file():
+        raise AppError("FILE_NOT_FOUND", "File not found", 404)
+    extension = target.suffix.lstrip(".")
+    return FileResponse(
+        target,
+        media_type=content_type,
+        headers={
+            "Cache-Control": "private, no-store",
+            "Content-Disposition": f'inline; filename="documento.{extension}"',
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
