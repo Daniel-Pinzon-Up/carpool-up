@@ -276,6 +276,32 @@ Errores propios: `TRIP_FULL`, `TRIP_NOT_BOOKABLE`, `BOOKING_EXISTS`, `BOOKING_OV
 
 El detalle del viaje (`GET /trips/{id}`) agrega `seats_available`, `pending_requests` (conductor), `passengers`, `payment_note`, `my_booking` y `my_waitlist`; el de la serie, `my_subscription`. La búsqueda descuenta los puestos aceptados.
 
+### Chat y tiempo real (paso 9)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /conversations` | Usuario activo | Chats propios (grupales y directos) con último mensaje, sin leer y si está cerrado. |
+| `GET /conversations/unread` | Usuario activo | `{unread, conversations}` para el contador de la navegación. |
+| `GET /conversations/{id}` | Miembro | Detalle con miembros (id, nombre, si es el conductor). |
+| `GET /conversations/{id}/messages?before&after&limit` | Miembro | Historial cronológico. `before` pagina hacia atrás; `after` trae lo nuevo desde el último visto. |
+| `POST /conversations/{id}/messages` | Miembro, 30 por minuto | `{body}` (1 a 1000 caracteres). Respaldo HTTP del envío. Error `CONVERSATION_CLOSED`. |
+| `POST /conversations/{id}/read` | Miembro | Marca el chat y su aviso de mensajes nuevos como leídos. |
+| `GET /notifications/unread-count` | Usuario | Contador de avisos sin leer. |
+
+El detalle del viaje agrega `chat_id` (el chat grupal) para el conductor y los pasajeros aceptados.
+
+**WebSocket `/ws`** (detrás de Nginx en el mismo origen; `ws://` en desarrollo a través del proxy de `ng serve`).
+
+1. El cliente abre la conexión y envía `{"type": "auth", "token": "<access token>"}` en menos de 10 s.
+2. El servidor responde `{"type": "ready", "conversations": [...]}`.
+3. Cliente a servidor: `ping`, `chat.send {conversation_id, body, client_id}`, `chat.read {conversation_id}` y `typing {conversation_id}`.
+4. Servidor a cliente:
+   - `pong`;
+   - `notification {notification}`, `notification.read {id}` y `notification.read_all`;
+   - `message {message}`, `typing {conversation_id, user_id, name}` y `conversation.joined {conversation_id}`;
+   - `chat.ack {client_id, message}` y `error {code, client_id}` (`NOT_FOUND`, `RATE_LIMITED`, `MESSAGE_INVALID`, `CONVERSATION_CLOSED`, `BAD_REQUEST`).
+5. Cierres: `4401` sin autenticación válida, `4001` token vencido (renovar y reconectar). Un origen no permitido se rechaza con HTTP 403.
+
 ## Cabeceras
 
 - `X-Request-ID`: se acepta del cliente o se genera, y se devuelve en cada respuesta para correlacionar logs.

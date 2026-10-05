@@ -15,7 +15,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 6 | Publicación de viajes y series: asistente, ocurrencias, pico y placa, edición, cancelación, duplicado y Mis viajes del conductor | Hecho |
 | 7 | Búsqueda de viajes: coincidencia geográfica con la ruta, ventana horaria, preferencias, solo mujeres y punto de recogida | Hecho |
 | 8 | Reservas y suscripciones: aprobación con bloqueo, cancelaciones libres y tardías, retraso del conductor, lista de espera, suscripción a series y bandeja del conductor | Hecho |
-| 9 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 9 | Tiempo real, chat y notificaciones: WebSocket con Redis, chat grupal por viaje y directo por serie, retención, avisos en vivo y bandeja de mensajes | Hecho |
+| 10 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
