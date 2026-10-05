@@ -1,0 +1,110 @@
+<div class="mx-auto flex max-w-2xl flex-col gap-5 py-2">
+  <a
+    routerLink="/vehiculos"
+    class="inline-flex items-center gap-2 self-start rounded text-sm font-semibold text-primary"
+  >
+    <svg lucideArrowLeft class="size-4" aria-hidden="true"></svg>
+    {{ 'vehicles.title' | transloco }}
+  </a>
+  <h1 class="text-2xl font-bold sm:text-3xl">
+    {{ (isEdit() ? 'vehicles.editTitle' : 'vehicles.newTitle') | transloco }}
+  </h1>
+
+  <cp-glass-card [level]="2">
+    @if (loading()) {
+      <div aria-busy="true"><cp-skeleton [lines]="6" /></div>
+    } @else {
+      @if (error()) {
+        <div role="alert" class="mb-5 flex gap-3 rounded-2xl bg-danger/10 p-4 text-sm text-danger">
+          <svg lucideCircleAlert class="size-5 shrink-0" aria-hidden="true"></svg>
+          <span>{{ error() }}</span>
+        </div>
+      }
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="flex flex-col gap-5">
+        @if (existing(); as vehicle) {
+          <p class="flex flex-wrap items-center gap-3">
+            <span class="font-semibold">{{ 'vehicles.types.' + vehicle.type | transloco }}</span>
+            <span
+              class="rounded-lg border-2 border-text px-2 py-0.5 font-mono font-bold tracking-widest"
+              >{{ vehicle.plate }}</span
+            >
+          </p>
+          <p class="-mt-3 text-sm text-muted">{{ 'vehicles.plateLocked' | transloco }}</p>
+        } @else {
+          <cp-choice-cards
+            formControlName="type"
+            [label]="'vehicles.type' | transloco"
+            [choices]="typeChoices()"
+          />
+          <cp-glass-input
+            formControlName="plate"
+            autocomplete="off"
+            [maxlength]="8"
+            [label]="'vehicles.plate' | transloco"
+            [hint]="'vehicles.plateHint.' + vehicleType() | transloco"
+            [error]="err('plate')"
+          />
+        }
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <cp-glass-input
+            formControlName="brand"
+            [label]="'vehicles.brand' | transloco"
+            [error]="err('brand')"
+          />
+          <cp-glass-input
+            formControlName="model"
+            [label]="'vehicles.model' | transloco"
+            [error]="err('model')"
+          />
+          <cp-glass-input
+            formControlName="color"
+            [label]="'vehicles.color' | transloco"
+            [error]="err('color')"
+          />
+          <cp-glass-input
+            formControlName="year"
+            type="number"
+            inputmode="numeric"
+            [label]="'vehicles.year' | transloco"
+            [error]="err('year')"
+          />
+        </div>
+
+        <div>
+          <cp-seat-picker
+            formControlName="capacity"
+            [label]="'vehicles.capacity' | transloco"
+            [min]="capacityRange()[0]"
+            [max]="capacityRange()[1]"
+          />
+          <p class="mt-1.5 text-sm text-muted">{{ 'vehicles.capacityHelp' | transloco }}</p>
+        </div>
+
+        <cp-glass-checkbox formControlName="luggage_space">{{
+          'vehicles.luggageQuestion' | transloco
+        }}</cp-glass-checkbox>
+
+        <cp-file-drop
+          formControlName="photo"
+          [accept]="photoTypes"
+          [label]="(existing()?.has_photo ? 'vehicles.replacePhoto' : 'vehicles.photo') | transloco"
+          [maxMb]="meta.settings().max_upload_mb"
+          [typeError]="'vehicles.photoTypeError' | transloco"
+          [sizeError]="
+            'errors.FILE_TOO_LARGE' | transloco: { max_mb: meta.settings().max_upload_mb }
+          "
+        />
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <a cp-button variant="secondary" routerLink="/vehiculos">{{
+            'common.cancel' | transloco
+          }}</a>
+          <button cp-button type="submit" [loading]="busy()">
+            {{ (isEdit() ? 'vehicles.save' : 'vehicles.create') | transloco }}
+          </button>
+        </div>
+      </form>
+    }
+  </cp-glass-card>
+</div>
