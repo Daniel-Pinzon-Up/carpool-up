@@ -26,6 +26,8 @@ END_KINDS = {
     BookingStatus.CANCELLED_BY_DRIVER: Kind.BOOKING_CANCELLED_BY_DRIVER,
     BookingStatus.AUTO_CANCELLED_PICO_PLACA: Kind.BOOKING_PICO_PLACA_CANCELLED,
     BookingStatus.AUTO_CANCELLED_LATE: Kind.BOOKING_AUTO_CANCELLED_LATE,
+    # Viaje no realizado: nadie lo inicio a tiempo.
+    BookingStatus.EXPIRED: Kind.BOOKING_EXPIRED,
 }
 
 

@@ -13,6 +13,7 @@ from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
 from app.modules.chat.service import close_finished_conversations, purge_chat
 from app.modules.documents.revalidation import run_revalidation
 from app.modules.series.service import finish_past_series
+from app.modules.trips.jobs import mark_not_held, recompute_traffic_factors, send_trip_reminders
 from app.modules.trips.service import recheck_pico_placa
 from app.modules.waitlist.offers import run_waitlist
 
@@ -73,6 +74,24 @@ async def chat_retention(ctx: dict[str, Any]) -> dict[str, int]:
     return {"closed": closed, "purged": purged}
 
 
+async def not_held(ctx: dict[str, Any]) -> int:
+    """Cada 15 minutos: viajes que nadie inicio a tiempo."""
+    async with SessionLocal() as session:
+        return await mark_not_held(session)
+
+
+async def trip_reminders(ctx: dict[str, Any]) -> int:
+    """Cada 5 minutos: recordatorio antes de salir."""
+    async with SessionLocal() as session:
+        return await send_trip_reminders(session)
+
+
+async def traffic_factors(ctx: dict[str, Any]) -> dict[str, int]:
+    """Semanal: recalcula los factores de trafico con los viajes reales."""
+    async with SessionLocal() as session:
+        return await recompute_traffic_factors(session)
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging(json_output=get_settings().environment != "development")
     logger.info("worker_started")
@@ -89,6 +108,9 @@ class WorkerSettings:
         auto_cancel_late,
         offer_waitlist,
         chat_retention,
+        not_held,
+        trip_reminders,
+        traffic_factors,
     ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True),
@@ -101,6 +123,10 @@ class WorkerSettings:
         cron(offer_waitlist),
         # 10:25 UTC = 5:25 a. m. en Pamplona.
         cron(chat_retention, hour={10}, minute={25}),
+        cron(not_held, minute={2, 17, 32, 47}),
+        cron(trip_reminders, minute=set(range(1, 60, 5))),
+        # Domingos 9:40 UTC = 4:40 a. m. en Pamplona.
+        cron(traffic_factors, weekday={6}, hour={9}, minute={40}),
     ]
     on_startup = startup
     max_tries = 5
