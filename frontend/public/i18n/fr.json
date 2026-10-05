@@ -128,7 +128,11 @@
     "REFRESH_INVALID": "Votre session a expiré. Reconnectez-vous.",
     "REFRESH_REUSED": "Par sécurité, nous avons fermé vos sessions. Reconnectez-vous.",
     "PAYMENT_NOTE_DRIVERS_ONLY": "Seuls les conducteurs peuvent enregistrer des informations de virement.",
-    "LEGAL_VERSION_NOT_CURRENT": "Cette version n'est plus en vigueur. Rechargez la page."
+    "LEGAL_VERSION_NOT_CURRENT": "Cette version n'est plus en vigueur. Rechargez la page.",
+    "APPROVAL_NOT_PENDING": "Un autre administrateur a déjà vérifié ce document. Actualisez la liste.",
+    "LICENSE_EXPIRED": "Le permis a expiré. Vérifiez la date d'expiration.",
+    "LICENSE_DRIVERS_ONLY": "Seuls les conducteurs envoient un permis.",
+    "FILE_NOT_FOUND": "Fichier introuvable."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -470,5 +474,77 @@
       "closed": "Nous avons fermé {{count}} sessions."
     },
     "logout": "Se déconnecter"
+  },
+  "approvals": {
+    "subtitle": "Vérifiez les documents par ordre d'arrivée. Comparez le nom et le sexe avec le document.",
+    "refresh": "Actualiser",
+    "tabs": {
+      "identity": "Cartes et attestations ({{count}})",
+      "license": "Permis ({{count}})",
+      "licenseName": "Permis de conduire"
+    },
+    "listLabel": "Documents à vérifier",
+    "empty": {
+      "title": "Aucun document en attente",
+      "body": "Les nouveaux envois apparaîtront ici."
+    },
+    "noProgram": "Aucun programme enregistré",
+    "document": "Document",
+    "semester": "Semestre",
+    "noSemester": "Aucun semestre en cours",
+    "fileError": "Impossible d'ouvrir le fichier. Actualisez et réessayez.",
+    "viewerTitle": "Document de {{name}}",
+    "confirmSex": "Sexe selon le document",
+    "declaredSex": "Déclaré à l'inscription : {{sex}}",
+    "approveAction": "Approuver",
+    "rejectAction": "Refuser",
+    "approved": "Vous avez approuvé le document de {{name}}.",
+    "rejected": "Vous avez refusé le document de {{name}}.",
+    "reject": {
+      "title": "Refuser le document de {{name}}",
+      "reason": "Motif du refus",
+      "hint": "La personne verra ce texte. Expliquez ce qu'elle doit corriger.",
+      "confirm": "Refuser le document"
+    }
+  },
+  "license": {
+    "title": "Permis de conduire",
+    "subtitle": "Il doit être approuvé et en cours de validité pour publier des trajets.",
+    "statusTitle": "État",
+    "validUntil": "Valable jusqu'au {{date}}",
+    "state": {
+      "pending": "Un administrateur le vérifiera bientôt.",
+      "approved": "Vous pouvez publier des trajets tant qu'il est valable.",
+      "rejected": "Envoyez une nouvelle photo lisible de votre permis.",
+      "expired": "Votre permis a expiré. Envoyez le permis renouvelé."
+    },
+    "none": "Vous n'avez pas encore envoyé votre permis.",
+    "uploadTitle": "Envoyez votre permis",
+    "replaceTitle": "Remplacer le permis",
+    "help": "Photo ou PDF des deux faces du permis dans un seul fichier. Seuls les administrateurs le voient.",
+    "expiresOn": "Date d'expiration",
+    "expiresHint": "Telle qu'elle figure sur votre permis.",
+    "file": "Photo ou PDF du permis",
+    "declaration": "En l'envoyant, vous déclarez que le véhicule a une assurance obligatoire (SOAT) et un contrôle technique en cours de validité.",
+    "send": "Envoyer le permis",
+    "sent": "Permis envoyé. Nous le vérifierons bientôt.",
+    "manage": "Voir ou mettre à jour le permis"
+  },
+  "notifications": {
+    "markAll": "Tout marquer comme lu",
+    "unread": "Non lu",
+    "empty": {
+      "title": "Aucune notification",
+      "body": "Les nouvelles de votre compte et de vos trajets apparaîtront ici."
+    },
+    "kinds": {
+      "document_approved": "Nous avons approuvé votre document. Votre compte est actif.",
+      "document_rejected": "Nous avons refusé votre document : {{reason}}",
+      "document_expired": "Votre carte a expiré. Envoyez celle du semestre {{semester}} avant le {{deadline}}.",
+      "license_approved": "Nous avons approuvé votre permis de conduire.",
+      "license_rejected": "Nous avons refusé votre permis : {{reason}}",
+      "account_revalidation_required": "Vous n'avez pas revalidé votre document pour le semestre {{semester}}. Envoyez-en un nouveau pour continuer à utiliser l'app.",
+      "role_changed": "Un administrateur a modifié votre rôle dans l'app."
+    }
   }
 }

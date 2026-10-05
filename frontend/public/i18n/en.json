@@ -128,7 +128,11 @@
     "REFRESH_INVALID": "Your session ended. Sign in again.",
     "REFRESH_REUSED": "For security we closed your sessions. Sign in again.",
     "PAYMENT_NOTE_DRIVERS_ONLY": "Only drivers can save transfer details.",
-    "LEGAL_VERSION_NOT_CURRENT": "That version is no longer current. Reload the page."
+    "LEGAL_VERSION_NOT_CURRENT": "That version is no longer current. Reload the page.",
+    "APPROVAL_NOT_PENDING": "Another administrator already reviewed this document. Refresh the list.",
+    "LICENSE_EXPIRED": "The license is expired. Check the expiration date.",
+    "LICENSE_DRIVERS_ONLY": "Only drivers upload a license.",
+    "FILE_NOT_FOUND": "We could not find the file."
   },
   "catalog": {
     "title": "Component catalog",
@@ -470,5 +474,77 @@
       "closed": "We closed {{count}} sessions."
     },
     "logout": "Sign out"
+  },
+  "approvals": {
+    "subtitle": "Review documents in order of arrival. Compare the name and sex with the document.",
+    "refresh": "Refresh",
+    "tabs": {
+      "identity": "IDs and certificates ({{count}})",
+      "license": "Licenses ({{count}})",
+      "licenseName": "Driver's license"
+    },
+    "listLabel": "Documents to review",
+    "empty": {
+      "title": "No pending documents",
+      "body": "New submissions will appear here."
+    },
+    "noProgram": "No program registered",
+    "document": "Document",
+    "semester": "Semester",
+    "noSemester": "No current semester",
+    "fileError": "We could not open the file. Refresh and try again.",
+    "viewerTitle": "Document of {{name}}",
+    "confirmSex": "Sex according to the document",
+    "declaredSex": "Declared at sign-up: {{sex}}",
+    "approveAction": "Approve",
+    "rejectAction": "Reject",
+    "approved": "You approved the document of {{name}}.",
+    "rejected": "You rejected the document of {{name}}.",
+    "reject": {
+      "title": "Reject the document of {{name}}",
+      "reason": "Reason for rejection",
+      "hint": "The person will see this text. Explain what to fix.",
+      "confirm": "Reject document"
+    }
+  },
+  "license": {
+    "title": "Driver's license",
+    "subtitle": "It must be approved and current to publish trips.",
+    "statusTitle": "Status",
+    "validUntil": "Valid until {{date}}",
+    "state": {
+      "pending": "An administrator will review it soon.",
+      "approved": "You can publish trips while it is valid.",
+      "rejected": "Upload a new, readable photo of your license.",
+      "expired": "Your license expired. Upload the renewed one."
+    },
+    "none": "You have not uploaded your license yet.",
+    "uploadTitle": "Upload your license",
+    "replaceTitle": "Replace license",
+    "help": "Photo or PDF of both sides of the license in one file. Only administrators can see it.",
+    "expiresOn": "Expiration date",
+    "expiresHint": "As shown on your license.",
+    "file": "Photo or PDF of the license",
+    "declaration": "By sending it you declare the vehicle has current mandatory insurance (SOAT) and technical inspection.",
+    "send": "Send license",
+    "sent": "License sent. We will review it soon.",
+    "manage": "View or update license"
+  },
+  "notifications": {
+    "markAll": "Mark all as read",
+    "unread": "Unread",
+    "empty": {
+      "title": "No notifications",
+      "body": "Updates about your account and trips will appear here."
+    },
+    "kinds": {
+      "document_approved": "We approved your document. Your account is active.",
+      "document_rejected": "We rejected your document: {{reason}}",
+      "document_expired": "Your ID expired. Upload the one for semester {{semester}} before {{deadline}}.",
+      "license_approved": "We approved your driver's license.",
+      "license_rejected": "We rejected your license: {{reason}}",
+      "account_revalidation_required": "You did not revalidate your document for semester {{semester}}. Upload a new one to keep using the app.",
+      "role_changed": "An administrator changed your role in the app."
+    }
   }
 }

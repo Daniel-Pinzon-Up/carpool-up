@@ -128,7 +128,11 @@
     "REFRESH_INVALID": "Tu sesión terminó. Inicia sesión de nuevo.",
     "REFRESH_REUSED": "Por seguridad cerramos tus sesiones. Inicia sesión de nuevo.",
     "PAYMENT_NOTE_DRIVERS_ONLY": "Solo los conductores pueden guardar datos para transferencias.",
-    "LEGAL_VERSION_NOT_CURRENT": "Esa versión ya no está vigente. Recarga la página."
+    "LEGAL_VERSION_NOT_CURRENT": "Esa versión ya no está vigente. Recarga la página.",
+    "APPROVAL_NOT_PENDING": "Otro administrador ya revisó este documento. Actualiza la lista.",
+    "LICENSE_EXPIRED": "La licencia está vencida. Revisa la fecha de vencimiento.",
+    "LICENSE_DRIVERS_ONLY": "Solo los conductores suben licencia.",
+    "FILE_NOT_FOUND": "No encontramos el archivo."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -470,5 +474,77 @@
       "closed": "Cerramos {{count}} sesiones."
     },
     "logout": "Cerrar sesión"
+  },
+  "approvals": {
+    "subtitle": "Revisa los documentos en orden de llegada. Compara el nombre y el sexo con el documento.",
+    "refresh": "Actualizar",
+    "tabs": {
+      "identity": "Carnets y constancias ({{count}})",
+      "license": "Licencias ({{count}})",
+      "licenseName": "Licencia de conducción"
+    },
+    "listLabel": "Documentos por revisar",
+    "empty": {
+      "title": "No hay documentos pendientes",
+      "body": "Cuando alguien envíe uno aparecerá aquí."
+    },
+    "noProgram": "Sin programa registrado",
+    "document": "Documento",
+    "semester": "Semestre",
+    "noSemester": "Sin semestre vigente",
+    "fileError": "No pudimos abrir el archivo. Actualiza e inténtalo de nuevo.",
+    "viewerTitle": "Documento de {{name}}",
+    "confirmSex": "Sexo según el documento",
+    "declaredSex": "Declarado al registrarse: {{sex}}",
+    "approveAction": "Aprobar",
+    "rejectAction": "Rechazar",
+    "approved": "Aprobaste el documento de {{name}}.",
+    "rejected": "Rechazaste el documento de {{name}}.",
+    "reject": {
+      "title": "Rechazar el documento de {{name}}",
+      "reason": "Motivo del rechazo",
+      "hint": "La persona verá este texto. Explica qué debe corregir.",
+      "confirm": "Rechazar documento"
+    }
+  },
+  "license": {
+    "title": "Licencia de conducción",
+    "subtitle": "La necesitas aprobada y vigente para publicar viajes.",
+    "statusTitle": "Estado",
+    "validUntil": "Vigente hasta el {{date}}",
+    "state": {
+      "pending": "Un administrador la revisará pronto.",
+      "approved": "Puedes publicar viajes mientras esté vigente.",
+      "rejected": "Sube una foto nueva y legible de tu licencia.",
+      "expired": "Tu licencia venció. Sube la renovada."
+    },
+    "none": "Aún no has subido tu licencia.",
+    "uploadTitle": "Sube tu licencia",
+    "replaceTitle": "Reemplazar licencia",
+    "help": "Foto o PDF de la licencia por ambos lados en un solo archivo. Solo la ven los administradores.",
+    "expiresOn": "Fecha de vencimiento",
+    "expiresHint": "Como aparece en tu licencia.",
+    "file": "Foto o PDF de la licencia",
+    "declaration": "Al enviarla declaras que el vehículo tiene SOAT y revisión técnico-mecánica vigentes.",
+    "send": "Enviar licencia",
+    "sent": "Licencia enviada. La revisaremos pronto.",
+    "manage": "Ver o actualizar licencia"
+  },
+  "notifications": {
+    "markAll": "Marcar todo como leído",
+    "unread": "Sin leer",
+    "empty": {
+      "title": "No tienes avisos",
+      "body": "Aquí verás las novedades de tu cuenta y tus viajes."
+    },
+    "kinds": {
+      "document_approved": "Aprobamos tu documento. Tu cuenta está activa.",
+      "document_rejected": "Rechazamos tu documento: {{reason}}",
+      "document_expired": "Tu carnet venció. Sube el del semestre {{semester}} antes del {{deadline}}.",
+      "license_approved": "Aprobamos tu licencia de conducción.",
+      "license_rejected": "Rechazamos tu licencia: {{reason}}",
+      "account_revalidation_required": "No revalidaste tu documento para el semestre {{semester}}. Sube uno nuevo para seguir usando la app.",
+      "role_changed": "Un administrador cambió tu rol en la app."
+    }
   }
 }

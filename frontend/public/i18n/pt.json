@@ -128,7 +128,11 @@
     "REFRESH_INVALID": "Sua sessão terminou. Entre novamente.",
     "REFRESH_REUSED": "Por segurança encerramos suas sessões. Entre novamente.",
     "PAYMENT_NOTE_DRIVERS_ONLY": "Só os motoristas podem salvar dados para transferências.",
-    "LEGAL_VERSION_NOT_CURRENT": "Essa versão não está mais vigente. Recarregue a página."
+    "LEGAL_VERSION_NOT_CURRENT": "Essa versão não está mais vigente. Recarregue a página.",
+    "APPROVAL_NOT_PENDING": "Outro administrador já analisou este documento. Atualize a lista.",
+    "LICENSE_EXPIRED": "A carteira está vencida. Verifique a data de vencimento.",
+    "LICENSE_DRIVERS_ONLY": "Só os motoristas enviam carteira de motorista.",
+    "FILE_NOT_FOUND": "Não encontramos o arquivo."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -470,5 +474,77 @@
       "closed": "Encerramos {{count}} sessões."
     },
     "logout": "Sair"
+  },
+  "approvals": {
+    "subtitle": "Analise os documentos por ordem de chegada. Compare o nome e o sexo com o documento.",
+    "refresh": "Atualizar",
+    "tabs": {
+      "identity": "Carteirinhas e declarações ({{count}})",
+      "license": "Carteiras de motorista ({{count}})",
+      "licenseName": "Carteira de motorista"
+    },
+    "listLabel": "Documentos para analisar",
+    "empty": {
+      "title": "Não há documentos pendentes",
+      "body": "Quando alguém enviar um, ele aparecerá aqui."
+    },
+    "noProgram": "Sem curso registrado",
+    "document": "Documento",
+    "semester": "Semestre",
+    "noSemester": "Sem semestre vigente",
+    "fileError": "Não conseguimos abrir o arquivo. Atualize e tente novamente.",
+    "viewerTitle": "Documento de {{name}}",
+    "confirmSex": "Sexo conforme o documento",
+    "declaredSex": "Declarado no cadastro: {{sex}}",
+    "approveAction": "Aprovar",
+    "rejectAction": "Recusar",
+    "approved": "Você aprovou o documento de {{name}}.",
+    "rejected": "Você recusou o documento de {{name}}.",
+    "reject": {
+      "title": "Recusar o documento de {{name}}",
+      "reason": "Motivo da recusa",
+      "hint": "A pessoa verá este texto. Explique o que deve corrigir.",
+      "confirm": "Recusar documento"
+    }
+  },
+  "license": {
+    "title": "Carteira de motorista",
+    "subtitle": "Ela precisa estar aprovada e vigente para publicar viagens.",
+    "statusTitle": "Status",
+    "validUntil": "Válida até {{date}}",
+    "state": {
+      "pending": "Um administrador vai analisá-la em breve.",
+      "approved": "Você pode publicar viagens enquanto ela estiver vigente.",
+      "rejected": "Envie uma foto nova e legível da sua carteira.",
+      "expired": "Sua carteira venceu. Envie a renovada."
+    },
+    "none": "Você ainda não enviou sua carteira de motorista.",
+    "uploadTitle": "Envie sua carteira",
+    "replaceTitle": "Substituir carteira",
+    "help": "Foto ou PDF dos dois lados da carteira em um só arquivo. Só os administradores veem.",
+    "expiresOn": "Data de vencimento",
+    "expiresHint": "Como aparece na sua carteira.",
+    "file": "Foto ou PDF da carteira",
+    "declaration": "Ao enviá-la você declara que o veículo tem seguro obrigatório (SOAT) e vistoria técnica vigentes.",
+    "send": "Enviar carteira",
+    "sent": "Carteira enviada. Vamos analisá-la em breve.",
+    "manage": "Ver ou atualizar carteira"
+  },
+  "notifications": {
+    "markAll": "Marcar tudo como lido",
+    "unread": "Não lida",
+    "empty": {
+      "title": "Você não tem avisos",
+      "body": "Aqui você verá as novidades da sua conta e das suas viagens."
+    },
+    "kinds": {
+      "document_approved": "Aprovamos seu documento. Sua conta está ativa.",
+      "document_rejected": "Recusamos seu documento: {{reason}}",
+      "document_expired": "Seu documento venceu. Envie o do semestre {{semester}} antes de {{deadline}}.",
+      "license_approved": "Aprovamos sua carteira de motorista.",
+      "license_rejected": "Recusamos sua carteira: {{reason}}",
+      "account_revalidation_required": "Você não revalidou seu documento para o semestre {{semester}}. Envie um novo para continuar usando o app.",
+      "role_changed": "Um administrador mudou seu papel no app."
+    }
   }
 }
