@@ -23,6 +23,8 @@ class Kind:
     LICENSE_REJECTED = "license_rejected"
     ACCOUNT_REVALIDATION_REQUIRED = "account_revalidation_required"
     ROLE_CHANGED = "role_changed"
+    TRIP_PICO_PLACA_CANCELLED = "trip_pico_placa_cancelled"
+    TRIP_PICO_PLACA_RESTORED = "trip_pico_placa_restored"
 
 
 class NotificationService:
