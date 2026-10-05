@@ -150,7 +150,16 @@ export const routes: Routes = [
         data: { mode: 'edit-series' },
         title: 'publish.editSeriesTitle',
       },
-      comingSoon('mensajes', 'messages'),
+      {
+        path: 'mensajes',
+        loadComponent: () => import('./features/chat/messages-page'),
+        title: 'nav.messages',
+      },
+      {
+        path: 'mensajes/:id',
+        loadComponent: () => import('./features/chat/messages-page'),
+        title: 'nav.messages',
+      },
       {
         path: 'notificaciones',
         loadComponent: () => import('./features/notifications/notifications-page'),

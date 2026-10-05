@@ -12,6 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LucideCopy,
+  LucideMessageCircle,
   LucideFootprints,
   LucidePencil,
   LucideRepeat,
@@ -21,8 +22,10 @@ import {
   LucideWallet,
   LucideX,
 } from '@lucide/angular';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { NotificationsStore } from '../../core/notifications/notifications.store';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { MapMarker, MapView } from '../../shared/map/map-view';
@@ -60,6 +63,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     Skeleton,
     StatusBadge,
     LucideCopy,
+    LucideMessageCircle,
     LucideFootprints,
     LucidePencil,
     LucideRepeat,
@@ -113,6 +117,17 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
             <span class="font-semibold">{{ 'trips.cancelReason' | transloco }}:</span>
             {{ t.cancel_reason }}
           </p>
+        }
+        @if (t.chat_id) {
+          <a
+            cp-button
+            variant="secondary"
+            class="self-start"
+            [routerLink]="['/mensajes', t.chat_id]"
+          >
+            <svg lucideMessageCircle class="size-4" aria-hidden="true"></svg>
+            {{ 'chat.openTrip' | transloco }}
+          </a>
         }
         @if (t.series_id && isOwner()) {
           <a
@@ -347,6 +362,12 @@ export default class TripDetail {
       const id = this.id();
       untracked(() => void this.load(id));
     });
+    // Un aviso sobre este viaje (aceptacion, cambio, cancelacion...) lo actualiza en vivo.
+    inject(NotificationsStore)
+      .incoming.pipe(takeUntilDestroyed())
+      .subscribe((item) => {
+        if (item.payload['trip_id'] === this.id()) void this.reload();
+      });
   }
 
   private async load(id: string): Promise<void> {

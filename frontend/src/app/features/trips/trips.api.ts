@@ -96,6 +96,8 @@ export interface Trip extends TripSummary {
   payment_note: string | null;
   my_booking: MyBooking | null;
   my_waitlist: MyWaitlist | null;
+  /** Chat grupal del viaje si quien consulta participa. */
+  chat_id: string | null;
 }
 
 export interface OccurrenceCounts {
