@@ -10,6 +10,8 @@ from app.core.db import SessionLocal
 from app.core.email import OutgoingEmail, send_smtp
 from app.core.logging import configure_logging
 from app.modules.documents.revalidation import run_revalidation
+from app.modules.series.service import finish_past_series
+from app.modules.trips.service import recheck_pico_placa
 
 logger = structlog.get_logger("worker")
 
@@ -34,6 +36,14 @@ async def semester_revalidation(ctx: dict[str, Any]) -> dict[str, int]:
     return {"expired": result.expired_documents, "downgraded": result.downgraded_users}
 
 
+async def pico_placa_recheck(ctx: dict[str, Any]) -> dict[str, int]:
+    """Diario: aplica pico y placa a los viajes futuros y cierra las series vencidas."""
+    async with SessionLocal() as session:
+        result = await recheck_pico_placa(session)
+        finished = await finish_past_series(session, local_today())
+    return {"cancelled": result.cancelled, "restored": result.restored, "finished": finished}
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging(json_output=get_settings().environment != "development")
     logger.info("worker_started")
@@ -41,11 +51,18 @@ async def startup(ctx: dict[str, Any]) -> None:
 
 class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(get_settings().redis_url)
-    functions: ClassVar[list[Any]] = [heartbeat, send_email, semester_revalidation]
+    functions: ClassVar[list[Any]] = [
+        heartbeat,
+        send_email,
+        semester_revalidation,
+        pico_placa_recheck,
+    ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True),
         # 10:05 UTC = 5:05 a. m. en Pamplona.
         cron(semester_revalidation, hour={10}, minute={5}, run_at_startup=True),
+        # 10:15 UTC = 5:15 a. m. en Pamplona.
+        cron(pico_placa_recheck, hour={10}, minute={15}, run_at_startup=True),
     ]
     on_startup = startup
     max_tries = 5
