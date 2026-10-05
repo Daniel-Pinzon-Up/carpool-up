@@ -156,7 +156,8 @@
     "SERIES_EMPTY": "The series has no bookable trips. Check the weekdays and pico y placa.",
     "SERIES_NOT_ACTIVE": "The series is no longer active.",
     "VEHICLE_HAS_TRIPS": "The vehicle has scheduled trips. Cancel them or change their vehicle first.",
-    "INVALID_RANGE": "The date range is not valid."
+    "INVALID_RANGE": "The date range is not valid.",
+    "SEARCH_IN_PAST": "That time has passed. Choose a future time."
   },
   "catalog": {
     "title": "Component catalog",
@@ -894,6 +895,45 @@
       "invalid": "Choose a date from today onward.",
       "confirm": "Duplicate",
       "done": "We published the copy."
+    },
+    "yourTrip": "Your pick-up and drop-off"
+  },
+  "search": {
+    "title": "Find a ride",
+    "subtitle": "Find who passes near you at the time you need.",
+    "origin": "Where do we pick you up?",
+    "destination": "Where are you going?",
+    "swap": "Swap origin and destination",
+    "time": "Time",
+    "seats": "Seats",
+    "preferences": "Preferences",
+    "submit": "Search",
+    "searching": "Searching rides...",
+    "results": "Rides found: {{count}}",
+    "prefs": {
+      "pets": "Travelling with a pet",
+      "luggage": "Large luggage",
+      "no_smoking": "Smoke-free",
+      "music": "With music",
+      "women_only": "Women only"
+    },
+    "empty": {
+      "title": "No rides found",
+      "hint": "Try another time, a nearby point or fewer preferences."
+    },
+    "errors": {
+      "when": "Choose the date and time."
+    },
+    "card": {
+      "pickup": "Pick-up",
+      "dropoff": "Drop-off",
+      "onRoute": "Point on the route",
+      "walk": "{{meters}} m from your point",
+      "seats": "Seats left: {{count}}",
+      "rating": "{{rating}}",
+      "newDriver": "New driver",
+      "trips": "Trips: {{count}}",
+      "series": "Series"
     }
   }
 }

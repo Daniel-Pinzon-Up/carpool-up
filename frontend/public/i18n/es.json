@@ -156,7 +156,8 @@
     "SERIES_EMPTY": "La serie no tiene ningún viaje que se pueda reservar. Revisa los días y el pico y placa.",
     "SERIES_NOT_ACTIVE": "La serie ya no está activa.",
     "VEHICLE_HAS_TRIPS": "El vehículo tiene viajes programados. Cancélalos o cámbiales el vehículo primero.",
-    "INVALID_RANGE": "El rango de fechas no es válido."
+    "INVALID_RANGE": "El rango de fechas no es válido.",
+    "SEARCH_IN_PAST": "Esa hora ya pasó. Elige una hora futura."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -894,6 +895,45 @@
       "invalid": "Elige una fecha de hoy en adelante.",
       "confirm": "Duplicar",
       "done": "Publicamos la copia."
+    },
+    "yourTrip": "Tu recogida y bajada"
+  },
+  "search": {
+    "title": "Buscar viaje",
+    "subtitle": "Encuentra quién pasa cerca de ti a la hora que necesitas.",
+    "origin": "¿Dónde te recogen?",
+    "destination": "¿A dónde vas?",
+    "swap": "Intercambiar origen y destino",
+    "time": "Hora",
+    "seats": "Puestos",
+    "preferences": "Preferencias",
+    "submit": "Buscar",
+    "searching": "Buscando viajes...",
+    "results": "Viajes encontrados: {{count}}",
+    "prefs": {
+      "pets": "Viajo con mascota",
+      "luggage": "Llevo equipaje grande",
+      "no_smoking": "Sin humo",
+      "music": "Con música",
+      "women_only": "Solo mujeres"
+    },
+    "empty": {
+      "title": "No encontramos viajes",
+      "hint": "Prueba otra hora, otro punto cercano o menos preferencias."
+    },
+    "errors": {
+      "when": "Elige la fecha y la hora."
+    },
+    "card": {
+      "pickup": "Recogida",
+      "dropoff": "Bajada",
+      "onRoute": "Punto en la ruta",
+      "walk": "A {{meters}} m de tu punto",
+      "seats": "Cupos: {{count}}",
+      "rating": "{{rating}}",
+      "newDriver": "Conductor nuevo",
+      "trips": "Viajes: {{count}}",
+      "series": "Serie"
     }
   }
 }

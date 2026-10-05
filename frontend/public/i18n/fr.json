@@ -156,7 +156,8 @@
     "SERIES_EMPTY": "La série n'a aucun trajet réservable. Vérifiez les jours et le pico y placa.",
     "SERIES_NOT_ACTIVE": "La série n'est plus active.",
     "VEHICLE_HAS_TRIPS": "Le véhicule a des trajets programmés. Annulez-les ou changez leur véhicule d'abord.",
-    "INVALID_RANGE": "La plage de dates n'est pas valide."
+    "INVALID_RANGE": "La plage de dates n'est pas valide.",
+    "SEARCH_IN_PAST": "Cette heure est passée. Choisissez une heure future."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -894,6 +895,45 @@
       "invalid": "Choisissez une date à partir d'aujourd'hui.",
       "confirm": "Dupliquer",
       "done": "La copie est publiée."
+    },
+    "yourTrip": "Votre prise en charge et dépose"
+  },
+  "search": {
+    "title": "Chercher un trajet",
+    "subtitle": "Trouvez qui passe près de vous à l'heure qu'il vous faut.",
+    "origin": "Où vous prendre ?",
+    "destination": "Où allez-vous ?",
+    "swap": "Inverser départ et destination",
+    "time": "Heure",
+    "seats": "Places",
+    "preferences": "Préférences",
+    "submit": "Chercher",
+    "searching": "Recherche de trajets...",
+    "results": "Trajets trouvés : {{count}}",
+    "prefs": {
+      "pets": "Je voyage avec un animal",
+      "luggage": "Gros bagages",
+      "no_smoking": "Sans fumée",
+      "music": "Avec musique",
+      "women_only": "Femmes uniquement"
+    },
+    "empty": {
+      "title": "Aucun trajet trouvé",
+      "hint": "Essayez une autre heure, un point proche ou moins de préférences."
+    },
+    "errors": {
+      "when": "Choisissez la date et l'heure."
+    },
+    "card": {
+      "pickup": "Prise en charge",
+      "dropoff": "Dépose",
+      "onRoute": "Point sur l'itinéraire",
+      "walk": "À {{meters}} m de votre point",
+      "seats": "Places : {{count}}",
+      "rating": "{{rating}}",
+      "newDriver": "Nouveau conducteur",
+      "trips": "Trajets : {{count}}",
+      "series": "Série"
     }
   }
 }
