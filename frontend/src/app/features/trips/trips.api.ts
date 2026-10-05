@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import type { BookingStatus, SubscriptionStatus, WaitlistStatus } from '../bookings/bookings.api';
 import { VehicleType } from '../vehicles/vehicles.api';
 
 export type TripStatus =
@@ -52,6 +53,34 @@ export interface TripSummary {
   stop_count: number;
   vehicle: VehicleSummary;
   editable: boolean;
+  seats_available: number;
+  /** Solicitudes y cancelaciones por decidir (solo el conductor). */
+  pending_requests: number;
+}
+
+export interface CoPassenger {
+  id: string;
+  full_name: string;
+  seats: number;
+  pickup_name: string | null;
+  pickup_eta: string | null;
+}
+
+export interface MyBooking {
+  id: string;
+  status: BookingStatus;
+  seats: number;
+  pickup_name: string | null;
+  pickup_eta: string;
+  dropoff_name: string | null;
+  dropoff_eta: string;
+}
+
+export interface MyWaitlist {
+  id: string;
+  status: WaitlistStatus;
+  seats: number;
+  offer_expires_at: string | null;
 }
 
 export interface Trip extends TripSummary {
@@ -63,6 +92,10 @@ export interface Trip extends TripSummary {
   driver: { id: string; full_name: string };
   cancel_reason: string | null;
   cancelled_at: string | null;
+  passengers: CoPassenger[];
+  payment_note: string | null;
+  my_booking: MyBooking | null;
+  my_waitlist: MyWaitlist | null;
 }
 
 export interface OccurrenceCounts {
@@ -94,6 +127,12 @@ export interface Series extends SeriesSummary {
   driver: { id: string; full_name: string };
   cancel_reason: string | null;
   occurrences: TripSummary[];
+  my_subscription: {
+    id: string;
+    status: SubscriptionStatus;
+    from_date: string;
+    to_date: string;
+  } | null;
 }
 
 export interface Page<T> {
@@ -121,7 +160,10 @@ export interface SeriesCreate extends TripTemplate {
 }
 
 export type TripUpdate = Partial<TripCreate>;
-export type SeriesUpdate = Partial<Omit<SeriesCreate, 'start_date' | 'window'>>;
+export type SeriesUpdate = Partial<Omit<SeriesCreate, 'start_date' | 'window'>> & {
+  /** Confirma el cambio cuando hay reservas afectadas. */
+  confirm?: boolean;
+};
 
 export interface Semester {
   id: string;
