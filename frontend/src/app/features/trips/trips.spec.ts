@@ -55,6 +55,8 @@ const SUMMARY: TripSummary = {
     plate: 'ABC123',
   },
   editable: true,
+  seats_available: 3,
+  pending_requests: 0,
 };
 
 const TRIP: Trip = {
@@ -89,6 +91,10 @@ const TRIP: Trip = {
   driver: { id: ME.id, full_name: ME.full_name },
   cancel_reason: null,
   cancelled_at: null,
+  passengers: [],
+  payment_note: null,
+  my_booking: null,
+  my_waitlist: null,
 };
 
 describe('fechas de Pamplona', () => {
