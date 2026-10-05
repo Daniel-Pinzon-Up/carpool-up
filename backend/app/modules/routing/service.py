@@ -44,6 +44,38 @@ class Stop:
     lon: float
 
 
+async def resolve_points(session: AsyncSession, points: list[RoutePoint], user: User) -> list[Stop]:
+    """Convierte place_id o coordenadas en paradas dentro del area de servicio."""
+    settings = SettingsService(session)
+    max_stops = int(await settings.get("max_trip_stops"))
+    if len(points) > max_stops + 2:
+        raise AppError(
+            "TOO_MANY_STOPS", "Too many intermediate stops", 422, {"max_stops": max_stops}
+        )
+    area = await settings.service_area()
+    stops: list[Stop] = []
+    for index, point in enumerate(points):
+        if point.place_id is not None:
+            place = await session.get(Place, point.place_id)
+            usable = (
+                place is not None
+                and place.is_active
+                and (place.kind != PlaceKind.CUSTOM or place.created_by == user.id)
+            )
+            if not usable or place is None:
+                raise AppError("PLACE_NOT_FOUND", "Place not found", 404, {"index": index})
+            stop = Stop(place.id, place.name, place.lat, place.lon)
+        else:
+            assert point.lat is not None and point.lon is not None  # noqa: S101 - validado
+            stop = Stop(None, None, point.lat, point.lon)
+        if not area.contains(stop.lat, stop.lon):
+            raise AppError(
+                "PLACE_OUT_OF_AREA", "Point is outside the service area", 422, {"index": index}
+            )
+        stops.append(stop)
+    return stops
+
+
 class RoutingService:
     def __init__(self, session: AsyncSession, provider: RouteProvider) -> None:
         self.session = session
@@ -51,34 +83,7 @@ class RoutingService:
         self.settings = SettingsService(session)
 
     async def resolve(self, points: list[RoutePoint], user: User) -> list[Stop]:
-        """Convierte place_id o coordenadas en paradas dentro del area de servicio."""
-        max_stops = int(await self.settings.get("max_trip_stops"))
-        if len(points) > max_stops + 2:
-            raise AppError(
-                "TOO_MANY_STOPS", "Too many intermediate stops", 422, {"max_stops": max_stops}
-            )
-        area = await self.settings.service_area()
-        stops: list[Stop] = []
-        for index, point in enumerate(points):
-            if point.place_id is not None:
-                place = await self.session.get(Place, point.place_id)
-                usable = (
-                    place is not None
-                    and place.is_active
-                    and (place.kind != PlaceKind.CUSTOM or place.created_by == user.id)
-                )
-                if not usable or place is None:
-                    raise AppError("PLACE_NOT_FOUND", "Place not found", 404, {"index": index})
-                stop = Stop(place.id, place.name, place.lat, place.lon)
-            else:
-                assert point.lat is not None and point.lon is not None  # noqa: S101 - validado
-                stop = Stop(None, None, point.lat, point.lon)
-            if not area.contains(stop.lat, stop.lon):
-                raise AppError(
-                    "PLACE_OUT_OF_AREA", "Point is outside the service area", 422, {"index": index}
-                )
-            stops.append(stop)
-        return stops
+        return await resolve_points(self.session, points, user)
 
     async def traffic_factor(self, departs_at: datetime | None) -> float:
         if departs_at is None:
