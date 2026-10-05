@@ -1,11 +1,14 @@
+from datetime import date
+
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import local_today
-from app.core.enums import DocKind, ReviewStatus
+from app.core.enums import DocKind, ReviewStatus, UserRole
+from app.core.errors import AppError
 from app.core.storage import StoredFile, delete_private_file, save_private_file
-from app.modules.documents.models import IdentityDocument
-from app.modules.documents.repository import DocumentRepository
+from app.modules.documents.models import DriverLicense, IdentityDocument
+from app.modules.documents.repository import DocumentRepository, LicenseRepository
 from app.modules.semesters.repository import SemesterRepository
 from app.modules.settings.service import SettingsService
 from app.modules.users.models import User
@@ -67,3 +70,45 @@ class DocumentService:
 
     async def history(self, user: User) -> list[IdentityDocument]:
         return await self.repo.for_user(user.id)
+
+
+LICENSE_FOLDER = "licenses"
+
+
+class LicenseService:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.repo = LicenseRepository(session)
+
+    async def get(self, user: User) -> DriverLicense | None:
+        return await self.repo.for_user(user.id)
+
+    async def upload(self, user: User, expires_on: date, upload: UploadFile) -> DriverLicense:
+        """Sube o reemplaza la licencia. Siempre vuelve a revision."""
+        if user.role != UserRole.DRIVER:
+            raise AppError("LICENSE_DRIVERS_ONLY", "Only drivers upload a license", 403)
+        if expires_on <= local_today():
+            raise AppError("LICENSE_EXPIRED", "The license is already expired", 422)
+        max_mb = int(await SettingsService(self.session).get("max_upload_mb"))
+        stored = await save_private_file(upload, LICENSE_FOLDER, max_mb)
+        current = await self.repo.for_user(user.id)
+        old_path = current.file_path if current else None
+        try:
+            if current is None:
+                current = DriverLicense(user_id=user.id)
+                self.repo.add(current)
+            current.file_path = stored.path
+            current.content_type = stored.content_type
+            current.expires_on = expires_on
+            current.status = ReviewStatus.PENDING
+            current.reviewed_by = None
+            current.reviewed_at = None
+            current.rejection_reason = None
+            await self.session.commit()
+        except Exception:
+            delete_private_file(stored.path)
+            raise
+        if old_path:
+            delete_private_file(old_path)
+        await self.session.refresh(current)
+        return current

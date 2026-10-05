@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.documents.models import IdentityDocument
+from app.modules.documents.models import DriverLicense, IdentityDocument
 
 
 class DocumentRepository:
@@ -29,3 +29,16 @@ class DocumentRepository:
 
     def add(self, document: IdentityDocument) -> None:
         self.session.add(document)
+
+
+class LicenseRepository:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def for_user(self, user_id: uuid.UUID) -> DriverLicense | None:
+        return await self.session.scalar(
+            select(DriverLicense).where(DriverLicense.user_id == user_id)
+        )
+
+    def add(self, license_: DriverLicense) -> None:
+        self.session.add(license_)
