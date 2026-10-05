@@ -75,3 +75,23 @@ Registro de decisiones tomadas durante la construcción que no estaban cerradas 
 | 2.16 | La bienvenida de 3 pasos se muestra una vez por dispositivo (`cp.onboarded`). Rutas: `/bienvenida`, `/ingresar`, `/registro`, `/verificar`, `/recuperar`, `/restablecer`, `/cuenta/estado`, `/cuenta/terminos`, `/legal/terminos`, `/legal/datos`, `/perfil`. Cada rol tiene su inicio (`/buscar`, `/inicio`, `/admin`). | Un solo lugar (`homeFor`) decide a dónde va cada quien. |
 | 2.17 | Idioma y tema se sincronizan con el perfil: al iniciar sesión manda el perfil; después, cada cambio en el dispositivo se guarda en el perfil. | Sección 12.1. |
 | 2.18 | El catálogo de componentes salió del layout autenticado: `/catalogo` sigue disponible solo en desarrollo y sin sesión. | Es una herramienta de diseño, no una pantalla del producto. |
+
+## Paso 3. Aprobaciones y revalidación
+
+| # | Decisión | Motivo |
+|---|----------|--------|
+| 3.1 | Una sola cola para carnets, constancias y licencias, separada por `type` (`identity` o `license`) y atendida en orden de llegada. Los ids son UUID, así que `/admin/approvals/{id}` funciona para ambas tablas. | Es la "misma cola" del plan y simplifica el panel. |
+| 3.2 | La cola muestra nombre, programa, rol, sexo declarado y estado del solicitante, pero no su correo ni su teléfono. | Sección 11: ningún endpoint devuelve datos de contacto de otros usuarios. |
+| 3.3 | Al aprobar un carnet el revisor confirma el sexo; si el documento muestra otro, lo corrige y queda en la auditoría (antes y después). | Sección 2: el administrador verifica el sexo al aprobar. |
+| 3.4 | Un documento aprobado queda ligado al semestre vigente y `valid_until` es el fin del semestre. Si no había semestre al subirlo, se liga al vigente al aprobarlo. | Un documento por semestre. |
+| 3.5 | Nadie revisa sus propios documentos y no se puede revisar dos veces (`APPROVAL_NOT_PENDING`). | Evita conflictos de interés y carreras entre administradores. |
+| 3.6 | Una licencia vencida no se puede aprobar ni subir. Subir otra reemplaza la anterior y vuelve a revisión. | "Sin licencia aprobada y vigente no pueden publicar". |
+| 3.7 | `can_publish` en `/users/me`: conductor activo con licencia aprobada y vigente. El paso 4 agrega el requisito de vehículo activo. | Un solo lugar para esa regla. |
+| 3.8 | Archivos: `/admin/files/{id}` para administradores y `/users/me/documents/{id}/file` y `/users/me/license/file` para el dueño, con `Cache-Control: private, no-store`. La interfaz los descarga con el token y los muestra como object URL. | El token nunca va en una URL y el archivo no queda en caché. |
+| 3.9 | La CSP permite `frame-src 'self' blob:` (visor de PDF) y agrega `object-src 'none'`. | El visor usa object URLs locales. |
+| 3.10 | Revalidación diaria (`semester_revalidation`, 5:05 a. m. de Pamplona, y al arrancar el worker). Con semestre vigente: vencen los carnets aprobados de otros semestres y se avisa. Pasado `revalidation_deadline`: pasajeros y conductores activos sin carnet aprobado del semestre vuelven a `pending_approval`. Administradores y superadmin no revalidan. Sin semestre vigente (vacaciones) no hace nada. | Sección 7.1. Es idempotente. |
+| 3.11 | El superadmin crea administradores con una clave inicial; el primer ingreso pide el código por correo. | El plan no define el envío de invitaciones; esto es lo más simple y seguro. |
+| 3.12 | El superadmin cambia roles entre pasajero, conductor y administrador. No puede cambiar el suyo ni asignar superadmin. Si deja de ser conductor se borra la nota de pago. | Sección 2. Queda en la auditoría y se avisa al usuario. |
+| 3.13 | Las notificaciones internas se adelantan: tabla, bandeja (`/notifications`) y pantalla. El paso 9 agrega la entrega en tiempo real. | Aprobaciones y vencimientos deben avisar al usuario. |
+| 3.14 | La campana de avisos está en el encabezado para todos los roles. | La barra del conductor no tiene "Notificaciones" entre sus 5 destinos. |
+| 3.15 | La interfaz para crear administradores y cambiar roles llega en el paso 12 (panel del superadmin). | En este paso basta la API. |

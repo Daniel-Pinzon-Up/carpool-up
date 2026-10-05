@@ -59,6 +59,10 @@ Los códigos de negocio se documentan aquí en el paso que los introduce.
 | `REFRESH_REUSED` | 401 | 2 | Se reutilizó un refresh viejo: se revocaron todas las sesiones. |
 | `PAYMENT_NOTE_DRIVERS_ONLY` | 403 | 2 | Solo conductores guardan nota de pago. |
 | `LEGAL_VERSION_NOT_CURRENT` | 422 | 2 | Se intentó aceptar una versión que no está vigente. |
+| `APPROVAL_NOT_PENDING` | 409 | 3 | El elemento ya fue revisado. |
+| `LICENSE_EXPIRED` | 422 | 3 | La licencia está vencida (al subirla o al aprobarla). |
+| `LICENSE_DRIVERS_ONLY` | 403 | 3 | Solo los conductores suben licencia. |
+| `FILE_NOT_FOUND` | 404 | 3 | El archivo no existe en el almacenamiento. |
 
 ## Endpoints
 
@@ -118,6 +122,27 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `GET, PATCH /users/me` | Sesión (cualquier estado) | | Perfil propio con `document` y `pending_legal`. Se puede cambiar `program`, `preferred_language`, `theme_preference` y `payment_note` (solo conductores). |
 | `GET, POST /users/me/documents` | Sesión (cualquier estado) | | Historial y carga de carnet o constancia (multipart: `kind`, `document`). |
 | `POST /legal/accept` | Sesión | | `{document_ids}` de versiones vigentes pendientes. |
+
+### Aprobaciones, licencias y notificaciones (paso 3)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /admin/approvals?type=&status=&limit=&cursor=` | Admin o superadmin | Cola en orden de llegada. `type`: `identity` (por defecto) o `license`; `status`: `pending` por defecto. |
+| `GET /admin/approvals/counts` | Admin o superadmin | Pendientes por tipo. |
+| `GET /admin/approvals/{id}` | Admin o superadmin | Detalle de un elemento. |
+| `POST /admin/approvals/{id}/approve` | Admin o superadmin | `{sex?}` para corregir el sexo en carnets. Activa la cuenta si estaba en `pending_approval`. |
+| `POST /admin/approvals/{id}/reject` | Admin o superadmin | `{reason}` (5 a 300 caracteres); el usuario lo ve. |
+| `GET /admin/files/{id}` | Admin o superadmin | Archivo del carnet, constancia o licencia, sin caché. |
+| `POST /admin/admins` | Superadmin | `{email, full_name, sex, password}`. |
+| `PATCH /admin/users/{id}/role` | Superadmin | `{role}`: `passenger`, `driver` o `admin`. |
+| `GET /users/me/documents/{id}/file` | Dueño | Archivo propio. |
+| `GET, PUT /users/me/license` | Dueño (PUT solo conductores) | Multipart: `expires_on`, `document`. |
+| `GET /users/me/license/file` | Dueño | Archivo propio. |
+| `GET /notifications?unread_only=&limit=&cursor=` | Sesión | Bandeja propia, más reciente primero. |
+| `GET /notifications/unread-count` | Sesión | `{unread}`. |
+| `POST /notifications/{id}/read`, `POST /notifications/read-all` | Sesión | Marcar como leídas. |
+
+Tipos de notificación de este paso: `document_approved`, `document_rejected` (`reason`), `document_expired` (`semester`, `deadline`), `license_approved`, `license_rejected` (`reason`), `account_revalidation_required` (`semester`), `role_changed` (`role`).
 
 ## Cabeceras
 

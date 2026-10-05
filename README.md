@@ -9,7 +9,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 0 | Cimientos: monorepo, Docker Compose, FastAPI modular, Angular con sistema de diseño glass | Hecho |
 | 1 | Configuración y catálogos: parámetros, semestres, lugares, pico y placa, documentos legales y auditoría | Hecho |
 | 2 | Autenticación y cuentas: registro con documento, verificación de correo, 2FA, sesiones, recuperación, términos y pantallas | Hecho |
-| 3 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 3 | Aprobaciones y revalidación: cola de carnets y licencias, visor seguro, revalidación semestral, administradores, roles y notificaciones | Hecho |
+| 4 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
