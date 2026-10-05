@@ -14,7 +14,7 @@ import { GlassTextarea } from '../../shared/ui/glass-textarea';
   imports: [ReactiveFormsModule, TranslocoPipe, GlassModal, GlassButton, GlassTextarea],
   template: `
     <cp-glass-modal [title]="'approvals.reject.title' | transloco: { name: data.name }">
-      <form id="reject-form" (ngSubmit)="submit()" novalidate>
+      <form id="reject-form" (submit)="$event.preventDefault(); submit()" novalidate>
         <cp-glass-textarea
           [formControl]="reason"
           [label]="'approvals.reject.reason' | transloco"

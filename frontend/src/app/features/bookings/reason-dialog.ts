@@ -28,7 +28,12 @@ export interface ReasonResult {
   imports: [ReactiveFormsModule, TranslocoPipe, GlassModal, GlassButton, GlassTextarea],
   template: `
     <cp-glass-modal [title]="data.title">
-      <form id="reason-form" class="flex flex-col gap-3" (ngSubmit)="submit()" novalidate>
+      <form
+        id="reason-form"
+        class="flex flex-col gap-3"
+        (submit)="$event.preventDefault(); submit()"
+        novalidate
+      >
         <p class="text-muted">{{ data.message }}</p>
         <cp-glass-textarea
           [formControl]="reason"

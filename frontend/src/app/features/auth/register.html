@@ -9,7 +9,7 @@
     </div>
   }
 
-  <form (ngSubmit)="next()" novalidate>
+  <form (submit)="$event.preventDefault(); next()" novalidate>
     <h2 id="register-step-title" tabindex="-1" class="mb-1 text-lg font-bold focus:outline-none">
       {{ 'register.steps.' + step() | transloco }}
     </h2>
