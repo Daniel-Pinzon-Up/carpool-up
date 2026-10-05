@@ -15,6 +15,7 @@ import { GlassInput } from '../../shared/ui/glass-input';
 import { SeatPicker } from '../../shared/ui/seat-picker';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { pamplonaDate, pamplonaTime } from '../trips/trips.api';
+import { SearchedPlaces } from '../bookings/booking-panel';
 import { ResultCard } from './result-card';
 import { PREFERENCE_KEYS, SearchApi, SearchPreferences, SearchResult } from './search.api';
 
@@ -138,7 +139,7 @@ interface SavedSearch extends SearchPreferences {
           }
         } @else if (results(); as list) {
           @for (result of list; track result.trip_id) {
-            <cp-result-card [result]="result" />
+            <cp-result-card [result]="result" [places]="searchedPlaces()" />
           } @empty {
             <cp-empty-state
               [title]="'search.empty.title' | transloco"
@@ -177,6 +178,7 @@ export default class SearchPage {
     PREFERENCE_KEYS.filter((key) => key !== 'women_only' || this.auth.user()?.sex === 'female'),
   );
   protected readonly results = signal<SearchResult[] | null>(null);
+  protected readonly searchedPlaces = signal<SearchedPlaces | null>(null);
   protected readonly loading = signal(false);
   protected readonly formError = signal<string | null>(null);
 
@@ -228,6 +230,7 @@ export default class SearchPage {
     const saved: SavedSearch = { origin, destination, date, time, seats, ...prefs };
     writePref(LAST_SEARCH_KEY, JSON.stringify(saved));
     this.loading.set(true);
+    this.searchedPlaces.set({ pickup: origin, dropoff: destination });
     try {
       this.results.set(
         await this.api.search({

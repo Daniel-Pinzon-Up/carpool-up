@@ -18,6 +18,7 @@ import {
   LucideRoute,
   LucideTriangleAlert,
   LucideUsers,
+  LucideWallet,
   LucideX,
 } from '@lucide/angular';
 import { firstValueFrom } from 'rxjs';
@@ -39,6 +40,8 @@ import {
   DuplicateResult,
 } from './trip-dialogs';
 import { TRIP_STATUS_TONE, formatDeparture, formatTime } from './trip-status';
+import { BookingPanel, SearchedPlaces } from '../bookings/booking-panel';
+import { TripPassengers } from '../bookings/trip-passengers';
 import { SearchResult } from '../search/search.api';
 import { Trip, TripsApi, pamplonaTime } from './trips.api';
 
@@ -49,6 +52,8 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
   imports: [
     RouterLink,
     TranslocoPipe,
+    BookingPanel,
+    TripPassengers,
     GlassButton,
     GlassCard,
     MapView,
@@ -61,6 +66,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     LucideRoute,
     LucideTriangleAlert,
     LucideUsers,
+    LucideWallet,
     LucideX,
   ],
   template: `
@@ -149,12 +155,17 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
         }
 
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-          <cp-map-view
-            class="h-72 w-full sm:h-[24rem]"
-            [route]="t.geometry"
-            [markers]="markers()"
-            [label]="'trips.mapLabel' | transloco"
-          />
+          <div class="flex flex-col gap-5">
+            <cp-map-view
+              class="h-72 w-full sm:h-[24rem]"
+              [route]="t.geometry"
+              [markers]="markers()"
+              [label]="'trips.mapLabel' | transloco"
+            />
+            @if (isPassenger()) {
+              <cp-booking-panel [trip]="t" [searched]="searched()" (changed)="reload()" />
+            }
+          </div>
           <cp-glass-card [level]="2">
             <h2 class="mb-3 flex items-center gap-2 font-bold">
               <svg lucideRoute class="size-5" aria-hidden="true"></svg>
@@ -196,7 +207,10 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
               <div>
                 <dt class="text-muted">{{ 'planner.seats' | transloco }}</dt>
                 <dd class="flex items-center gap-1 font-semibold">
-                  <svg lucideUsers class="size-4" aria-hidden="true"></svg>{{ t.seats_total }}
+                  <svg lucideUsers class="size-4" aria-hidden="true"></svg>
+                  {{
+                    'trips.seatsLeft' | transloco: { free: t.seats_available, total: t.seats_total }
+                  }}
                 </dd>
               </div>
               <div class="col-span-2">
@@ -212,7 +226,22 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
                 <dt class="text-muted">{{ 'trips.driver' | transloco }}</dt>
                 <dd class="font-semibold">{{ t.driver.full_name }}</dd>
               </div>
+              @if (!isOwner() && t.passengers.length) {
+                <div class="col-span-2">
+                  <dt class="text-muted">{{ 'bookings.panel.companions' | transloco }}</dt>
+                  <dd class="font-semibold">{{ companions() }}</dd>
+                </div>
+              }
             </dl>
+            @if (t.payment_note) {
+              <p class="mt-4 flex gap-2 rounded-xl bg-accent/10 p-3 text-sm">
+                <svg lucideWallet class="size-4 shrink-0 text-accent" aria-hidden="true"></svg>
+                <span>
+                  <span class="font-semibold">{{ 'bookings.card.paymentNote' | transloco }}:</span>
+                  {{ t.payment_note }}
+                </span>
+              </p>
+            }
             <h2 class="mt-5 mb-2 font-bold">{{ 'publish.steps.rules' | transloco }}</h2>
             <ul class="flex flex-wrap gap-1.5">
               @for (rule of t.rules; track rule.kind) {
@@ -232,6 +261,10 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
             </ul>
           </cp-glass-card>
         </div>
+
+        @if (isOwner()) {
+          <cp-trip-passengers [tripId]="t.id" (changed)="reload()" />
+        }
       } @else {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
       }
@@ -253,7 +286,19 @@ export default class TripDetail {
   /** Recogida y bajada calculadas por la busqueda (llegan en el estado de la navegacion). */
   protected readonly match = signal<SearchResult | null>(null);
   protected readonly error = signal<string | null>(null);
+  /** Lugares que el pasajero busco (llegan junto con el resultado de la busqueda). */
+  protected readonly searched = signal<SearchedPlaces | null>(null);
   protected readonly isOwner = computed(() => this.trip()?.driver.id === this.auth.user()?.id);
+  protected readonly isPassenger = computed(
+    () => this.auth.user()?.role === 'passenger' && !this.isOwner(),
+  );
+  protected readonly companions = computed(
+    () =>
+      (this.trip()?.passengers ?? [])
+        .filter((p) => p.id !== this.auth.user()?.id)
+        .map((p) => p.full_name)
+        .join(', ') || this.transloco.translate('bookings.panel.onlyYou'),
+  );
   protected readonly tone = computed(() => TRIP_STATUS_TONE[this.trip()?.status ?? 'scheduled']);
   protected readonly when = computed(() => {
     const trip = this.trip();
@@ -306,12 +351,25 @@ export default class TripDetail {
 
   private async load(id: string): Promise<void> {
     this.error.set(null);
-    const state = (globalThis.history?.state ?? {}) as { match?: SearchResult };
-    this.match.set(state.match?.trip_id === id ? state.match : null);
+    const state = (globalThis.history?.state ?? {}) as {
+      match?: SearchResult;
+      places?: SearchedPlaces;
+    };
+    const fromSearch = state.match?.trip_id === id;
+    this.match.set(fromSearch ? (state.match ?? null) : null);
+    this.searched.set(fromSearch ? (state.places ?? null) : null);
     try {
       this.trip.set(await this.api.trip(id));
     } catch (error) {
       this.error.set(apiErrorMessage(this.transloco, error));
+    }
+  }
+
+  protected async reload(): Promise<void> {
+    try {
+      this.trip.set(await this.api.trip(this.id()));
+    } catch (error) {
+      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
     }
   }
 

@@ -28,6 +28,7 @@ import { GlassCard } from '../../shared/ui/glass-card';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
+import { SubscribePanel } from '../bookings/subscribe-panel';
 import { TripCard } from './trip-card';
 import {
   CancelDialogData,
@@ -49,6 +50,7 @@ import { Series, TripsApi } from './trips.api';
     GlassCard,
     Skeleton,
     StatusBadge,
+    SubscribePanel,
     TripCard,
     LucideArrowRight,
     LucideCopy,
@@ -136,6 +138,9 @@ import { Series, TripsApi } from './trips.api';
           }
         </cp-glass-card>
 
+        @if (isPassenger()) {
+          <cp-subscribe-panel [series]="s" (changed)="reload()" />
+        }
         <section aria-labelledby="occurrences-title" class="flex flex-col gap-3">
           <h2 id="occurrences-title" class="text-xl font-bold">
             {{ 'trips.occurrences' | transloco }}
@@ -164,6 +169,9 @@ export default class SeriesDetail {
   protected readonly series = signal<Series | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly isOwner = computed(() => this.series()?.driver.id === this.auth.user()?.id);
+  protected readonly isPassenger = computed(
+    () => this.auth.user()?.role === 'passenger' && !this.isOwner(),
+  );
   protected readonly tone = computed(() => SERIES_STATUS_TONE[this.series()?.status ?? 'active']);
   protected readonly money = computed(() =>
     formatCop(this.series()?.price_per_seat ?? 0, this.language.current()),
@@ -193,6 +201,10 @@ export default class SeriesDetail {
     } catch (error) {
       this.error.set(apiErrorMessage(this.transloco, error));
     }
+  }
+
+  protected async reload(): Promise<void> {
+    await this.load(this.id());
   }
 
   protected date(value: string): string {

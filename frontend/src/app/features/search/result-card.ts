@@ -13,6 +13,7 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { formatCop } from '../../shared/map/routing.api';
 import { Avatar } from '../../shared/ui/avatar';
 import { formatTime } from '../trips/trip-status';
+import { SearchedPlaces } from '../bookings/booking-panel';
 import { SearchResult } from './search.api';
 
 /** Resultado de busqueda: hora y lugar de recogida, conductor, vehiculo, aporte y cupos. */
@@ -34,7 +35,7 @@ import { SearchResult } from './search.api';
   template: `
     <a
       [routerLink]="['/viajes', result().trip_id]"
-      [state]="{ match: result() }"
+      [state]="{ match: result(), places: places() }"
       class="glass-1 !rounded-2xl flex flex-col gap-3 p-4 transition hover:bg-glass-strong focus-visible:outline-2 focus-visible:outline-primary"
     >
       <div class="flex items-start justify-between gap-3">
@@ -118,6 +119,8 @@ import { SearchResult } from './search.api';
 })
 export class ResultCard {
   readonly result = input.required<SearchResult>();
+  /** Origen y destino que eligio el pasajero, para proponerlos al reservar. */
+  readonly places = input<SearchedPlaces | null>(null);
   private readonly language = inject(LanguageService);
 
   protected readonly money = computed(() =>
