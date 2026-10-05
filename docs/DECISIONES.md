@@ -182,3 +182,11 @@ Registro de decisiones tomadas durante la construcción que no estaban cerradas 
 | 8.14 | Jobs: `expire_pending_requests` cada 5 minutos, `auto_cancel_late` y `offer_waitlist` cada minuto. Los chats al aceptar llegan en el paso 9; abordaje, no-show y sanciones automáticas en el paso 10 (la tabla `suspensions` ya existe). | Sección 9 y orden del plan. |
 | 8.15 | Pantallas: panel de reserva en el detalle del viaje (con los lugares de la búsqueda como opción), unirse a la serie con las fechas del rango marcadas (pico y placa tachadas, llenas en gris), Mis viajes del pasajero (próximos, historial, series y lista de espera) y Solicitudes del conductor (reservas, cancelaciones y suscripciones), con acceso desde Inicio y Mis viajes. | Sección 13. |
 
+## Identidad visual
+
+| # | Decisión | Motivo |
+|---|----------|--------|
+| V.1 | La app se llama **Carpool UP** en los cuatro idiomas (antes "Carpool Universitario" y traducciones). Es una marca y no se traduce. | Así lo dice el logo entregado. |
+| V.2 | Los originales están en `design/brand/` y fuera del build. La app usa versiones WebP recortadas y reducidas en `public/brand/`: logo (512 y 128 px), wordmark, tres ilustraciones (38 a 81 KB). También los iconos PNG de 192 y 512 px, el apple-touch-icon, el favicon y `manifest.webmanifest`. | Los originales pesan de 0,9 a 1,9 MB cada uno, demasiado para móvil. |
+| V.3 | Ubicación: logo en la barra lateral, la cabecera móvil y la pestaña; wordmark en las pantallas sin sesión; escena pasajera y conductor en la bienvenida y la búsqueda; carro en acuarela en la bienvenida y el inicio del conductor; carro plano en los estados vacíos de viajes y búsqueda. Las ilustraciones son decorativas (`alt=""`). | La marca se ve en cada pantalla y las ilustraciones acompañan los momentos sin datos. |
+
