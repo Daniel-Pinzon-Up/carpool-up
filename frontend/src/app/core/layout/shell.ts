@@ -10,12 +10,16 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   LucideBell,
+  LucideWifiOff,
   LucideDynamicIcon,
   LucidePalette,
   LucidePanelLeftClose,
   LucidePanelLeftOpen,
 } from '@lucide/angular';
 import { Brand } from '../../shared/ui/brand';
+import { ChatUnread } from '../../features/chat/chat.api';
+import { NotificationsStore } from '../notifications/notifications.store';
+import { RealtimeService } from '../ws/realtime.service';
 import { LanguageSelect } from '../../shared/ui/language-select';
 import { ThemeToggle } from '../../shared/ui/theme-toggle';
 import { AuthService } from '../auth/auth.service';
@@ -37,6 +41,7 @@ import { NAV_BY_ROLE } from './navigation';
     TranslocoPipe,
     LucideDynamicIcon,
     LucideBell,
+    LucideWifiOff,
     LucidePalette,
     LucidePanelLeftClose,
     LucidePanelLeftOpen,
@@ -72,12 +77,22 @@ import { NAV_BY_ROLE } from './navigation';
             [class.justify-center]="collapsed()"
             [attr.title]="collapsed() ? ('nav.' + item.key | transloco) : null"
           >
-            <svg
-              [lucideIcon]="item.icon"
-              class="size-6 shrink-0"
-              [class.text-accent]="rla.isActive"
-              aria-hidden="true"
-            ></svg>
+            <span class="relative shrink-0">
+              <svg
+                [lucideIcon]="item.icon"
+                class="size-6"
+                [class.text-accent]="rla.isActive"
+                aria-hidden="true"
+              ></svg>
+              @if (badge(item.key); as count) {
+                <span
+                  class="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[0.7rem] font-bold text-on-accent"
+                >
+                  {{ count > 99 ? '99+' : count }}
+                  <span class="sr-only">{{ 'layout.unread' | transloco }}</span>
+                </span>
+              }
+            </span>
             <span [class.sr-only]="collapsed()">{{ 'nav.' + item.key | transloco }}</span>
           </a>
         }
@@ -128,13 +143,35 @@ import { NAV_BY_ROLE } from './navigation';
                 <svg lucidePalette class="size-5" aria-hidden="true"></svg>
               </a>
             }
+            @if (live.status() === 'reconnecting') {
+              <span
+                class="glass-1 !rounded-full flex min-h-11 items-center gap-2 px-3 text-sm text-muted"
+                role="status"
+              >
+                <svg lucideWifiOff class="size-4" aria-hidden="true"></svg>
+                <span class="hidden sm:inline">{{ 'layout.reconnecting' | transloco }}</span>
+                <span class="sr-only sm:hidden">{{ 'layout.reconnecting' | transloco }}</span>
+              </span>
+            }
             <a
               routerLink="/notificaciones"
               routerLinkActive="!bg-accent/20"
-              class="glass-1 !rounded-full grid size-11 place-items-center"
-              [attr.aria-label]="'nav.notifications' | transloco"
+              class="glass-1 !rounded-full relative grid size-11 place-items-center"
+              [attr.aria-label]="
+                notifications.unread()
+                  ? ('layout.notificationsUnread' | transloco: { count: notifications.unread() })
+                  : ('nav.notifications' | transloco)
+              "
             >
               <svg lucideBell class="size-5" aria-hidden="true"></svg>
+              @if (notifications.unread(); as count) {
+                <span
+                  class="absolute -top-0.5 -right-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[0.7rem] font-bold text-on-accent"
+                  aria-hidden="true"
+                >
+                  {{ count > 99 ? '99+' : count }}
+                </span>
+              }
             </a>
             <cp-language-select />
             <cp-theme-toggle />
@@ -161,7 +198,7 @@ import { NAV_BY_ROLE } from './navigation';
           class="flex min-h-12 min-w-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[0.7rem] font-medium text-muted transition"
         >
           <span
-            class="grid h-7 w-12 place-items-center rounded-full transition"
+            class="relative grid h-7 w-12 place-items-center rounded-full transition"
             [class]="rla.isActive ? 'bg-accent/20' : ''"
           >
             <svg
@@ -170,6 +207,14 @@ import { NAV_BY_ROLE } from './navigation';
               [class.text-accent]="rla.isActive"
               aria-hidden="true"
             ></svg>
+            @if (badge(item.key); as count) {
+              <span
+                class="absolute -top-1 right-0 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[0.7rem] font-bold text-on-accent"
+              >
+                {{ count > 99 ? '99+' : count }}
+                <span class="sr-only">{{ 'layout.unread' | transloco }}</span>
+              </span>
+            }
           </span>
           <span class="max-w-full truncate">{{ 'navShort.' + item.key | transloco }}</span>
         </a>
@@ -179,10 +224,20 @@ import { NAV_BY_ROLE } from './navigation';
 })
 export class Shell {
   private readonly auth = inject(AuthService);
+  protected readonly live = inject(RealtimeService);
+  protected readonly notifications = inject(NotificationsStore);
+  private readonly chatUnread = inject(ChatUnread);
   protected readonly items = computed(() => NAV_BY_ROLE[this.auth.user()?.role ?? 'passenger']);
   protected readonly mobileItems = computed(() => this.items().slice(0, 5));
   protected readonly collapsed = signal(
     globalThis.innerWidth !== undefined && globalThis.innerWidth < 1024,
   );
   protected readonly devMode = isDevMode();
+
+  /** Pendientes por destino de la navegacion: mensajes y avisos. */
+  protected badge(key: string): number {
+    if (key === 'messages') return this.chatUnread.count();
+    if (key === 'notifications') return this.notifications.unread();
+    return 0;
+  }
 }

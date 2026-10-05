@@ -1,4 +1,5 @@
 import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -11,6 +12,7 @@ import {
   LucideCircleX,
   LucideHourglass,
   LucideInbox,
+  LucideMessageCircle,
   LucideRoute,
   LucideTicket,
   LucideDynamicIcon,
@@ -24,14 +26,7 @@ import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ToastService } from '../../shared/ui/toast.service';
-
-interface AppNotification {
-  id: string;
-  kind: string;
-  payload: Record<string, unknown>;
-  read_at: string | null;
-  created_at: string;
-}
+import { AppNotification, NotificationsStore } from '../../core/notifications/notifications.store';
 
 const ICONS: Record<string, LucideIcon> = {
   document_approved: LucideCircleCheck,
@@ -56,6 +51,7 @@ const ICONS: Record<string, LucideIcon> = {
   trip_pico_placa_cancelled: LucideCalendarX,
   trip_changed: LucideRoute,
   waitlist_offer: LucideHourglass,
+  message_new: LucideMessageCircle,
 };
 
 /** A donde lleva cada aviso al abrirlo. */
@@ -76,7 +72,7 @@ const LINKS: Record<string, string> = {
   subscription_ended: '/mis-viajes',
 };
 
-/** Bandeja de avisos. El paso 9 agrega la llegada en vivo. */
+/** Bandeja de avisos; los nuevos llegan en vivo y se agregan arriba. */
 @Component({
   selector: 'cp-notifications-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -174,6 +170,11 @@ export default class NotificationsPage {
 
   constructor() {
     void this.load();
+    inject(NotificationsStore)
+      .incoming.pipe(takeUntilDestroyed())
+      .subscribe((item) =>
+        this.items.update((list) => (list.some((i) => i.id === item.id) ? list : [item, ...list])),
+      );
   }
 
   private async load(): Promise<void> {
@@ -199,7 +200,8 @@ export default class NotificationsPage {
   protected link(item: AppNotification): string {
     const fixed = LINKS[item.kind];
     if (fixed) return fixed;
-    const { trip_id: trip, series_id: series } = item.payload;
+    const { trip_id: trip, series_id: series, conversation_id: chat } = item.payload;
+    if (typeof chat === 'string') return `/mensajes/${chat}`;
     if (typeof trip === 'string') return `/viajes/${trip}`;
     if (typeof series === 'string') return `/series/${series}`;
     return '/notificaciones';
