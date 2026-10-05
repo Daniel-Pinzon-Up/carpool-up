@@ -41,12 +41,10 @@ describe('Approvals', () => {
 
   beforeEach(() => {
     api = {
-      queue: vi
-        .fn()
-        .mockResolvedValue({
-          items: [item('a', 'Laura Gomez', 'male'), item('b', 'Andres Rojas')],
-          next_cursor: null,
-        }),
+      queue: vi.fn().mockResolvedValue({
+        items: [item('a', 'Laura Gomez', 'male'), item('b', 'Andres Rojas')],
+        next_cursor: null,
+      }),
       counts: vi.fn().mockResolvedValue({ identity: 2, license: 0 }),
       approve: vi.fn().mockResolvedValue(item('a', 'Laura Gomez')),
       reject: vi.fn(),
