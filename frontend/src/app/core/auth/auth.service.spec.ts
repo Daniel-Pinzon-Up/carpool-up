@@ -17,6 +17,8 @@ export const ME: Me = {
   theme_preference: 'system',
   last_login_at: null,
   document: null,
+  license: null,
+  can_publish: false,
   pending_legal: [],
 };
 
