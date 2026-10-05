@@ -99,3 +99,10 @@ async def get_superadmin_actor(user: SuperAdmin, request: Request) -> Actor:
 
 
 SuperAdminActor = Annotated[Actor, Depends(get_superadmin_actor)]
+
+
+async def get_admin_actor(user: AdminOrSuper, request: Request) -> Actor:
+    return Actor(user=user, ip=client_ip(request))
+
+
+AdminActor = Annotated[Actor, Depends(get_admin_actor)]
