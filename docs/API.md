@@ -67,6 +67,10 @@ Los códigos de negocio se documentan aquí en el paso que los introduce.
 | `VEHICLE_PLATE_TAKEN` | 409 | 4 | La placa ya está registrada en un vehículo no borrado. |
 | `VEHICLE_INVALID` | 422 | 4 | Una edición rompe las reglas del tipo (`details.rule`). |
 | `PUBLISH_NOT_ALLOWED` | 403 | 4 | El conductor no cumple los requisitos para publicar (`details.blockers`). |
+| `PLACE_NOT_FOUND` | 404 | 5 | El lugar no existe, está inactivo o es un pin de otro usuario (`details.index`). |
+| `TOO_MANY_STOPS` | 422 | 5 | Más paradas intermedias que `max_trip_stops` (`details.max_stops`). |
+| `ROUTE_NOT_FOUND` | 422 | 5 | No hay ruta por carretera entre los puntos. |
+| `ROUTING_UNAVAILABLE` | 503 | 5 | OSRM no responde o no está levantado. |
 
 ## Endpoints
 
@@ -160,6 +164,27 @@ Tipos de notificación de este paso: `document_approved`, `document_rejected` (`
 | `GET /vehicles/{id}/photo` | Sesión | Foto del vehículo. |
 
 `GET /users/me` incluye `can_publish` y `publish_blockers` (`account_not_active`, `license_missing`, `license_pending`, `license_rejected`, `license_expired`, `no_active_vehicle`).
+
+### Rutas (paso 5)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `POST /routing/preview` | Usuario activo, 30 por minuto | Ruta, distancia, ETA por parada y aporte sugerido. |
+
+Cuerpo:
+
+```json
+{
+  "points": [{"place_id": "uuid"}, {"lat": 7.376, "lon": -72.646}, {"place_id": "uuid"}],
+  "departs_at": "2026-10-06T07:30:00-05:00",
+  "vehicle_type": "car",
+  "seats": 3
+}
+```
+
+`points` tiene origen, paradas intermedias y destino (al menos 2). Cada punto lleva `place_id` o `lat` y `lon`, nunca ambos. `departs_at`, `vehicle_type` y `seats` son opcionales.
+
+Respuesta: `geometry` (GeoJSON `[[lon, lat], ...]`), `distance_m`, `osrm_duration_s`, `traffic_factor`, `duration_s` (ya con el factor), `points` (cada uno con `eta_offset_s` y `eta` si hubo hora de salida), `pricing_configured`, `suggested_price` y `max_price_per_seat`.
 
 ## Cabeceras
 

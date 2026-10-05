@@ -11,7 +11,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 2 | Autenticación y cuentas: registro con documento, verificación de correo, 2FA, sesiones, recuperación, términos y pantallas | Hecho |
 | 3 | Aprobaciones y revalidación: cola de carnets y licencias, visor seguro, revalidación semestral, administradores, roles y notificaciones | Hecho |
 | 4 | Vehículos: CRUD con foto, reglas de placa y capacidad, requisitos para publicar e inicio del conductor | Hecho |
-| 5 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 5 | Rutas y mapas: OSRM con el mapa de Pamplona, ETA con factor de tráfico, aporte sugerido, mapa base propio y planificador de rutas | Hecho |
+| 6 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
@@ -37,6 +38,16 @@ make up          # Windows: .\make.ps1 up
 
 El catálogo de componentes del sistema de diseño está en `/catalogo` en modo desarrollo.
 
+### Mapa y rutas
+
+```sh
+make osrm     # descarga Colombia (unos 330 MB), la recorta a Pamplona y genera el grafo de OSRM; tarda unos minutos
+make tiles    # descarga solo el recorte de Pamplona del mapa base de Protomaps (cerca de 1 MB)
+make up       # levanta OSRM si ya existen sus datos
+```
+
+En Windows: `.\make.ps1 osrm` y `.\make.ps1 tiles` (necesitan Git Bash). Los datos quedan en `infra/osrm/data` e `infra/tiles` y no se versionan.
+
 ### Primeros pasos con datos
 
 ```sh
@@ -57,7 +68,7 @@ Los correos de verificación y recuperación llegan a Mailpit en desarrollo: htt
 ```sh
 cd frontend
 npm install
-npm start        # http://localhost:4200, con proxy de /api y /ws hacia localhost:8000
+npm start        # http://localhost:4200, con proxy de /api y /ws hacia localhost:8000 y de /tiles hacia Nginx
 ```
 
 ### Backend fuera de Docker
