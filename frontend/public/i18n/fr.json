@@ -25,7 +25,10 @@
       "system": "Selon le système",
       "light": "Clair",
       "dark": "Sombre"
-    }
+    },
+    "unread": "non lus",
+    "reconnecting": "Reconnexion...",
+    "notificationsUnread": "Notifications : {{count}} non lues"
   },
   "nav": {
     "search": "Rechercher",
@@ -183,7 +186,9 @@
     "WAITLIST_OFFER_EXPIRED": "L'offre de place n'est plus disponible.",
     "SEATS_BELOW_BOOKED": "{{booked}} places sont déjà acceptées ; vous ne pouvez pas en proposer moins.",
     "WOMEN_ONLY_CONFLICT": "Le trajet a des passagers qui ne sont pas des femmes ; il ne peut pas être réservé aux femmes.",
-    "SERIES_HAS_BOOKINGS": "Certains trajets de la série ont des réservations. Confirmez la modification."
+    "SERIES_HAS_BOOKINGS": "Certains trajets de la série ont des réservations. Confirmez la modification.",
+    "CONVERSATION_CLOSED": "Ce chat est déjà fermé.",
+    "MESSAGE_EMPTY": "Écrivez un message avant de l'envoyer."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -618,7 +623,8 @@
       "subscription_expired": "Votre demande pour rejoindre la série a expiré.",
       "subscription_ended": "Votre inscription à la série est terminée.",
       "waitlist_offer": "Une place s'est libérée sur un trajet complet. Confirmez vite.",
-      "waitlist_offer_expired": "L'offre de place a expiré."
+      "waitlist_offer_expired": "L'offre de place a expiré.",
+      "message_new": "{{sender_name}} vous a écrit dans le chat."
     }
   },
   "vehicles": {
@@ -1134,5 +1140,34 @@
         "active": "Vos trajets de la série sont dans Mes trajets."
       }
     }
+  },
+  "chat": {
+    "list": "Conversations",
+    "back": "Retour aux messages",
+    "viewTrip": "Voir le trajet",
+    "viewSeries": "Voir la série",
+    "older": "Voir les messages précédents",
+    "empty": "Pas encore de messages. Dites bonjour pour organiser la prise en charge.",
+    "you": "Vous",
+    "sending": "Envoi...",
+    "failed": "Non envoyé",
+    "retry": "Réessayer",
+    "discard": "Supprimer",
+    "typing": "{{name}} est en train d'écrire...",
+    "closed": "Ce chat est fermé car le trajet est terminé ou annulé. Vous pouvez le lire mais pas écrire.",
+    "closedShort": "Fermé",
+    "placeholder": "Écrivez un message",
+    "send": "Envoyer le message",
+    "remaining": "{{count}} caractères restants",
+    "unread": "messages non lus",
+    "none": "Vous n'avez pas encore de conversations",
+    "noneHint": "Quand vous êtes accepté sur un trajet (ou acceptez un passager), le chat du trajet s'ouvre.",
+    "pick": "Choisissez une conversation",
+    "pickHint": "Vous verrez ici les messages du trajet et ceux avec votre conducteur ou passager.",
+    "directSeries": "Chat direct de la série {{route}}",
+    "directTrip": "Chat direct du trajet {{route}}",
+    "groupOn": "Chat du trajet · {{when}}",
+    "noMessages": "Pas encore de messages",
+    "openTrip": "Ouvrir le chat du trajet"
   }
 }

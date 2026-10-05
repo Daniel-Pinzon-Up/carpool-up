@@ -25,7 +25,10 @@
       "system": "Conforme o sistema",
       "light": "Claro",
       "dark": "Escuro"
-    }
+    },
+    "unread": "não lidas",
+    "reconnecting": "Reconectando...",
+    "notificationsUnread": "Notificações: {{count}} não lidas"
   },
   "nav": {
     "search": "Buscar",
@@ -183,7 +186,9 @@
     "WAITLIST_OFFER_EXPIRED": "A oferta de vaga não está mais disponível.",
     "SEATS_BELOW_BOOKED": "Já há {{booked}} vagas aceitas; não é possível oferecer menos.",
     "WOMEN_ONLY_CONFLICT": "A viagem tem passageiros que não são mulheres; não pode ser só para mulheres.",
-    "SERIES_HAS_BOOKINGS": "Algumas viagens da série têm reservas. Confirme a mudança."
+    "SERIES_HAS_BOOKINGS": "Algumas viagens da série têm reservas. Confirme a mudança.",
+    "CONVERSATION_CLOSED": "Este chat já está encerrado.",
+    "MESSAGE_EMPTY": "Escreva uma mensagem antes de enviar."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -618,7 +623,8 @@
       "subscription_expired": "Seu pedido para entrar na série venceu.",
       "subscription_ended": "Sua inscrição na série terminou.",
       "waitlist_offer": "Abriu uma vaga numa viagem cheia. Confirme logo.",
-      "waitlist_offer_expired": "A oferta de vaga venceu."
+      "waitlist_offer_expired": "A oferta de vaga venceu.",
+      "message_new": "{{sender_name}} escreveu para você no chat."
     }
   },
   "vehicles": {
@@ -1134,5 +1140,34 @@
         "active": "Suas viagens da série estão em Minhas viagens."
       }
     }
+  },
+  "chat": {
+    "list": "Conversas",
+    "back": "Voltar às mensagens",
+    "viewTrip": "Ver viagem",
+    "viewSeries": "Ver série",
+    "older": "Ver mensagens anteriores",
+    "empty": "Ainda não há mensagens. Diga olá para combinar o encontro.",
+    "you": "Você",
+    "sending": "Enviando...",
+    "failed": "Não enviada",
+    "retry": "Tentar de novo",
+    "discard": "Descartar",
+    "typing": "{{name}} está digitando...",
+    "closed": "Este chat foi encerrado porque a viagem terminou ou foi cancelada. Você pode ler, mas não escrever.",
+    "closedShort": "Encerrado",
+    "placeholder": "Escreva uma mensagem",
+    "send": "Enviar mensagem",
+    "remaining": "Restam {{count}} caracteres",
+    "unread": "mensagens não lidas",
+    "none": "Você ainda não tem conversas",
+    "noneHint": "Quando você for aceito numa viagem (ou aceitar um passageiro), o chat da viagem é aberto.",
+    "pick": "Escolha uma conversa",
+    "pickHint": "Aqui você verá as mensagens da viagem e com seu motorista ou passageiro.",
+    "directSeries": "Chat direto da série {{route}}",
+    "directTrip": "Chat direto da viagem {{route}}",
+    "groupOn": "Chat da viagem · {{when}}",
+    "noMessages": "Sem mensagens ainda",
+    "openTrip": "Abrir o chat da viagem"
   }
 }

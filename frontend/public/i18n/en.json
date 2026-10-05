@@ -25,7 +25,10 @@
       "system": "Match system",
       "light": "Light",
       "dark": "Dark"
-    }
+    },
+    "unread": "unread",
+    "reconnecting": "Reconnecting...",
+    "notificationsUnread": "Notifications: {{count}} unread"
   },
   "nav": {
     "search": "Search",
@@ -183,7 +186,9 @@
     "WAITLIST_OFFER_EXPIRED": "The seat offer is no longer available.",
     "SEATS_BELOW_BOOKED": "{{booked}} seats are already accepted; you cannot offer fewer.",
     "WOMEN_ONLY_CONFLICT": "The ride has passengers who are not women; it cannot be women only.",
-    "SERIES_HAS_BOOKINGS": "Some rides in the series have bookings. Confirm the change."
+    "SERIES_HAS_BOOKINGS": "Some rides in the series have bookings. Confirm the change.",
+    "CONVERSATION_CLOSED": "This chat is already closed.",
+    "MESSAGE_EMPTY": "Write a message before sending it."
   },
   "catalog": {
     "title": "Component catalog",
@@ -618,7 +623,8 @@
       "subscription_expired": "Your request to join the series expired.",
       "subscription_ended": "Your series subscription ended.",
       "waitlist_offer": "A seat freed up on a full ride. Confirm it soon.",
-      "waitlist_offer_expired": "The seat offer expired."
+      "waitlist_offer_expired": "The seat offer expired.",
+      "message_new": "{{sender_name}} wrote to you in the chat."
     }
   },
   "vehicles": {
@@ -1134,5 +1140,34 @@
         "active": "Your series rides are in My rides."
       }
     }
+  },
+  "chat": {
+    "list": "Conversations",
+    "back": "Back to messages",
+    "viewTrip": "View ride",
+    "viewSeries": "View series",
+    "older": "Show earlier messages",
+    "empty": "No messages yet. Say hello to arrange the pick-up.",
+    "you": "You",
+    "sending": "Sending...",
+    "failed": "Not sent",
+    "retry": "Retry",
+    "discard": "Discard",
+    "typing": "{{name}} is typing...",
+    "closed": "This chat is closed because the ride ended or was cancelled. You can read it but not write.",
+    "closedShort": "Closed",
+    "placeholder": "Write a message",
+    "send": "Send message",
+    "remaining": "{{count}} characters left",
+    "unread": "unread messages",
+    "none": "You have no conversations yet",
+    "noneHint": "When you are accepted on a ride (or accept a passenger) the ride chat opens.",
+    "pick": "Choose a conversation",
+    "pickHint": "Here you will see the ride messages and those with your driver or passenger.",
+    "directSeries": "Direct chat for the series {{route}}",
+    "directTrip": "Direct chat for the ride {{route}}",
+    "groupOn": "Ride chat · {{when}}",
+    "noMessages": "No messages yet",
+    "openTrip": "Open the ride chat"
   }
 }
