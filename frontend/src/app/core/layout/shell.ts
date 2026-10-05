@@ -9,6 +9,7 @@ import {
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
+  LucideBell,
   LucideCarFront,
   LucideDynamicIcon,
   LucidePalette,
@@ -34,6 +35,7 @@ import { NAV_BY_ROLE } from './navigation';
     RouterLinkActive,
     TranslocoPipe,
     LucideDynamicIcon,
+    LucideBell,
     LucideCarFront,
     LucidePalette,
     LucidePanelLeftClose,
@@ -138,6 +140,14 @@ import { NAV_BY_ROLE } from './navigation';
                 <svg lucidePalette class="size-5" aria-hidden="true"></svg>
               </a>
             }
+            <a
+              routerLink="/notificaciones"
+              routerLinkActive="!bg-accent/20"
+              class="glass-1 !rounded-full grid size-11 place-items-center"
+              [attr.aria-label]="'nav.notifications' | transloco"
+            >
+              <svg lucideBell class="size-5" aria-hidden="true"></svg>
+            </a>
             <cp-language-select />
             <cp-theme-toggle />
           </div>
