@@ -12,6 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LucideCopy,
+  LucideFootprints,
   LucidePencil,
   LucideRepeat,
   LucideRoute,
@@ -38,6 +39,7 @@ import {
   DuplicateResult,
 } from './trip-dialogs';
 import { TRIP_STATUS_TONE, formatDeparture, formatTime } from './trip-status';
+import { SearchResult } from '../search/search.api';
 import { Trip, TripsApi, pamplonaTime } from './trips.api';
 
 /** Detalle de un viaje: mapa, paradas con hora, reglas, vehiculo y acciones del conductor. */
@@ -53,6 +55,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     Skeleton,
     StatusBadge,
     LucideCopy,
+    LucideFootprints,
     LucidePencil,
     LucideRepeat,
     LucideRoute,
@@ -113,6 +116,36 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
             <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
             {{ 'trips.viewSeries' | transloco }}
           </a>
+        }
+
+        @if (match(); as m) {
+          <section
+            aria-labelledby="my-pickup-title"
+            class="glass-2 !rounded-2xl grid gap-3 p-4 sm:grid-cols-2"
+          >
+            <h2 id="my-pickup-title" class="sr-only">{{ 'trips.yourTrip' | transloco }}</h2>
+            <div>
+              <p class="text-sm text-muted">{{ 'search.card.pickup' | transloco }}</p>
+              <p class="font-semibold">
+                {{ m.pickup.name || ('search.card.onRoute' | transloco) }} ·
+                {{ time(m.pickup.eta) }}
+              </p>
+              <p class="flex items-center gap-1 text-xs text-muted">
+                <svg lucideFootprints class="size-3.5" aria-hidden="true"></svg>
+                {{ 'search.card.walk' | transloco: { meters: m.pickup.walk_m } }}
+              </p>
+            </div>
+            <div>
+              <p class="text-sm text-muted">{{ 'search.card.dropoff' | transloco }}</p>
+              <p class="font-semibold">
+                {{ m.dropoff.name || ('search.card.onRoute' | transloco) }} ·
+                {{ time(m.dropoff.eta) }}
+              </p>
+              <p class="text-xs text-muted">
+                {{ 'search.card.seats' | transloco: { count: m.seats_available } }}
+              </p>
+            </div>
+          </section>
         }
 
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
@@ -217,6 +250,8 @@ export default class TripDetail {
   private readonly language = inject(LanguageService);
 
   protected readonly trip = signal<Trip | null>(null);
+  /** Recogida y bajada calculadas por la busqueda (llegan en el estado de la navegacion). */
+  protected readonly match = signal<SearchResult | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly isOwner = computed(() => this.trip()?.driver.id === this.auth.user()?.id);
   protected readonly tone = computed(() => TRIP_STATUS_TONE[this.trip()?.status ?? 'scheduled']);
@@ -235,14 +270,32 @@ export default class TripDetail {
   protected readonly money = computed(() =>
     formatCop(this.trip()?.price_per_seat ?? 0, this.language.current()),
   );
-  protected readonly markers = computed<MapMarker[]>(() =>
-    (this.trip()?.stops ?? []).map((stop) => ({
+  protected readonly markers = computed<MapMarker[]>(() => {
+    const stops: MapMarker[] = (this.trip()?.stops ?? []).map((stop) => ({
       lat: stop.lat,
       lon: stop.lon,
       kind: stop.kind,
       label: stop.name,
-    })),
-  );
+    }));
+    const match = this.match();
+    if (!match) return stops;
+    const label = (key: string) => this.transloco.translate(key);
+    return [
+      ...stops,
+      {
+        lat: match.pickup.lat,
+        lon: match.pickup.lon,
+        kind: 'pin',
+        label: label('search.card.pickup'),
+      },
+      {
+        lat: match.dropoff.lat,
+        lon: match.dropoff.lon,
+        kind: 'pin',
+        label: label('search.card.dropoff'),
+      },
+    ];
+  });
 
   constructor() {
     effect(() => {
@@ -253,6 +306,8 @@ export default class TripDetail {
 
   private async load(id: string): Promise<void> {
     this.error.set(null);
+    const state = (globalThis.history?.state ?? {}) as { match?: SearchResult };
+    this.match.set(state.match?.trip_id === id ? state.match : null);
     try {
       this.trip.set(await this.api.trip(id));
     } catch (error) {

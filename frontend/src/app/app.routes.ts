@@ -151,7 +151,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/license/license-page'),
         title: 'license.title',
       },
-      comingSoon('buscar', 'search', { canMatch: [roleGuard('passenger')] }),
+      {
+        path: 'buscar',
+        canMatch: [roleGuard('passenger')],
+        loadComponent: () => import('./features/search/search-page'),
+        title: 'nav.search',
+      },
       {
         path: 'inicio',
         canMatch: [roleGuard('driver')],
