@@ -39,6 +39,7 @@ from app.modules.legal.models import LegalDocument
 from app.modules.places.models import Place
 from app.modules.routing.osrm import Leg, RouteResult
 from app.modules.routing.router import get_route_provider
+from app.modules.safety import location
 from app.modules.semesters.models import Semester
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
@@ -126,6 +127,30 @@ def events() -> Iterator[EventLog]:
     previous = realtime.set_publisher(log.publish)
     yield log
     realtime.set_publisher(previous)
+
+
+class MemoryLocations:
+    """Ubicaciones en vivo en memoria (en vez de Redis)."""
+
+    def __init__(self) -> None:
+        self.values: dict[str, str] = {}
+
+    async def set(self, key: str, value: str, ttl: int) -> None:
+        self.values[key] = value
+
+    async def get(self, key: str) -> str | None:
+        return self.values.get(key)
+
+    async def delete(self, key: str) -> None:
+        self.values.pop(key, None)
+
+
+@pytest.fixture(autouse=True)
+def locations() -> Iterator[MemoryLocations]:
+    store = MemoryLocations()
+    previous = location.set_backend(store)
+    yield store
+    location.set_backend(previous)
 
 
 @pytest.fixture(autouse=True)
