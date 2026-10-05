@@ -284,3 +284,33 @@ async def test_search_validation(
     assert (await search(routing_api, passenger, outside)).json()["code"] == "PLACE_OUT_OF_AREA"
     yesterday = params(places[0], places[2], date=(local_today() - timedelta(days=1)).isoformat())
     assert (await search(routing_api, passenger, yesterday)).json()["code"] == "SEARCH_IN_PAST"
+
+
+async def test_accepted_bookings_reduce_seats_and_full_trips_disappear(
+    routing_api: AsyncClient,
+    driver: tuple[User, Vehicle],
+    places: list[Place],
+    trip: dict[str, Any],
+    passenger: User,
+    make_user: UserFactory,
+) -> None:
+    rider = await make_user(UserRole.PASSENGER)
+    response = await routing_api.post(
+        f"{API}/trips/{trip['id']}/bookings",
+        json={
+            "seats": 2,
+            "pickup_place_id": str(places[0].id),
+            "dropoff_place_id": str(places[2].id),
+        },
+        headers=auth(rider),
+    )
+    booking_id = response.json()["id"]
+    # Una solicitud sin aceptar no aparta cupo.
+    results = (await search(routing_api, passenger, params(places[0], places[2]))).json()
+    assert results[0]["seats_available"] == 3
+
+    await routing_api.post(f"{API}/bookings/{booking_id}/accept", headers=auth(driver[0]))
+    results = (await search(routing_api, passenger, params(places[0], places[2]))).json()
+    assert results[0]["seats_available"] == 1
+    full = await search(routing_api, passenger, params(places[0], places[2], seats=2))
+    assert full.json() == []
