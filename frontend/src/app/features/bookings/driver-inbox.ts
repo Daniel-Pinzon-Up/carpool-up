@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideArrowRight, LucideInbox, LucideRefreshCw } from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
+import { NotificationsStore } from '../../core/notifications/notifications.store';
 import { LanguageService } from '../../core/i18n/language.service';
 import { Avatar } from '../../shared/ui/avatar';
 import { EmptyState } from '../../shared/ui/empty-state';
@@ -12,6 +14,15 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { BookingActions } from './booking-actions';
 import { BookingCard } from './booking-card';
 import { BOOKING_PREFERENCE_KEYS, Booking, BookingsApi, Inbox, Subscription } from './bookings.api';
+
+/** Avisos que cambian lo que hay por decidir. */
+const INBOX_KINDS = new Set([
+  'booking_requested',
+  'booking_withdrawn',
+  'cancellation_requested',
+  'subscription_requested',
+  'subscription_cancelled',
+]);
 
 /**
  * Solicitudes del conductor: reservas, cancelaciones tardias y suscripciones a series que
@@ -183,6 +194,11 @@ export default class DriverInbox {
 
   constructor() {
     void this.load();
+    inject(NotificationsStore)
+      .incoming.pipe(takeUntilDestroyed())
+      .subscribe((item) => {
+        if (INBOX_KINDS.has(item.kind)) void this.load();
+      });
   }
 
   protected async load(): Promise<void> {

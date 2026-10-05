@@ -7,10 +7,12 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideArrowRight, LucideCalendarX, LucideHourglass, LucideSearch } from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
+import { NotificationsStore } from '../../core/notifications/notifications.store';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassButton } from '../../shared/ui/glass-button';
@@ -237,6 +239,12 @@ export default class PassengerTrips {
       const tab = this.tab();
       untracked(() => void this.load(tab));
     });
+    // Aceptaciones, ofertas de cupo y cancelaciones se ven sin recargar la pagina.
+    inject(NotificationsStore)
+      .incoming.pipe(takeUntilDestroyed())
+      .subscribe((item) => {
+        if (item.kind !== 'message_new') void this.load(this.tab());
+      });
   }
 
   private async load(tab: Tab): Promise<void> {
