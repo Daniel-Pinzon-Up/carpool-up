@@ -11,6 +11,7 @@ from app.core.enums import UserRole
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.storage import delete_private_file, private_file_response, save_private_file
 from app.modules.settings.service import SettingsService
+from app.modules.trips.queries import vehicle_has_upcoming_trips
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 from app.modules.vehicles.schemas import VehicleCreate, VehicleOut, VehicleUpdate, check_vehicle
@@ -58,6 +59,14 @@ class VehicleService:
             raise NotFoundError("vehicle")
         return vehicle
 
+    async def _require_no_trips(self, vehicle: Vehicle) -> None:
+        if await vehicle_has_upcoming_trips(self.session, vehicle.id):
+            raise AppError(
+                "VEHICLE_HAS_TRIPS",
+                "The vehicle has scheduled trips; cancel them or change their vehicle first",
+                409,
+            )
+
     async def _commit_plate(self) -> None:
         try:
             await self.session.commit()
@@ -92,6 +101,8 @@ class VehicleService:
             raise AppError(
                 "VEHICLE_INVALID", "Invalid vehicle data", 422, {"rule": str(exc)}
             ) from exc
+        if changes.get("is_active") is False and vehicle.is_active:
+            await self._require_no_trips(vehicle)
         for field, value in changes.items():
             setattr(vehicle, field, value)
         await self.session.commit()
@@ -99,8 +110,9 @@ class VehicleService:
         return vehicle
 
     async def delete(self, user: User, vehicle_id: uuid.UUID) -> None:
-        """Borrado logico. El paso 6 impide borrar vehiculos con viajes programados."""
+        """Borrado logico. No se borran vehiculos con viajes programados."""
         vehicle = await self.get_own(user, vehicle_id)
+        await self._require_no_trips(vehicle)
         vehicle.deleted_at = utcnow()
         vehicle.is_active = False
         await self.session.commit()
