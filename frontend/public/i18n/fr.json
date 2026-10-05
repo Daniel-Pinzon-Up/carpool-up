@@ -140,7 +140,23 @@
     "ROUTING_UNAVAILABLE": "Le service d'itinéraires est indisponible. Réessayez dans quelques minutes.",
     "ROUTE_NOT_FOUND": "Aucun itinéraire routier trouvé entre ces points. Essayez un point proche.",
     "TOO_MANY_STOPS": "L'itinéraire comporte plus d'arrêts que permis.",
-    "PLACE_NOT_FOUND": "L'un des lieux n'existe plus. Choisissez-le à nouveau."
+    "PLACE_NOT_FOUND": "L'un des lieux n'existe plus. Choisissez-le à nouveau.",
+    "DEPARTURE_TOO_SOON": "Le départ doit être dans au moins {{min_lead_minutes}} minutes.",
+    "DEPARTURE_TOO_FAR": "Vous ne pouvez publier des trajets que {{max_days}} jours à l'avance au maximum.",
+    "SEATS_INVALID": "Ce véhicule permet jusqu'à {{max_seats}} places.",
+    "PRICE_ABOVE_MAX": "La participation ne peut pas dépasser {{max}} pesos par place.",
+    "VEHICLE_INACTIVE": "Ce véhicule est inactif. Activez-le ou choisissez-en un autre.",
+    "WOMEN_ONLY_FEMALE_DRIVERS": "Seules les conductrices peuvent publier des trajets réservés aux femmes.",
+    "PICO_PLACA_RESTRICTED": "Votre véhicule a le pico y placa ce jour-là.",
+    "TRIP_OVERLAP": "Vous avez déjà un trajet à cette heure. Vérifiez vos trajets ou changez l'heure.",
+    "TRIP_NOT_EDITABLE": "Ce trajet ne peut plus être modifié.",
+    "SERIES_OUTSIDE_SEMESTER": "La date de début n'est pas dans un semestre universitaire.",
+    "SERIES_WINDOW_INVALID": "Cette durée de série n'est pas disponible.",
+    "SERIES_START_IN_PAST": "La série ne peut pas commencer dans le passé.",
+    "SERIES_EMPTY": "La série n'a aucun trajet réservable. Vérifiez les jours et le pico y placa.",
+    "SERIES_NOT_ACTIVE": "La série n'est plus active.",
+    "VEHICLE_HAS_TRIPS": "Le véhicule a des trajets programmés. Annulez-les ou changez leur véhicule d'abord.",
+    "INVALID_RANGE": "La plage de dates n'est pas valide."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -552,7 +568,9 @@
       "license_approved": "Nous avons approuvé votre permis de conduire.",
       "license_rejected": "Nous avons refusé votre permis : {{reason}}",
       "account_revalidation_required": "Vous n'avez pas revalidé votre document pour le semestre {{semester}}. Envoyez-en un nouveau pour continuer à utiliser l'app.",
-      "role_changed": "Un administrateur a modifié votre rôle dans l'app."
+      "role_changed": "Un administrateur a modifié votre rôle dans l'app.",
+      "trip_pico_placa_cancelled": "Votre trajet du {{date}} a été annulé automatiquement à cause du pico y placa.",
+      "trip_pico_placa_restored": "Votre trajet du {{date}} n'a plus de pico y placa et est de nouveau programmé."
     }
   },
   "vehicles": {
@@ -703,5 +721,179 @@
     "etaNote": "Les durées sont estimées et peuvent varier selon la circulation.",
     "factor": "Inclut un ajustement de circulation de x{{factor}} pour cette heure.",
     "contribution": "C'est une participation aux frais de carburant, pas un tarif."
+  },
+  "publish": {
+    "title": "Publier un trajet",
+    "editTripTitle": "Modifier le trajet",
+    "editSeriesTitle": "Modifier la série",
+    "subtitle": "Partagez votre trajet avec la communauté. Vérifiez chaque étape avant de publier.",
+    "steps": {
+      "type": "Type",
+      "route": "Itinéraire",
+      "when": "Date et heure",
+      "vehicle": "Véhicule et places",
+      "price": "Participation",
+      "rules": "Règles",
+      "summary": "Résumé"
+    },
+    "type": {
+      "legend": "Type de trajet",
+      "single": "Trajet unique",
+      "singleHint": "Un seul trajet à une date et une heure.",
+      "series": "Série récurrente",
+      "seriesHint": "Le même trajet plusieurs jours par semaine pendant 15 jours, 4 semaines ou le semestre.",
+      "noSemester": "Il n'y a pas de semestre en cours : pour l'instant, vous ne pouvez publier que des trajets uniques."
+    },
+    "when": {
+      "date": "Date",
+      "time": "Heure de départ",
+      "timeHint": "Heure de Pamplona.",
+      "weekdays": "Jours de la semaine",
+      "startDate": "Date de début",
+      "window": "Durée de la série",
+      "windowDays": "{{days}} jours",
+      "windowSemester": "Jusqu'à la fin du semestre",
+      "windowFixed": "La série continue jusqu'au {{end}}. Les changements s'appliquent aux trajets futurs.",
+      "datesTitle": "Trajets qui seront publiés : {{count}} sur {{total}}",
+      "picoPlacaDay": "pico y placa",
+      "picoPlacaSeries": "{{count}} dates tombent sur le pico y placa : elles sont créées annulées et ne peuvent pas être réservées.",
+      "picoPlacaSingle": "Votre véhicule a le pico y placa ce jour-là. Choisissez une autre date ou un autre véhicule."
+    },
+    "vehicle": {
+      "seatsHint": "Vous pouvez proposer jusqu'à {{max}} places avec ce véhicule."
+    },
+    "price": {
+      "label": "Participation par place (COP)",
+      "suggested": "Participation suggérée",
+      "useSuggested": "Utiliser la suggestion",
+      "hint": "Vous pouvez la laisser à 0.",
+      "hintMax": "Maximum autorisé : {{max}}. Vous pouvez la laisser à 0."
+    },
+    "rules": {
+      "women_only": "Femmes uniquement",
+      "womenOnlyHint": "Seules les passagères pourront demander une place.",
+      "pets": "Animaux",
+      "luggage": "Gros bagages",
+      "smoking": "Fumer",
+      "music": "Musique",
+      "choice": {
+        "unset": "Non précisé",
+        "allowed": "Autorisé",
+        "not_allowed": "Interdit"
+      },
+      "custom": "Autre règle (facultatif)",
+      "customHint": "Par exemple : j'attends 5 minutes maximum."
+    },
+    "summary": {
+      "type": "Type",
+      "when": "Quand",
+      "seriesWhen": "{{count}} trajets à {{time}}",
+      "seats": "Places : {{count}}",
+      "noRules": "Aucune règle particulière"
+    },
+    "errors": {
+      "route": "Choisissez le départ et la destination.",
+      "routeFailed": "L'itinéraire n'a pas pu être calculé. Changez un point et réessayez.",
+      "time": "Choisissez l'heure de départ.",
+      "date": "Choisissez une date dans la plage autorisée.",
+      "past": "Le départ doit être dans le futur.",
+      "picoPlaca": "Votre véhicule a le pico y placa ce jour-là.",
+      "weekdays": "Choisissez au moins un jour de la semaine.",
+      "startDate": "La date de début ne peut pas être passée.",
+      "noDates": "La série n'aurait aucun trajet réservable.",
+      "noSemester": "Il n'y a pas de semestre en cours pour publier des séries.",
+      "vehicle": "Choisissez un véhicule actif.",
+      "seats": "Vous pouvez proposer entre 1 et {{seats}} places.",
+      "price": "Saisissez une participation en pesos, sans décimales (elle peut être 0).",
+      "priceMax": "La participation ne peut pas dépasser {{max}} pesos.",
+      "custom": "La règle supplémentaire accepte 200 caractères au maximum."
+    },
+    "confirmSeriesEdit": {
+      "title": "Enregistrer les changements de la série ?",
+      "message": "Tous les trajets futurs de la série sont mis à jour. Les trajets passés ou annulés ne changent pas.",
+      "confirm": "Enregistrer"
+    },
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Publier",
+    "save": "Enregistrer",
+    "published": "Trajet publié.",
+    "saved": "Changements enregistrés."
+  },
+  "trips": {
+    "title": "Mes trajets",
+    "subtitle": "Vos trajets publiés, vos séries et l'historique.",
+    "detailTitle": "Détail du trajet",
+    "seriesTitle": "Détail de la série",
+    "tabs": {
+      "upcoming": "À venir",
+      "series": "Séries",
+      "history": "Historique"
+    },
+    "status": {
+      "scheduled": "Programmé",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled_by_driver": "Annulé",
+      "cancelled_pico_placa": "Pico y placa",
+      "not_held": "Non effectué"
+    },
+    "seriesStatus": {
+      "active": "Active",
+      "cancelled": "Annulée",
+      "finished": "Terminée"
+    },
+    "to": "vers",
+    "seats": "Places : {{count}}",
+    "stops": "Arrêts : {{count}}",
+    "fromSeries": "Série",
+    "seriesCounts": "{{scheduled}} programmés sur {{total}}",
+    "next": "prochain : {{when}}",
+    "window": "du {{start}} au {{end}}",
+    "picoPlacaAlert": "{{count}} trajets annulés à cause du pico y placa.",
+    "picoPlacaCancelled": "Ce trajet est tombé sur le pico y placa et a été annulé automatiquement. Il ne peut pas être réservé.",
+    "cancelReason": "Motif de l'annulation",
+    "viewSeries": "Voir la série",
+    "mapLabel": "Carte avec l'itinéraire du trajet",
+    "driver": "Conducteur",
+    "occurrences": "Trajets de la série",
+    "counts": {
+      "scheduled": "Programmés",
+      "picoPlaca": "Pico y placa"
+    },
+    "more": "Voir plus",
+    "empty": {
+      "upcoming": "Vous n'avez pas de trajets à venir",
+      "history": "Pas encore d'historique",
+      "hint": "Publiez un trajet pour le partager.",
+      "series": "Vous n'avez pas de séries",
+      "seriesHint": "Les séries répètent votre trajet plusieurs jours par semaine."
+    },
+    "actions": {
+      "edit": "Modifier",
+      "cancel": "Annuler le trajet",
+      "cancelSeries": "Annuler la série",
+      "duplicate": "Dupliquer"
+    },
+    "cancel": {
+      "title": "Annuler le trajet",
+      "message": "Les passagers ayant réservé recevront l'avis avec votre motif. Annuler compte dans votre réputation.",
+      "seriesTitle": "Annuler la série",
+      "seriesMessage": "Tous les trajets futurs de la série sont annulés. Les passagers recevront l'avis avec votre motif.",
+      "reason": "Motif",
+      "hint": "Entre 5 et 500 caractères. Les passagers le verront.",
+      "keep": "Ne pas annuler",
+      "confirm": "Annuler",
+      "done": "Trajet annulé.",
+      "seriesDone": "Série annulée."
+    },
+    "duplicate": {
+      "title": "Dupliquer",
+      "tripHint": "Un nouveau trajet est publié avec le même itinéraire, véhicule, places, participation et règles.",
+      "seriesHint": "Une nouvelle série est publiée avec le même modèle à partir de la date choisie.",
+      "invalid": "Choisissez une date à partir d'aujourd'hui.",
+      "confirm": "Dupliquer",
+      "done": "La copie est publiée."
+    }
   }
 }

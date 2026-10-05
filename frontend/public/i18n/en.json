@@ -140,7 +140,23 @@
     "ROUTING_UNAVAILABLE": "The routing service is unavailable. Try again in a few minutes.",
     "ROUTE_NOT_FOUND": "We could not find a road route between those points. Try a nearby point.",
     "TOO_MANY_STOPS": "The route has more stops than allowed.",
-    "PLACE_NOT_FOUND": "One of the places no longer exists. Choose it again."
+    "PLACE_NOT_FOUND": "One of the places no longer exists. Choose it again.",
+    "DEPARTURE_TOO_SOON": "Departure must be at least {{min_lead_minutes}} minutes from now.",
+    "DEPARTURE_TOO_FAR": "You can only publish trips up to {{max_days}} days ahead.",
+    "SEATS_INVALID": "This vehicle allows up to {{max_seats}} seats.",
+    "PRICE_ABOVE_MAX": "The contribution cannot exceed {{max}} pesos per seat.",
+    "VEHICLE_INACTIVE": "That vehicle is inactive. Activate it or choose another.",
+    "WOMEN_ONLY_FEMALE_DRIVERS": "Only female drivers can publish women-only trips.",
+    "PICO_PLACA_RESTRICTED": "Your vehicle has pico y placa that day.",
+    "TRIP_OVERLAP": "You already have a trip at that time. Check your trips or change the time.",
+    "TRIP_NOT_EDITABLE": "This trip can no longer be changed.",
+    "SERIES_OUTSIDE_SEMESTER": "The start date is not within an academic semester.",
+    "SERIES_WINDOW_INVALID": "That series length is not available.",
+    "SERIES_START_IN_PAST": "The series cannot start in the past.",
+    "SERIES_EMPTY": "The series has no bookable trips. Check the weekdays and pico y placa.",
+    "SERIES_NOT_ACTIVE": "The series is no longer active.",
+    "VEHICLE_HAS_TRIPS": "The vehicle has scheduled trips. Cancel them or change their vehicle first.",
+    "INVALID_RANGE": "The date range is not valid."
   },
   "catalog": {
     "title": "Component catalog",
@@ -552,7 +568,9 @@
       "license_approved": "We approved your driver's license.",
       "license_rejected": "We rejected your license: {{reason}}",
       "account_revalidation_required": "You did not revalidate your document for semester {{semester}}. Upload a new one to keep using the app.",
-      "role_changed": "An administrator changed your role in the app."
+      "role_changed": "An administrator changed your role in the app.",
+      "trip_pico_placa_cancelled": "Your trip on {{date}} was cancelled automatically because of pico y placa.",
+      "trip_pico_placa_restored": "Your trip on {{date}} no longer has pico y placa and is scheduled again."
     }
   },
   "vehicles": {
@@ -703,5 +721,179 @@
     "etaNote": "Times are estimates and may vary with traffic.",
     "factor": "Includes a x{{factor}} traffic adjustment for that time.",
     "contribution": "This is a contribution to share fuel costs, not a fare."
+  },
+  "publish": {
+    "title": "Publish a trip",
+    "editTripTitle": "Edit trip",
+    "editSeriesTitle": "Edit series",
+    "subtitle": "Share your ride with the community. Check each step before publishing.",
+    "steps": {
+      "type": "Type",
+      "route": "Route",
+      "when": "Date and time",
+      "vehicle": "Vehicle and seats",
+      "price": "Contribution",
+      "rules": "Rules",
+      "summary": "Summary"
+    },
+    "type": {
+      "legend": "Trip type",
+      "single": "One-time trip",
+      "singleHint": "A single trip on one date and time.",
+      "series": "Recurring series",
+      "seriesHint": "The same route on several weekdays for 15 days, 4 weeks or the semester.",
+      "noSemester": "There is no current semester, so for now you can only publish one-time trips."
+    },
+    "when": {
+      "date": "Date",
+      "time": "Departure time",
+      "timeHint": "Pamplona time.",
+      "weekdays": "Weekdays",
+      "startDate": "Start date",
+      "window": "Series length",
+      "windowDays": "{{days}} days",
+      "windowSemester": "Until the end of the semester",
+      "windowFixed": "The series runs until {{end}}. Changes apply to future trips.",
+      "datesTitle": "Trips to be published: {{count}} of {{total}}",
+      "picoPlacaDay": "pico y placa",
+      "picoPlacaSeries": "{{count}} dates fall on pico y placa: they are created cancelled and cannot be booked.",
+      "picoPlacaSingle": "Your vehicle has pico y placa that day. Choose another date or vehicle."
+    },
+    "vehicle": {
+      "seatsHint": "You can offer up to {{max}} seats with this vehicle."
+    },
+    "price": {
+      "label": "Contribution per seat (COP)",
+      "suggested": "Suggested contribution",
+      "useSuggested": "Use the suggestion",
+      "hint": "You can leave it at 0.",
+      "hintMax": "Maximum allowed: {{max}}. You can leave it at 0."
+    },
+    "rules": {
+      "women_only": "Women only",
+      "womenOnlyHint": "Only female passengers can request a seat.",
+      "pets": "Pets",
+      "luggage": "Large luggage",
+      "smoking": "Smoking",
+      "music": "Music",
+      "choice": {
+        "unset": "Not stated",
+        "allowed": "Allowed",
+        "not_allowed": "Not allowed"
+      },
+      "custom": "Other rule (optional)",
+      "customHint": "For example: I wait 5 minutes at most."
+    },
+    "summary": {
+      "type": "Type",
+      "when": "When",
+      "seriesWhen": "{{count}} trips at {{time}}",
+      "seats": "Seats: {{count}}",
+      "noRules": "No special rules"
+    },
+    "errors": {
+      "route": "Choose the origin and destination.",
+      "routeFailed": "The route could not be calculated. Change a point and try again.",
+      "time": "Choose the departure time.",
+      "date": "Choose a date within the allowed range.",
+      "past": "Departure must be in the future.",
+      "picoPlaca": "Your vehicle has pico y placa that day.",
+      "weekdays": "Choose at least one weekday.",
+      "startDate": "The start date cannot be in the past.",
+      "noDates": "The series would have no bookable trips.",
+      "noSemester": "There is no current semester to publish series.",
+      "vehicle": "Choose an active vehicle.",
+      "seats": "You can offer between 1 and {{seats}} seats.",
+      "price": "Enter a contribution in pesos, without decimals (it can be 0).",
+      "priceMax": "The contribution cannot exceed {{max}} pesos.",
+      "custom": "The extra rule allows up to 200 characters."
+    },
+    "confirmSeriesEdit": {
+      "title": "Save changes to the series?",
+      "message": "All future trips of the series are updated. Past or cancelled trips do not change.",
+      "confirm": "Save changes"
+    },
+    "back": "Back",
+    "next": "Next",
+    "submit": "Publish",
+    "save": "Save changes",
+    "published": "Trip published.",
+    "saved": "Changes saved."
+  },
+  "trips": {
+    "title": "My trips",
+    "subtitle": "Your published trips, your series and your history.",
+    "detailTitle": "Trip details",
+    "seriesTitle": "Series details",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "series": "Series",
+      "history": "History"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled_by_driver": "Cancelled",
+      "cancelled_pico_placa": "Pico y placa",
+      "not_held": "Did not happen"
+    },
+    "seriesStatus": {
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "finished": "Finished"
+    },
+    "to": "to",
+    "seats": "Seats: {{count}}",
+    "stops": "Stops: {{count}}",
+    "fromSeries": "Series",
+    "seriesCounts": "{{scheduled}} scheduled of {{total}}",
+    "next": "next: {{when}}",
+    "window": "from {{start}} to {{end}}",
+    "picoPlacaAlert": "{{count}} trips cancelled because of pico y placa.",
+    "picoPlacaCancelled": "This trip fell on pico y placa and was cancelled automatically. It cannot be booked.",
+    "cancelReason": "Cancellation reason",
+    "viewSeries": "View the series",
+    "mapLabel": "Map with the trip route",
+    "driver": "Driver",
+    "occurrences": "Trips in the series",
+    "counts": {
+      "scheduled": "Scheduled",
+      "picoPlaca": "Pico y placa"
+    },
+    "more": "Show more",
+    "empty": {
+      "upcoming": "You have no upcoming trips",
+      "history": "No history yet",
+      "hint": "Publish a trip to share your ride.",
+      "series": "You have no series",
+      "seriesHint": "Series repeat your route on several weekdays."
+    },
+    "actions": {
+      "edit": "Edit",
+      "cancel": "Cancel trip",
+      "cancelSeries": "Cancel series",
+      "duplicate": "Duplicate"
+    },
+    "cancel": {
+      "title": "Cancel trip",
+      "message": "Passengers with a booking will be notified with your reason. Cancelling counts toward your reputation.",
+      "seriesTitle": "Cancel series",
+      "seriesMessage": "All future trips in the series are cancelled. Passengers will be notified with your reason.",
+      "reason": "Reason",
+      "hint": "Between 5 and 500 characters. Passengers will see it.",
+      "keep": "Keep it",
+      "confirm": "Cancel",
+      "done": "Trip cancelled.",
+      "seriesDone": "Series cancelled."
+    },
+    "duplicate": {
+      "title": "Duplicate",
+      "tripHint": "A new trip is published with the same route, vehicle, seats, contribution and rules.",
+      "seriesHint": "A new series is published with the same template from the date you choose.",
+      "invalid": "Choose a date from today onward.",
+      "confirm": "Duplicate",
+      "done": "We published the copy."
+    }
   }
 }

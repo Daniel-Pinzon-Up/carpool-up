@@ -140,7 +140,23 @@
     "ROUTING_UNAVAILABLE": "El servicio de rutas no está disponible. Inténtalo de nuevo en unos minutos.",
     "ROUTE_NOT_FOUND": "No encontramos una ruta por carretera entre esos puntos. Prueba con otro punto cercano.",
     "TOO_MANY_STOPS": "La ruta tiene más paradas de las permitidas.",
-    "PLACE_NOT_FOUND": "Uno de los lugares ya no existe. Elígelo de nuevo."
+    "PLACE_NOT_FOUND": "Uno de los lugares ya no existe. Elígelo de nuevo.",
+    "DEPARTURE_TOO_SOON": "La salida debe ser al menos {{min_lead_minutes}} minutos en el futuro.",
+    "DEPARTURE_TOO_FAR": "Solo puedes publicar viajes hasta {{max_days}} días adelante.",
+    "SEATS_INVALID": "Este vehículo permite hasta {{max_seats}} puestos.",
+    "PRICE_ABOVE_MAX": "El aporte no puede pasar de {{max}} pesos por puesto.",
+    "VEHICLE_INACTIVE": "Ese vehículo está inactivo. Actívalo o elige otro.",
+    "WOMEN_ONLY_FEMALE_DRIVERS": "Solo las conductoras pueden publicar viajes solo para mujeres.",
+    "PICO_PLACA_RESTRICTED": "Tu vehículo tiene pico y placa ese día.",
+    "TRIP_OVERLAP": "Ya tienes un viaje a esa hora. Revisa tus viajes o cambia la hora.",
+    "TRIP_NOT_EDITABLE": "Este viaje ya no se puede cambiar.",
+    "SERIES_OUTSIDE_SEMESTER": "La fecha de inicio no está dentro de un semestre académico.",
+    "SERIES_WINDOW_INVALID": "Esa duración de serie no está disponible.",
+    "SERIES_START_IN_PAST": "La serie no puede empezar en el pasado.",
+    "SERIES_EMPTY": "La serie no tiene ningún viaje que se pueda reservar. Revisa los días y el pico y placa.",
+    "SERIES_NOT_ACTIVE": "La serie ya no está activa.",
+    "VEHICLE_HAS_TRIPS": "El vehículo tiene viajes programados. Cancélalos o cámbiales el vehículo primero.",
+    "INVALID_RANGE": "El rango de fechas no es válido."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -552,7 +568,9 @@
       "license_approved": "Aprobamos tu licencia de conducción.",
       "license_rejected": "Rechazamos tu licencia: {{reason}}",
       "account_revalidation_required": "No revalidaste tu documento para el semestre {{semester}}. Sube uno nuevo para seguir usando la app.",
-      "role_changed": "Un administrador cambió tu rol en la app."
+      "role_changed": "Un administrador cambió tu rol en la app.",
+      "trip_pico_placa_cancelled": "Tu viaje del {{date}} se canceló automáticamente por pico y placa.",
+      "trip_pico_placa_restored": "Tu viaje del {{date}} ya no tiene pico y placa y volvió a estar programado."
     }
   },
   "vehicles": {
@@ -703,5 +721,179 @@
     "etaNote": "Los tiempos son estimados y pueden variar con el tráfico.",
     "factor": "Incluye un ajuste de tráfico de x{{factor}} para esa hora.",
     "contribution": "Es un aporte para compartir gastos de combustible, no una tarifa."
+  },
+  "publish": {
+    "title": "Publicar viaje",
+    "editTripTitle": "Editar viaje",
+    "editSeriesTitle": "Editar serie",
+    "subtitle": "Comparte tu trayecto con la comunidad. Revisa cada paso antes de publicar.",
+    "steps": {
+      "type": "Tipo",
+      "route": "Ruta",
+      "when": "Fecha y hora",
+      "vehicle": "Vehículo y puestos",
+      "price": "Aporte",
+      "rules": "Reglas",
+      "summary": "Resumen"
+    },
+    "type": {
+      "legend": "Tipo de viaje",
+      "single": "Viaje puntual",
+      "singleHint": "Un solo viaje en una fecha y hora.",
+      "series": "Serie recurrente",
+      "seriesHint": "El mismo trayecto varios días de la semana durante 15 días, 4 semanas o el semestre.",
+      "noSemester": "No hay un semestre vigente, así que por ahora solo puedes publicar viajes puntuales."
+    },
+    "when": {
+      "date": "Fecha",
+      "time": "Hora de salida",
+      "timeHint": "Hora de Pamplona.",
+      "weekdays": "Días de la semana",
+      "startDate": "Fecha de inicio",
+      "window": "Duración de la serie",
+      "windowDays": "{{days}} días",
+      "windowSemester": "Hasta el fin del semestre",
+      "windowFixed": "La serie sigue hasta el {{end}}. Los cambios aplican a los viajes futuros.",
+      "datesTitle": "Viajes que se publicarán: {{count}} de {{total}}",
+      "picoPlacaDay": "pico y placa",
+      "picoPlacaSeries": "{{count}} fechas caen en pico y placa: se crean canceladas y no se pueden reservar.",
+      "picoPlacaSingle": "Tu vehículo tiene pico y placa ese día. Elige otra fecha u otro vehículo."
+    },
+    "vehicle": {
+      "seatsHint": "Puedes ofrecer hasta {{max}} puestos con este vehículo."
+    },
+    "price": {
+      "label": "Aporte por puesto (COP)",
+      "suggested": "Aporte sugerido",
+      "useSuggested": "Usar el sugerido",
+      "hint": "Puedes dejarlo en 0.",
+      "hintMax": "Máximo permitido: {{max}}. Puedes dejarlo en 0."
+    },
+    "rules": {
+      "women_only": "Solo mujeres",
+      "womenOnlyHint": "Solo pasajeras podrán solicitar puesto.",
+      "pets": "Mascotas",
+      "luggage": "Equipaje grande",
+      "smoking": "Fumar",
+      "music": "Música",
+      "choice": {
+        "unset": "Sin indicar",
+        "allowed": "Permitido",
+        "not_allowed": "No permitido"
+      },
+      "custom": "Otra regla (opcional)",
+      "customHint": "Por ejemplo: espero máximo 5 minutos."
+    },
+    "summary": {
+      "type": "Tipo",
+      "when": "Cuándo",
+      "seriesWhen": "{{count}} viajes a las {{time}}",
+      "seats": "Puestos: {{count}}",
+      "noRules": "Sin reglas especiales"
+    },
+    "errors": {
+      "route": "Elige el origen y el destino.",
+      "routeFailed": "No se pudo calcular la ruta. Cambia algún punto e inténtalo de nuevo.",
+      "time": "Elige la hora de salida.",
+      "date": "Elige una fecha dentro del rango permitido.",
+      "past": "La salida debe ser en el futuro.",
+      "picoPlaca": "Tu vehículo tiene pico y placa ese día.",
+      "weekdays": "Elige al menos un día de la semana.",
+      "startDate": "La fecha de inicio no puede estar en el pasado.",
+      "noDates": "La serie no tendría ningún viaje que se pueda reservar.",
+      "noSemester": "No hay un semestre vigente para publicar series.",
+      "vehicle": "Elige un vehículo activo.",
+      "seats": "Puedes ofrecer entre 1 y {{seats}} puestos.",
+      "price": "Escribe un aporte en pesos, sin decimales (puede ser 0).",
+      "priceMax": "El aporte no puede pasar de {{max}} pesos.",
+      "custom": "La regla adicional admite hasta 200 caracteres."
+    },
+    "confirmSeriesEdit": {
+      "title": "¿Guardar cambios en la serie?",
+      "message": "Se actualizan todos los viajes futuros de la serie. Los viajes pasados o cancelados no cambian.",
+      "confirm": "Guardar cambios"
+    },
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Publicar",
+    "save": "Guardar cambios",
+    "published": "Viaje publicado.",
+    "saved": "Cambios guardados."
+  },
+  "trips": {
+    "title": "Mis viajes",
+    "subtitle": "Tus viajes publicados, tus series y el historial.",
+    "detailTitle": "Detalle del viaje",
+    "seriesTitle": "Detalle de la serie",
+    "tabs": {
+      "upcoming": "Próximos",
+      "series": "Series",
+      "history": "Historial"
+    },
+    "status": {
+      "scheduled": "Programado",
+      "in_progress": "En curso",
+      "completed": "Finalizado",
+      "cancelled_by_driver": "Cancelado",
+      "cancelled_pico_placa": "Pico y placa",
+      "not_held": "No realizado"
+    },
+    "seriesStatus": {
+      "active": "Activa",
+      "cancelled": "Cancelada",
+      "finished": "Terminada"
+    },
+    "to": "hacia",
+    "seats": "Puestos: {{count}}",
+    "stops": "Paradas: {{count}}",
+    "fromSeries": "Serie",
+    "seriesCounts": "{{scheduled}} programados de {{total}}",
+    "next": "próximo: {{when}}",
+    "window": "del {{start}} al {{end}}",
+    "picoPlacaAlert": "{{count}} viajes cancelados por pico y placa.",
+    "picoPlacaCancelled": "Este viaje cayó en pico y placa y se canceló automáticamente. No se puede reservar.",
+    "cancelReason": "Motivo de la cancelación",
+    "viewSeries": "Ver la serie",
+    "mapLabel": "Mapa con la ruta del viaje",
+    "driver": "Conductor",
+    "occurrences": "Viajes de la serie",
+    "counts": {
+      "scheduled": "Programados",
+      "picoPlaca": "Pico y placa"
+    },
+    "more": "Ver más",
+    "empty": {
+      "upcoming": "No tienes viajes próximos",
+      "history": "Aún no tienes historial",
+      "hint": "Publica un viaje para compartir tu trayecto.",
+      "series": "No tienes series",
+      "seriesHint": "Las series repiten tu trayecto varios días de la semana."
+    },
+    "actions": {
+      "edit": "Editar",
+      "cancel": "Cancelar viaje",
+      "cancelSeries": "Cancelar serie",
+      "duplicate": "Duplicar"
+    },
+    "cancel": {
+      "title": "Cancelar viaje",
+      "message": "Los pasajeros con reserva recibirán el aviso con tu motivo. Cancelar cuenta en tu reputación.",
+      "seriesTitle": "Cancelar serie",
+      "seriesMessage": "Se cancelan todos los viajes futuros de la serie. Los pasajeros recibirán el aviso con tu motivo.",
+      "reason": "Motivo",
+      "hint": "Entre 5 y 500 caracteres. Lo verán los pasajeros.",
+      "keep": "No cancelar",
+      "confirm": "Cancelar",
+      "done": "Viaje cancelado.",
+      "seriesDone": "Serie cancelada."
+    },
+    "duplicate": {
+      "title": "Duplicar",
+      "tripHint": "Se publica un viaje nuevo con la misma ruta, vehículo, puestos, aporte y reglas.",
+      "seriesHint": "Se publica una serie nueva con la misma plantilla desde la fecha que elijas.",
+      "invalid": "Elige una fecha de hoy en adelante.",
+      "confirm": "Duplicar",
+      "done": "Publicamos la copia."
+    }
   }
 }
