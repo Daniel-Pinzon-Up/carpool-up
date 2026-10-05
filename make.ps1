@@ -1,5 +1,5 @@
 # Equivalente del Makefile para Windows sin make.
-# Uso: .\make.ps1 token <correo> | up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | clean
+# Uso: .\make.ps1 token <correo> | up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | tiles | clean
 param(
     [Parameter(Position = 0)][string]$Target = 'help',
     [Parameter(Position = 1)][string]$Email = ''
@@ -11,6 +11,8 @@ $ErrorActionPreference = 'Continue'
 Set-Location $PSScriptRoot
 
 $Compose = @('compose', '--env-file', '.env', '-f', 'infra/docker-compose.yml', '-f', 'infra/docker-compose.dev.yml')
+# OSRM arranca solo cuando ya existen sus datos (.\make.ps1 osrm).
+if (Test-Path 'infra/osrm/data/pamplona.osrm.mldgr') { $Compose += @('--profile', 'osrm') }
 $TestDb = 'export DATABASE_URL=${DATABASE_URL%/*}/carpool_test && alembic upgrade head && pytest --cov=app --cov-report=term-missing'
 
 function Invoke-Compose([string[]]$CommandArgs) {
@@ -62,8 +64,9 @@ switch ($Target) {
     }
     'build' { Invoke-Compose @('build') }
     'osrm' { & bash infra/scripts/build_osrm.sh }
+    'tiles' { & bash infra/scripts/build_tiles.sh }
     'clean' { Invoke-Compose @('down', '-v') }
     default {
-        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, token <correo>, test, test-backend, test-frontend, lint, build, osrm, clean'
+        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, token <correo>, test, test-backend, test-frontend, lint, build, osrm, tiles, clean'
     }
 }

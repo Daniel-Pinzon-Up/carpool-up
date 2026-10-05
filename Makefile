@@ -1,8 +1,10 @@
 # Comandos del proyecto. En Windows sin make: .\make.ps1 <objetivo>
-DC = docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml
+# OSRM arranca solo cuando ya existen sus datos (make osrm).
+OSRM_PROFILE = $(if $(wildcard infra/osrm/data/pamplona.osrm.mldgr),--profile osrm,)
+DC = docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml $(OSRM_PROFILE)
 DC_TEST_DB = sh -c 'export DATABASE_URL=$${DATABASE_URL%/*}/carpool_test && alembic upgrade head && pytest --cov=app --cov-report=term-missing'
 
-.PHONY: help env up down restart logs ps migrate seed token test test-backend test-frontend lint build osrm clean
+.PHONY: help env up down restart logs ps migrate seed token test test-backend test-frontend lint build osrm tiles clean
 
 help:
 	@echo "env            crea .env desde .env.example si no existe"
@@ -15,6 +17,7 @@ help:
 	@echo "test           pruebas de backend (con PostGIS real) y frontend"
 	@echo "lint           ruff, mypy, eslint y prettier"
 	@echo "osrm           descarga y procesa el mapa de Pamplona para OSRM"
+	@echo "tiles          descarga las teselas del mapa base de Pamplona"
 
 env:
 	@test -f .env || cp .env.example .env
@@ -61,6 +64,9 @@ build:
 
 osrm:
 	sh infra/scripts/build_osrm.sh
+
+tiles:
+	sh infra/scripts/build_tiles.sh
 
 clean:
 	$(DC) down -v
