@@ -108,7 +108,37 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/profile'),
         title: 'nav.profile',
       },
+      {
+        path: 'mis-viajes',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/trips/driver-trips'),
+        title: 'nav.myTrips',
+      },
       comingSoon('mis-viajes', 'myTrips'),
+      {
+        path: 'viajes/:id',
+        loadComponent: () => import('./features/trips/trip-detail'),
+        title: 'trips.detailTitle',
+      },
+      {
+        path: 'viajes/:id/editar',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/publish/publish-wizard'),
+        data: { mode: 'edit-trip' },
+        title: 'publish.editTripTitle',
+      },
+      {
+        path: 'series/:id',
+        loadComponent: () => import('./features/trips/series-detail'),
+        title: 'trips.seriesTitle',
+      },
+      {
+        path: 'series/:id/editar',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/publish/publish-wizard'),
+        data: { mode: 'edit-series' },
+        title: 'publish.editSeriesTitle',
+      },
       comingSoon('mensajes', 'messages'),
       {
         path: 'notificaciones',
@@ -131,7 +161,7 @@ export const routes: Routes = [
       {
         path: 'publicar',
         canMatch: [roleGuard('driver'), canPublishGuard],
-        loadComponent: () => import('./features/publish/route-planner'),
+        loadComponent: () => import('./features/publish/publish-wizard'),
         title: 'nav.publish',
       },
       {

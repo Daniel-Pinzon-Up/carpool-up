@@ -1,0 +1,423 @@
+<div class="mx-auto flex max-w-6xl flex-col gap-5 py-2">
+  <header>
+    <h1 class="text-2xl font-bold sm:text-3xl">
+      {{
+        (mode() === 'create'
+          ? 'publish.title'
+          : mode() === 'edit-trip'
+            ? 'publish.editTripTitle'
+            : 'publish.editSeriesTitle'
+        ) | transloco
+      }}
+    </h1>
+    <p class="text-muted">{{ 'publish.subtitle' | transloco }}</p>
+  </header>
+
+  <cp-stepper [steps]="stepLabels()" [current]="stepIndex()" />
+
+  <form
+    [formGroup]="form"
+    class="grid gap-5 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]"
+    (submit)="$event.preventDefault()"
+    novalidate
+  >
+    <cp-glass-card [level]="2" class="flex flex-col">
+      <h2 id="publish-step-title" tabindex="-1" class="mb-4 text-xl font-bold outline-none">
+        {{ 'publish.steps.' + step() | transloco }}
+      </h2>
+
+      @switch (step()) {
+        @case ('type') {
+          <fieldset class="flex flex-col gap-3">
+            <legend class="sr-only">{{ 'publish.type.legend' | transloco }}</legend>
+            @for (option of ['single', 'series']; track option) {
+              <label
+                class="glass-1 !rounded-2xl flex cursor-pointer items-start gap-3 p-4 has-[:checked]:ring-2 has-[:checked]:ring-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+              >
+                <input
+                  type="radio"
+                  formControlName="kind"
+                  [value]="option"
+                  class="mt-1 size-4 accent-[var(--accent)]"
+                />
+                <span class="flex flex-col gap-1">
+                  <span class="flex items-center gap-2 font-semibold">
+                    @if (option === 'single') {
+                      <svg lucideCalendarDays class="size-5 text-accent" aria-hidden="true"></svg>
+                    } @else {
+                      <svg lucideRepeat class="size-5 text-accent" aria-hidden="true"></svg>
+                    }
+                    {{ 'publish.type.' + option | transloco }}
+                  </span>
+                  <span class="text-sm text-muted">{{
+                    'publish.type.' + option + 'Hint' | transloco
+                  }}</span>
+                </span>
+              </label>
+            }
+            @if (semesterMissing()) {
+              <p class="flex gap-2 text-sm text-muted">
+                <svg lucideCircleAlert class="size-4 shrink-0" aria-hidden="true"></svg>
+                {{ 'publish.type.noSemester' | transloco }}
+              </p>
+            }
+          </fieldset>
+        }
+
+        @case ('route') {
+          <div class="flex flex-col gap-4">
+            <cp-place-picker formControlName="origin" [label]="'planner.origin' | transloco" />
+            <div formArrayName="stops" class="flex flex-col gap-3">
+              @for (stop of stops.controls; track stop; let i = $index) {
+                <div class="flex items-end gap-2">
+                  <cp-place-picker
+                    class="min-w-0 flex-1"
+                    [formControlName]="i"
+                    [label]="'planner.stop' | transloco: { n: i + 1 }"
+                  />
+                  <button
+                    type="button"
+                    class="mb-12 grid size-11 shrink-0 place-items-center rounded-full text-muted hover:bg-glass hover:text-danger"
+                    [attr.aria-label]="'planner.removeStop' | transloco: { n: i + 1 }"
+                    (click)="removeStop(i)"
+                  >
+                    <svg lucideTrash2 class="size-5" aria-hidden="true"></svg>
+                  </button>
+                </div>
+              }
+            </div>
+            <button
+              cp-button
+              variant="ghost"
+              type="button"
+              class="self-start"
+              [disabled]="!canAddStop()"
+              (click)="addStop()"
+            >
+              <svg lucidePlus class="size-4" aria-hidden="true"></svg>
+              {{ 'planner.addStop' | transloco }}
+            </button>
+            <cp-place-picker
+              formControlName="destination"
+              [label]="'planner.destination' | transloco"
+            />
+          </div>
+        }
+
+        @case ('when') {
+          <div class="flex flex-col gap-4">
+            @if (isSeries()) {
+              <fieldset>
+                <legend class="mb-2 text-sm font-medium">
+                  {{ 'publish.when.weekdays' | transloco }}
+                </legend>
+                <div class="flex flex-wrap gap-2">
+                  @for (day of weekdays; track day) {
+                    <cp-glass-chip
+                      [selected]="selectedWeekdays().includes(day)"
+                      (selectedChange)="toggleWeekday(day, $event)"
+                    >
+                      <span aria-hidden="true">{{ weekdayName(day, 'short') }}</span>
+                      <span class="sr-only">{{ weekdayName(day) }}</span>
+                    </cp-glass-chip>
+                  }
+                </div>
+              </fieldset>
+              <cp-glass-input
+                formControlName="time"
+                type="time"
+                [label]="'publish.when.time' | transloco"
+                [hint]="'publish.when.timeHint' | transloco"
+              />
+              @if (mode() === 'create') {
+                <cp-glass-input
+                  formControlName="start_date"
+                  type="date"
+                  [label]="'publish.when.startDate' | transloco"
+                />
+                <cp-glass-select
+                  formControlName="window"
+                  [label]="'publish.when.window' | transloco"
+                  [options]="windowOptions()"
+                />
+              } @else {
+                <p class="text-sm text-muted">
+                  {{
+                    'publish.when.windowFixed'
+                      | transloco: { end: formatDate(editingSeries()?.window_end ?? today()) }
+                  }}
+                </p>
+              }
+
+              <section aria-labelledby="series-dates-title" class="flex flex-col gap-2">
+                <h3 id="series-dates-title" class="flex items-center gap-2 text-sm font-semibold">
+                  <svg lucideCalendarRange class="size-4" aria-hidden="true"></svg>
+                  {{
+                    'publish.when.datesTitle'
+                      | transloco: { count: bookableCount(), total: seriesPlan().length }
+                  }}
+                </h3>
+                <ul class="flex max-h-48 flex-wrap gap-1.5 overflow-y-auto">
+                  @for (day of seriesPlan(); track day.date) {
+                    <li
+                      class="rounded-full px-2.5 py-1 text-xs font-medium"
+                      [class]="day.blocked ? 'bg-warning/15 text-text line-through' : 'bg-glass'"
+                    >
+                      {{ formatDate(day.date) }}
+                      @if (day.blocked) {
+                        <span class="sr-only">({{ 'publish.when.picoPlacaDay' | transloco }})</span>
+                      }
+                    </li>
+                  }
+                </ul>
+                @if (seriesPlan().length > bookableCount()) {
+                  <p class="flex gap-2 text-sm text-muted">
+                    <svg
+                      lucideTriangleAlert
+                      class="size-4 shrink-0 text-warning"
+                      aria-hidden="true"
+                    ></svg>
+                    {{
+                      'publish.when.picoPlacaSeries'
+                        | transloco: { count: seriesPlan().length - bookableCount() }
+                    }}
+                  </p>
+                }
+              </section>
+            } @else {
+              <cp-glass-input
+                formControlName="date"
+                type="date"
+                [label]="'publish.when.date' | transloco"
+              />
+              <cp-glass-input
+                formControlName="time"
+                type="time"
+                [label]="'publish.when.time' | transloco"
+                [hint]="'publish.when.timeHint' | transloco"
+              />
+              @if (singleBlocked()) {
+                <p role="alert" class="flex gap-2 text-sm text-danger">
+                  <svg lucideTriangleAlert class="size-4 shrink-0" aria-hidden="true"></svg>
+                  {{ 'publish.when.picoPlacaSingle' | transloco }}
+                </p>
+              }
+            }
+          </div>
+        }
+
+        @case ('vehicle') {
+          <div class="flex flex-col gap-4">
+            <cp-glass-select
+              formControlName="vehicle_id"
+              [label]="'planner.vehicle' | transloco"
+              [options]="vehicleOptions()"
+            />
+            <cp-seat-picker
+              formControlName="seats"
+              [label]="'planner.seats' | transloco"
+              [min]="1"
+              [max]="seatMax()"
+            />
+            <p class="text-sm text-muted">
+              {{ 'publish.vehicle.seatsHint' | transloco: { max: seatMax() } }}
+            </p>
+          </div>
+        }
+
+        @case ('price') {
+          <div class="flex flex-col gap-4">
+            @if (preview()?.suggested_price !== null && preview()?.suggested_price !== undefined) {
+              <div
+                class="glass-1 !rounded-2xl flex flex-wrap items-center justify-between gap-3 p-4"
+              >
+                <div>
+                  <p class="text-sm text-muted">{{ 'publish.price.suggested' | transloco }}</p>
+                  <p class="text-2xl font-bold">{{ money(preview()!.suggested_price!) }}</p>
+                </div>
+                <button cp-button variant="secondary" type="button" (click)="useSuggestedPrice()">
+                  {{ 'publish.price.useSuggested' | transloco }}
+                </button>
+              </div>
+            } @else {
+              <p class="text-sm text-muted">{{ 'routeSummary.priceNotConfigured' | transloco }}</p>
+            }
+            <cp-glass-input
+              formControlName="price"
+              type="number"
+              inputmode="numeric"
+              [label]="'publish.price.label' | transloco"
+              [hint]="
+                (maxPrice() !== null ? 'publish.price.hintMax' : 'publish.price.hint')
+                  | transloco: { max: money(maxPrice() ?? 0) }
+              "
+            />
+            <p class="flex gap-2 text-sm text-muted">
+              <svg lucideHandCoins class="size-4 shrink-0" aria-hidden="true"></svg>
+              {{ 'routeSummary.contribution' | transloco }}
+            </p>
+          </div>
+        }
+
+        @case ('rules') {
+          <div class="flex flex-col gap-5">
+            @if (isFemale()) {
+              <label class="flex min-h-11 cursor-pointer items-center justify-between gap-3">
+                <span>
+                  <span class="block font-medium">{{
+                    'publish.rules.women_only' | transloco
+                  }}</span>
+                  <span class="block text-sm text-muted">{{
+                    'publish.rules.womenOnlyHint' | transloco
+                  }}</span>
+                </span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  formControlName="women_only"
+                  class="size-5 shrink-0 accent-[var(--accent)]"
+                />
+              </label>
+            }
+            @for (kind of toggleRules; track kind) {
+              <fieldset>
+                <legend class="mb-2 font-medium">{{ 'publish.rules.' + kind | transloco }}</legend>
+                <div class="flex flex-wrap gap-2">
+                  @for (choice of ['', 'allowed', 'not_allowed']; track choice) {
+                    <label
+                      class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-glass-border bg-glass px-4 text-sm has-[:checked]:border-accent has-[:checked]:bg-accent/15 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+                    >
+                      <input
+                        type="radio"
+                        class="sr-only"
+                        [formControlName]="kind"
+                        [value]="choice"
+                      />
+                      {{ 'publish.rules.choice.' + (choice || 'unset') | transloco }}
+                    </label>
+                  }
+                </div>
+              </fieldset>
+            }
+            <cp-glass-textarea
+              formControlName="custom"
+              [rows]="2"
+              [maxlength]="200"
+              [label]="'publish.rules.custom' | transloco"
+              [hint]="'publish.rules.customHint' | transloco"
+            />
+          </div>
+        }
+
+        @case ('summary') {
+          <dl class="flex flex-col gap-3 text-sm">
+            <div>
+              <dt class="text-muted">{{ 'publish.summary.type' | transloco }}</dt>
+              <dd class="font-semibold">
+                {{ 'publish.type.' + (isSeries() ? 'series' : 'single') | transloco }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'publish.summary.when' | transloco }}</dt>
+              <dd class="font-semibold">
+                @if (isSeries()) {
+                  {{
+                    'publish.summary.seriesWhen'
+                      | transloco: { count: bookableCount(), time: form.controls.time.value }
+                  }}
+                } @else {
+                  {{ formatDate(form.controls.date.value) }}, {{ form.controls.time.value }}
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'planner.vehicle' | transloco }}</dt>
+              <dd class="font-semibold">
+                {{ vehicle()?.brand }} {{ vehicle()?.model }} ·
+                {{ 'publish.summary.seats' | transloco: { count: form.controls.seats.value } }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'publish.price.label' | transloco }}</dt>
+              <dd class="font-semibold">{{ money(+form.controls.price.value) }}</dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'publish.steps.rules' | transloco }}</dt>
+              <dd>
+                @for (rule of rules(); track rule.kind) {
+                  <span
+                    class="mr-1.5 mb-1.5 inline-block rounded-full bg-glass px-2.5 py-1 text-xs font-medium"
+                  >
+                    @if (rule.kind === 'custom') {
+                      {{ rule.value }}
+                    } @else if (rule.kind === 'women_only') {
+                      {{ 'publish.rules.women_only' | transloco }}
+                    } @else {
+                      {{ 'publish.rules.' + rule.kind | transloco }}:
+                      {{ 'publish.rules.choice.' + rule.value | transloco }}
+                    }
+                  </span>
+                } @empty {
+                  <span class="text-muted">{{ 'publish.summary.noRules' | transloco }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        }
+      }
+
+      @if (stepError()) {
+        <p role="alert" class="mt-4 flex gap-2 text-sm text-danger">
+          <svg lucideCircleAlert class="size-5 shrink-0" aria-hidden="true"></svg>
+          {{ stepError() }}
+        </p>
+      }
+
+      <div class="mt-auto flex flex-wrap justify-between gap-3 pt-6">
+        <button
+          cp-button
+          variant="secondary"
+          type="button"
+          [disabled]="stepIndex() === 0"
+          (click)="back()"
+        >
+          <svg lucideArrowLeft class="size-4" aria-hidden="true"></svg>
+          {{ 'publish.back' | transloco }}
+        </button>
+        @if (step() === 'summary') {
+          <button cp-button type="button" [disabled]="submitting() || !loaded()" (click)="submit()">
+            {{ (mode() === 'create' ? 'publish.submit' : 'publish.save') | transloco }}
+          </button>
+        } @else {
+          <button cp-button type="button" [disabled]="!loaded()" (click)="next()">
+            {{ 'publish.next' | transloco }}
+            <svg lucideArrowRight class="size-4" aria-hidden="true"></svg>
+          </button>
+        }
+      </div>
+    </cp-glass-card>
+
+    <div class="flex flex-col gap-5">
+      <cp-map-view
+        class="h-72 w-full sm:h-[24rem]"
+        [route]="preview()?.geometry ?? null"
+        [markers]="markers()"
+        [label]="'planner.mapLabel' | transloco"
+      />
+      <cp-glass-card [attr.aria-busy]="loadingRoute()" aria-live="polite">
+        @if (routeError()) {
+          <p role="alert" class="flex gap-2 text-danger">
+            <svg lucideCircleAlert class="size-5 shrink-0" aria-hidden="true"></svg>
+            {{ routeError() }}
+          </p>
+        } @else if (preview()) {
+          <cp-route-summary [preview]="preview()" />
+        } @else {
+          <p class="text-muted">
+            {{ (loadingRoute() ? 'planner.calculating' : 'planner.empty') | transloco }}
+          </p>
+        }
+      </cp-glass-card>
+    </div>
+  </form>
+</div>
