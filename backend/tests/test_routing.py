@@ -1,68 +1,25 @@
 """Vista previa de ruta: puntos, area de servicio, ETA con factor de trafico y precio."""
 
-from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from typing import Any
 
 import httpx
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import get_session
 from app.core.enums import PlaceKind, UserRole
 from app.core.geo import point
-from app.main import create_app
-from app.modules.auth.router import get_email_queue
 from app.modules.places.models import Place
 from app.modules.routing.models import TrafficFactor
-from app.modules.routing.osrm import Leg, OsrmClient, RouteResult, cache_key
-from app.modules.routing.router import get_route_provider
+from app.modules.routing.osrm import OsrmClient, cache_key
 from app.modules.routing.service import estimate_price, round_to_hundred, weekday_group
 from app.modules.users.models import User
-from tests.conftest import API, Outbox, UserFactory, auth
+from tests.conftest import API, FakeProvider, UserFactory, auth
 
 ORIGIN = {"lat": 7.3870, "lon": -72.6495}
 STOP = {"lat": 7.3790, "lon": -72.6440}
 DESTINATION = {"lat": 7.3712, "lon": -72.6512}
-
-
-class FakeProvider:
-    """OSRM en memoria: cada tramo mide 2 km y dura 300 s."""
-
-    def __init__(self) -> None:
-        self.calls: list[list[tuple[float, float]]] = []
-
-    async def route(self, points: list[tuple[float, float]]) -> RouteResult:
-        self.calls.append(points)
-        legs = [Leg(2000.0, 300.0) for _ in points[1:]]
-        return RouteResult(
-            coordinates=[[lon, lat] for lat, lon in points],
-            distance_m=sum(leg.distance_m for leg in legs),
-            duration_s=sum(leg.duration_s for leg in legs),
-            legs=legs,
-        )
-
-
-@pytest.fixture
-def provider() -> FakeProvider:
-    return FakeProvider()
-
-
-@pytest.fixture
-async def routing_api(
-    db: AsyncSession, outbox: Outbox, provider: FakeProvider
-) -> AsyncIterator[AsyncClient]:
-    app = create_app()
-
-    async def override_session() -> AsyncIterator[AsyncSession]:
-        yield db
-
-    app.dependency_overrides[get_session] = override_session
-    app.dependency_overrides[get_email_queue] = lambda: outbox
-    app.dependency_overrides[get_route_provider] = lambda: provider
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        yield ac
 
 
 async def preview(api: AsyncClient, user: User, **body: Any) -> httpx.Response:

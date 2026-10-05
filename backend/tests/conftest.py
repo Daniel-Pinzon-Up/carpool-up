@@ -21,6 +21,8 @@ from app.core.security import create_access_token, hash_password
 from app.main import create_app
 from app.modules.auth.router import get_email_queue
 from app.modules.legal.models import LegalDocument
+from app.modules.routing.osrm import Leg, RouteResult
+from app.modules.routing.router import get_route_provider
 from app.modules.users.models import User
 
 API = "/api/v1"
@@ -170,3 +172,44 @@ async def legal_docs(db: AsyncSession) -> list[LegalDocument]:
     db.add_all(docs)
     await db.flush()
     return docs
+
+
+# --- Rutas sin OSRM ---------------------------------------------------------------------
+
+
+class FakeProvider:
+    """OSRM en memoria: cada tramo mide 2 km y dura 300 s."""
+
+    def __init__(self) -> None:
+        self.calls: list[list[tuple[float, float]]] = []
+
+    async def route(self, points: list[tuple[float, float]]) -> RouteResult:
+        self.calls.append(points)
+        legs = [Leg(2000.0, 300.0) for _ in points[1:]]
+        return RouteResult(
+            coordinates=[[lon, lat] for lat, lon in points],
+            distance_m=sum(leg.distance_m for leg in legs),
+            duration_s=sum(leg.duration_s for leg in legs),
+            legs=legs,
+        )
+
+
+@pytest.fixture
+def provider() -> FakeProvider:
+    return FakeProvider()
+
+
+@pytest.fixture
+async def routing_api(
+    db: AsyncSession, outbox: Outbox, provider: FakeProvider
+) -> AsyncIterator[AsyncClient]:
+    app = create_app()
+
+    async def override_session() -> AsyncIterator[AsyncSession]:
+        yield db
+
+    app.dependency_overrides[get_session] = override_session
+    app.dependency_overrides[get_email_queue] = lambda: outbox
+    app.dependency_overrides[get_route_provider] = lambda: provider
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
