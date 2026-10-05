@@ -230,5 +230,6 @@ class TripPlanner:
         trip.route = linestring(planned.route.coordinates)
         trip.distance_m = round(planned.route.distance_m)
         trip.est_duration_s = await self.duration(planned, departs_at)
+        trip.osrm_duration_s = round(planned.route.duration_s)
         trip.stops = await self.stop_rows(planned, departs_at)
         trip.rules = [TripRule(kind=RuleKind(rule["kind"]), value=rule["value"]) for rule in rules]

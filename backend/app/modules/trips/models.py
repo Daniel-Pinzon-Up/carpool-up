@@ -70,6 +70,8 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     )
     distance_m: Mapped[int] = mapped_column(Integer, nullable=False)
     est_duration_s: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Duracion de OSRM sin factor de trafico: el job semanal compara la real contra esta.
+    osrm_duration_s: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[TripStatus] = mapped_column(
         pg_enum(TripStatus, "trip_status"), nullable=False, default=TripStatus.SCHEDULED
     )
@@ -77,6 +79,7 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cancel_reason: Mapped[str | None] = mapped_column(Text)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     driver: Mapped[User] = relationship(lazy="selectin")

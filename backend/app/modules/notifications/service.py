@@ -51,6 +51,15 @@ class Kind:
     WAITLIST_OFFER_EXPIRED = "waitlist_offer_expired"
     # Chat (paso 9): uno por conversacion mientras haya mensajes sin leer.
     MESSAGE_NEW = "message_new"
+    # Ciclo del viaje y seguridad (paso 10).
+    TRIP_REMINDER = "trip_reminder"
+    TRIP_REMINDER_DRIVER = "trip_reminder_driver"
+    TRIP_STARTED = "trip_started"
+    TRIP_FINISHED = "trip_finished"
+    TRIP_NOT_HELD = "trip_not_held"
+    PASSENGER_NO_SHOW = "passenger_no_show"
+    BOOKING_SUSPENDED = "booking_suspended"
+    EMERGENCY_ALERT = "emergency_alert"
 
 
 class NotificationService:
