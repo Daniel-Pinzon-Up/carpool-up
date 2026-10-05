@@ -27,6 +27,7 @@ def new_code() -> str:
 
 class TicketOut(BaseModel):
     id: uuid.UUID
+    booking_id: uuid.UUID
     code: str
     amount: int
     seats: int
@@ -50,6 +51,7 @@ def ticket_out(ticket: Ticket) -> TicketOut:
     trip = booking.trip
     return TicketOut(
         id=ticket.id,
+        booking_id=booking.id,
         code=ticket.code,
         amount=ticket.amount,
         seats=booking.seats,

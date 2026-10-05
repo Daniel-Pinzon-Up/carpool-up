@@ -115,6 +115,8 @@ class BookingOut(BaseModel):
     )
     created_at: datetime
     decided_at: datetime | None
+    boarded_at: datetime | None = Field(description="El conductor lo marco a bordo")
+    no_show_at: datetime | None
     cancelled_at: datetime | None
     cancel_reason: str | None
     cancellation: CancellationOut | None

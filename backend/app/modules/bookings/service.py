@@ -278,6 +278,8 @@ async def booking_outs(
                 free_cancel=rules.free(booking, now),
                 created_at=booking.created_at,
                 decided_at=booking.decided_at,
+                boarded_at=booking.boarded_at,
+                no_show_at=booking.no_show_at,
                 cancelled_at=booking.cancelled_at,
                 cancel_reason=booking.cancel_reason,
                 cancellation=(
