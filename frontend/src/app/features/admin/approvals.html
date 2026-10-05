@@ -1,0 +1,173 @@
+<div class="mx-auto flex max-w-6xl flex-col gap-5 py-2">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold sm:text-3xl">{{ 'nav.approvals' | transloco }}</h1>
+      <p class="text-muted">{{ 'approvals.subtitle' | transloco }}</p>
+    </div>
+    <button cp-button variant="secondary" type="button" (click)="reload()" [loading]="loading()">
+      <svg lucideRefreshCw class="size-4" aria-hidden="true"></svg>
+      {{ 'approvals.refresh' | transloco }}
+    </button>
+  </header>
+
+  <cp-glass-tabs
+    #tabsRef
+    [tabs]="tabs()"
+    [selected]="type()"
+    (selectedChange)="setType($event)"
+    [label]="'nav.approvals' | transloco"
+  />
+
+  <div
+    role="tabpanel"
+    [id]="tabsRef.panelId(type())"
+    [attr.aria-labelledby]="tabsRef.tabId(type())"
+    class="grid gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]"
+  >
+    <cp-glass-card class="!p-3" [attr.aria-busy]="loading()">
+      @if (loading()) {
+        <div class="flex flex-col gap-4 p-2">
+          @for (row of [1, 2, 3]; track row) {
+            <cp-skeleton [lines]="2" />
+          }
+        </div>
+      } @else if (items().length === 0) {
+        <cp-empty-state
+          [icon]="emptyIcon"
+          [title]="'approvals.empty.title' | transloco"
+          [description]="'approvals.empty.body' | transloco"
+        />
+      } @else {
+        <ul class="flex flex-col gap-1" [attr.aria-label]="'approvals.listLabel' | transloco">
+          @for (item of items(); track item.id) {
+            <li>
+              <button
+                type="button"
+                class="flex w-full items-center gap-3 rounded-2xl p-3 text-left transition hover:bg-glass-strong"
+                [class.bg-accent/15]="item.id === selectedId()"
+                [attr.aria-current]="item.id === selectedId() ? 'true' : null"
+                (click)="select(item)"
+              >
+                <cp-avatar [name]="item.applicant.full_name" size="sm" />
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate font-semibold">{{ item.applicant.full_name }}</span>
+                  <span class="block truncate text-sm text-muted">
+                    {{ 'roles.' + item.applicant.role | transloco }} ·
+                    {{ formatDate(item.submitted_at) }}
+                  </span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </cp-glass-card>
+
+    @if (selected(); as item) {
+      <cp-glass-card [level]="2">
+        <section
+          id="approval-detail"
+          tabindex="-1"
+          class="flex flex-col gap-5 focus:outline-none"
+          aria-labelledby="approval-name"
+        >
+          <div class="flex flex-wrap items-start gap-4">
+            <cp-avatar [name]="item.applicant.full_name" />
+            <div class="min-w-0 flex-1">
+              <h2 id="approval-name" class="text-xl font-bold">{{ item.applicant.full_name }}</h2>
+              <p class="text-muted">
+                {{ item.applicant.program || ('approvals.noProgram' | transloco) }}
+              </p>
+            </div>
+          </div>
+
+          <dl class="grid gap-3 text-sm sm:grid-cols-3">
+            <div>
+              <dt class="text-muted">{{ 'approvals.document' | transloco }}</dt>
+              <dd class="font-semibold">
+                @if (item.type === 'license') {
+                  {{ 'approvals.tabs.licenseName' | transloco }}
+                } @else {
+                  {{ 'register.document.' + item.doc_kind + '.title' | transloco }}
+                }
+              </dd>
+            </div>
+            <div>
+              <dt class="text-muted">{{ 'register.role.label' | transloco }}</dt>
+              <dd class="font-semibold">{{ 'roles.' + item.applicant.role | transloco }}</dd>
+            </div>
+            <div>
+              @if (item.type === 'license') {
+                <dt class="text-muted">{{ 'license.expiresOn' | transloco }}</dt>
+                <dd class="font-semibold">{{ formatDate(item.license_expires_on) }}</dd>
+              } @else {
+                <dt class="text-muted">{{ 'approvals.semester' | transloco }}</dt>
+                <dd class="font-semibold">
+                  {{ item.semester || ('approvals.noSemester' | transloco) }}
+                </dd>
+              }
+            </div>
+          </dl>
+
+          <div
+            class="overflow-hidden rounded-2xl border border-glass-border bg-black/5"
+            [attr.aria-busy]="fileLoading()"
+          >
+            @if (fileLoading()) {
+              <div class="p-6"><cp-skeleton [lines]="6" /></div>
+            } @else if (fileError()) {
+              <p role="alert" class="p-6 text-danger">{{ 'approvals.fileError' | transloco }}</p>
+            } @else if (fileUrl(); as url) {
+              @if (file()?.isPdf) {
+                <iframe
+                  [src]="url"
+                  class="h-[32rem] w-full"
+                  [title]="'approvals.viewerTitle' | transloco: { name: item.applicant.full_name }"
+                ></iframe>
+              } @else {
+                <img
+                  [src]="url"
+                  class="mx-auto max-h-[32rem] object-contain"
+                  [alt]="'approvals.viewerTitle' | transloco: { name: item.applicant.full_name }"
+                />
+              }
+            }
+          </div>
+
+          @if (item.type === 'identity') {
+            <div class="max-w-xs">
+              <cp-glass-select
+                [formControl]="sex"
+                [label]="'approvals.confirmSex' | transloco"
+                [options]="sexOptions()"
+              />
+              <p class="mt-1.5 text-sm text-muted">
+                {{
+                  'approvals.declaredSex'
+                    | transloco: { sex: ('fields.sexOptions.' + item.applicant.sex | transloco) }
+                }}
+              </p>
+            </div>
+          }
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              cp-button
+              variant="danger"
+              type="button"
+              [disabled]="deciding()"
+              (click)="reject(item)"
+            >
+              <svg lucideX class="size-4" aria-hidden="true"></svg>
+              {{ 'approvals.rejectAction' | transloco }}
+            </button>
+            <button cp-button type="button" [loading]="deciding()" (click)="approve(item)">
+              <svg lucideCheck class="size-4" aria-hidden="true"></svg>
+              {{ 'approvals.approveAction' | transloco }}
+            </button>
+          </div>
+        </section>
+      </cp-glass-card>
+    }
+  </div>
+</div>
