@@ -170,6 +170,12 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             "Tamano maximo de documentos e imagenes subidos.",
         ),
         _define(
+            "max_trip_stops",
+            Annotated[int, Field(ge=0, le=10)],
+            5,
+            "Paradas intermedias permitidas entre origen y destino.",
+        ),
+        _define(
             "service_area",
             ServiceArea,
             {"min_lat": 7.33, "max_lat": 7.43, "min_lon": -72.70, "max_lon": -72.59},

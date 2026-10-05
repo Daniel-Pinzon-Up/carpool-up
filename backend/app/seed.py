@@ -24,6 +24,7 @@ from app.modules.legal.schemas import LegalPublish
 from app.modules.legal.service import LegalService
 from app.modules.pico_placa.models import PicoPlacaRule
 from app.modules.places.models import Place
+from app.modules.routing.models import TrafficFactor
 from app.modules.semesters.models import Semester
 from app.modules.semesters.repository import SemesterRepository
 from app.modules.settings.service import SettingsService
@@ -144,6 +145,24 @@ async def seed_pico_placa(session: AsyncSession, valid_from: date) -> None:
     logger.info("seed_pico_placa", created=len(VehicleType) * len(SAMPLE_PICO_PLACA))
 
 
+async def seed_traffic_factors(session: AsyncSession) -> None:
+    """Factor 1.0 en cada franja: la ETA es la de OSRM hasta que haya viajes reales."""
+    existing = {
+        (group, hour)
+        for group, hour in (
+            await session.execute(select(TrafficFactor.weekday_group, TrafficFactor.hour))
+        ).all()
+    }
+    created = 0
+    for group in ("weekday", "saturday", "sunday"):
+        for hour in range(24):
+            if (group, hour) not in existing:
+                session.add(TrafficFactor(weekday_group=group, hour=hour, factor=1.0, samples=0))
+                created += 1
+    await session.commit()
+    logger.info("seed_traffic_factors", created=created)
+
+
 async def seed_legal(session: AsyncSession) -> None:
     sources = {LegalKind.TERMS: "terms_es.md", LegalKind.DATA_POLICY: "data_policy_es.md"}
     for kind, filename in sources.items():
@@ -172,6 +191,7 @@ async def run() -> None:
         await seed_places(session)
         await seed_pico_placa(session, semester_start)
         await seed_legal(session)
+        await seed_traffic_factors(session)
 
 
 async def main() -> None:
