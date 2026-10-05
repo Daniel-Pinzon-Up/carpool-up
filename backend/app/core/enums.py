@@ -102,3 +102,45 @@ class RuleKind(StrEnum):
     SMOKING = "smoking"
     MUSIC = "music"
     CUSTOM = "custom"
+
+
+class BookingStatus(StrEnum):
+    REQUESTED = "requested"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    CANCEL_REQUESTED = "cancel_requested"
+    CANCELLED_BY_PASSENGER = "cancelled_by_passenger"
+    CANCELLED_BY_DRIVER = "cancelled_by_driver"
+    AUTO_CANCELLED_LATE = "auto_cancelled_late"
+    AUTO_CANCELLED_PICO_PLACA = "auto_cancelled_pico_placa"
+    EXPIRED = "expired"
+    NO_SHOW = "no_show"
+    COMPLETED = "completed"
+
+
+class SubscriptionStatus(StrEnum):
+    REQUESTED = "requested"
+    ACTIVE = "active"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
+    FINISHED = "finished"
+    EXPIRED = "expired"
+
+
+class WaitlistStatus(StrEnum):
+    WAITING = "waiting"
+    OFFERED = "offered"
+    CONVERTED = "converted"
+    EXPIRED = "expired"
+    LEFT = "left"
+
+
+class CancelRequestStatus(StrEnum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
+
+class SuspensionKind(StrEnum):
+    BOOKING_BAN = "booking_ban"
+    ACCOUNT = "account"
