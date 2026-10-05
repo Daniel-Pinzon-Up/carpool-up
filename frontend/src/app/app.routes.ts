@@ -128,7 +128,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/driver/driver-home'),
         title: 'nav.home',
       },
-      comingSoon('publicar', 'publish', { canMatch: [roleGuard('driver'), canPublishGuard] }),
+      {
+        path: 'publicar',
+        canMatch: [roleGuard('driver'), canPublishGuard],
+        loadComponent: () => import('./features/publish/route-planner'),
+        title: 'nav.publish',
+      },
       {
         path: 'vehiculos',
         canMatch: [roleGuard('driver')],

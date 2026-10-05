@@ -87,7 +87,7 @@ import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
 export class GlassInput extends FormControlBase<string> {
   readonly label = input.required<string>();
   readonly type = input<
-    'text' | 'email' | 'password' | 'tel' | 'number' | 'date' | 'time' | 'search'
+    'text' | 'email' | 'password' | 'tel' | 'number' | 'date' | 'datetime-local' | 'time' | 'search'
   >('text');
   readonly placeholder = input('');
   readonly hint = input<string | null>(null);
