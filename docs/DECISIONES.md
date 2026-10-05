@@ -95,3 +95,17 @@ Registro de decisiones tomadas durante la construcción que no estaban cerradas 
 | 3.13 | Las notificaciones internas se adelantan: tabla, bandeja (`/notifications`) y pantalla. El paso 9 agrega la entrega en tiempo real. | Aprobaciones y vencimientos deben avisar al usuario. |
 | 3.14 | La campana de avisos está en el encabezado para todos los roles. | La barra del conductor no tiene "Notificaciones" entre sus 5 destinos. |
 | 3.15 | La interfaz para crear administradores y cambiar roles llega en el paso 12 (panel del superadmin). | En este paso basta la API. |
+
+## Paso 4. Vehículos
+
+| # | Decisión | Motivo |
+|---|----------|--------|
+| 4.1 | Placas colombianas: carro `ABC123` y moto `ABC12D`. Se aceptan con espacios, guiones o minúsculas y se guardan normalizadas en mayúsculas. Otros formatos (diplomáticas, remolques) no se aceptan. | Son los formatos de uso particular; el resto no aplica a la comunidad universitaria. |
+| 4.2 | Capacidad = puestos totales con el conductor: carro de 2 a 8, moto exactamente 2. También la valida una restricción `CHECK` en la base. Año entre 1980 y el próximo año. | Sección 5.4. |
+| 4.3 | Tipo y placa no se editan: un cambio de vehículo es un vehículo nuevo. | Los viajes guardan el vehículo con el que se publicaron. |
+| 4.4 | Borrado lógico (`deleted_at`) y placa única solo entre vehículos no borrados (índice único parcial). Un vehículo borrado libera su placa. | "Borrados lógicos en vehículos". |
+| 4.5 | Impedir borrar vehículos con viajes programados se agrega en el paso 6, cuando existan los viajes. | Todavía no hay viajes. |
+| 4.6 | Fotos de vehículos: solo imágenes (JPG, PNG, WebP), sin EXIF, visibles para cualquier usuario con sesión. | Sección 11. |
+| 4.7 | Requisitos para publicar en un solo lugar (`publishing_blockers`): cuenta activa, licencia aprobada y vigente y al menos un vehículo activo. `/users/me` devuelve `publish_blockers` con los motivos y la API del paso 6 usará `require_can_publish` (`PUBLISH_NOT_ALLOWED`). | Criterio de aceptación del paso 4 y del paso 6. |
+| 4.8 | El inicio del conductor (`/inicio`) muestra la lista de requisitos con su estado y el botón Publicar deshabilitado con la explicación. `/publicar` exige `can_publish` y, si no, redirige a `/inicio`. | Prevención de errores (Nielsen) y aceptación del paso. |
+| 4.9 | Licencia y vehículos se gestionan desde el inicio del conductor y el perfil, no desde la barra inferior. | La barra admite cinco destinos y ya están definidos en el plan. |

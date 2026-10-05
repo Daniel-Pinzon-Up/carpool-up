@@ -63,6 +63,10 @@ Los códigos de negocio se documentan aquí en el paso que los introduce.
 | `LICENSE_EXPIRED` | 422 | 3 | La licencia está vencida (al subirla o al aprobarla). |
 | `LICENSE_DRIVERS_ONLY` | 403 | 3 | Solo los conductores suben licencia. |
 | `FILE_NOT_FOUND` | 404 | 3 | El archivo no existe en el almacenamiento. |
+| `VEHICLES_DRIVERS_ONLY` | 403 | 4 | Solo los conductores registran vehículos. |
+| `VEHICLE_PLATE_TAKEN` | 409 | 4 | La placa ya está registrada en un vehículo no borrado. |
+| `VEHICLE_INVALID` | 422 | 4 | Una edición rompe las reglas del tipo (`details.rule`). |
+| `PUBLISH_NOT_ALLOWED` | 403 | 4 | El conductor no cumple los requisitos para publicar (`details.blockers`). |
 
 ## Endpoints
 
@@ -143,6 +147,19 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `POST /notifications/{id}/read`, `POST /notifications/read-all` | Sesión | Marcar como leídas. |
 
 Tipos de notificación de este paso: `document_approved`, `document_rejected` (`reason`), `document_expired` (`semester`, `deadline`), `license_approved`, `license_rejected` (`reason`), `account_revalidation_required` (`semester`), `role_changed` (`role`).
+
+### Vehículos (paso 4)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /vehicles` | Conductor activo | Vehículos propios no borrados (incluye la placa). |
+| `POST /vehicles` | Conductor activo | `{type, plate, brand, model, color, year, capacity, luggage_space}`. |
+| `PATCH /vehicles/{id}` | Dueño | `{brand?, model?, color?, year?, capacity?, luggage_space?, is_active?}`. |
+| `DELETE /vehicles/{id}` | Dueño | Borrado lógico. |
+| `PUT /vehicles/{id}/photo` | Dueño | Multipart `photo` (JPG, PNG o WebP). |
+| `GET /vehicles/{id}/photo` | Sesión | Foto del vehículo. |
+
+`GET /users/me` incluye `can_publish` y `publish_blockers` (`account_not_active`, `license_missing`, `license_pending`, `license_rejected`, `license_expired`, `no_active_vehicle`).
 
 ## Cabeceras
 
