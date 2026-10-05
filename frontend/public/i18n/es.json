@@ -132,7 +132,11 @@
     "APPROVAL_NOT_PENDING": "Otro administrador ya revisó este documento. Actualiza la lista.",
     "LICENSE_EXPIRED": "La licencia está vencida. Revisa la fecha de vencimiento.",
     "LICENSE_DRIVERS_ONLY": "Solo los conductores suben licencia.",
-    "FILE_NOT_FOUND": "No encontramos el archivo."
+    "FILE_NOT_FOUND": "No encontramos el archivo.",
+    "VEHICLES_DRIVERS_ONLY": "Solo los conductores registran vehículos.",
+    "VEHICLE_PLATE_TAKEN": "Esa placa ya está registrada en la app.",
+    "VEHICLE_INVALID": "Revisa los datos del vehículo: no cumplen las reglas de su tipo.",
+    "PUBLISH_NOT_ALLOWED": "Aún no puedes publicar viajes. Revisa los pasos pendientes en tu inicio."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -546,5 +550,97 @@
       "account_revalidation_required": "No revalidaste tu documento para el semestre {{semester}}. Sube uno nuevo para seguir usando la app.",
       "role_changed": "Un administrador cambió tu rol en la app."
     }
+  },
+  "vehicles": {
+    "title": "Mis vehículos",
+    "subtitle": "Registra los carros o motos con los que ofreces viajes.",
+    "add": "Agregar vehículo",
+    "manage": "Ver mis vehículos",
+    "empty": {
+      "title": "Aún no tienes vehículos",
+      "body": "Agrega tu carro o moto para poder publicar viajes."
+    },
+    "types": {
+      "car": "Carro",
+      "motorcycle": "Moto"
+    },
+    "typeHelp": {
+      "car": "Entre 2 y 8 puestos, incluido tú.",
+      "motorcycle": "Tú y un pasajero."
+    },
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "seats": "{{count}} puestos en total",
+    "luggage": "Espacio para equipaje",
+    "edit": "Editar",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar el vehículo de placa {{plate}}",
+    "confirmDelete": {
+      "title": "¿Eliminar el vehículo {{plate}}?",
+      "body": "Dejará de aparecer en tu lista y no podrás usarlo para publicar viajes.",
+      "confirm": "Sí, eliminar"
+    },
+    "deleted": "Vehículo eliminado.",
+    "newTitle": "Nuevo vehículo",
+    "editTitle": "Editar vehículo",
+    "plateLocked": "El tipo y la placa no se pueden cambiar. Si cambiaste de vehículo, agrega uno nuevo.",
+    "type": "Tipo de vehículo",
+    "plate": "Placa",
+    "plateHint": {
+      "car": "Tres letras y tres números, por ejemplo ABC123.",
+      "motorcycle": "Tres letras, dos números y una letra, por ejemplo ABC12D."
+    },
+    "plateError": {
+      "car": "La placa de un carro tiene tres letras y tres números (ABC123).",
+      "motorcycle": "La placa de una moto tiene tres letras, dos números y una letra (ABC12D)."
+    },
+    "brand": "Marca",
+    "model": "Modelo",
+    "color": "Color",
+    "year": "Año",
+    "yearError": "Escribe un año entre {{min}} y {{max}}.",
+    "capacity": "Puestos totales",
+    "capacityHelp": "Incluye el puesto del conductor. Al publicar podrás ofrecer menos puestos.",
+    "luggageQuestion": "Tiene espacio para equipaje",
+    "photo": "Foto del vehículo (opcional)",
+    "replacePhoto": "Reemplazar foto (opcional)",
+    "photoTypeError": "La foto debe ser JPG, PNG o WebP.",
+    "create": "Agregar vehículo",
+    "save": "Guardar cambios",
+    "created": "Vehículo agregado.",
+    "saved": "Cambios guardados."
+  },
+  "driverHome": {
+    "title": "Tu panel de conductor",
+    "ready": {
+      "title": "Todo listo para publicar",
+      "body": "Publica un viaje puntual o una serie para tus trayectos de cada semana."
+    },
+    "setup": {
+      "title": "Completa estos pasos para publicar",
+      "body": "Necesitas una licencia aprobada y vigente y al menos un vehículo activo."
+    },
+    "license": {
+      "title": "Licencia de conducción",
+      "missing": "Súbela con su fecha de vencimiento.",
+      "pending": "Un administrador la está revisando.",
+      "rejected": "Fue rechazada. Revisa el motivo y súbela de nuevo.",
+      "expired": "Está vencida. Sube la renovada.",
+      "ok": "Aprobada y vigente."
+    },
+    "vehicle": {
+      "title": "Vehículo",
+      "missing": "Agrega tu carro o moto y déjalo activo.",
+      "ok": "Tienes un vehículo activo."
+    },
+    "state": {
+      "done": "Listo",
+      "waiting": "En revisión",
+      "todo": "Pendiente",
+      "problem": "Requiere atención"
+    },
+    "locked": "Podrás publicar cuando completes los pasos de arriba."
   }
 }

@@ -132,7 +132,11 @@
     "APPROVAL_NOT_PENDING": "Another administrator already reviewed this document. Refresh the list.",
     "LICENSE_EXPIRED": "The license is expired. Check the expiration date.",
     "LICENSE_DRIVERS_ONLY": "Only drivers upload a license.",
-    "FILE_NOT_FOUND": "We could not find the file."
+    "FILE_NOT_FOUND": "We could not find the file.",
+    "VEHICLES_DRIVERS_ONLY": "Only drivers register vehicles.",
+    "VEHICLE_PLATE_TAKEN": "That plate is already registered in the app.",
+    "VEHICLE_INVALID": "Check the vehicle details: they do not meet the rules for its type.",
+    "PUBLISH_NOT_ALLOWED": "You cannot publish trips yet. Check the pending steps on your home screen."
   },
   "catalog": {
     "title": "Component catalog",
@@ -546,5 +550,97 @@
       "account_revalidation_required": "You did not revalidate your document for semester {{semester}}. Upload a new one to keep using the app.",
       "role_changed": "An administrator changed your role in the app."
     }
+  },
+  "vehicles": {
+    "title": "My vehicles",
+    "subtitle": "Register the cars or motorcycles you offer trips with.",
+    "add": "Add vehicle",
+    "manage": "See my vehicles",
+    "empty": {
+      "title": "You have no vehicles yet",
+      "body": "Add your car or motorcycle to publish trips."
+    },
+    "types": {
+      "car": "Car",
+      "motorcycle": "Motorcycle"
+    },
+    "typeHelp": {
+      "car": "Between 2 and 8 seats, including you.",
+      "motorcycle": "You and one passenger."
+    },
+    "active": "Active",
+    "inactive": "Inactive",
+    "seats": "{{count}} seats in total",
+    "luggage": "Luggage space",
+    "edit": "Edit",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "deleteLabel": "Delete the vehicle with plate {{plate}}",
+    "confirmDelete": {
+      "title": "Delete vehicle {{plate}}?",
+      "body": "It will no longer appear in your list and you will not be able to publish trips with it.",
+      "confirm": "Yes, delete"
+    },
+    "deleted": "Vehicle deleted.",
+    "newTitle": "New vehicle",
+    "editTitle": "Edit vehicle",
+    "plateLocked": "Type and plate cannot be changed. If you changed vehicles, add a new one.",
+    "type": "Vehicle type",
+    "plate": "Plate",
+    "plateHint": {
+      "car": "Three letters and three digits, for example ABC123.",
+      "motorcycle": "Three letters, two digits and a letter, for example ABC12D."
+    },
+    "plateError": {
+      "car": "A car plate has three letters and three digits (ABC123).",
+      "motorcycle": "A motorcycle plate has three letters, two digits and a letter (ABC12D)."
+    },
+    "brand": "Brand",
+    "model": "Model",
+    "color": "Color",
+    "year": "Year",
+    "yearError": "Enter a year between {{min}} and {{max}}.",
+    "capacity": "Total seats",
+    "capacityHelp": "Includes the driver's seat. When publishing you can offer fewer seats.",
+    "luggageQuestion": "Has luggage space",
+    "photo": "Vehicle photo (optional)",
+    "replacePhoto": "Replace photo (optional)",
+    "photoTypeError": "The photo must be JPG, PNG or WebP.",
+    "create": "Add vehicle",
+    "save": "Save changes",
+    "created": "Vehicle added.",
+    "saved": "Changes saved."
+  },
+  "driverHome": {
+    "title": "Your driver dashboard",
+    "ready": {
+      "title": "Ready to publish",
+      "body": "Publish a one-time trip or a series for your weekly routes."
+    },
+    "setup": {
+      "title": "Complete these steps to publish",
+      "body": "You need an approved, current license and at least one active vehicle."
+    },
+    "license": {
+      "title": "Driver's license",
+      "missing": "Upload it with its expiration date.",
+      "pending": "An administrator is reviewing it.",
+      "rejected": "It was rejected. Check the reason and upload it again.",
+      "expired": "It is expired. Upload the renewed one.",
+      "ok": "Approved and current."
+    },
+    "vehicle": {
+      "title": "Vehicle",
+      "missing": "Add your car or motorcycle and keep it active.",
+      "ok": "You have an active vehicle."
+    },
+    "state": {
+      "done": "Done",
+      "waiting": "Under review",
+      "todo": "Pending",
+      "problem": "Needs attention"
+    },
+    "locked": "You can publish once you complete the steps above."
   }
 }

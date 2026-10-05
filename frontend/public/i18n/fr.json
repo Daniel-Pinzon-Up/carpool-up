@@ -132,7 +132,11 @@
     "APPROVAL_NOT_PENDING": "Un autre administrateur a déjà vérifié ce document. Actualisez la liste.",
     "LICENSE_EXPIRED": "Le permis a expiré. Vérifiez la date d'expiration.",
     "LICENSE_DRIVERS_ONLY": "Seuls les conducteurs envoient un permis.",
-    "FILE_NOT_FOUND": "Fichier introuvable."
+    "FILE_NOT_FOUND": "Fichier introuvable.",
+    "VEHICLES_DRIVERS_ONLY": "Seuls les conducteurs enregistrent des véhicules.",
+    "VEHICLE_PLATE_TAKEN": "Cette plaque est déjà enregistrée dans l'app.",
+    "VEHICLE_INVALID": "Vérifiez les données du véhicule : elles ne respectent pas les règles de son type.",
+    "PUBLISH_NOT_ALLOWED": "Vous ne pouvez pas encore publier de trajets. Consultez les étapes en attente sur votre accueil."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -546,5 +550,97 @@
       "account_revalidation_required": "Vous n'avez pas revalidé votre document pour le semestre {{semester}}. Envoyez-en un nouveau pour continuer à utiliser l'app.",
       "role_changed": "Un administrateur a modifié votre rôle dans l'app."
     }
+  },
+  "vehicles": {
+    "title": "Mes véhicules",
+    "subtitle": "Enregistrez les voitures ou motos avec lesquelles vous proposez des trajets.",
+    "add": "Ajouter un véhicule",
+    "manage": "Voir mes véhicules",
+    "empty": {
+      "title": "Vous n'avez pas encore de véhicule",
+      "body": "Ajoutez votre voiture ou votre moto pour publier des trajets."
+    },
+    "types": {
+      "car": "Voiture",
+      "motorcycle": "Moto"
+    },
+    "typeHelp": {
+      "car": "Entre 2 et 8 places, vous compris.",
+      "motorcycle": "Vous et un passager."
+    },
+    "active": "Actif",
+    "inactive": "Inactif",
+    "seats": "{{count}} places au total",
+    "luggage": "Espace bagages",
+    "edit": "Modifier",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "delete": "Supprimer",
+    "deleteLabel": "Supprimer le véhicule immatriculé {{plate}}",
+    "confirmDelete": {
+      "title": "Supprimer le véhicule {{plate}} ?",
+      "body": "Il n'apparaîtra plus dans votre liste et vous ne pourrez plus publier de trajets avec.",
+      "confirm": "Oui, supprimer"
+    },
+    "deleted": "Véhicule supprimé.",
+    "newTitle": "Nouveau véhicule",
+    "editTitle": "Modifier le véhicule",
+    "plateLocked": "Le type et la plaque ne peuvent pas être modifiés. Si vous avez changé de véhicule, ajoutez-en un nouveau.",
+    "type": "Type de véhicule",
+    "plate": "Plaque",
+    "plateHint": {
+      "car": "Trois lettres et trois chiffres, par exemple ABC123.",
+      "motorcycle": "Trois lettres, deux chiffres et une lettre, par exemple ABC12D."
+    },
+    "plateError": {
+      "car": "Une plaque de voiture comporte trois lettres et trois chiffres (ABC123).",
+      "motorcycle": "Une plaque de moto comporte trois lettres, deux chiffres et une lettre (ABC12D)."
+    },
+    "brand": "Marque",
+    "model": "Modèle",
+    "color": "Couleur",
+    "year": "Année",
+    "yearError": "Saisissez une année entre {{min}} et {{max}}.",
+    "capacity": "Places au total",
+    "capacityHelp": "Inclut la place du conducteur. En publiant, vous pourrez proposer moins de places.",
+    "luggageQuestion": "Dispose d'un espace bagages",
+    "photo": "Photo du véhicule (facultatif)",
+    "replacePhoto": "Remplacer la photo (facultatif)",
+    "photoTypeError": "La photo doit être au format JPG, PNG ou WebP.",
+    "create": "Ajouter le véhicule",
+    "save": "Enregistrer",
+    "created": "Véhicule ajouté.",
+    "saved": "Modifications enregistrées."
+  },
+  "driverHome": {
+    "title": "Votre tableau de bord conducteur",
+    "ready": {
+      "title": "Prêt à publier",
+      "body": "Publiez un trajet ponctuel ou une série pour vos trajets de la semaine."
+    },
+    "setup": {
+      "title": "Terminez ces étapes pour publier",
+      "body": "Il vous faut un permis approuvé et valable et au moins un véhicule actif."
+    },
+    "license": {
+      "title": "Permis de conduire",
+      "missing": "Envoyez-le avec sa date d'expiration.",
+      "pending": "Un administrateur le vérifie.",
+      "rejected": "Il a été refusé. Consultez le motif et renvoyez-le.",
+      "expired": "Il a expiré. Envoyez le permis renouvelé.",
+      "ok": "Approuvé et valable."
+    },
+    "vehicle": {
+      "title": "Véhicule",
+      "missing": "Ajoutez votre voiture ou votre moto et laissez-la active.",
+      "ok": "Vous avez un véhicule actif."
+    },
+    "state": {
+      "done": "Terminé",
+      "waiting": "En vérification",
+      "todo": "À faire",
+      "problem": "À corriger"
+    },
+    "locked": "Vous pourrez publier une fois les étapes ci-dessus terminées."
   }
 }
