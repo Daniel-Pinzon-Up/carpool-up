@@ -20,6 +20,7 @@ from app.modules.legal import router as legal
 from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
+from app.modules.routing import router as routing
 from app.modules.semesters import router as semesters
 from app.modules.settings import router as settings_module
 from app.modules.users import router as users
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
         users.router,
         notifications.router,
         vehicles.router,
+        routing.router,
         settings_module.router,
         semesters.router,
         places.router,
