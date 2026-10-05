@@ -21,6 +21,7 @@ from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
 from app.modules.routing import router as routing
+from app.modules.search import router as search
 from app.modules.semesters import router as semesters
 from app.modules.series import router as series
 from app.modules.settings import router as settings_module
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
         routing.router,
         trips.router,
         series.router,
+        search.router,
         settings_module.router,
         semesters.router,
         places.router,

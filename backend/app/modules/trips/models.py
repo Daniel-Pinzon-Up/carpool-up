@@ -39,6 +39,13 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
             name="cancel_has_reason",
         ),
         Index("ix_trips_driver_departs", "driver_id", "departs_at"),
+        # Busqueda en metros: ST_DWithin(route::geography, ...) (migracion 0008).
+        Index(
+            "ix_trips_route_geography",
+            text("(route::geography)"),
+            postgresql_using="gist",
+            postgresql_where=text("status = 'scheduled' AND deleted_at IS NULL"),
+        ),
         Index(
             "ix_trips_scheduled_departs",
             "departs_at",
