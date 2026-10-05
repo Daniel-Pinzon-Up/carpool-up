@@ -157,7 +157,33 @@
     "SERIES_NOT_ACTIVE": "The series is no longer active.",
     "VEHICLE_HAS_TRIPS": "The vehicle has scheduled trips. Cancel them or change their vehicle first.",
     "INVALID_RANGE": "The date range is not valid.",
-    "SEARCH_IN_PAST": "That time has passed. Choose a future time."
+    "SEARCH_IN_PAST": "That time has passed. Choose a future time.",
+    "TRIP_FULL": "Not enough seats left. {{seats_available}} left.",
+    "TRIP_NOT_BOOKABLE": "This ride no longer takes bookings.",
+    "BOOKING_EXISTS": "You already have a booking on this ride.",
+    "BOOKING_OVERLAP": "You already have another ride at that time.",
+    "BOOKING_OWN_TRIP": "You cannot book your own ride.",
+    "WOMEN_ONLY_TRIP": "This ride is for women only.",
+    "BOOKING_SUSPENDED": "Your bookings are suspended for now.",
+    "PREFERENCES_CONFLICT": "The ride rules do not allow some of your preferences.",
+    "POINTS_OFF_ROUTE": "Pick-up and drop-off must be along the route and in that order.",
+    "BOOKING_NOT_PENDING": "This request was already answered.",
+    "BOOKING_NOT_CANCELLABLE": "This booking can no longer be cancelled.",
+    "CANCELLATION_PENDING": "You already asked to cancel this booking.",
+    "CANCEL_REASON_REQUIRED": "Tell the driver why you are cancelling.",
+    "CANCELLATION_NOT_PENDING": "This cancellation was already decided.",
+    "SUBSCRIPTION_OPTION_INVALID": "Choose one of the available ranges.",
+    "SUBSCRIPTION_OUT_OF_RANGE": "The start date is outside the series.",
+    "SUBSCRIPTION_EMPTY": "There are no rides available in that range.",
+    "SUBSCRIPTION_EXISTS": "You already have a request for this series.",
+    "SUBSCRIPTION_NOT_PENDING": "This request was already answered or expired.",
+    "SUBSCRIPTION_NOT_ACTIVE": "This subscription is no longer active.",
+    "WAITLIST_NOT_NEEDED": "There are seats left: request your booking directly.",
+    "WAITLIST_EXISTS": "You are already on the waiting list.",
+    "WAITLIST_OFFER_EXPIRED": "The seat offer is no longer available.",
+    "SEATS_BELOW_BOOKED": "{{booked}} seats are already accepted; you cannot offer fewer.",
+    "WOMEN_ONLY_CONFLICT": "The ride has passengers who are not women; it cannot be women only.",
+    "SERIES_HAS_BOOKINGS": "Some rides in the series have bookings. Confirm the change."
   },
   "catalog": {
     "title": "Component catalog",
@@ -571,7 +597,28 @@
       "account_revalidation_required": "You did not revalidate your document for semester {{semester}}. Upload a new one to keep using the app.",
       "role_changed": "An administrator changed your role in the app.",
       "trip_pico_placa_cancelled": "Your trip on {{date}} was cancelled automatically because of pico y placa.",
-      "trip_pico_placa_restored": "Your trip on {{date}} no longer has pico y placa and is scheduled again."
+      "trip_pico_placa_restored": "Your trip on {{date}} no longer has pico y placa and is scheduled again.",
+      "booking_requested": "You have a new seat request.",
+      "booking_withdrawn": "A passenger withdrew their request.",
+      "booking_cancelled_by_passenger": "A passenger cancelled; the seat is free.",
+      "cancellation_requested": "A passenger asks to cancel their booking.",
+      "subscription_requested": "A passenger wants to join your series.",
+      "subscription_cancelled": "A passenger left your series.",
+      "booking_accepted": "Your booking was accepted!",
+      "booking_rejected": "Your seat request was rejected.",
+      "booking_expired": "Your request expired without an answer.",
+      "booking_cancelled_by_driver": "The driver cancelled the ride.",
+      "booking_auto_cancelled_late": "The ride did not start on time; we cancelled your booking with no penalty.",
+      "booking_pico_placa_cancelled": "The ride fell on pico y placa and was cancelled.",
+      "cancellation_accepted": "The driver accepted your cancellation.",
+      "cancellation_rejected": "Your booking stays: the cancellation was not approved.",
+      "trip_changed": "The driver changed your ride. Check the new time.",
+      "subscription_accepted": "You joined the series: {{booked}} rides booked.",
+      "subscription_rejected": "Your request to join the series was rejected.",
+      "subscription_expired": "Your request to join the series expired.",
+      "subscription_ended": "Your series subscription ended.",
+      "waitlist_offer": "A seat freed up on a full ride. Confirm it soon.",
+      "waitlist_offer_expired": "The seat offer expired."
     }
   },
   "vehicles": {
@@ -811,7 +858,7 @@
     },
     "confirmSeriesEdit": {
       "title": "Save changes to the series?",
-      "message": "All future trips of the series are updated. Past or cancelled trips do not change.",
+      "message": "All future rides in the series are updated. Passengers with bookings get a notice and, if a date leaves the series, their booking is cancelled.",
       "confirm": "Save changes"
     },
     "back": "Back",
@@ -896,7 +943,9 @@
       "confirm": "Duplicate",
       "done": "We published the copy."
     },
-    "yourTrip": "Your pick-up and drop-off"
+    "yourTrip": "Your pick-up and drop-off",
+    "seatsLeft": "{{free}} of {{total}} free",
+    "pendingRequests": "To decide: {{count}}"
   },
   "search": {
     "title": "Find a ride",
@@ -934,6 +983,156 @@
       "newDriver": "New driver",
       "trips": "Trips: {{count}}",
       "series": "Series"
+    }
+  },
+  "bookings": {
+    "status": {
+      "requested": "Requested",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "cancel_requested": "Cancellation pending",
+      "cancelled_by_passenger": "Cancelled by you",
+      "cancelled_by_driver": "Cancelled by the driver",
+      "auto_cancelled_late": "Cancelled for delay",
+      "auto_cancelled_pico_placa": "Cancelled for pico y placa",
+      "expired": "Expired",
+      "no_show": "No-show",
+      "completed": "Completed"
+    },
+    "subscriptionStatus": {
+      "requested": "Requested",
+      "active": "Active",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "finished": "Finished",
+      "expired": "Expired"
+    },
+    "tabs": {
+      "upcoming": "Upcoming",
+      "history": "History",
+      "series": "Series",
+      "waitlist": "Waiting list"
+    },
+    "empty": {
+      "upcoming": "You have no upcoming rides",
+      "history": "No history yet",
+      "hint": "Find a ride and request a seat.",
+      "series": "You have not joined any series",
+      "seriesHint": "From a recurring ride you can join for several days.",
+      "waitlist": "You are not on any waiting list",
+      "waitlistHint": "If a ride is full, join the list and we will tell you when a seat frees up."
+    },
+    "reason": {
+      "label": "Reason",
+      "optional": "Reason (optional)",
+      "back": "Back"
+    },
+    "cancel": {
+      "action": "Cancel booking",
+      "title": "Cancel your booking?",
+      "message": "Your seat will be freed for someone else.",
+      "confirm": "Yes, cancel",
+      "done": "Booking cancelled.",
+      "lateTitle": "The ride is soon",
+      "lateMessage": "With less than 2 hours left, the driver must approve the cancellation. Tell them why.",
+      "lateConfirm": "Ask to cancel",
+      "requested": "We asked the driver to approve your cancellation."
+    },
+    "panel": {
+      "title": "Your booking",
+      "request": "Request a seat",
+      "sent": "Request sent. We will let you know when the driver answers.",
+      "approvalHint": "The driver approves each request. Until then the seat is not held.",
+      "total": "Total contribution: {{amount}}",
+      "contribution": "It is a contribution to share the ride costs, not a commercial payment.",
+      "closed": "This ride no longer takes requests.",
+      "womenOnly": "This ride is for women only.",
+      "myPoint": "My point: {{name}}",
+      "joinSeries": "Join the series",
+      "companions": "Riding with you",
+      "onlyYou": "Only you for now",
+      "hint": {
+        "requested": "Waiting for the driver's answer.",
+        "accepted": "You have a seat. The plate and payment details are now visible.",
+        "cancel_requested": "The driver is reviewing your cancellation request."
+      }
+    },
+    "waitlist": {
+      "full": "There are not enough seats left.",
+      "join": "Join the waiting list",
+      "joined": "You are on the waiting list. We will tell you if a seat frees up.",
+      "waiting": "You are on this ride's waiting list.",
+      "leave": "Leave the list",
+      "left": "Done, you left the list.",
+      "offer": "A seat is free. Confirm it before {{time}}.",
+      "confirm": "I want the seat",
+      "decline": "I no longer need it",
+      "position": "People ahead of you: {{ahead}}"
+    },
+    "card": {
+      "trips": "Rides: {{count}}",
+      "fromSubscription": "Series",
+      "paymentNote": "Contribution details",
+      "cancelReason": "Cancellation reason",
+      "tripChanged": "The driver changed the ride: you can cancel with no penalty."
+    },
+    "passengers": {
+      "title": "Passengers",
+      "pending": "To decide",
+      "confirmed": "Confirmed",
+      "none": "No confirmed passengers yet.",
+      "others": "Other bookings ({{count}})"
+    },
+    "inbox": {
+      "title": "Requests",
+      "subtitle": "Bookings, cancellations and series waiting for your answer.",
+      "refresh": "Refresh",
+      "empty": "No pending requests",
+      "emptyHint": "When a passenger asks for a seat it shows up here.",
+      "requests": "Bookings to approve ({{count}})",
+      "cancellations": "Cancellations to decide ({{count}})",
+      "cancellationsHint": "Less than 2 hours left: if you accept, the seat is freed.",
+      "subscriptions": "Series subscriptions ({{count}})",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accepted": "Booking accepted.",
+      "rejected": "Request rejected.",
+      "rejectTitle": "Reject the request?",
+      "rejectSubscriptionTitle": "Reject the subscription?",
+      "rejectMessage": "We will let the passenger know. You can tell them why.",
+      "acceptCancellation": "Accept cancellation",
+      "rejectCancellation": "Keep the booking",
+      "cancellationAccepted": "Cancellation accepted; the seat is free.",
+      "cancellationRejected": "The booking stays.",
+      "subscriptionAccepted": "Subscription accepted; dates with seats were booked."
+    },
+    "subscription": {
+      "title": "Join the series",
+      "option": "For how long?",
+      "start": "From",
+      "wholeSeries": "The whole series",
+      "days_count": "{{count}} days",
+      "days": "Dates in range",
+      "noDays": "There are no rides in that range.",
+      "legend": "Struck-through dates have pico y placa and grey ones are full: they are not booked.",
+      "dayFree": "seats left",
+      "dayFull": "full",
+      "dayPicoPlaca": "pico y placa",
+      "submit": "Request {{count}} rides",
+      "approvalHint": "The driver approves once and we book every date with seats.",
+      "sent": "Request sent to the driver.",
+      "range": "From {{start}} to {{end}}",
+      "summary": "Booked: {{booked}} · Full or blocked: {{skipped}}",
+      "closed": "This series no longer takes passengers.",
+      "cancel": "Leave the series",
+      "cancelTitle": "Leave the series?",
+      "cancelMessage": "Your future bookings in the series are cancelled.",
+      "cancelled": "You left the series.",
+      "lateMessage": "A ride leaves in less than 2 hours: the driver must approve that cancellation. Tell them why.",
+      "hint": {
+        "requested": "Waiting for the driver's approval.",
+        "active": "Your series rides are in My rides."
+      }
     }
   }
 }

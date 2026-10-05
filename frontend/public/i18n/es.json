@@ -157,7 +157,33 @@
     "SERIES_NOT_ACTIVE": "La serie ya no está activa.",
     "VEHICLE_HAS_TRIPS": "El vehículo tiene viajes programados. Cancélalos o cámbiales el vehículo primero.",
     "INVALID_RANGE": "El rango de fechas no es válido.",
-    "SEARCH_IN_PAST": "Esa hora ya pasó. Elige una hora futura."
+    "SEARCH_IN_PAST": "Esa hora ya pasó. Elige una hora futura.",
+    "TRIP_FULL": "No quedan cupos suficientes. Quedan {{seats_available}}.",
+    "TRIP_NOT_BOOKABLE": "Este viaje ya no recibe reservas.",
+    "BOOKING_EXISTS": "Ya tienes una reserva en este viaje.",
+    "BOOKING_OVERLAP": "Ya tienes otro viaje a esa hora.",
+    "BOOKING_OWN_TRIP": "No puedes reservar tu propio viaje.",
+    "WOMEN_ONLY_TRIP": "Este viaje es solo para mujeres.",
+    "BOOKING_SUSPENDED": "Tus reservas están suspendidas por ahora.",
+    "PREFERENCES_CONFLICT": "Las reglas del viaje no permiten algunas de tus preferencias.",
+    "POINTS_OFF_ROUTE": "La recogida y la bajada deben quedar sobre la ruta y en ese orden.",
+    "BOOKING_NOT_PENDING": "Esta solicitud ya fue respondida.",
+    "BOOKING_NOT_CANCELLABLE": "Esta reserva ya no se puede cancelar.",
+    "CANCELLATION_PENDING": "Ya pediste cancelar esta reserva.",
+    "CANCEL_REASON_REQUIRED": "Cuéntale al conductor el motivo de la cancelación.",
+    "CANCELLATION_NOT_PENDING": "Esta cancelación ya fue decidida.",
+    "SUBSCRIPTION_OPTION_INVALID": "Elige uno de los rangos disponibles.",
+    "SUBSCRIPTION_OUT_OF_RANGE": "La fecha de inicio está fuera de la serie.",
+    "SUBSCRIPTION_EMPTY": "No hay viajes disponibles en ese rango.",
+    "SUBSCRIPTION_EXISTS": "Ya tienes una solicitud en esta serie.",
+    "SUBSCRIPTION_NOT_PENDING": "Esta solicitud ya fue respondida o venció.",
+    "SUBSCRIPTION_NOT_ACTIVE": "Esta suscripción ya no está activa.",
+    "WAITLIST_NOT_NEEDED": "Aún hay cupo: solicita tu reserva directamente.",
+    "WAITLIST_EXISTS": "Ya estás en la lista de espera.",
+    "WAITLIST_OFFER_EXPIRED": "La oferta de cupo ya no está disponible.",
+    "SEATS_BELOW_BOOKED": "Ya hay {{booked}} puestos aceptados; no puedes ofrecer menos.",
+    "WOMEN_ONLY_CONFLICT": "El viaje tiene pasajeros que no son mujeres; no puede ser solo para mujeres.",
+    "SERIES_HAS_BOOKINGS": "Algunos viajes de la serie tienen reservas. Confirma el cambio."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -571,7 +597,28 @@
       "account_revalidation_required": "No revalidaste tu documento para el semestre {{semester}}. Sube uno nuevo para seguir usando la app.",
       "role_changed": "Un administrador cambió tu rol en la app.",
       "trip_pico_placa_cancelled": "Tu viaje del {{date}} se canceló automáticamente por pico y placa.",
-      "trip_pico_placa_restored": "Tu viaje del {{date}} ya no tiene pico y placa y volvió a estar programado."
+      "trip_pico_placa_restored": "Tu viaje del {{date}} ya no tiene pico y placa y volvió a estar programado.",
+      "booking_requested": "Tienes una nueva solicitud de cupo.",
+      "booking_withdrawn": "Un pasajero retiró su solicitud.",
+      "booking_cancelled_by_passenger": "Un pasajero canceló su reserva; se liberó el cupo.",
+      "cancellation_requested": "Un pasajero pide cancelar su reserva.",
+      "subscription_requested": "Un pasajero quiere unirse a tu serie.",
+      "subscription_cancelled": "Un pasajero salió de tu serie.",
+      "booking_accepted": "¡Tu reserva fue aceptada!",
+      "booking_rejected": "Tu solicitud de cupo fue rechazada.",
+      "booking_expired": "Tu solicitud venció sin respuesta.",
+      "booking_cancelled_by_driver": "El conductor canceló el viaje.",
+      "booking_auto_cancelled_late": "El viaje no inició a tiempo; cancelamos tu reserva sin penalización.",
+      "booking_pico_placa_cancelled": "El viaje cayó en pico y placa y se canceló.",
+      "cancellation_accepted": "El conductor aceptó tu cancelación.",
+      "cancellation_rejected": "Tu reserva se mantiene: la cancelación no fue aprobada.",
+      "trip_changed": "El conductor cambió tu viaje. Revisa la nueva hora.",
+      "subscription_accepted": "Te aceptaron en la serie: {{booked}} viajes reservados.",
+      "subscription_rejected": "Tu solicitud para unirte a la serie fue rechazada.",
+      "subscription_expired": "Tu solicitud para unirte a la serie venció.",
+      "subscription_ended": "Tu suscripción a la serie terminó.",
+      "waitlist_offer": "Se liberó un cupo en un viaje lleno. Confírmalo pronto.",
+      "waitlist_offer_expired": "La oferta de cupo venció."
     }
   },
   "vehicles": {
@@ -811,7 +858,7 @@
     },
     "confirmSeriesEdit": {
       "title": "¿Guardar cambios en la serie?",
-      "message": "Se actualizan todos los viajes futuros de la serie. Los viajes pasados o cancelados no cambian.",
+      "message": "Se actualizan todos los viajes futuros de la serie. Los pasajeros con reserva reciben un aviso y, si una fecha sale de la serie, su reserva se cancela.",
       "confirm": "Guardar cambios"
     },
     "back": "Atrás",
@@ -896,7 +943,9 @@
       "confirm": "Duplicar",
       "done": "Publicamos la copia."
     },
-    "yourTrip": "Tu recogida y bajada"
+    "yourTrip": "Tu recogida y bajada",
+    "seatsLeft": "{{free}} de {{total}} libres",
+    "pendingRequests": "Por decidir: {{count}}"
   },
   "search": {
     "title": "Buscar viaje",
@@ -934,6 +983,156 @@
       "newDriver": "Conductor nuevo",
       "trips": "Viajes: {{count}}",
       "series": "Serie"
+    }
+  },
+  "bookings": {
+    "status": {
+      "requested": "Solicitada",
+      "accepted": "Aceptada",
+      "rejected": "Rechazada",
+      "cancel_requested": "Cancelación pendiente",
+      "cancelled_by_passenger": "Cancelada por ti",
+      "cancelled_by_driver": "Cancelada por el conductor",
+      "auto_cancelled_late": "Cancelada por retraso",
+      "auto_cancelled_pico_placa": "Cancelada por pico y placa",
+      "expired": "Vencida",
+      "no_show": "No se presentó",
+      "completed": "Completada"
+    },
+    "subscriptionStatus": {
+      "requested": "Solicitada",
+      "active": "Activa",
+      "rejected": "Rechazada",
+      "cancelled": "Cancelada",
+      "finished": "Terminada",
+      "expired": "Vencida"
+    },
+    "tabs": {
+      "upcoming": "Próximos",
+      "history": "Historial",
+      "series": "Series",
+      "waitlist": "Lista de espera"
+    },
+    "empty": {
+      "upcoming": "No tienes viajes próximos",
+      "history": "Aún no tienes historial",
+      "hint": "Busca un viaje y solicita tu cupo.",
+      "series": "No te has unido a ninguna serie",
+      "seriesHint": "En el detalle de un viaje recurrente puedes unirte por varios días.",
+      "waitlist": "No estás en ninguna lista de espera",
+      "waitlistHint": "Si un viaje está lleno, anótate y te avisamos cuando se libere un cupo."
+    },
+    "reason": {
+      "label": "Motivo",
+      "optional": "Motivo (opcional)",
+      "back": "Volver"
+    },
+    "cancel": {
+      "action": "Cancelar reserva",
+      "title": "¿Cancelar tu reserva?",
+      "message": "Se libera tu cupo para otra persona.",
+      "confirm": "Sí, cancelar",
+      "done": "Reserva cancelada.",
+      "lateTitle": "Falta poco para el viaje",
+      "lateMessage": "Como faltan menos de 2 horas, el conductor debe aprobar la cancelación. Cuéntale el motivo.",
+      "lateConfirm": "Pedir cancelación",
+      "requested": "Le pedimos al conductor que apruebe tu cancelación."
+    },
+    "panel": {
+      "title": "Tu reserva",
+      "request": "Solicitar cupo",
+      "sent": "Solicitud enviada. Te avisamos cuando el conductor responda.",
+      "approvalHint": "El conductor aprueba cada solicitud. Mientras tanto no se aparta el cupo.",
+      "total": "Aporte total: {{amount}}",
+      "contribution": "Es una contribución para cubrir gastos del viaje, no un pago comercial.",
+      "closed": "Este viaje ya no recibe solicitudes.",
+      "womenOnly": "Este viaje es solo para mujeres.",
+      "myPoint": "Mi punto: {{name}}",
+      "joinSeries": "Unirme a la serie",
+      "companions": "Viajan contigo",
+      "onlyYou": "Por ahora solo tú",
+      "hint": {
+        "requested": "Esperando la respuesta del conductor.",
+        "accepted": "Tienes cupo. La placa y los datos de pago ya están visibles.",
+        "cancel_requested": "El conductor está revisando tu solicitud de cancelación."
+      }
+    },
+    "waitlist": {
+      "full": "No quedan cupos para esos puestos.",
+      "join": "Anotarme en la lista de espera",
+      "joined": "Estás en la lista de espera. Te avisamos si se libera un cupo.",
+      "waiting": "Estás en la lista de espera de este viaje.",
+      "leave": "Salir de la lista",
+      "left": "Listo, saliste de la lista.",
+      "offer": "Se liberó un cupo. Confírmalo antes de las {{time}}.",
+      "confirm": "Quiero el cupo",
+      "decline": "Ya no lo necesito",
+      "position": "Personas antes que tú: {{ahead}}"
+    },
+    "card": {
+      "trips": "Viajes: {{count}}",
+      "fromSubscription": "Serie",
+      "paymentNote": "Datos para el aporte",
+      "cancelReason": "Motivo de la cancelación",
+      "tripChanged": "El conductor cambió el viaje: puedes cancelar sin penalización."
+    },
+    "passengers": {
+      "title": "Pasajeros",
+      "pending": "Por decidir",
+      "confirmed": "Confirmados",
+      "none": "Aún no hay pasajeros confirmados.",
+      "others": "Otras reservas ({{count}})"
+    },
+    "inbox": {
+      "title": "Solicitudes",
+      "subtitle": "Reservas, cancelaciones y series que esperan tu respuesta.",
+      "refresh": "Actualizar",
+      "empty": "No tienes solicitudes pendientes",
+      "emptyHint": "Cuando un pasajero pida cupo aparecerá aquí.",
+      "requests": "Reservas por aprobar ({{count}})",
+      "cancellations": "Cancelaciones por decidir ({{count}})",
+      "cancellationsHint": "Faltan menos de 2 horas: si aceptas, el cupo se libera.",
+      "subscriptions": "Suscripciones a series ({{count}})",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "accepted": "Reserva aceptada.",
+      "rejected": "Solicitud rechazada.",
+      "rejectTitle": "¿Rechazar la solicitud?",
+      "rejectSubscriptionTitle": "¿Rechazar la suscripción?",
+      "rejectMessage": "Le avisamos al pasajero. Puedes contarle el motivo.",
+      "acceptCancellation": "Aceptar cancelación",
+      "rejectCancellation": "Mantener la reserva",
+      "cancellationAccepted": "Cancelación aceptada; el cupo quedó libre.",
+      "cancellationRejected": "La reserva se mantiene.",
+      "subscriptionAccepted": "Suscripción aceptada; se reservaron las fechas con cupo."
+    },
+    "subscription": {
+      "title": "Unirme a la serie",
+      "option": "¿Por cuánto tiempo?",
+      "start": "Desde",
+      "wholeSeries": "Toda la serie",
+      "days_count": "{{count}} días",
+      "days": "Fechas del rango",
+      "noDays": "No hay viajes en ese rango.",
+      "legend": "Las fechas tachadas están en pico y placa y las grises están llenas: no se reservan.",
+      "dayFree": "con cupo",
+      "dayFull": "llena",
+      "dayPicoPlaca": "pico y placa",
+      "submit": "Solicitar {{count}} viajes",
+      "approvalHint": "El conductor aprueba una sola vez y reservamos cada fecha con cupo.",
+      "sent": "Solicitud enviada al conductor.",
+      "range": "Del {{start}} al {{end}}",
+      "summary": "Reservados: {{booked}} · Sin cupo o bloqueados: {{skipped}}",
+      "closed": "Esta serie ya no recibe pasajeros.",
+      "cancel": "Salir de la serie",
+      "cancelTitle": "¿Salir de la serie?",
+      "cancelMessage": "Se cancelan tus reservas futuras de la serie.",
+      "cancelled": "Saliste de la serie.",
+      "lateMessage": "Algún viaje sale en menos de 2 horas: el conductor debe aprobar esa cancelación. Cuéntale el motivo.",
+      "hint": {
+        "requested": "Esperando la aprobación del conductor.",
+        "active": "Tus viajes de la serie están en Mis viajes."
+      }
     }
   }
 }

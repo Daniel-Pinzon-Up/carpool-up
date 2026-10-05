@@ -157,7 +157,33 @@
     "SERIES_NOT_ACTIVE": "La série n'est plus active.",
     "VEHICLE_HAS_TRIPS": "Le véhicule a des trajets programmés. Annulez-les ou changez leur véhicule d'abord.",
     "INVALID_RANGE": "La plage de dates n'est pas valide.",
-    "SEARCH_IN_PAST": "Cette heure est passée. Choisissez une heure future."
+    "SEARCH_IN_PAST": "Cette heure est passée. Choisissez une heure future.",
+    "TRIP_FULL": "Il ne reste pas assez de places. Il en reste {{seats_available}}.",
+    "TRIP_NOT_BOOKABLE": "Ce trajet n'accepte plus de réservations.",
+    "BOOKING_EXISTS": "Vous avez déjà une réservation sur ce trajet.",
+    "BOOKING_OVERLAP": "Vous avez déjà un autre trajet à cette heure.",
+    "BOOKING_OWN_TRIP": "Vous ne pouvez pas réserver votre propre trajet.",
+    "WOMEN_ONLY_TRIP": "Ce trajet est réservé aux femmes.",
+    "BOOKING_SUSPENDED": "Vos réservations sont suspendues pour le moment.",
+    "PREFERENCES_CONFLICT": "Les règles du trajet n'autorisent pas certaines de vos préférences.",
+    "POINTS_OFF_ROUTE": "La prise en charge et la dépose doivent être sur l'itinéraire, dans cet ordre.",
+    "BOOKING_NOT_PENDING": "Cette demande a déjà reçu une réponse.",
+    "BOOKING_NOT_CANCELLABLE": "Cette réservation ne peut plus être annulée.",
+    "CANCELLATION_PENDING": "Vous avez déjà demandé l'annulation de cette réservation.",
+    "CANCEL_REASON_REQUIRED": "Indiquez au conducteur le motif de l'annulation.",
+    "CANCELLATION_NOT_PENDING": "Cette annulation a déjà été décidée.",
+    "SUBSCRIPTION_OPTION_INVALID": "Choisissez l'une des périodes proposées.",
+    "SUBSCRIPTION_OUT_OF_RANGE": "La date de début est en dehors de la série.",
+    "SUBSCRIPTION_EMPTY": "Aucun trajet disponible sur cette période.",
+    "SUBSCRIPTION_EXISTS": "Vous avez déjà une demande pour cette série.",
+    "SUBSCRIPTION_NOT_PENDING": "Cette demande a déjà reçu une réponse ou a expiré.",
+    "SUBSCRIPTION_NOT_ACTIVE": "Cette inscription n'est plus active.",
+    "WAITLIST_NOT_NEEDED": "Il reste des places : demandez directement votre réservation.",
+    "WAITLIST_EXISTS": "Vous êtes déjà sur la liste d'attente.",
+    "WAITLIST_OFFER_EXPIRED": "L'offre de place n'est plus disponible.",
+    "SEATS_BELOW_BOOKED": "{{booked}} places sont déjà acceptées ; vous ne pouvez pas en proposer moins.",
+    "WOMEN_ONLY_CONFLICT": "Le trajet a des passagers qui ne sont pas des femmes ; il ne peut pas être réservé aux femmes.",
+    "SERIES_HAS_BOOKINGS": "Certains trajets de la série ont des réservations. Confirmez la modification."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -571,7 +597,28 @@
       "account_revalidation_required": "Vous n'avez pas revalidé votre document pour le semestre {{semester}}. Envoyez-en un nouveau pour continuer à utiliser l'app.",
       "role_changed": "Un administrateur a modifié votre rôle dans l'app.",
       "trip_pico_placa_cancelled": "Votre trajet du {{date}} a été annulé automatiquement à cause du pico y placa.",
-      "trip_pico_placa_restored": "Votre trajet du {{date}} n'a plus de pico y placa et est de nouveau programmé."
+      "trip_pico_placa_restored": "Votre trajet du {{date}} n'a plus de pico y placa et est de nouveau programmé.",
+      "booking_requested": "Vous avez une nouvelle demande de place.",
+      "booking_withdrawn": "Un passager a retiré sa demande.",
+      "booking_cancelled_by_passenger": "Un passager a annulé ; la place est libre.",
+      "cancellation_requested": "Un passager demande à annuler sa réservation.",
+      "subscription_requested": "Un passager veut rejoindre votre série.",
+      "subscription_cancelled": "Un passager a quitté votre série.",
+      "booking_accepted": "Votre réservation a été acceptée !",
+      "booking_rejected": "Votre demande de place a été refusée.",
+      "booking_expired": "Votre demande a expiré sans réponse.",
+      "booking_cancelled_by_driver": "Le conducteur a annulé le trajet.",
+      "booking_auto_cancelled_late": "Le trajet n'a pas commencé à temps ; votre réservation est annulée sans pénalité.",
+      "booking_pico_placa_cancelled": "Le trajet tombait en pico y placa et a été annulé.",
+      "cancellation_accepted": "Le conducteur a accepté votre annulation.",
+      "cancellation_rejected": "Votre réservation est maintenue : l'annulation n'a pas été approuvée.",
+      "trip_changed": "Le conducteur a modifié votre trajet. Vérifiez le nouvel horaire.",
+      "subscription_accepted": "Vous avez rejoint la série : {{booked}} trajets réservés.",
+      "subscription_rejected": "Votre demande pour rejoindre la série a été refusée.",
+      "subscription_expired": "Votre demande pour rejoindre la série a expiré.",
+      "subscription_ended": "Votre inscription à la série est terminée.",
+      "waitlist_offer": "Une place s'est libérée sur un trajet complet. Confirmez vite.",
+      "waitlist_offer_expired": "L'offre de place a expiré."
     }
   },
   "vehicles": {
@@ -811,7 +858,7 @@
     },
     "confirmSeriesEdit": {
       "title": "Enregistrer les changements de la série ?",
-      "message": "Tous les trajets futurs de la série sont mis à jour. Les trajets passés ou annulés ne changent pas.",
+      "message": "Tous les trajets futurs de la série sont mis à jour. Les passagers ayant réservé reçoivent un avis et, si une date sort de la série, leur réservation est annulée.",
       "confirm": "Enregistrer"
     },
     "back": "Retour",
@@ -896,7 +943,9 @@
       "confirm": "Dupliquer",
       "done": "La copie est publiée."
     },
-    "yourTrip": "Votre prise en charge et dépose"
+    "yourTrip": "Votre prise en charge et dépose",
+    "seatsLeft": "{{free}} sur {{total}} libres",
+    "pendingRequests": "À décider : {{count}}"
   },
   "search": {
     "title": "Chercher un trajet",
@@ -934,6 +983,156 @@
       "newDriver": "Nouveau conducteur",
       "trips": "Trajets : {{count}}",
       "series": "Série"
+    }
+  },
+  "bookings": {
+    "status": {
+      "requested": "Demandée",
+      "accepted": "Acceptée",
+      "rejected": "Refusée",
+      "cancel_requested": "Annulation en attente",
+      "cancelled_by_passenger": "Annulée par vous",
+      "cancelled_by_driver": "Annulée par le conducteur",
+      "auto_cancelled_late": "Annulée pour retard",
+      "auto_cancelled_pico_placa": "Annulée pour pico y placa",
+      "expired": "Expirée",
+      "no_show": "Absent",
+      "completed": "Terminée"
+    },
+    "subscriptionStatus": {
+      "requested": "Demandée",
+      "active": "Active",
+      "rejected": "Refusée",
+      "cancelled": "Annulée",
+      "finished": "Terminée",
+      "expired": "Expirée"
+    },
+    "tabs": {
+      "upcoming": "À venir",
+      "history": "Historique",
+      "series": "Séries",
+      "waitlist": "Liste d'attente"
+    },
+    "empty": {
+      "upcoming": "Vous n'avez aucun trajet à venir",
+      "history": "Pas encore d'historique",
+      "hint": "Cherchez un trajet et demandez une place.",
+      "series": "Vous n'avez rejoint aucune série",
+      "seriesHint": "Depuis un trajet récurrent, vous pouvez le rejoindre pour plusieurs jours.",
+      "waitlist": "Vous n'êtes sur aucune liste d'attente",
+      "waitlistHint": "Si un trajet est complet, inscrivez-vous et nous vous préviendrons dès qu'une place se libère."
+    },
+    "reason": {
+      "label": "Motif",
+      "optional": "Motif (facultatif)",
+      "back": "Retour"
+    },
+    "cancel": {
+      "action": "Annuler la réservation",
+      "title": "Annuler votre réservation ?",
+      "message": "Votre place sera libérée pour quelqu'un d'autre.",
+      "confirm": "Oui, annuler",
+      "done": "Réservation annulée.",
+      "lateTitle": "Le trajet approche",
+      "lateMessage": "À moins de 2 heures du départ, le conducteur doit approuver l'annulation. Expliquez-lui le motif.",
+      "lateConfirm": "Demander l'annulation",
+      "requested": "Nous avons demandé au conducteur d'approuver votre annulation."
+    },
+    "panel": {
+      "title": "Votre réservation",
+      "request": "Demander une place",
+      "sent": "Demande envoyée. Nous vous préviendrons dès que le conducteur répondra.",
+      "approvalHint": "Le conducteur approuve chaque demande. En attendant, la place n'est pas réservée.",
+      "total": "Participation totale : {{amount}}",
+      "contribution": "C'est une participation aux frais du trajet, pas un paiement commercial.",
+      "closed": "Ce trajet n'accepte plus de demandes.",
+      "womenOnly": "Ce trajet est réservé aux femmes.",
+      "myPoint": "Mon point : {{name}}",
+      "joinSeries": "Rejoindre la série",
+      "companions": "Voyagent avec vous",
+      "onlyYou": "Vous seul pour l'instant",
+      "hint": {
+        "requested": "En attente de la réponse du conducteur.",
+        "accepted": "Vous avez une place. La plaque et les infos de paiement sont visibles.",
+        "cancel_requested": "Le conducteur examine votre demande d'annulation."
+      }
+    },
+    "waitlist": {
+      "full": "Il ne reste pas assez de places.",
+      "join": "M'inscrire sur la liste d'attente",
+      "joined": "Vous êtes sur la liste d'attente. Nous vous préviendrons si une place se libère.",
+      "waiting": "Vous êtes sur la liste d'attente de ce trajet.",
+      "leave": "Quitter la liste",
+      "left": "C'est fait, vous avez quitté la liste.",
+      "offer": "Une place s'est libérée. Confirmez avant {{time}}.",
+      "confirm": "Je veux la place",
+      "decline": "Je n'en ai plus besoin",
+      "position": "Personnes avant vous : {{ahead}}"
+    },
+    "card": {
+      "trips": "Trajets : {{count}}",
+      "fromSubscription": "Série",
+      "paymentNote": "Infos pour la participation",
+      "cancelReason": "Motif de l'annulation",
+      "tripChanged": "Le conducteur a modifié le trajet : vous pouvez annuler sans pénalité."
+    },
+    "passengers": {
+      "title": "Passagers",
+      "pending": "À décider",
+      "confirmed": "Confirmés",
+      "none": "Aucun passager confirmé pour l'instant.",
+      "others": "Autres réservations ({{count}})"
+    },
+    "inbox": {
+      "title": "Demandes",
+      "subtitle": "Réservations, annulations et séries qui attendent votre réponse.",
+      "refresh": "Actualiser",
+      "empty": "Aucune demande en attente",
+      "emptyHint": "Quand un passager demande une place, elle apparaît ici.",
+      "requests": "Réservations à approuver ({{count}})",
+      "cancellations": "Annulations à décider ({{count}})",
+      "cancellationsHint": "Moins de 2 heures avant le départ : si vous acceptez, la place se libère.",
+      "subscriptions": "Inscriptions aux séries ({{count}})",
+      "accept": "Accepter",
+      "reject": "Refuser",
+      "accepted": "Réservation acceptée.",
+      "rejected": "Demande refusée.",
+      "rejectTitle": "Refuser la demande ?",
+      "rejectSubscriptionTitle": "Refuser l'inscription ?",
+      "rejectMessage": "Nous préviendrons le passager. Vous pouvez lui donner le motif.",
+      "acceptCancellation": "Accepter l'annulation",
+      "rejectCancellation": "Maintenir la réservation",
+      "cancellationAccepted": "Annulation acceptée ; la place est libre.",
+      "cancellationRejected": "La réservation est maintenue.",
+      "subscriptionAccepted": "Inscription acceptée ; les dates avec des places ont été réservées."
+    },
+    "subscription": {
+      "title": "Rejoindre la série",
+      "option": "Pour combien de temps ?",
+      "start": "À partir du",
+      "wholeSeries": "Toute la série",
+      "days_count": "{{count}} jours",
+      "days": "Dates de la période",
+      "noDays": "Aucun trajet sur cette période.",
+      "legend": "Les dates barrées sont en pico y placa et les grises sont complètes : elles ne sont pas réservées.",
+      "dayFree": "places libres",
+      "dayFull": "complet",
+      "dayPicoPlaca": "pico y placa",
+      "submit": "Demander {{count}} trajets",
+      "approvalHint": "Le conducteur approuve une seule fois et nous réservons chaque date avec des places.",
+      "sent": "Demande envoyée au conducteur.",
+      "range": "Du {{start}} au {{end}}",
+      "summary": "Réservés : {{booked}} · Complets ou bloqués : {{skipped}}",
+      "closed": "Cette série n'accepte plus de passagers.",
+      "cancel": "Quitter la série",
+      "cancelTitle": "Quitter la série ?",
+      "cancelMessage": "Vos réservations futures de la série seront annulées.",
+      "cancelled": "Vous avez quitté la série.",
+      "lateMessage": "Un trajet part dans moins de 2 heures : le conducteur doit approuver cette annulation. Expliquez-lui le motif.",
+      "hint": {
+        "requested": "En attente de l'approbation du conducteur.",
+        "active": "Vos trajets de la série sont dans Mes trajets."
+      }
     }
   }
 }

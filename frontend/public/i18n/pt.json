@@ -157,7 +157,33 @@
     "SERIES_NOT_ACTIVE": "A série não está mais ativa.",
     "VEHICLE_HAS_TRIPS": "O veículo tem viagens programadas. Cancele-as ou troque o veículo primeiro.",
     "INVALID_RANGE": "O intervalo de datas não é válido.",
-    "SEARCH_IN_PAST": "Esse horário já passou. Escolha um horário futuro."
+    "SEARCH_IN_PAST": "Esse horário já passou. Escolha um horário futuro.",
+    "TRIP_FULL": "Não há vagas suficientes. Restam {{seats_available}}.",
+    "TRIP_NOT_BOOKABLE": "Esta viagem não recebe mais reservas.",
+    "BOOKING_EXISTS": "Você já tem uma reserva nesta viagem.",
+    "BOOKING_OVERLAP": "Você já tem outra viagem nesse horário.",
+    "BOOKING_OWN_TRIP": "Você não pode reservar sua própria viagem.",
+    "WOMEN_ONLY_TRIP": "Esta viagem é só para mulheres.",
+    "BOOKING_SUSPENDED": "Suas reservas estão suspensas por enquanto.",
+    "PREFERENCES_CONFLICT": "As regras da viagem não permitem algumas das suas preferências.",
+    "POINTS_OFF_ROUTE": "O embarque e o desembarque devem ficar na rota e nessa ordem.",
+    "BOOKING_NOT_PENDING": "Esta solicitação já foi respondida.",
+    "BOOKING_NOT_CANCELLABLE": "Esta reserva não pode mais ser cancelada.",
+    "CANCELLATION_PENDING": "Você já pediu para cancelar esta reserva.",
+    "CANCEL_REASON_REQUIRED": "Conte ao motorista o motivo do cancelamento.",
+    "CANCELLATION_NOT_PENDING": "Este cancelamento já foi decidido.",
+    "SUBSCRIPTION_OPTION_INVALID": "Escolha um dos períodos disponíveis.",
+    "SUBSCRIPTION_OUT_OF_RANGE": "A data de início está fora da série.",
+    "SUBSCRIPTION_EMPTY": "Não há viagens disponíveis nesse período.",
+    "SUBSCRIPTION_EXISTS": "Você já tem uma solicitação nesta série.",
+    "SUBSCRIPTION_NOT_PENDING": "Esta solicitação já foi respondida ou venceu.",
+    "SUBSCRIPTION_NOT_ACTIVE": "Esta inscrição não está mais ativa.",
+    "WAITLIST_NOT_NEEDED": "Ainda há vagas: solicite sua reserva diretamente.",
+    "WAITLIST_EXISTS": "Você já está na lista de espera.",
+    "WAITLIST_OFFER_EXPIRED": "A oferta de vaga não está mais disponível.",
+    "SEATS_BELOW_BOOKED": "Já há {{booked}} vagas aceitas; não é possível oferecer menos.",
+    "WOMEN_ONLY_CONFLICT": "A viagem tem passageiros que não são mulheres; não pode ser só para mulheres.",
+    "SERIES_HAS_BOOKINGS": "Algumas viagens da série têm reservas. Confirme a mudança."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -571,7 +597,28 @@
       "account_revalidation_required": "Você não revalidou seu documento para o semestre {{semester}}. Envie um novo para continuar usando o app.",
       "role_changed": "Um administrador mudou seu papel no app.",
       "trip_pico_placa_cancelled": "Sua viagem de {{date}} foi cancelada automaticamente por pico y placa.",
-      "trip_pico_placa_restored": "Sua viagem de {{date}} não tem mais pico y placa e voltou a estar programada."
+      "trip_pico_placa_restored": "Sua viagem de {{date}} não tem mais pico y placa e voltou a estar programada.",
+      "booking_requested": "Você tem uma nova solicitação de vaga.",
+      "booking_withdrawn": "Um passageiro retirou a solicitação.",
+      "booking_cancelled_by_passenger": "Um passageiro cancelou; a vaga ficou livre.",
+      "cancellation_requested": "Um passageiro pede para cancelar a reserva.",
+      "subscription_requested": "Um passageiro quer entrar na sua série.",
+      "subscription_cancelled": "Um passageiro saiu da sua série.",
+      "booking_accepted": "Sua reserva foi aceita!",
+      "booking_rejected": "Sua solicitação de vaga foi recusada.",
+      "booking_expired": "Sua solicitação venceu sem resposta.",
+      "booking_cancelled_by_driver": "O motorista cancelou a viagem.",
+      "booking_auto_cancelled_late": "A viagem não começou a tempo; cancelamos sua reserva sem penalidade.",
+      "booking_pico_placa_cancelled": "A viagem caiu no rodízio e foi cancelada.",
+      "cancellation_accepted": "O motorista aceitou seu cancelamento.",
+      "cancellation_rejected": "Sua reserva continua: o cancelamento não foi aprovado.",
+      "trip_changed": "O motorista mudou sua viagem. Confira o novo horário.",
+      "subscription_accepted": "Você entrou na série: {{booked}} viagens reservadas.",
+      "subscription_rejected": "Seu pedido para entrar na série foi recusado.",
+      "subscription_expired": "Seu pedido para entrar na série venceu.",
+      "subscription_ended": "Sua inscrição na série terminou.",
+      "waitlist_offer": "Abriu uma vaga numa viagem cheia. Confirme logo.",
+      "waitlist_offer_expired": "A oferta de vaga venceu."
     }
   },
   "vehicles": {
@@ -811,7 +858,7 @@
     },
     "confirmSeriesEdit": {
       "title": "Salvar mudanças na série?",
-      "message": "Todas as viagens futuras da série são atualizadas. Viagens passadas ou canceladas não mudam.",
+      "message": "Todas as viagens futuras da série são atualizadas. Passageiros com reserva recebem um aviso e, se uma data sair da série, a reserva é cancelada.",
       "confirm": "Salvar mudanças"
     },
     "back": "Voltar",
@@ -896,7 +943,9 @@
       "confirm": "Duplicar",
       "done": "Publicamos a cópia."
     },
-    "yourTrip": "Seu embarque e desembarque"
+    "yourTrip": "Seu embarque e desembarque",
+    "seatsLeft": "{{free}} de {{total}} livres",
+    "pendingRequests": "Para decidir: {{count}}"
   },
   "search": {
     "title": "Buscar carona",
@@ -934,6 +983,156 @@
       "newDriver": "Motorista novo",
       "trips": "Viagens: {{count}}",
       "series": "Série"
+    }
+  },
+  "bookings": {
+    "status": {
+      "requested": "Solicitada",
+      "accepted": "Aceita",
+      "rejected": "Recusada",
+      "cancel_requested": "Cancelamento pendente",
+      "cancelled_by_passenger": "Cancelada por você",
+      "cancelled_by_driver": "Cancelada pelo motorista",
+      "auto_cancelled_late": "Cancelada por atraso",
+      "auto_cancelled_pico_placa": "Cancelada por rodízio",
+      "expired": "Vencida",
+      "no_show": "Não compareceu",
+      "completed": "Concluída"
+    },
+    "subscriptionStatus": {
+      "requested": "Solicitada",
+      "active": "Ativa",
+      "rejected": "Recusada",
+      "cancelled": "Cancelada",
+      "finished": "Encerrada",
+      "expired": "Vencida"
+    },
+    "tabs": {
+      "upcoming": "Próximas",
+      "history": "Histórico",
+      "series": "Séries",
+      "waitlist": "Lista de espera"
+    },
+    "empty": {
+      "upcoming": "Você não tem viagens próximas",
+      "history": "Ainda sem histórico",
+      "hint": "Busque uma carona e solicite sua vaga.",
+      "series": "Você não entrou em nenhuma série",
+      "seriesHint": "No detalhe de uma viagem recorrente você pode entrar por vários dias.",
+      "waitlist": "Você não está em nenhuma lista de espera",
+      "waitlistHint": "Se uma viagem estiver cheia, entre na lista e avisamos quando abrir uma vaga."
+    },
+    "reason": {
+      "label": "Motivo",
+      "optional": "Motivo (opcional)",
+      "back": "Voltar"
+    },
+    "cancel": {
+      "action": "Cancelar reserva",
+      "title": "Cancelar sua reserva?",
+      "message": "Sua vaga fica livre para outra pessoa.",
+      "confirm": "Sim, cancelar",
+      "done": "Reserva cancelada.",
+      "lateTitle": "Falta pouco para a viagem",
+      "lateMessage": "Faltando menos de 2 horas, o motorista precisa aprovar o cancelamento. Conte o motivo.",
+      "lateConfirm": "Pedir cancelamento",
+      "requested": "Pedimos ao motorista que aprove seu cancelamento."
+    },
+    "panel": {
+      "title": "Sua reserva",
+      "request": "Solicitar vaga",
+      "sent": "Solicitação enviada. Avisamos quando o motorista responder.",
+      "approvalHint": "O motorista aprova cada solicitação. Até lá a vaga não fica reservada.",
+      "total": "Contribuição total: {{amount}}",
+      "contribution": "É uma contribuição para dividir os custos, não um pagamento comercial.",
+      "closed": "Esta viagem não recebe mais solicitações.",
+      "womenOnly": "Esta viagem é só para mulheres.",
+      "myPoint": "Meu ponto: {{name}}",
+      "joinSeries": "Entrar na série",
+      "companions": "Viajam com você",
+      "onlyYou": "Por enquanto só você",
+      "hint": {
+        "requested": "Aguardando a resposta do motorista.",
+        "accepted": "Você tem vaga. A placa e os dados de pagamento já estão visíveis.",
+        "cancel_requested": "O motorista está analisando seu pedido de cancelamento."
+      }
+    },
+    "waitlist": {
+      "full": "Não há vagas suficientes.",
+      "join": "Entrar na lista de espera",
+      "joined": "Você está na lista de espera. Avisamos se abrir uma vaga.",
+      "waiting": "Você está na lista de espera desta viagem.",
+      "leave": "Sair da lista",
+      "left": "Pronto, você saiu da lista.",
+      "offer": "Abriu uma vaga. Confirme antes das {{time}}.",
+      "confirm": "Quero a vaga",
+      "decline": "Não preciso mais",
+      "position": "Pessoas à sua frente: {{ahead}}"
+    },
+    "card": {
+      "trips": "Viagens: {{count}}",
+      "fromSubscription": "Série",
+      "paymentNote": "Dados para a contribuição",
+      "cancelReason": "Motivo do cancelamento",
+      "tripChanged": "O motorista mudou a viagem: você pode cancelar sem penalidade."
+    },
+    "passengers": {
+      "title": "Passageiros",
+      "pending": "Para decidir",
+      "confirmed": "Confirmados",
+      "none": "Ainda não há passageiros confirmados.",
+      "others": "Outras reservas ({{count}})"
+    },
+    "inbox": {
+      "title": "Solicitações",
+      "subtitle": "Reservas, cancelamentos e séries aguardando sua resposta.",
+      "refresh": "Atualizar",
+      "empty": "Nenhuma solicitação pendente",
+      "emptyHint": "Quando um passageiro pedir vaga, aparece aqui.",
+      "requests": "Reservas para aprovar ({{count}})",
+      "cancellations": "Cancelamentos para decidir ({{count}})",
+      "cancellationsHint": "Faltam menos de 2 horas: se aceitar, a vaga fica livre.",
+      "subscriptions": "Inscrições em séries ({{count}})",
+      "accept": "Aceitar",
+      "reject": "Recusar",
+      "accepted": "Reserva aceita.",
+      "rejected": "Solicitação recusada.",
+      "rejectTitle": "Recusar a solicitação?",
+      "rejectSubscriptionTitle": "Recusar a inscrição?",
+      "rejectMessage": "Avisaremos o passageiro. Você pode contar o motivo.",
+      "acceptCancellation": "Aceitar cancelamento",
+      "rejectCancellation": "Manter a reserva",
+      "cancellationAccepted": "Cancelamento aceito; a vaga ficou livre.",
+      "cancellationRejected": "A reserva continua.",
+      "subscriptionAccepted": "Inscrição aceita; as datas com vaga foram reservadas."
+    },
+    "subscription": {
+      "title": "Entrar na série",
+      "option": "Por quanto tempo?",
+      "start": "A partir de",
+      "wholeSeries": "A série inteira",
+      "days_count": "{{count}} dias",
+      "days": "Datas do período",
+      "noDays": "Não há viagens nesse período.",
+      "legend": "Datas riscadas estão no rodízio e as cinzas estão cheias: não são reservadas.",
+      "dayFree": "com vaga",
+      "dayFull": "cheia",
+      "dayPicoPlaca": "rodízio",
+      "submit": "Solicitar {{count}} viagens",
+      "approvalHint": "O motorista aprova uma vez e reservamos cada data com vaga.",
+      "sent": "Solicitação enviada ao motorista.",
+      "range": "De {{start}} a {{end}}",
+      "summary": "Reservadas: {{booked}} · Cheias ou bloqueadas: {{skipped}}",
+      "closed": "Esta série não recebe mais passageiros.",
+      "cancel": "Sair da série",
+      "cancelTitle": "Sair da série?",
+      "cancelMessage": "Suas reservas futuras da série serão canceladas.",
+      "cancelled": "Você saiu da série.",
+      "lateMessage": "Alguma viagem sai em menos de 2 horas: o motorista precisa aprovar esse cancelamento. Conte o motivo.",
+      "hint": {
+        "requested": "Aguardando a aprovação do motorista.",
+        "active": "Suas viagens da série estão em Minhas viagens."
+      }
     }
   }
 }
