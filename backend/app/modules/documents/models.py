@@ -33,3 +33,28 @@ class IdentityDocument(UUIDPrimaryKey, Timestamps, Base):
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     rejection_reason: Mapped[str | None] = mapped_column(Text)
     valid_until: Mapped[date | None] = mapped_column(Date)
+
+
+class DriverLicense(UUIDPrimaryKey, Timestamps, Base):
+    """Licencia de conduccion (una por conductor). Subir otra la reemplaza y vuelve a revision."""
+
+    __tablename__ = "driver_licenses"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    file_path: Mapped[str] = mapped_column(Text, nullable=False)
+    content_type: Mapped[str] = mapped_column(Text, nullable=False)
+    expires_on: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[ReviewStatus] = mapped_column(
+        pg_enum(ReviewStatus, "review_status"), nullable=False, default=ReviewStatus.PENDING
+    )
+    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejection_reason: Mapped[str | None] = mapped_column(Text)
+
+    def is_valid_on(self, day: date) -> bool:
+        """Aprobada y no vencida: requisito para publicar viajes."""
+        return self.status == ReviewStatus.APPROVED and self.expires_on >= day
