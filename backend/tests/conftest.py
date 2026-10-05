@@ -1,6 +1,7 @@
 import os
 import re
 from collections.abc import AsyncIterator, Awaitable, Callable
+from datetime import timedelta
 from pathlib import Path
 
 # Configuracion de prueba antes de importar la app.
@@ -11,19 +12,32 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
-from app.core.clock import utcnow
+from app.core.clock import local_today, utcnow
 from app.core.config import get_settings
 from app.core.db import get_session
 from app.core.email import OutgoingEmail
-from app.core.enums import Language, LegalKind, Sex, UserRole, UserStatus
+from app.core.enums import (
+    Language,
+    LegalKind,
+    PlaceKind,
+    ReviewStatus,
+    Sex,
+    UserRole,
+    UserStatus,
+    VehicleType,
+)
+from app.core.geo import point
 from app.core.rate_limit import limiter
 from app.core.security import create_access_token, hash_password
 from app.main import create_app
 from app.modules.auth.router import get_email_queue
+from app.modules.documents.models import DriverLicense
 from app.modules.legal.models import LegalDocument
+from app.modules.places.models import Place
 from app.modules.routing.osrm import Leg, RouteResult
 from app.modules.routing.router import get_route_provider
 from app.modules.users.models import User
+from app.modules.vehicles.models import Vehicle
 
 API = "/api/v1"
 
@@ -213,3 +227,51 @@ async def routing_api(
     app.dependency_overrides[get_route_provider] = lambda: provider
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
+
+
+# --- Conductores y lugares para viajes ---------------------------------------------------
+
+
+@pytest.fixture
+async def places(db: AsyncSession) -> list[Place]:
+    rows = [
+        Place(name="Ciudad Universitaria", kind=PlaceKind.CAMPUS, point=point(7.3870, -72.6495)),
+        Place(name="Sede Casona", kind=PlaceKind.CAMPUS, point=point(7.3762, -72.6468)),
+        Place(name="Terminal", kind=PlaceKind.LANDMARK, point=point(7.3712, -72.6512)),
+    ]
+    db.add_all(rows)
+    await db.flush()
+    return rows
+
+
+async def make_driver(
+    db: AsyncSession, make_user: UserFactory, sex: Sex = Sex.FEMALE, plate: str = "ABC123"
+) -> tuple[User, Vehicle]:
+    user = await make_user(UserRole.DRIVER, sex=sex)
+    db.add(
+        DriverLicense(
+            user_id=user.id,
+            file_path="licenses/x.pdf",
+            content_type="application/pdf",
+            expires_on=local_today() + timedelta(days=365),
+            status=ReviewStatus.APPROVED,
+        )
+    )
+    vehicle = Vehicle(
+        owner_id=user.id,
+        type=VehicleType.CAR,
+        plate=plate,
+        brand="Chevrolet",
+        model="Spark",
+        color="Gris",
+        year=2018,
+        capacity=5,
+    )
+    db.add(vehicle)
+    await db.flush()
+    return user, vehicle
+
+
+@pytest.fixture
+async def driver(db: AsyncSession, make_user: UserFactory) -> tuple[User, Vehicle]:
+    return await make_driver(db, make_user)

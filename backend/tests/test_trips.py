@@ -10,9 +10,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import LOCAL_TZ, local_today
-from app.core.enums import PlaceKind, ReviewStatus, Sex, UserRole, VehicleType
+from app.core.enums import PlaceKind, Sex, UserRole, VehicleType
 from app.core.geo import point
-from app.modules.documents.models import DriverLicense
 from app.modules.notifications.models import Notification
 from app.modules.pico_placa.models import PicoPlacaRule
 from app.modules.places.models import Place
@@ -21,24 +20,12 @@ from app.modules.series.service import finish_past_series, series_days, window_e
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
-from tests.conftest import API, UserFactory, auth
+from tests.conftest import API, UserFactory, auth, make_driver
 
 pytestmark = pytest.mark.integration
 
 
 # --- Datos ----------------------------------------------------------------------------
-
-
-@pytest.fixture
-async def places(db: AsyncSession) -> list[Place]:
-    rows = [
-        Place(name="Ciudad Universitaria", kind=PlaceKind.CAMPUS, point=point(7.3870, -72.6495)),
-        Place(name="Sede Casona", kind=PlaceKind.CAMPUS, point=point(7.3762, -72.6468)),
-        Place(name="Terminal", kind=PlaceKind.LANDMARK, point=point(7.3712, -72.6512)),
-    ]
-    db.add_all(rows)
-    await db.flush()
-    return rows
 
 
 @pytest.fixture
@@ -53,39 +40,6 @@ async def semester(db: AsyncSession) -> Semester:
     db.add(row)
     await db.flush()
     return row
-
-
-async def make_driver(
-    db: AsyncSession, make_user: UserFactory, sex: Sex = Sex.FEMALE, plate: str = "ABC123"
-) -> tuple[User, Vehicle]:
-    user = await make_user(UserRole.DRIVER, sex=sex)
-    db.add(
-        DriverLicense(
-            user_id=user.id,
-            file_path="licenses/x.pdf",
-            content_type="application/pdf",
-            expires_on=local_today() + timedelta(days=365),
-            status=ReviewStatus.APPROVED,
-        )
-    )
-    vehicle = Vehicle(
-        owner_id=user.id,
-        type=VehicleType.CAR,
-        plate=plate,
-        brand="Chevrolet",
-        model="Spark",
-        color="Gris",
-        year=2018,
-        capacity=5,
-    )
-    db.add(vehicle)
-    await db.flush()
-    return user, vehicle
-
-
-@pytest.fixture
-async def driver(db: AsyncSession, make_user: UserFactory) -> tuple[User, Vehicle]:
-    return await make_driver(db, make_user)
 
 
 async def pico_placa(db: AsyncSession, weekday: int, digits: list[int]) -> PicoPlacaRule:
