@@ -21,11 +21,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
       [alt]="showName() || wordmark() ? '' : ('app.name' | transloco)"
     />
     @if (wordmark()) {
+      <!-- El azul oscuro del nombre no contrasta con el tema oscuro: va sobre una ficha clara. -->
       <img
         src="brand/wordmark.webp"
         width="480"
         height="278"
-        class="h-10 w-auto"
+        class="h-11 w-auto rounded-xl bg-white/90 px-2 py-0.5 shadow-sm"
         [alt]="'app.name' | transloco"
       />
     } @else if (showName()) {
