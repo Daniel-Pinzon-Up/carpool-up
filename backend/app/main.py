@@ -24,10 +24,12 @@ from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
 from app.modules.routing import router as routing
+from app.modules.safety import router as safety
 from app.modules.search import router as search
 from app.modules.semesters import router as semesters
 from app.modules.series import router as series
 from app.modules.settings import router as settings_module
+from app.modules.tickets import router as tickets
 from app.modules.trips import router as trips
 from app.modules.users import router as users
 from app.modules.vehicles import router as vehicles
@@ -86,6 +88,9 @@ def create_app() -> FastAPI:
         bookings.router,
         waitlist.router,
         chat.router,
+        tickets.router,
+        safety.router,
+        safety.public_router,
         settings_module.router,
         semesters.router,
         places.router,
@@ -100,6 +105,7 @@ def create_app() -> FastAPI:
         legal.admin_router,
         audit.admin_router,
         admin.router,
+        safety.admin_router,
     ):
         api.include_router(admin_router)
     app.include_router(api)

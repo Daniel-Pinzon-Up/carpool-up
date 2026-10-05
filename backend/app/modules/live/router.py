@@ -16,17 +16,22 @@ from urllib.parse import urlsplit
 import structlog
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from redis.asyncio.client import PubSub
+from sqlalchemy import select
 
 from app.core.clock import utcnow
 from app.core.config import get_settings
 from app.core.db import SessionLocal
-from app.core.enums import UserStatus
+from app.core.enums import TripStatus, UserRole, UserStatus
 from app.core.realtime import conversation_channel, user_channel
 from app.core.redis import redis_client
 from app.core.security import decode_access_token
 from app.modules.auth.models import UserSession
+from app.modules.bookings.models import HOLDING_STATUSES, Booking
 from app.modules.chat.service import ChatService
 from app.modules.live.connection import LiveConnection
+from app.modules.safety.location import location_channel
+from app.modules.safety.service import ADMIN_CHANNEL
+from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
 logger = structlog.get_logger("live")
@@ -48,7 +53,9 @@ def origin_allowed(websocket: WebSocket) -> bool:
     return urlsplit(origin).netloc == websocket.headers.get("host")
 
 
-async def authenticate(token: object) -> tuple[uuid.UUID, str, datetime | None] | None:
+async def authenticate(
+    token: object,
+) -> tuple[uuid.UUID, str, datetime | None, bool] | None:
     if not isinstance(token, str):
         return None
     claims = decode_access_token(token)
@@ -67,12 +74,31 @@ async def authenticate(token: object) -> tuple[uuid.UUID, str, datetime | None] 
         user = await session.get(User, claims.user_id)
         if user is None or user.deleted_at is not None or user.status == UserStatus.BLOCKED:
             return None
-        return user.id, user.full_name, claims.expires_at
+        is_admin = user.role in (UserRole.ADMIN, UserRole.SUPERADMIN)
+        return user.id, user.full_name, claims.expires_at, is_admin
 
 
 async def conversation_ids(user_id: uuid.UUID) -> set[uuid.UUID]:
     async with SessionLocal() as session:
         return set(await ChatService(session).active_ids(user_id))
+
+
+async def live_trip_ids(user_id: uuid.UUID) -> set[uuid.UUID]:
+    """Viajes en curso donde conduce o viaja con reserva aceptada."""
+    async with SessionLocal() as session:
+        driving = await session.scalars(
+            select(Trip.id).where(Trip.driver_id == user_id, Trip.status == TripStatus.IN_PROGRESS)
+        )
+        riding = await session.scalars(
+            select(Booking.trip_id)
+            .join(Trip, Trip.id == Booking.trip_id)
+            .where(
+                Booking.passenger_id == user_id,
+                Booking.status.in_(HOLDING_STATUSES),
+                Trip.status == TripStatus.IN_PROGRESS,
+            )
+        )
+        return set(driving.all()) | set(riding.all())
 
 
 @router.websocket("/ws")
@@ -90,20 +116,36 @@ async def live(websocket: WebSocket) -> None:
     if identity is None:
         await _close(websocket, CLOSE_UNAUTHORIZED)
         return
-    user_id, name, expires_at = identity
+    user_id, name, expires_at, is_admin = identity
 
     pubsub: PubSub = redis_client.pubsub()
     conversations = await conversation_ids(user_id)
-    await pubsub.subscribe(user_channel(user_id), *(conversation_channel(c) for c in conversations))
+    trips = await live_trip_ids(user_id)
+    channels = [
+        user_channel(user_id),
+        *(conversation_channel(c) for c in conversations),
+        *(location_channel(t) for t in trips),
+    ]
+    if is_admin:
+        channels.append(ADMIN_CHANNEL)
+    await pubsub.subscribe(*channels)
     connection = LiveConnection(
         user_id=user_id,
         user_name=name,
         conversations=conversations,
         send=websocket.send_json,
         subscribe=pubsub.subscribe,
+        unsubscribe=pubsub.unsubscribe,
         sessions=SessionLocal,
+        trips=trips,
     )
-    await websocket.send_json({"type": "ready", "conversations": [str(c) for c in conversations]})
+    await websocket.send_json(
+        {
+            "type": "ready",
+            "conversations": [str(c) for c in conversations],
+            "trips": [str(t) for t in trips],
+        }
+    )
     logger.info("ws_connected", conversations=len(conversations))
 
     async def from_redis() -> None:
