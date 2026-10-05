@@ -72,3 +72,33 @@ class AuthPurpose(StrEnum):
     EMAIL_VERIFICATION = "email_verification"
     TWO_FACTOR = "two_factor"
     PASSWORD_RESET = "password_reset"  # noqa: S105 - proposito del codigo, no un secreto
+
+
+class SeriesStatus(StrEnum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    FINISHED = "finished"
+
+
+class TripStatus(StrEnum):
+    SCHEDULED = "scheduled"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    CANCELLED_BY_DRIVER = "cancelled_by_driver"
+    CANCELLED_PICO_PLACA = "cancelled_pico_placa"
+    NOT_HELD = "not_held"
+
+
+class StopKind(StrEnum):
+    ORIGIN = "origin"
+    STOP = "stop"
+    DESTINATION = "destination"
+
+
+class RuleKind(StrEnum):
+    WOMEN_ONLY = "women_only"
+    PETS = "pets"
+    LUGGAGE = "luggage"
+    SMOKING = "smoking"
+    MUSIC = "music"
+    CUSTOM = "custom"

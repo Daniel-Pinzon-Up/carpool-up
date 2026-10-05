@@ -176,6 +176,24 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             "Paradas intermedias permitidas entre origen y destino.",
         ),
         _define(
+            "trip_publish_min_lead_minutes",
+            Annotated[int, Field(ge=0, le=1440)],
+            15,
+            "Antelacion minima para publicar un viaje.",
+        ),
+        _define(
+            "trip_max_days_ahead",
+            Annotated[int, Field(ge=1, le=180)],
+            60,
+            "Dias hacia adelante en que se puede publicar un viaje puntual.",
+        ),
+        _define(
+            "trip_edit_cutoff_minutes",
+            Annotated[int, Field(ge=0, le=1440)],
+            30,
+            "Minutos antes de la salida a partir de los cuales un viaje ya no se edita.",
+        ),
+        _define(
             "service_area",
             ServiceArea,
             {"min_lat": 7.33, "max_lat": 7.43, "min_lon": -72.70, "max_lon": -72.59},
