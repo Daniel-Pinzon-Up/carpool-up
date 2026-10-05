@@ -80,6 +80,8 @@ def require_roles(*roles: UserRole) -> Callable[[User], Awaitable[User]]:
 
 SuperAdmin = Annotated[User, Depends(require_roles(UserRole.SUPERADMIN))]
 AdminOrSuper = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.SUPERADMIN))]
+Passenger = Annotated[User, Depends(require_roles(UserRole.PASSENGER))]
+Driver = Annotated[User, Depends(require_roles(UserRole.DRIVER))]
 
 
 @dataclass(frozen=True)

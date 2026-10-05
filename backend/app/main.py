@@ -16,6 +16,7 @@ from app.core.redis import redis_client
 from app.modules.admin import router as admin
 from app.modules.audit import router as audit
 from app.modules.auth import router as auth
+from app.modules.bookings import router as bookings
 from app.modules.legal import router as legal
 from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
@@ -28,6 +29,7 @@ from app.modules.settings import router as settings_module
 from app.modules.trips import router as trips
 from app.modules.users import router as users
 from app.modules.vehicles import router as vehicles
+from app.modules.waitlist import router as waitlist
 
 
 @asynccontextmanager
@@ -79,6 +81,8 @@ def create_app() -> FastAPI:
         trips.router,
         series.router,
         search.router,
+        bookings.router,
+        waitlist.router,
         settings_module.router,
         semesters.router,
         places.router,
