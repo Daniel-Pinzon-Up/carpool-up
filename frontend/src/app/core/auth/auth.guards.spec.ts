@@ -76,6 +76,20 @@ describe('navegacion con las rutas reales', () => {
     expect(router.url).toBe('/buscar');
   });
 
+  it('cada rol llega a su propia version de una ruta compartida', async () => {
+    const auth = TestBed.inject(AuthService);
+    const router = TestBed.inject(Router);
+    auth.user.set({ ...ME, role: 'passenger' });
+    await router.navigateByUrl('/mis-viajes');
+    expect(router.url).toBe('/mis-viajes');
+    // Una seccion de otro rol lleva a casa.
+    await router.navigateByUrl('/solicitudes');
+    expect(router.url).toBe('/buscar');
+    auth.user.set({ ...ME, role: 'driver' });
+    await router.navigateByUrl('/mis-viajes');
+    expect(router.url).toBe('/mis-viajes');
+  });
+
   it('sin sesion la app lleva a la bienvenida', async () => {
     const router = TestBed.inject(Router);
     await router.navigateByUrl('/perfil');

@@ -48,11 +48,14 @@ export const activeGuard: CanMatchFn = () => {
 export const canPublishGuard: CanMatchFn = () =>
   inject(AuthService).user()?.can_publish === true || inject(Router).parseUrl('/inicio');
 
-/** Restringe una seccion a ciertos roles (se usa junto con activeGuard). */
+/**
+ * Restringe una seccion a ciertos roles (se usa junto con activeGuard). Devuelve false en
+ * lugar de redirigir: la misma ruta puede existir para otro rol mas abajo (Mis viajes del
+ * conductor y del pasajero). Si ninguna coincide, '**' lleva a casa.
+ */
 export function roleGuard(...roles: UserRole[]): CanMatchFn {
   return () => {
-    const auth = inject(AuthService);
-    const role = auth.user()?.role;
-    return (role !== undefined && roles.includes(role)) || homeFor(auth, inject(Router));
+    const role = inject(AuthService).user()?.role;
+    return role !== undefined && roles.includes(role);
   };
 }
