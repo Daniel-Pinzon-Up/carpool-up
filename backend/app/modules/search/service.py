@@ -22,6 +22,7 @@ from app.core.clock import LOCAL_TZ, utcnow
 from app.core.enums import RuleKind, Sex, StopKind, TripStatus
 from app.core.errors import AppError
 from app.core.geo import SRID
+from app.modules.bookings.queries import booked_seats_subquery
 from app.modules.routing.schemas import RoutePoint
 from app.modules.routing.service import resolve_points
 from app.modules.search.schemas import (
@@ -52,11 +53,6 @@ def walk_m(a: Point, b: Point) -> float:
     dp, dl = p2 - p1, math.radians(b.lon - a.lon)
     h = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
     return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(h))
-
-
-def seats_available(trip: Trip) -> int:
-    """El paso 8 descuenta las reservas aceptadas y con cancelacion pendiente."""
-    return trip.seats_total
 
 
 def _rule(kind: RuleKind, value: str | None = None) -> Exists:
@@ -119,10 +115,13 @@ class SearchService:
         pickup_fraction = func.ST_LineLocatePoint(Trip.route, pickup_geom)
         dropoff_fraction = func.ST_LineLocatePoint(Trip.route, dropoff_geom)
         time_gap = func.abs(func.extract("epoch", Trip.departs_at - literal(target)))
+        # Cupo: puestos menos los aceptados y con cancelacion pendiente.
+        free_seats = Trip.seats_total - booked_seats_subquery()
 
         query = (
             select(
                 Trip,
+                free_seats.label("free_seats"),
                 pickup_fraction.label("pickup_fraction"),
                 dropoff_fraction.label("dropoff_fraction"),
                 func.ST_Y(func.ST_LineInterpolatePoint(Trip.route, pickup_fraction)).label("p_lat"),
@@ -140,7 +139,7 @@ class SearchService:
                 Trip.driver_id != viewer.id,
                 Trip.departs_at >= start,
                 Trip.departs_at <= end,
-                Trip.seats_total >= prefs.seats,
+                free_seats >= prefs.seats,
                 func.ST_DWithin(route_geo, cast(pickup_geom, Geography), radius),
                 func.ST_DWithin(route_geo, cast(dropoff_geom, Geography), radius),
                 pickup_fraction < dropoff_fraction,
@@ -155,8 +154,6 @@ class SearchService:
         results = []
         for row in rows:
             trip: Trip = row.Trip
-            if seats_available(trip) < prefs.seats:
-                continue
             board = self.match(
                 trip, pickup, Point(row.p_lat, row.p_lon), row.pickup_fraction, radius, pickup=True
             )
@@ -170,7 +167,11 @@ class SearchService:
             )
             if board.eta >= alight.eta and board.kind == alight.kind == "stop":
                 continue  # Misma parada para subir y bajar: no hay trayecto.
-            results.append(self.result(trip, board, alight, target, counts.get(trip.driver_id, 0)))
+            results.append(
+                self.result(
+                    trip, board, alight, target, counts.get(trip.driver_id, 0), row.free_seats
+                )
+            )
         return results
 
     @staticmethod
@@ -220,7 +221,12 @@ class SearchService:
 
     @staticmethod
     def result(
-        trip: Trip, board: MatchPoint, alight: MatchPoint, target: datetime, trips_done: int
+        trip: Trip,
+        board: MatchPoint,
+        alight: MatchPoint,
+        target: datetime,
+        trips_done: int,
+        free_seats: int,
     ) -> SearchResult:
         stops: list[TripStop] = trip.stops
         return SearchResult(
@@ -232,7 +238,7 @@ class SearchService:
             origin=stops[0].place.name,
             destination=stops[-1].place.name,
             price_per_seat=trip.price_per_seat,
-            seats_available=seats_available(trip),
+            seats_available=free_seats,
             pickup=board,
             dropoff=alight,
             minutes_from_requested=round((trip.departs_at - target).total_seconds() / 60),

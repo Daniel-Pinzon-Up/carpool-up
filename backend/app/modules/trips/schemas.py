@@ -4,7 +4,16 @@ from typing import Annotated, Literal
 
 from pydantic import AwareDatetime, BaseModel, Field, field_validator, model_validator
 
-from app.core.enums import RuleKind, SeriesStatus, StopKind, TripStatus, VehicleType
+from app.core.enums import (
+    BookingStatus,
+    RuleKind,
+    SeriesStatus,
+    StopKind,
+    SubscriptionStatus,
+    TripStatus,
+    VehicleType,
+    WaitlistStatus,
+)
 
 ALLOWED = "allowed"
 NOT_ALLOWED = "not_allowed"
@@ -112,6 +121,11 @@ class SeriesCreate(BaseModel):
 class SeriesUpdate(BaseModel):
     """Cambia la plantilla y las ocurrencias futuras. La ventana no se edita."""
 
+    confirm: bool = Field(
+        default=False,
+        description="Confirma el cambio cuando hay reservas afectadas (SERIES_HAS_BOOKINGS)",
+    )
+
     place_ids: PlaceIds | None = None
     weekdays: Weekdays | None = None
     departure_time: time | None = None
@@ -169,7 +183,7 @@ class VehicleSummary(BaseModel):
     color: str
     has_photo: bool
     plate: str | None = Field(
-        description="Solo para el conductor (el paso 8 la muestra al aceptar)"
+        description="Solo para el conductor y los pasajeros con reserva aceptada"
     )
 
 
@@ -186,6 +200,37 @@ class TripSummary(BaseModel):
     stop_count: int = Field(description="Paradas intermedias")
     vehicle: VehicleSummary
     editable: bool = Field(description="El conductor todavia puede editarlo o cancelarlo")
+    seats_available: int = Field(description="Puestos sin reserva aceptada")
+    pending_requests: int = Field(
+        default=0, description="Solicitudes y cancelaciones por decidir (solo el conductor)"
+    )
+
+
+class CoPassenger(BaseModel):
+    """Pasajero aceptado. La recogida solo la ve el conductor."""
+
+    id: uuid.UUID
+    full_name: str
+    seats: int
+    pickup_name: str | None = None
+    pickup_eta: datetime | None = None
+
+
+class MyBooking(BaseModel):
+    id: uuid.UUID
+    status: BookingStatus
+    seats: int
+    pickup_name: str | None
+    pickup_eta: datetime
+    dropoff_name: str | None
+    dropoff_eta: datetime
+
+
+class MyWaitlist(BaseModel):
+    id: uuid.UUID
+    status: WaitlistStatus
+    seats: int
+    offer_expires_at: datetime | None
 
 
 class TripOut(TripSummary):
@@ -197,6 +242,14 @@ class TripOut(TripSummary):
     driver: DriverOut
     cancel_reason: str | None
     cancelled_at: datetime | None
+    passengers: list[CoPassenger] = Field(
+        default=[], description="Aceptados; visibles para el conductor y los otros aceptados"
+    )
+    payment_note: str | None = Field(
+        default=None, description="Datos de pago del conductor, para pasajeros aceptados"
+    )
+    my_booking: MyBooking | None = Field(default=None, description="Reserva del que consulta")
+    my_waitlist: MyWaitlist | None = None
 
 
 class OccurrenceCounts(BaseModel):
@@ -222,9 +275,19 @@ class SeriesSummary(BaseModel):
     counts: OccurrenceCounts
 
 
+class MySubscription(BaseModel):
+    id: uuid.UUID
+    status: SubscriptionStatus
+    from_date: date
+    to_date: date
+
+
 class SeriesOut(SeriesSummary):
     stops: list[StopOut]
     rules: list[RuleOut]
     driver: DriverOut
     cancel_reason: str | None
     occurrences: list[TripSummary]
+    my_subscription: MySubscription | None = Field(
+        default=None, description="Suscripcion abierta o mas reciente del que consulta"
+    )

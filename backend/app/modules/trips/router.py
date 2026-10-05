@@ -16,7 +16,7 @@ from app.modules.trips.schemas import (
     TripSummary,
     TripUpdate,
 )
-from app.modules.trips.service import TripService, trip_out
+from app.modules.trips.service import TripService
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 
@@ -34,7 +34,7 @@ PUBLISH_ERRORS: dict[int | str, dict[str, str]] = {
 
 async def _out(service: TripService, trip_id: uuid.UUID, user: ActiveUser) -> TripOut:
     trip = await service.get_visible(user, trip_id)
-    return trip_out(trip, user, await service.cutoff_minutes())
+    return await service.view(trip, user)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, responses=PUBLISH_ERRORS)
@@ -45,7 +45,7 @@ async def publish_trip(
     """Publica un viaje puntual. La ruta se calcula con OSRM; si no responde, no se publica."""
     service = TripService(session, provider)
     trip = await service.create(user, body)
-    return trip_out(trip, user, await service.cutoff_minutes())
+    return await service.view(trip, user)
 
 
 @router.get("/mine")
@@ -76,7 +76,7 @@ async def update_trip(
     """Edita un viaje o una ocurrencia hasta trip_edit_cutoff_minutes antes de la salida."""
     service = TripService(session, provider)
     trip = await service.update(user, trip_id, body)
-    return trip_out(trip, user, await service.cutoff_minutes())
+    return await service.view(trip, user)
 
 
 @router.post("/{trip_id}/cancel", responses={409: {"description": "TRIP_NOT_EDITABLE"}})
@@ -89,7 +89,7 @@ async def cancel_trip(
 ) -> TripOut:
     service = TripService(session, provider)
     trip = await service.cancel(user, trip_id, body.reason)
-    return trip_out(trip, user, await service.cutoff_minutes())
+    return await service.view(trip, user)
 
 
 @router.post("/{trip_id}/duplicate", status_code=status.HTTP_201_CREATED, responses=PUBLISH_ERRORS)
@@ -105,4 +105,4 @@ async def duplicate_trip(
     """Publica un viaje nuevo con la ruta, reglas, vehiculo, puestos y precio de otro."""
     service = TripService(session, provider)
     trip = await service.duplicate(user, trip_id, body.departs_at)
-    return trip_out(trip, user, await service.cutoff_minutes())
+    return await service.view(trip, user)
