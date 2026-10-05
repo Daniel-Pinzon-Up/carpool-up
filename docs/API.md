@@ -247,6 +247,35 @@ Parámetros: `origin_place_id` u `origin_lat` y `origin_lon`; lo mismo para el d
 
 Cada resultado trae `trip_id`, `series_id`, `departs_at`, `arrives_at`, `origin`, `destination`, `price_per_seat`, `seats_available`, `pickup` y `dropoff` (`kind` `stop` o `route`, `name`, `lat`, `lon`, `eta`, `walk_m`), `minutes_from_requested`, `driver` (`id`, `full_name`, `rating`, `trips_as_driver`), `vehicle` sin placa y `rules`. Error propio: `SEARCH_IN_PAST` (422).
 
+### Reservas, suscripciones y lista de espera (paso 8)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `POST /trips/{id}/bookings` | Pasajero, 20 por minuto | `{seats, pickup_place_id, dropoff_place_id, preferences}`. Queda `requested` sin apartar cupo. |
+| `GET /trips/{id}/bookings` | Conductor dueño | Todas las reservas del viaje con el punto de encuentro de cada pasajero. |
+| `GET /bookings/mine?scope=upcoming\|history&limit&cursor` | Pasajero | Reservas propias por hora de recogida. |
+| `GET /bookings/inbox` | Conductor | `{bookings, cancellations, subscriptions}` por decidir. |
+| `GET /bookings/{id}` | Pasajero o conductor del viaje | Detalle; placa y nota de pago solo con la reserva aceptada. |
+| `POST /bookings/{id}/accept` | Conductor dueño | Acepta con el viaje bloqueado. |
+| `POST /bookings/{id}/reject` | Conductor dueño | `{reason?}`. |
+| `POST /bookings/{id}/cancel` | Pasajero | `{reason?}`. Directa o solicitud de cancelación tardía (motivo obligatorio). |
+| `POST /cancellation-requests/{id}/accept`, `/reject` | Conductor dueño | Decide una cancelación tardía. |
+| `GET /series/{id}/availability?seats` | Usuario activo | Fechas futuras con estado, cupo y si se pueden reservar, más las opciones de rango. |
+| `POST /series/{id}/subscriptions` | Pasajero, 10 por minuto | `{option, start_date, seats, pickup_place_id, dropoff_place_id, preferences}`. |
+| `GET /subscriptions/mine` | Pasajero | Con fechas reservadas y omitidas. |
+| `GET /subscriptions/{id}` | Pasajero o conductor de la serie | |
+| `POST /subscriptions/{id}/accept`, `/reject` | Conductor dueño | Aprobación única; `reject` admite `{reason?}`. |
+| `POST /subscriptions/{id}/cancel` | Pasajero | `{reason?}`. Cancela las reservas futuras con las reglas de cancelación. |
+| `POST /trips/{id}/waitlist`, `DELETE /trips/{id}/waitlist` | Pasajero | Anotarse (mismo cuerpo que la reserva) y salir. |
+| `GET /waitlist/mine` | Pasajero | Entradas abiertas con personas por delante y oferta vigente. |
+| `POST /waitlist/{id}/confirm`, `/decline` | Pasajero | Responder la oferta; confirmar crea una solicitud. |
+
+Estados de la reserva: `requested`, `accepted`, `rejected`, `cancel_requested`, `cancelled_by_passenger`, `cancelled_by_driver`, `auto_cancelled_late`, `auto_cancelled_pico_placa`, `expired`, `no_show`, `completed`. Cada respuesta trae `free_cancel`: si es falso, cancelar crea una solicitud al conductor.
+
+Errores propios: `TRIP_FULL`, `TRIP_NOT_BOOKABLE`, `BOOKING_EXISTS`, `BOOKING_OVERLAP`, `BOOKING_OWN_TRIP`, `WOMEN_ONLY_TRIP`, `BOOKING_SUSPENDED`, `PREFERENCES_CONFLICT`, `POINTS_OFF_ROUTE`, `BOOKING_NOT_PENDING`, `BOOKING_NOT_CANCELLABLE`, `CANCELLATION_PENDING`, `CANCEL_REASON_REQUIRED`, `CANCELLATION_NOT_PENDING`, `SUBSCRIPTION_OPTION_INVALID`, `SUBSCRIPTION_OUT_OF_RANGE`, `SUBSCRIPTION_EMPTY`, `SUBSCRIPTION_EXISTS`, `SUBSCRIPTION_NOT_PENDING`, `SUBSCRIPTION_NOT_ACTIVE`, `WAITLIST_NOT_NEEDED`, `WAITLIST_EXISTS`, `WAITLIST_OFFER_EXPIRED`. Al editar viajes y series: `SEATS_BELOW_BOOKED`, `WOMEN_ONLY_CONFLICT` y `SERIES_HAS_BOOKINGS` (se confirma con `confirm: true` en `PATCH /series/{id}`).
+
+El detalle del viaje (`GET /trips/{id}`) agrega `seats_available`, `pending_requests` (conductor), `passengers`, `payment_note`, `my_booking` y `my_waitlist`; el de la serie, `my_subscription`. La búsqueda descuenta los puestos aceptados.
+
 ## Cabeceras
 
 - `X-Request-ID`: se acepta del cliente o se genera, y se devuelve en cada respuesta para correlacionar logs.

@@ -14,7 +14,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 5 | Rutas y mapas: OSRM con el mapa de Pamplona, ETA con factor de tráfico, aporte sugerido, mapa base propio y planificador de rutas | Hecho |
 | 6 | Publicación de viajes y series: asistente, ocurrencias, pico y placa, edición, cancelación, duplicado y Mis viajes del conductor | Hecho |
 | 7 | Búsqueda de viajes: coincidencia geográfica con la ruta, ventana horaria, preferencias, solo mujeres y punto de recogida | Hecho |
-| 8 a 14 | Ver plan maestro, sección 16 | Pendiente |
+| 8 | Reservas y suscripciones: aprobación con bloqueo, cancelaciones libres y tardías, retraso del conductor, lista de espera, suscripción a series y bandeja del conductor | Hecho |
+| 9 a 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
