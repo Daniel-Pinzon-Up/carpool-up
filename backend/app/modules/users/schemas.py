@@ -62,6 +62,8 @@ class MeOut(BaseModel):
     document: DocumentSummary | None
     license: LicenseSummary | None
     can_publish: bool
+    # Motivos por los que un conductor aun no puede publicar (vacio si puede).
+    publish_blockers: list[str]
     pending_legal: list[PendingLegal]
 
 

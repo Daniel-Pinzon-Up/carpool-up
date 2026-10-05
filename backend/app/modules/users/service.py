@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.clock import local_today
-from app.core.enums import UserRole, UserStatus
+from app.core.enums import UserRole
 from app.core.errors import AppError
 from app.modules.documents.service import DocumentService, LicenseService
 from app.modules.legal.service import LegalService
@@ -13,6 +12,7 @@ from app.modules.users.schemas import (
     MeUpdate,
     PendingLegal,
 )
+from app.modules.vehicles.eligibility import publishing_blockers
 
 
 class UserService:
@@ -25,12 +25,8 @@ class UserService:
         license_ = (
             await LicenseService(self.session).get(user) if user.role == UserRole.DRIVER else None
         )
-        # El paso 4 agrega el requisito de tener al menos un vehiculo activo.
-        can_publish = (
-            user.role == UserRole.DRIVER
-            and user.status == UserStatus.ACTIVE
-            and license_ is not None
-            and license_.is_valid_on(local_today())
+        blockers = (
+            await publishing_blockers(self.session, user) if user.role == UserRole.DRIVER else []
         )
         return MeOut(
             id=user.id,
@@ -46,7 +42,8 @@ class UserService:
             last_login_at=user.last_login_at,
             document=DocumentSummary.model_validate(document) if document else None,
             license=LicenseSummary.model_validate(license_) if license_ else None,
-            can_publish=can_publish,
+            can_publish=user.role == UserRole.DRIVER and not blockers,
+            publish_blockers=blockers,
             pending_legal=[
                 PendingLegal(id=d.id, kind=d.kind, version=d.version, language=d.language)
                 for d in pending
