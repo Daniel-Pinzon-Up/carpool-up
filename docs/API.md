@@ -322,6 +322,21 @@ El detalle del viaje agrega `chat_id` (el chat grupal) para el conductor y los p
 
 WebSocket: el conductor envía `location.update {trip_id, lat, lon, accuracy?, heading?, speed?}`. Los participantes reciben `location`, `trip.started` y `trip.finished`; los administradores, `emergency` y `emergency.handled`.
 
+### Calificaciones, historial y estadísticas (paso 11)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /ratings/pending` | Usuario activo | Personas que aún puede calificar, con los criterios y el cierre del plazo. |
+| `POST /trips/{id}/ratings` | Participante | `{target_id, scores: {criterio: 1..5}, comment?}`. Errores `RATING_NOT_OPEN`, `RATING_WINDOW_CLOSED`, `RATING_TARGET_INVALID`, `RATING_CRITERIA_INVALID`, `RATING_EXISTS`. |
+| `GET /users/{id}/ratings?limit&cursor` | Usuario activo | Calificaciones recibidas, sin autor; los comentarios ocultos salen sin texto. |
+| `GET /users/{id}/rating-summary` | Usuario activo | Promedio general, por criterio, número de calificaciones y viajes hechos. |
+| `GET /history/passenger?limit&cursor` | Pasajero | Viajes pasados con estado, ticket y estado de la calificación. |
+| `GET /history/driver?limit&cursor` | Conductor | Viajes pasados con pasajeros, aportes y calificaciones pendientes. |
+| `GET /stats/passenger` | Pasajero | Viajes, aporte total, cancelaciones, ausencias, lugares de salida y meses. |
+| `GET /stats/driver` | Conductor | Viajes, pasajeros, ocupación, aportes, cancelaciones, calificación y meses. |
+
+Criterios: conductor `punctuality`, `safe_driving`, `courtesy`, `cleanliness`; pasajero `punctuality`, `courtesy`, `compliance`. En la búsqueda, `driver.rating` y `driver.trips_as_driver` vienen de `user_stats`.
+
 ## Cabeceras
 
 - `X-Request-ID`: se acepta del cliente o se genera, y se devuelve en cada respuesta para correlacionar logs.
