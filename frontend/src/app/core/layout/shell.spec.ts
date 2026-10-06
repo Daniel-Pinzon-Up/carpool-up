@@ -2,6 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Me } from '../auth/auth.models';
+import { AuthService } from '../auth/auth.service';
 import { getTranslocoTestingModule } from '../../../testing/transloco-testing';
 import { NAV_BY_ROLE } from './navigation';
 import { Shell } from './shell';
@@ -22,9 +24,36 @@ describe('Shell', () => {
     expect(bottomLinks[0].textContent).toContain('Buscar');
   });
 
-  it('ningun rol tiene mas de cinco destinos en la barra inferior movil', () => {
-    for (const items of [NAV_BY_ROLE.passenger, NAV_BY_ROLE.driver, NAV_BY_ROLE.admin]) {
-      expect(items.length).toBeLessThanOrEqual(5);
-    }
+  it('con mas de cinco destinos la barra inferior muestra cuatro y el menu Mas', () => {
+    TestBed.configureTestingModule({
+      imports: [Shell, getTranslocoTestingModule()],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+    });
+    TestBed.inject(AuthService).user.set({ id: 'u1', role: 'superadmin' } as Me);
+    const fixture = TestBed.createComponent(Shell);
+    fixture.detectChanges();
+
+    const bottom = fixture.nativeElement.querySelectorAll(
+      'nav[aria-label="Navegación principal"]',
+    )[1];
+    expect(bottom.querySelectorAll('a')).toHaveLength(4);
+    const more = bottom.querySelector('button[aria-controls="cp-more-menu"]') as HTMLButtonElement;
+    expect(more.getAttribute('aria-expanded')).toBe('false');
+
+    more.click();
+    fixture.detectChanges();
+    const menu = fixture.nativeElement.querySelector('#cp-more-menu') as HTMLElement;
+    const links = [...menu.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+    expect(links).toEqual(NAV_BY_ROLE.superadmin.slice(4).map((item) => item.path));
+    expect(links).toContain('/admin/configuracion');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#cp-more-menu')).toBeNull();
+  });
+
+  it('solo el superadmin ve la configuracion en la navegacion', () => {
+    expect(NAV_BY_ROLE.admin.some((item) => item.key === 'settings')).toBe(false);
+    expect(NAV_BY_ROLE.superadmin.some((item) => item.key === 'settings')).toBe(true);
   });
 });
