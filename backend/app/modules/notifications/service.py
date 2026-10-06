@@ -64,6 +64,11 @@ class Kind:
     RATING_PENDING = "rating_pending"
     RATING_REMINDER = "rating_reminder"
     RATING_RECEIVED = "rating_received"
+    # Administracion (paso 12).
+    ACCOUNT_SUSPENDED = "account_suspended"
+    ACCOUNT_REINSTATED = "account_reinstated"
+    BOOKING_BAN_LIFTED = "booking_ban_lifted"
+    TRIP_CANCELLED_BY_ADMIN = "trip_cancelled_by_admin"
 
 
 class NotificationService:

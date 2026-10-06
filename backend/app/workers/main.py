@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.core.db import SessionLocal
 from app.core.email import OutgoingEmail, send_smtp
 from app.core.logging import configure_logging
+from app.modules.admin.users import end_expired_account_suspensions
 from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
 from app.modules.chat.service import close_finished_conversations, purge_chat
 from app.modules.documents.revalidation import run_revalidation
@@ -99,6 +100,12 @@ async def close_rating_window(ctx: dict[str, Any]) -> int:
         return await remind_pending_ratings(session)
 
 
+async def reinstate_suspended(ctx: dict[str, Any]) -> int:
+    """Cada 15 minutos: reactiva las cuentas cuya suspension temporal ya vencio."""
+    async with SessionLocal() as session:
+        return await end_expired_account_suspensions(session)
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging(json_output=get_settings().environment != "development")
     logger.info("worker_started")
@@ -119,6 +126,7 @@ class WorkerSettings:
         trip_reminders,
         traffic_factors,
         close_rating_window,
+        reinstate_suspended,
     ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True),
@@ -137,6 +145,7 @@ class WorkerSettings:
         cron(traffic_factors, weekday={6}, hour={9}, minute={40}),
         # 14:00 UTC = 9:00 a. m. en Pamplona (de dia, para que el aviso se vea).
         cron(close_rating_window, hour={14}, minute={0}),
+        cron(reinstate_suspended, minute={7, 22, 37, 52}),
     ]
     on_startup = startup
     max_tries = 5
