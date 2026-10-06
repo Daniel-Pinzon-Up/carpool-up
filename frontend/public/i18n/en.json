@@ -188,7 +188,18 @@
     "WOMEN_ONLY_CONFLICT": "The ride has passengers who are not women; it cannot be women only.",
     "SERIES_HAS_BOOKINGS": "Some rides in the series have bookings. Confirm the change.",
     "CONVERSATION_CLOSED": "This chat is already closed.",
-    "MESSAGE_EMPTY": "Write a message before sending it."
+    "MESSAGE_EMPTY": "Write a message before sending it.",
+    "TRIP_NOT_STARTABLE": "This ride can no longer start.",
+    "TRIP_START_TOO_EARLY": "It is early: you can start it from {{lead_minutes}} minutes before departure.",
+    "TRIP_START_TOO_LATE": "The time of this ride has passed.",
+    "TRIP_NOT_IN_PROGRESS": "The ride is not in progress.",
+    "BOOKING_NOT_BOARDABLE": "This passenger was already marked.",
+    "NO_SHOW_TOO_EARLY": "Wait {{wait_minutes}} minutes after departure to mark a no-show.",
+    "PASSENGERS_UNMARKED": "Mark every passenger as on board or no-show before finishing.",
+    "TRIP_NOT_SHAREABLE": "Only upcoming or ongoing rides can be shared.",
+    "TRIP_NOT_ACTIVE": "The ride is not active.",
+    "TRUSTED_CONTACTS_LIMIT": "You already have the {{max}} allowed contacts.",
+    "EMERGENCY_HANDLED": "This emergency was already handled."
   },
   "catalog": {
     "title": "Component catalog",
@@ -624,7 +635,15 @@
       "subscription_ended": "Your series subscription ended.",
       "waitlist_offer": "A seat freed up on a full ride. Confirm it soon.",
       "waitlist_offer_expired": "The seat offer expired.",
-      "message_new": "{{sender_name}} wrote to you in the chat."
+      "message_new": "{{sender_name}} wrote to you in the chat.",
+      "trip_reminder": "Your ride leaves in {{minutes}} minutes.",
+      "trip_reminder_driver": "Your ride leaves in {{minutes}} minutes. Remember to start it.",
+      "trip_started": "Your ride started. You can now see the driver location.",
+      "trip_finished": "Ride finished. Your ticket is {{ticket_code}}.",
+      "trip_not_held": "Your ride was not started in time and did not take place.",
+      "passenger_no_show": "The driver marked that you did not show up.",
+      "booking_suspended": "Your bookings are suspended for {{days}} days for repeated no-shows.",
+      "emergency_alert": "Emergency reported by {{user_name}}. Check it now."
     }
   },
   "vehicles": {
@@ -1169,5 +1188,106 @@
     "groupOn": "Ride chat · {{when}}",
     "noMessages": "No messages yet",
     "openTrip": "Open the ride chat"
+  },
+  "lifecycle": {
+    "start": {
+      "title": "Start the ride",
+      "hint": "You can start it from 30 minutes before departure. Starting it shares your location with your passengers.",
+      "action": "Start ride",
+      "done": "Ride started. Your passengers can see your location."
+    },
+    "location": {
+      "off": "Your location is not being shared.",
+      "starting": "Finding your location...",
+      "on": "Sharing your location with the passengers.",
+      "denied": "The browser is not allowed to use your location.",
+      "unavailable": "We could not get your location.",
+      "retry": "Try again",
+      "screenOn": "The screen stays on while you share your location.",
+      "marker": "Driver",
+      "seen": "Driver location updated at {{time}}."
+    },
+    "finish": {
+      "action": "Finish ride",
+      "title": "Finish the ride?",
+      "message": "Tickets are issued for those who boarded and the ride chat closes.",
+      "done": "Ride finished. Tickets were issued."
+    },
+    "boarding": {
+      "board": "Boarded",
+      "boarded": "On board",
+      "boardedDone": "Passenger on board.",
+      "noShow": "No-show",
+      "noShowTitle": "Mark as no-show?",
+      "noShowMessage": "{{name}} will be notified. Repeated no-shows suspend their bookings for a few days.",
+      "noShowDone": "Marked as no-show."
+    },
+    "tickets": {
+      "title": "Ride tickets",
+      "mine": "Your ticket",
+      "paid": "Contribution received",
+      "confirmed": "The driver confirmed your contribution.",
+      "pending": "Contribution not confirmed yet.",
+      "hint": "The ticket is informative: the contribution is agreed and paid outside the app."
+    }
+  },
+  "safety": {
+    "share": {
+      "action": "Share ride",
+      "title": "Share the ride",
+      "body": "Anyone with the link sees the route, the vehicle with its plate and the live location. No names or phone numbers.",
+      "link": "Ride link",
+      "expires": "The link stops working when the ride ends (around {{time}}).",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "send": "Send",
+      "smsTo": "Send by SMS to {{name}}",
+      "message": "I am riding with Carpool UP. Follow my ride here: {{link}}"
+    },
+    "emergency": {
+      "action": "Emergency",
+      "title": "Emergency",
+      "call": "Call {{phone}}",
+      "body": "If you are in danger, call first. You can also alert the university with your location.",
+      "note": "What is happening? (optional)",
+      "report": "Alert the university",
+      "sent": "Alert sent at {{time}}. An administrator is reviewing it.",
+      "callContact": "Call {{name}}"
+    },
+    "contacts": {
+      "title": "Trusted contacts",
+      "help": "Up to 5 people to send your ride to or call in an emergency. Only you see them.",
+      "none": "You have no trusted contacts yet.",
+      "add": "Add contact",
+      "save": "Save contact",
+      "name": "Name",
+      "phone": "Phone",
+      "relationship": "Relationship (optional)",
+      "edit": "Edit {{name}}",
+      "remove": "Remove {{name}}",
+      "removeTitle": "Remove the contact?",
+      "removeMessage": "{{name}} will no longer appear when sharing rides or in emergencies.",
+      "removeConfirm": "Remove",
+      "full": "You already have the {{max}} allowed contacts."
+    }
+  },
+  "shared": {
+    "title": "Shared ride",
+    "mapLabel": "Map with the route and the vehicle location",
+    "vehicle": "Vehicle",
+    "arrival": "Estimated arrival",
+    "location": "Location",
+    "seenAt": "Updated at {{time}}",
+    "noLocation": {
+      "scheduled": "The ride has not started yet.",
+      "in_progress": "Waiting for the driver location...",
+      "completed": "The ride has ended.",
+      "cancelled_by_driver": "The ride was cancelled.",
+      "cancelled_pico_placa": "The ride was cancelled.",
+      "not_held": "The ride did not take place."
+    },
+    "expires": "This link works until {{time}}.",
+    "gone": "This link is no longer available",
+    "goneHint": "Ride links are turned off shortly after the ride ends."
   }
 }

@@ -188,7 +188,18 @@
     "WOMEN_ONLY_CONFLICT": "El viaje tiene pasajeros que no son mujeres; no puede ser solo para mujeres.",
     "SERIES_HAS_BOOKINGS": "Algunos viajes de la serie tienen reservas. Confirma el cambio.",
     "CONVERSATION_CLOSED": "Este chat ya está cerrado.",
-    "MESSAGE_EMPTY": "Escribe un mensaje antes de enviarlo."
+    "MESSAGE_EMPTY": "Escribe un mensaje antes de enviarlo.",
+    "TRIP_NOT_STARTABLE": "Este viaje ya no se puede iniciar.",
+    "TRIP_START_TOO_EARLY": "Aún es temprano: puedes iniciarlo desde {{lead_minutes}} minutos antes de la salida.",
+    "TRIP_START_TOO_LATE": "Ya pasó la hora de este viaje.",
+    "TRIP_NOT_IN_PROGRESS": "El viaje no está en curso.",
+    "BOOKING_NOT_BOARDABLE": "Este pasajero ya fue marcado.",
+    "NO_SHOW_TOO_EARLY": "Espera {{wait_minutes}} minutos después de la salida para marcar que no se presentó.",
+    "PASSENGERS_UNMARKED": "Marca a cada pasajero como a bordo o no presentado antes de finalizar.",
+    "TRIP_NOT_SHAREABLE": "Solo se comparten viajes próximos o en curso.",
+    "TRIP_NOT_ACTIVE": "El viaje no está activo.",
+    "TRUSTED_CONTACTS_LIMIT": "Ya tienes los {{max}} contactos permitidos.",
+    "EMERGENCY_HANDLED": "Esta emergencia ya fue atendida."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -624,7 +635,15 @@
       "subscription_ended": "Tu suscripción a la serie terminó.",
       "waitlist_offer": "Se liberó un cupo en un viaje lleno. Confírmalo pronto.",
       "waitlist_offer_expired": "La oferta de cupo venció.",
-      "message_new": "{{sender_name}} te escribió en el chat."
+      "message_new": "{{sender_name}} te escribió en el chat.",
+      "trip_reminder": "Tu viaje sale en {{minutes}} minutos.",
+      "trip_reminder_driver": "Tu viaje sale en {{minutes}} minutos. Recuerda iniciarlo.",
+      "trip_started": "Tu viaje inició. Ya puedes ver la ubicación del conductor.",
+      "trip_finished": "Viaje terminado. Tu ticket es {{ticket_code}}.",
+      "trip_not_held": "Tu viaje no se inició a tiempo y quedó como no realizado.",
+      "passenger_no_show": "El conductor marcó que no te presentaste al viaje.",
+      "booking_suspended": "Tus reservas quedaron suspendidas por {{days}} días por ausencias repetidas.",
+      "emergency_alert": "Emergencia reportada por {{user_name}}. Revísala ahora."
     }
   },
   "vehicles": {
@@ -1169,5 +1188,106 @@
     "groupOn": "Chat del viaje · {{when}}",
     "noMessages": "Sin mensajes todavía",
     "openTrip": "Abrir el chat del viaje"
+  },
+  "lifecycle": {
+    "start": {
+      "title": "Iniciar el viaje",
+      "hint": "Puedes iniciarlo desde 30 minutos antes de la salida. Al iniciarlo compartes tu ubicación con tus pasajeros.",
+      "action": "Iniciar viaje",
+      "done": "Viaje iniciado. Tus pasajeros ya ven tu ubicación."
+    },
+    "location": {
+      "off": "La ubicación no se está compartiendo.",
+      "starting": "Buscando tu ubicación...",
+      "on": "Compartiendo tu ubicación con los pasajeros.",
+      "denied": "El navegador no tiene permiso para usar tu ubicación.",
+      "unavailable": "No pudimos obtener tu ubicación.",
+      "retry": "Intentar de nuevo",
+      "screenOn": "La pantalla se mantiene encendida mientras compartes la ubicación.",
+      "marker": "Conductor",
+      "seen": "Ubicación del conductor actualizada a las {{time}}."
+    },
+    "finish": {
+      "action": "Finalizar viaje",
+      "title": "¿Finalizar el viaje?",
+      "message": "Se emiten los tickets de quienes abordaron y se cierra el chat del viaje.",
+      "done": "Viaje finalizado. Se emitieron los tickets."
+    },
+    "boarding": {
+      "board": "Abordó",
+      "boarded": "A bordo",
+      "boardedDone": "Pasajero a bordo.",
+      "noShow": "No se presentó",
+      "noShowTitle": "¿Marcar que no se presentó?",
+      "noShowMessage": "{{name}} recibirá un aviso. Varias ausencias suspenden sus reservas por unos días.",
+      "noShowDone": "Marcado como no presentado."
+    },
+    "tickets": {
+      "title": "Tickets del viaje",
+      "mine": "Tu ticket",
+      "paid": "Aporte recibido",
+      "confirmed": "El conductor confirmó tu aporte.",
+      "pending": "Aporte por confirmar.",
+      "hint": "El ticket es informativo: el aporte se acuerda y se paga fuera de la app."
+    }
+  },
+  "safety": {
+    "share": {
+      "action": "Compartir viaje",
+      "title": "Compartir el viaje",
+      "body": "Quien tenga el enlace verá la ruta, el vehículo con su placa y la ubicación en vivo. No verá nombres ni teléfonos.",
+      "link": "Enlace del viaje",
+      "expires": "El enlace deja de funcionar al terminar el viaje (hacia las {{time}}).",
+      "copy": "Copiar enlace",
+      "copied": "Copiado",
+      "send": "Enviar",
+      "smsTo": "Enviar por SMS a {{name}}",
+      "message": "Estoy viajando con Carpool UP. Sigue mi viaje aquí: {{link}}"
+    },
+    "emergency": {
+      "action": "Emergencia",
+      "title": "Emergencia",
+      "call": "Llamar al {{phone}}",
+      "body": "Si estás en peligro llama primero. Además puedes avisar a la universidad con tu ubicación.",
+      "note": "¿Qué está pasando? (opcional)",
+      "report": "Avisar a la universidad",
+      "sent": "Aviso enviado a las {{time}}. Un administrador lo está revisando.",
+      "callContact": "Llamar a {{name}}"
+    },
+    "contacts": {
+      "title": "Contactos de confianza",
+      "help": "Hasta 5 personas a quienes enviar tu viaje o llamar en una emergencia. Solo tú las ves.",
+      "none": "Aún no tienes contactos de confianza.",
+      "add": "Agregar contacto",
+      "save": "Guardar contacto",
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "relationship": "Relación (opcional)",
+      "edit": "Editar a {{name}}",
+      "remove": "Quitar a {{name}}",
+      "removeTitle": "¿Quitar el contacto?",
+      "removeMessage": "{{name}} dejará de aparecer al compartir el viaje y en emergencias.",
+      "removeConfirm": "Quitar",
+      "full": "Ya tienes los {{max}} contactos permitidos."
+    }
+  },
+  "shared": {
+    "title": "Viaje compartido",
+    "mapLabel": "Mapa con la ruta y la ubicación del vehículo",
+    "vehicle": "Vehículo",
+    "arrival": "Llegada estimada",
+    "location": "Ubicación",
+    "seenAt": "Actualizada a las {{time}}",
+    "noLocation": {
+      "scheduled": "El viaje aún no empieza.",
+      "in_progress": "Esperando la ubicación del conductor...",
+      "completed": "El viaje terminó.",
+      "cancelled_by_driver": "El viaje se canceló.",
+      "cancelled_pico_placa": "El viaje se canceló.",
+      "not_held": "El viaje no se realizó."
+    },
+    "expires": "Este enlace funciona hasta {{time}}.",
+    "gone": "Este enlace ya no está disponible",
+    "goneHint": "Los enlaces de viaje se desactivan poco después de terminar el viaje."
   }
 }

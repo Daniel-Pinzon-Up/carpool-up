@@ -188,7 +188,18 @@
     "WOMEN_ONLY_CONFLICT": "Le trajet a des passagers qui ne sont pas des femmes ; il ne peut pas être réservé aux femmes.",
     "SERIES_HAS_BOOKINGS": "Certains trajets de la série ont des réservations. Confirmez la modification.",
     "CONVERSATION_CLOSED": "Ce chat est déjà fermé.",
-    "MESSAGE_EMPTY": "Écrivez un message avant de l'envoyer."
+    "MESSAGE_EMPTY": "Écrivez un message avant de l'envoyer.",
+    "TRIP_NOT_STARTABLE": "Ce trajet ne peut plus être démarré.",
+    "TRIP_START_TOO_EARLY": "C'est trop tôt : vous pouvez le démarrer dès {{lead_minutes}} minutes avant le départ.",
+    "TRIP_START_TOO_LATE": "L'heure de ce trajet est passée.",
+    "TRIP_NOT_IN_PROGRESS": "Le trajet n'est pas en cours.",
+    "BOOKING_NOT_BOARDABLE": "Ce passager a déjà été marqué.",
+    "NO_SHOW_TOO_EARLY": "Attendez {{wait_minutes}} minutes après le départ pour marquer une absence.",
+    "PASSENGERS_UNMARKED": "Marquez chaque passager à bord ou absent avant de terminer.",
+    "TRIP_NOT_SHAREABLE": "Seuls les trajets à venir ou en cours peuvent être partagés.",
+    "TRIP_NOT_ACTIVE": "Le trajet n'est pas actif.",
+    "TRUSTED_CONTACTS_LIMIT": "Vous avez déjà les {{max}} contacts autorisés.",
+    "EMERGENCY_HANDLED": "Cette urgence a déjà été traitée."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -624,7 +635,15 @@
       "subscription_ended": "Votre inscription à la série est terminée.",
       "waitlist_offer": "Une place s'est libérée sur un trajet complet. Confirmez vite.",
       "waitlist_offer_expired": "L'offre de place a expiré.",
-      "message_new": "{{sender_name}} vous a écrit dans le chat."
+      "message_new": "{{sender_name}} vous a écrit dans le chat.",
+      "trip_reminder": "Votre trajet part dans {{minutes}} minutes.",
+      "trip_reminder_driver": "Votre trajet part dans {{minutes}} minutes. Pensez à le démarrer.",
+      "trip_started": "Votre trajet a commencé. Vous voyez la position du conducteur.",
+      "trip_finished": "Trajet terminé. Votre ticket est {{ticket_code}}.",
+      "trip_not_held": "Votre trajet n'a pas été démarré à temps et n'a pas eu lieu.",
+      "passenger_no_show": "Le conducteur a indiqué que vous ne vous êtes pas présenté.",
+      "booking_suspended": "Vos réservations sont suspendues pendant {{days}} jours pour absences répétées.",
+      "emergency_alert": "Urgence signalée par {{user_name}}. Consultez-la maintenant."
     }
   },
   "vehicles": {
@@ -1169,5 +1188,106 @@
     "groupOn": "Chat du trajet · {{when}}",
     "noMessages": "Pas encore de messages",
     "openTrip": "Ouvrir le chat du trajet"
+  },
+  "lifecycle": {
+    "start": {
+      "title": "Démarrer le trajet",
+      "hint": "Vous pouvez le démarrer dès 30 minutes avant le départ. En le démarrant, vous partagez votre position avec vos passagers.",
+      "action": "Démarrer le trajet",
+      "done": "Trajet démarré. Vos passagers voient votre position."
+    },
+    "location": {
+      "off": "Votre position n'est pas partagée.",
+      "starting": "Recherche de votre position...",
+      "on": "Partage de votre position avec les passagers.",
+      "denied": "Le navigateur n'a pas l'autorisation d'utiliser votre position.",
+      "unavailable": "Impossible d'obtenir votre position.",
+      "retry": "Réessayer",
+      "screenOn": "L'écran reste allumé pendant le partage de la position.",
+      "marker": "Conducteur",
+      "seen": "Position du conducteur mise à jour à {{time}}."
+    },
+    "finish": {
+      "action": "Terminer le trajet",
+      "title": "Terminer le trajet ?",
+      "message": "Les tickets des passagers montés sont émis et le chat du trajet est fermé.",
+      "done": "Trajet terminé. Les tickets ont été émis."
+    },
+    "boarding": {
+      "board": "Monté",
+      "boarded": "À bord",
+      "boardedDone": "Passager à bord.",
+      "noShow": "Absent",
+      "noShowTitle": "Marquer comme absent ?",
+      "noShowMessage": "{{name}} sera prévenu. Des absences répétées suspendent ses réservations pendant quelques jours.",
+      "noShowDone": "Marqué comme absent."
+    },
+    "tickets": {
+      "title": "Tickets du trajet",
+      "mine": "Votre ticket",
+      "paid": "Participation reçue",
+      "confirmed": "Le conducteur a confirmé votre participation.",
+      "pending": "Participation à confirmer.",
+      "hint": "Le ticket est informatif : la participation se convient et se paie hors de l'application."
+    }
+  },
+  "safety": {
+    "share": {
+      "action": "Partager le trajet",
+      "title": "Partager le trajet",
+      "body": "Toute personne ayant le lien voit l'itinéraire, le véhicule avec sa plaque et la position en direct. Sans noms ni téléphones.",
+      "link": "Lien du trajet",
+      "expires": "Le lien cesse de fonctionner à la fin du trajet (vers {{time}}).",
+      "copy": "Copier le lien",
+      "copied": "Copié",
+      "send": "Envoyer",
+      "smsTo": "Envoyer par SMS à {{name}}",
+      "message": "Je voyage avec Carpool UP. Suivez mon trajet ici : {{link}}"
+    },
+    "emergency": {
+      "action": "Urgence",
+      "title": "Urgence",
+      "call": "Appeler le {{phone}}",
+      "body": "Si vous êtes en danger, appelez d'abord. Vous pouvez aussi alerter l'université avec votre position.",
+      "note": "Que se passe-t-il ? (facultatif)",
+      "report": "Alerter l'université",
+      "sent": "Alerte envoyée à {{time}}. Un administrateur l'examine.",
+      "callContact": "Appeler {{name}}"
+    },
+    "contacts": {
+      "title": "Contacts de confiance",
+      "help": "Jusqu'à 5 personnes à qui envoyer votre trajet ou appeler en cas d'urgence. Vous seul les voyez.",
+      "none": "Vous n'avez pas encore de contacts de confiance.",
+      "add": "Ajouter un contact",
+      "save": "Enregistrer le contact",
+      "name": "Nom",
+      "phone": "Téléphone",
+      "relationship": "Lien (facultatif)",
+      "edit": "Modifier {{name}}",
+      "remove": "Retirer {{name}}",
+      "removeTitle": "Retirer le contact ?",
+      "removeMessage": "{{name}} n'apparaîtra plus lors du partage du trajet ni en cas d'urgence.",
+      "removeConfirm": "Retirer",
+      "full": "Vous avez déjà les {{max}} contacts autorisés."
+    }
+  },
+  "shared": {
+    "title": "Trajet partagé",
+    "mapLabel": "Carte avec l'itinéraire et la position du véhicule",
+    "vehicle": "Véhicule",
+    "arrival": "Arrivée estimée",
+    "location": "Position",
+    "seenAt": "Mise à jour à {{time}}",
+    "noLocation": {
+      "scheduled": "Le trajet n'a pas encore commencé.",
+      "in_progress": "En attente de la position du conducteur...",
+      "completed": "Le trajet est terminé.",
+      "cancelled_by_driver": "Le trajet a été annulé.",
+      "cancelled_pico_placa": "Le trajet a été annulé.",
+      "not_held": "Le trajet n'a pas eu lieu."
+    },
+    "expires": "Ce lien fonctionne jusqu'à {{time}}.",
+    "gone": "Ce lien n'est plus disponible",
+    "goneHint": "Les liens de trajet sont désactivés peu après la fin du trajet."
   }
 }
