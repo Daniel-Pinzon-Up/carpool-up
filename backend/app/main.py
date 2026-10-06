@@ -23,12 +23,14 @@ from app.modules.live import router as live
 from app.modules.notifications import router as notifications
 from app.modules.pico_placa import router as pico_placa
 from app.modules.places import router as places
+from app.modules.ratings import router as ratings
 from app.modules.routing import router as routing
 from app.modules.safety import router as safety
 from app.modules.search import router as search
 from app.modules.semesters import router as semesters
 from app.modules.series import router as series
 from app.modules.settings import router as settings_module
+from app.modules.stats import router as stats
 from app.modules.tickets import router as tickets
 from app.modules.trips import router as trips
 from app.modules.users import router as users
@@ -89,6 +91,8 @@ def create_app() -> FastAPI:
         waitlist.router,
         chat.router,
         tickets.router,
+        ratings.router,
+        stats.router,
         safety.router,
         safety.public_router,
         settings_module.router,
