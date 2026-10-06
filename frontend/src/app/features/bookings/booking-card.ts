@@ -75,6 +75,9 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
               @if (b().passenger.program) {
                 {{ b().passenger.program }} ·
               }
+              @if (b().passenger.rating !== null) {
+                {{ 'bookings.card.rating' | transloco: { rating: b().passenger.rating } }} ·
+              }
               {{ 'bookings.card.trips' | transloco: { count: b().passenger.trips_as_passenger } }}
             </p>
           </div>

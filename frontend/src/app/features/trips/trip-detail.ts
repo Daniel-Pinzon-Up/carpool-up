@@ -19,6 +19,7 @@ import {
   LucideRoute,
   LucideTriangleAlert,
   LucideUsers,
+  LucideStar,
   LucideWallet,
   LucideX,
 } from '@lucide/angular';
@@ -48,6 +49,7 @@ import { TripPassengers } from '../bookings/trip-passengers';
 import { LiveEvent, RealtimeService } from '../../core/ws/realtime.service';
 import { LifecycleApi, LiveLocation } from './lifecycle.api';
 import { MyTicket, SafetyActions, TripControl } from './trip-live';
+import { RatingSummary, RatingsApi } from '../ratings/ratings.api';
 import { SearchResult } from '../search/search.api';
 import { Trip, TripsApi, pamplonaTime } from './trips.api';
 
@@ -76,6 +78,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     LucideRoute,
     LucideTriangleAlert,
     LucideUsers,
+    LucideStar,
     LucideWallet,
     LucideX,
   ],
@@ -132,6 +135,12 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
         }
         @if (!isOwner() && t.status === 'completed' && t.my_booking?.status === 'completed') {
           <cp-my-ticket [tripId]="t.id" />
+        }
+        @if (canRate()) {
+          <a cp-button variant="secondary" class="self-start" [routerLink]="['/calificar', t.id]">
+            <svg lucideStar class="size-4" aria-hidden="true"></svg>
+            {{ 'ratings.rateTrip' | transloco }}
+          </a>
         }
         @if (driverAt(); as at) {
           <p class="text-sm text-muted" role="status">
@@ -259,7 +268,20 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
               </div>
               <div class="col-span-2">
                 <dt class="text-muted">{{ 'trips.driver' | transloco }}</dt>
-                <dd class="font-semibold">{{ t.driver.full_name }}</dd>
+                <dd class="font-semibold">
+                  {{ t.driver.full_name }}
+                  @if (driverRating(); as r) {
+                    <span class="font-normal text-muted">
+                      ·
+                      {{
+                        r.average !== null
+                          ? ('trips.driverRating'
+                            | transloco: { rating: r.average, count: r.count })
+                          : ('search.card.newDriver' | transloco)
+                      }}
+                    </span>
+                  }
+                </dd>
               </div>
               @if (!isOwner() && t.passengers.length) {
                 <div class="col-span-2">
@@ -324,6 +346,15 @@ export default class TripDetail {
   /** Lugares que el pasajero busco (llegan junto con el resultado de la busqueda). */
   protected readonly searched = signal<SearchedPlaces | null>(null);
   protected readonly isOwner = computed(() => this.trip()?.driver.id === this.auth.user()?.id);
+  /** Reputacion del conductor (promedio y numero de calificaciones). */
+  protected readonly driverRating = signal<RatingSummary | null>(null);
+  private readonly ratings = inject(RatingsApi);
+  protected readonly canRate = computed(() => {
+    const trip = this.trip();
+    return (
+      trip?.status === 'completed' && (this.isOwner() || trip.my_booking?.status === 'completed')
+    );
+  });
   /** Ultima ubicacion del conductor (viaje en curso). */
   protected readonly driverAt = signal<LiveLocation | null>(null);
   private readonly lifecycle = inject(LifecycleApi);
@@ -434,6 +465,10 @@ export default class TripDetail {
     try {
       const trip = await this.api.trip(id);
       this.trip.set(trip);
+      void this.ratings.summary(trip.driver.id).then(
+        (summary) => this.driverRating.set(summary),
+        () => this.driverRating.set(null),
+      );
       if (trip.status === 'in_progress' && this.participant()) {
         this.driverAt.set(await this.lifecycle.location(id).catch(() => null));
       }

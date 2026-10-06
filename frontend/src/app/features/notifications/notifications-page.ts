@@ -15,6 +15,7 @@ import {
   LucideInbox,
   LucidePlay,
   LucideSiren,
+  LucideStar,
   LucideUserX,
   LucideMessageCircle,
   LucideRoute,
@@ -64,6 +65,9 @@ const ICONS: Record<string, LucideIcon> = {
   passenger_no_show: LucideUserX,
   booking_suspended: LucideUserX,
   emergency_alert: LucideSiren,
+  rating_pending: LucideStar,
+  rating_reminder: LucideStar,
+  rating_received: LucideStar,
 };
 
 /** A donde lleva cada aviso al abrirlo. */
@@ -216,6 +220,13 @@ export default class NotificationsPage {
     if (fixed) return fixed;
     const { trip_id: trip, series_id: series, conversation_id: chat } = item.payload;
     if (typeof chat === 'string') return `/mensajes/${chat}`;
+    if (
+      (item.kind === 'rating_pending' || item.kind === 'rating_reminder') &&
+      typeof trip === 'string'
+    ) {
+      return `/calificar/${trip}`;
+    }
+    if (item.kind === 'rating_received') return '/perfil';
     if (typeof trip === 'string') return `/viajes/${trip}`;
     if (typeof series === 'string') return `/series/${series}`;
     return '/notificaciones';

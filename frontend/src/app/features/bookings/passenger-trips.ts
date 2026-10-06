@@ -22,7 +22,8 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
 import { formatDeparture, formatTime } from '../trips/trip-status';
-import { LifecycleApi, Ticket } from '../trips/lifecycle.api';
+import { PassengerHistoryItem } from '../ratings/history-items';
+import { PassengerHistoryEntry, RatingsApi } from '../ratings/ratings.api';
 import { BookingActions } from './booking-actions';
 import { BookingCard } from './booking-card';
 import {
@@ -43,6 +44,7 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
     RouterLink,
     TranslocoPipe,
     BookingCard,
+    PassengerHistoryItem,
     EmptyState,
     GlassButton,
     GlassCard,
@@ -81,22 +83,32 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
           @for (row of [1, 2]; track row) {
             <cp-glass-card><cp-skeleton [lines]="3" /></cp-glass-card>
           }
-        } @else if (tab() === 'upcoming' || tab() === 'history') {
+        } @else if (tab() === 'history') {
+          @for (entry of history(); track entry.booking_id) {
+            <cp-passenger-history-item [entry]="entry" />
+          } @empty {
+            <cp-empty-state
+              [icon]="emptyIcon"
+              [title]="'bookings.empty.history' | transloco"
+              [description]="'bookings.empty.hint' | transloco"
+              image="brand/car.webp"
+            />
+          }
+          @if (nextCursor()) {
+            <button
+              cp-button
+              variant="secondary"
+              type="button"
+              class="self-center"
+              (click)="more()"
+            >
+              {{ 'trips.more' | transloco }}
+            </button>
+          }
+        } @else if (tab() === 'upcoming') {
           @for (booking of bookings(); track booking.id) {
             <cp-booking-card [booking]="booking">
-              @if (tickets()[booking.id]; as ticket) {
-                <p class="text-sm">
-                  <span class="font-semibold">{{ 'lifecycle.tickets.mine' | transloco }}:</span>
-                  <span class="font-mono">{{ ticket.code }}</span> ·
-                  {{
-                    (ticket.paid_confirmed
-                      ? 'lifecycle.tickets.confirmed'
-                      : 'lifecycle.tickets.pending'
-                    ) | transloco
-                  }}
-                </p>
-              }
-              @if (tab() === 'upcoming' && cancellable(booking)) {
+              @if (cancellable(booking)) {
                 <button cp-button variant="danger" type="button" (click)="cancel(booking)">
                   {{ 'bookings.cancel.action' | transloco }}
                 </button>
@@ -246,9 +258,9 @@ export default class PassengerTrips {
   protected readonly nextCursor = signal<string | null>(null);
   protected readonly subscriptions = signal<Subscription[]>([]);
   protected readonly waitlist = signal<WaitlistEntry[]>([]);
-  /** Tickets por reserva, para mostrarlos en el historial. */
-  protected readonly tickets = signal<Record<string, Ticket>>({});
-  private readonly lifecycle = inject(LifecycleApi);
+  /** Viajes pasados con ticket y estado de la calificacion. */
+  protected readonly history = signal<PassengerHistoryEntry[]>([]);
+  private readonly ratings = inject(RatingsApi);
 
   constructor() {
     effect(() => {
@@ -270,14 +282,14 @@ export default class PassengerTrips {
         this.subscriptions.set(await this.api.mySubscriptions());
       } else if (tab === 'waitlist') {
         this.waitlist.set(await this.api.myWaitlist());
+      } else if (tab === 'history') {
+        const page = await this.ratings.passengerHistory();
+        this.history.set(page.items);
+        this.nextCursor.set(page.next_cursor);
       } else {
         const page = await this.api.mine(tab);
         this.bookings.set(page.items);
         this.nextCursor.set(page.next_cursor);
-        if (tab === 'history') {
-          const tickets = await this.lifecycle.tickets('passenger').catch(() => []);
-          this.tickets.set(Object.fromEntries(tickets.map((t) => [t.booking_id, t])));
-        }
       }
     } catch (error) {
       this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
@@ -290,6 +302,12 @@ export default class PassengerTrips {
     const tab = this.tab();
     if (tab !== 'upcoming' && tab !== 'history') return;
     try {
+      if (tab === 'history') {
+        const older = await this.ratings.passengerHistory(this.nextCursor());
+        this.history.update((list) => [...list, ...older.items]);
+        this.nextCursor.set(older.next_cursor);
+        return;
+      }
       const page = await this.api.mine(tab, this.nextCursor());
       this.bookings.update((list) => [...list, ...page.items]);
       this.nextCursor.set(page.next_cursor);

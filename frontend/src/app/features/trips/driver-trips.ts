@@ -16,6 +16,8 @@ import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassTabs, TabItem } from '../../shared/ui/glass-tabs';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
+import { DriverHistoryItem } from '../ratings/history-items';
+import { DriverHistoryEntry, RatingsApi } from '../ratings/ratings.api';
 import { TripCard } from './trip-card';
 import { SERIES_STATUS_TONE, formatDeparture } from './trip-status';
 import { SeriesSummary, TripSummary, TripsApi } from './trips.api';
@@ -36,6 +38,7 @@ type Tab = 'upcoming' | 'series' | 'history';
     Skeleton,
     StatusBadge,
     TripCard,
+    DriverHistoryItem,
     LucideArrowRight,
     LucideInbox,
     LucidePlus,
@@ -128,6 +131,17 @@ type Tab = 'upcoming' | 'series' | 'history';
               [icon]="carIcon"
             />
           }
+        } @else if (tab() === 'history') {
+          @for (entry of history(); track entry.trip_id) {
+            <cp-driver-history-item [entry]="entry" />
+          } @empty {
+            <cp-empty-state
+              image="brand/car.webp"
+              [title]="'trips.empty.history' | transloco"
+              [description]="'trips.empty.hint' | transloco"
+              [icon]="carIcon"
+            />
+          }
         } @else {
           @for (trip of trips(); track trip.id) {
             <cp-trip-card [trip]="trip" />
@@ -164,6 +178,9 @@ export default class DriverTrips {
   protected readonly carIcon = LucideCarFront;
   protected readonly tab = signal<Tab>('upcoming');
   protected readonly trips = signal<TripSummary[]>([]);
+  /** Viajes pasados con pasajeros, aportes y calificaciones pendientes. */
+  protected readonly history = signal<DriverHistoryEntry[]>([]);
+  private readonly ratings = inject(RatingsApi);
   protected readonly series = signal<SeriesSummary[]>([]);
   protected readonly cursor = signal<string | null>(null);
   protected readonly loading = signal(true);
@@ -187,6 +204,10 @@ export default class DriverTrips {
       const tab = this.tab();
       if (tab === 'series') {
         this.series.set(await this.api.mySeries());
+      } else if (tab === 'history') {
+        const page = await this.ratings.driverHistory();
+        this.history.set(page.items);
+        this.cursor.set(page.next_cursor);
       } else {
         const page = await this.api.myTrips(tab);
         this.trips.set(page.items);
@@ -204,6 +225,12 @@ export default class DriverTrips {
     if (tab === 'series' || !this.cursor()) return;
     this.loadingMore.set(true);
     try {
+      if (tab === 'history') {
+        const older = await this.ratings.driverHistory(this.cursor());
+        this.history.update((list) => [...list, ...older.items]);
+        this.cursor.set(older.next_cursor);
+        return;
+      }
       const page = await this.api.myTrips(tab, this.cursor());
       this.trips.update((list) => [...list, ...page.items]);
       this.cursor.set(page.next_cursor);
