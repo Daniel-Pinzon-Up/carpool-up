@@ -22,6 +22,7 @@ import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
 import { formatDeparture, formatTime } from '../trips/trip-status';
+import { LifecycleApi, Ticket } from '../trips/lifecycle.api';
 import { BookingActions } from './booking-actions';
 import { BookingCard } from './booking-card';
 import {
@@ -83,6 +84,18 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
         } @else if (tab() === 'upcoming' || tab() === 'history') {
           @for (booking of bookings(); track booking.id) {
             <cp-booking-card [booking]="booking">
+              @if (tickets()[booking.id]; as ticket) {
+                <p class="text-sm">
+                  <span class="font-semibold">{{ 'lifecycle.tickets.mine' | transloco }}:</span>
+                  <span class="font-mono">{{ ticket.code }}</span> ·
+                  {{
+                    (ticket.paid_confirmed
+                      ? 'lifecycle.tickets.confirmed'
+                      : 'lifecycle.tickets.pending'
+                    ) | transloco
+                  }}
+                </p>
+              }
               @if (tab() === 'upcoming' && cancellable(booking)) {
                 <button cp-button variant="danger" type="button" (click)="cancel(booking)">
                   {{ 'bookings.cancel.action' | transloco }}
@@ -233,6 +246,9 @@ export default class PassengerTrips {
   protected readonly nextCursor = signal<string | null>(null);
   protected readonly subscriptions = signal<Subscription[]>([]);
   protected readonly waitlist = signal<WaitlistEntry[]>([]);
+  /** Tickets por reserva, para mostrarlos en el historial. */
+  protected readonly tickets = signal<Record<string, Ticket>>({});
+  private readonly lifecycle = inject(LifecycleApi);
 
   constructor() {
     effect(() => {
@@ -258,6 +274,10 @@ export default class PassengerTrips {
         const page = await this.api.mine(tab);
         this.bookings.set(page.items);
         this.nextCursor.set(page.next_cursor);
+        if (tab === 'history') {
+          const tickets = await this.lifecycle.tickets('passenger').catch(() => []);
+          this.tickets.set(Object.fromEntries(tickets.map((t) => [t.booking_id, t])));
+        }
       }
     } catch (error) {
       this.toast.show(apiErrorMessage(this.transloco, error), 'danger');

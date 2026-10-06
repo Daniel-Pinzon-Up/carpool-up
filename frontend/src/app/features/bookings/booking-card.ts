@@ -54,9 +54,16 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
             <span class="truncate">{{ b().trip.destination }}</span>
           </p>
         </div>
-        <cp-status-badge [variant]="tone()">{{
-          'bookings.status.' + b().status | transloco
-        }}</cp-status-badge>
+        <span class="flex flex-wrap gap-1.5">
+          @if (b().trip.status === 'in_progress') {
+            <cp-status-badge variant="pending">{{
+              'trips.status.in_progress' | transloco
+            }}</cp-status-badge>
+          }
+          <cp-status-badge [variant]="tone()">{{
+            'bookings.status.' + b().status | transloco
+          }}</cp-status-badge>
+        </span>
       </div>
 
       @if (view() === 'driver') {

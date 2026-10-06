@@ -45,6 +45,9 @@ import {
 import { TRIP_STATUS_TONE, formatDeparture, formatTime } from './trip-status';
 import { BookingPanel, SearchedPlaces } from '../bookings/booking-panel';
 import { TripPassengers } from '../bookings/trip-passengers';
+import { LiveEvent, RealtimeService } from '../../core/ws/realtime.service';
+import { LifecycleApi, LiveLocation } from './lifecycle.api';
+import { MyTicket, SafetyActions, TripControl } from './trip-live';
 import { SearchResult } from '../search/search.api';
 import { Trip, TripsApi, pamplonaTime } from './trips.api';
 
@@ -57,6 +60,9 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     TranslocoPipe,
     BookingPanel,
     TripPassengers,
+    MyTicket,
+    SafetyActions,
+    TripControl,
     GlassButton,
     GlassCard,
     MapView,
@@ -116,6 +122,20 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
           <p class="glass-1 !rounded-2xl p-4">
             <span class="font-semibold">{{ 'trips.cancelReason' | transloco }}:</span>
             {{ t.cancel_reason }}
+          </p>
+        }
+        @if (isOwner()) {
+          <cp-trip-control [trip]="t" (changed)="reload()" />
+        }
+        @if (participant() && (t.status === 'scheduled' || t.status === 'in_progress')) {
+          <cp-safety-actions [tripId]="t.id" />
+        }
+        @if (!isOwner() && t.status === 'completed' && t.my_booking?.status === 'completed') {
+          <cp-my-ticket [tripId]="t.id" />
+        }
+        @if (driverAt(); as at) {
+          <p class="text-sm text-muted" role="status">
+            {{ 'lifecycle.location.seen' | transloco: { time: time(at.at) } }}
           </p>
         }
         @if (t.chat_id) {
@@ -278,7 +298,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
         </div>
 
         @if (isOwner()) {
-          <cp-trip-passengers [tripId]="t.id" (changed)="reload()" />
+          <cp-trip-passengers [tripId]="t.id" [status]="t.status" (changed)="reload()" />
         }
       } @else {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
@@ -304,6 +324,15 @@ export default class TripDetail {
   /** Lugares que el pasajero busco (llegan junto con el resultado de la busqueda). */
   protected readonly searched = signal<SearchedPlaces | null>(null);
   protected readonly isOwner = computed(() => this.trip()?.driver.id === this.auth.user()?.id);
+  /** Ultima ubicacion del conductor (viaje en curso). */
+  protected readonly driverAt = signal<LiveLocation | null>(null);
+  private readonly lifecycle = inject(LifecycleApi);
+  /** Conductor o pasajero que viaja: comparte el viaje y tiene boton de emergencia. */
+  protected readonly participant = computed(() => {
+    const trip = this.trip();
+    const status = trip?.my_booking?.status;
+    return this.isOwner() || status === 'accepted' || status === 'cancel_requested';
+  });
   protected readonly isPassenger = computed(
     () => this.auth.user()?.role === 'passenger' && !this.isOwner(),
   );
@@ -337,9 +366,18 @@ export default class TripDetail {
       kind: stop.kind,
       label: stop.name,
     }));
+    const label = (key: string) => this.transloco.translate(key);
+    const at = this.driverAt();
+    if (at) {
+      stops.push({
+        lat: at.lat,
+        lon: at.lon,
+        kind: 'vehicle',
+        label: label('lifecycle.location.marker'),
+      });
+    }
     const match = this.match();
     if (!match) return stops;
-    const label = (key: string) => this.transloco.translate(key);
     return [
       ...stops,
       {
@@ -362,6 +400,19 @@ export default class TripDetail {
       const id = this.id();
       untracked(() => void this.load(id));
     });
+    // Ubicacion del conductor en vivo mientras el viaje esta en curso.
+    inject(RealtimeService)
+      .on<LiveEvent & LiveLocation & { trip_id: string }>('location', 'trip.finished')
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        if (event.trip_id !== this.id()) return;
+        if (event.type === 'trip.finished') {
+          this.driverAt.set(null);
+          void this.reload();
+        } else {
+          this.driverAt.set(event);
+        }
+      });
     // Un aviso sobre este viaje (aceptacion, cambio, cancelacion...) lo actualiza en vivo.
     inject(NotificationsStore)
       .incoming.pipe(takeUntilDestroyed())
@@ -379,8 +430,13 @@ export default class TripDetail {
     const fromSearch = state.match?.trip_id === id;
     this.match.set(fromSearch ? (state.match ?? null) : null);
     this.searched.set(fromSearch ? (state.places ?? null) : null);
+    this.driverAt.set(null);
     try {
-      this.trip.set(await this.api.trip(id));
+      const trip = await this.api.trip(id);
+      this.trip.set(trip);
+      if (trip.status === 'in_progress' && this.participant()) {
+        this.driverAt.set(await this.lifecycle.location(id).catch(() => null));
+      }
     } catch (error) {
       this.error.set(apiErrorMessage(this.transloco, error));
     }
