@@ -77,6 +77,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/legal/legal-page'),
     title: 'legal.pageTitle',
   },
+  {
+    // Enlace compartido de un viaje: publico y de solo lectura.
+    path: 'compartido/:token',
+    loadComponent: () => import('./features/share/shared-trip'),
+    title: 'shared.title',
+  },
 
   // Cualquier sesion, aunque la cuenta no este activa
   {

@@ -11,7 +11,11 @@ import {
   LucideCircleCheck,
   LucideCircleX,
   LucideHourglass,
+  LucideFlagTriangleRight,
   LucideInbox,
+  LucidePlay,
+  LucideSiren,
+  LucideUserX,
   LucideMessageCircle,
   LucideRoute,
   LucideTicket,
@@ -52,6 +56,14 @@ const ICONS: Record<string, LucideIcon> = {
   trip_changed: LucideRoute,
   waitlist_offer: LucideHourglass,
   message_new: LucideMessageCircle,
+  trip_reminder: LucideHourglass,
+  trip_reminder_driver: LucideHourglass,
+  trip_started: LucidePlay,
+  trip_finished: LucideFlagTriangleRight,
+  trip_not_held: LucideCalendarX,
+  passenger_no_show: LucideUserX,
+  booking_suspended: LucideUserX,
+  emergency_alert: LucideSiren,
 };
 
 /** A donde lleva cada aviso al abrirlo. */
@@ -70,6 +82,8 @@ const LINKS: Record<string, string> = {
   subscription_rejected: '/mis-viajes',
   subscription_expired: '/mis-viajes',
   subscription_ended: '/mis-viajes',
+  booking_suspended: '/mis-viajes',
+  emergency_alert: '/admin/emergencias',
 };
 
 /** Bandeja de avisos; los nuevos llegan en vivo y se agregan arriba. */
