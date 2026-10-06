@@ -1464,7 +1464,7 @@
       "bookings": "Réservations",
       "noBookings": "Aucune réservation.",
       "cancel": "Annuler le trajet",
-      "cancelMessage": "Le conducteur et les passagers sont prévenus avec votre motif. Cela ne compte pas dans la réputation du conducteur.",
+      "cancelMessage": "Le conducteur et les passagers sont prévenus avec votre motif. Cela compte comme une annulation dans les statistiques du conducteur.",
       "cancelled": "Trajet annulé.",
       "viewChat": "Voir la discussion",
       "chatWarning": "N’ouvrez la discussion que si c’est nécessaire pour traiter un signalement ou une urgence. Ce sera enregistré dans l’audit.",

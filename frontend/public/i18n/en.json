@@ -1464,7 +1464,7 @@
       "bookings": "Bookings",
       "noBookings": "No bookings.",
       "cancel": "Cancel trip",
-      "cancelMessage": "The driver and passengers are notified with your reason. It does not count against the driver’s reputation.",
+      "cancelMessage": "The driver and passengers are notified with your reason. It counts as a cancellation in the driver’s stats.",
       "cancelled": "Trip cancelled.",
       "viewChat": "View chat",
       "chatWarning": "Open the chat only if needed to handle a report or an emergency. It will be recorded in the audit log.",

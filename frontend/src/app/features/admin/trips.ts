@@ -307,7 +307,7 @@ export default class AdminTrips {
         </cp-glass-card>
 
         <div class="flex flex-wrap gap-2">
-          @if (t.status === 'scheduled' || t.status === 'in_progress') {
+          @if (t.status === 'scheduled' && !t.deleted) {
             <button cp-button variant="danger" type="button" (click)="cancel()">
               <svg lucideCalendarX class="size-4" aria-hidden="true"></svg>
               {{ 'admin.trips.cancel' | transloco }}

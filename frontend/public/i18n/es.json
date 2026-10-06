@@ -1464,7 +1464,7 @@
       "bookings": "Reservas",
       "noBookings": "Sin reservas.",
       "cancel": "Cancelar viaje",
-      "cancelMessage": "Se avisa al conductor y a los pasajeros con tu motivo. No cuenta en la reputación del conductor.",
+      "cancelMessage": "Se avisa al conductor y a los pasajeros con tu motivo. Cuenta como cancelación en las estadísticas del conductor.",
       "cancelled": "Viaje cancelado.",
       "viewChat": "Ver el chat",
       "chatWarning": "Abre el chat solo si hace falta para atender un reporte o una emergencia. Quedará en la auditoría.",
