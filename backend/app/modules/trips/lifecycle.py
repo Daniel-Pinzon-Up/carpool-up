@@ -23,6 +23,7 @@ from app.modules.pico_placa.service import PicoPlacaService
 from app.modules.safety.location import forget_location, location_channel
 from app.modules.safety.models import ShareLink
 from app.modules.settings.service import SettingsService
+from app.modules.stats.summary import refresh_user_stats
 from app.modules.suspensions.models import Suspension
 from app.modules.suspensions.service import active_suspension
 from app.modules.tickets.service import issue_ticket
@@ -168,6 +169,7 @@ class TripLifecycle:
             {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)},
         )
         await self.session.flush()
+        await refresh_user_stats(self.session, [booking.passenger_id])
         await self.sanction(booking.passenger_id)
         await self.session.commit()
         return booking
@@ -236,6 +238,16 @@ class TripLifecycle:
                 {"trip_id": str(trip.id), "ticket_code": ticket.code},
             )
         await close_trip_chats(self.session, trip)
+        await self.session.flush()
+        await refresh_user_stats(
+            self.session, [trip.driver_id, *(b.passenger_id for b in bookings)]
+        )
+        # Se abren las calificaciones: el conductor califica a cada pasajero y viceversa.
+        if bookings:
+            payload = {"trip_id": str(trip.id)}
+            self.notifications.notify(trip.driver_id, Kind.RATING_PENDING, payload)
+            for booking in bookings:
+                self.notifications.notify(booking.passenger_id, Kind.RATING_PENDING, payload)
         extra = int(await self.settings.get("share_link_extra_minutes"))
         links = await self.session.scalars(select(ShareLink).where(ShareLink.trip_id == trip.id))
         for link in links.all():

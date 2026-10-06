@@ -19,6 +19,7 @@ from app.modules.semesters.models import Semester
 from app.modules.semesters.repository import SemesterRepository
 from app.modules.series.models import SeriesStop, TripSeries
 from app.modules.settings.service import SettingsService
+from app.modules.stats.summary import refresh_user_stats
 from app.modules.trips.models import Trip
 from app.modules.trips.planning import (
     PlannedRoute,
@@ -476,6 +477,8 @@ class SeriesService:
                 )
         await self.close_subscriptions(series, reason)
         await close_series_chats(self.session, series.id)
+        await self.session.flush()
+        await refresh_user_stats(self.session, [driver.id])
         await self.session.commit()
         return await self.reload(series.id)
 

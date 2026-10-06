@@ -31,7 +31,7 @@ from app.modules.bookings.service import (
     cancel_rules,
     check_compatibility,
     passenger_card,
-    passenger_trip_counts,
+    passenger_stats,
     require_can_book,
     resolve_places,
 )
@@ -98,7 +98,7 @@ async def subscription_outs(
 ) -> list[SubscriptionOut]:
     if not subscriptions:
         return []
-    counts = await passenger_trip_counts(session, {s.passenger_id for s in subscriptions})
+    counts = await passenger_stats(session, {s.passenger_id for s in subscriptions})
     booked_rows = (
         await session.execute(
             select(Booking.subscription_id, Trip.departs_at)
@@ -124,7 +124,7 @@ async def subscription_outs(
             SubscriptionOut(
                 id=sub.id,
                 series=series_brief(sub.series),
-                passenger=passenger_card(sub.passenger, counts.get(sub.passenger_id, 0)),
+                passenger=passenger_card(sub.passenger, counts.get(sub.passenger_id)),
                 from_date=sub.from_date,
                 to_date=sub.to_date,
                 seats=sub.seats,

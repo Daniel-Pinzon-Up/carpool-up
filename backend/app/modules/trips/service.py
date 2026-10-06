@@ -22,6 +22,7 @@ from app.modules.notifications.service import Kind, NotificationService
 from app.modules.pico_placa.service import PicoPlacaService
 from app.modules.routing.osrm import RouteProvider
 from app.modules.settings.service import SettingsService
+from app.modules.stats.summary import refresh_user_stats
 from app.modules.trips.models import Trip, TripStop
 from app.modules.trips.planning import TripPlanner, local_date
 from app.modules.trips.schemas import (
@@ -389,6 +390,8 @@ class TripService:
             )
         mark_cancelled(trip, reason)
         await end_trip_bookings(self.session, trip, BookingStatus.CANCELLED_BY_DRIVER, reason)
+        await self.session.flush()
+        await refresh_user_stats(self.session, [driver.id])
         await self.session.commit()
         return await self.reload(trip.id)
 

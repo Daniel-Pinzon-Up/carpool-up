@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
@@ -42,6 +42,8 @@ from app.modules.routing.schemas import RoutePoint
 from app.modules.routing.service import resolve_points
 from app.modules.search.service import Point
 from app.modules.settings.service import SettingsService
+from app.modules.stats.models import UserStats
+from app.modules.stats.summary import stats_for
 from app.modules.suspensions.service import active_suspension
 from app.modules.trips.models import Trip
 from app.modules.trips.schemas import ALLOWED, NOT_ALLOWED, DriverOut, VehicleSummary
@@ -201,26 +203,19 @@ def trip_brief(trip: Trip, viewer: User, booking: Booking | None = None) -> Trip
     )
 
 
-async def passenger_trip_counts(
+async def passenger_stats(
     session: AsyncSession, passenger_ids: set[uuid.UUID]
-) -> dict[uuid.UUID, int]:
-    if not passenger_ids:
-        return {}
-    rows = await session.execute(
-        select(Booking.passenger_id, func.count())
-        .where(Booking.passenger_id.in_(passenger_ids), Booking.status == BookingStatus.COMPLETED)
-        .group_by(Booking.passenger_id)
-    )
-    return {passenger_id: int(count) for passenger_id, count in rows}
+) -> dict[uuid.UUID, UserStats]:
+    return await stats_for(session, passenger_ids)
 
 
-def passenger_card(user: User, trips_done: int) -> PassengerCard:
+def passenger_card(user: User, stats: UserStats | None) -> PassengerCard:
     return PassengerCard(
         id=user.id,
         full_name=user.full_name,
         program=user.program,
-        rating=None,
-        trips_as_passenger=trips_done,
+        rating=stats.rating_avg if stats else None,
+        trips_as_passenger=stats.trips_as_passenger if stats else 0,
     )
 
 
@@ -245,7 +240,7 @@ async def booking_outs(
 ) -> list[BookingOut]:
     if not bookings:
         return []
-    counts = await passenger_trip_counts(session, {b.passenger_id for b in bookings})
+    counts = await passenger_stats(session, {b.passenger_id for b in bookings})
     requests = (
         await session.scalars(
             select(CancellationRequest)
@@ -265,7 +260,7 @@ async def booking_outs(
             BookingOut(
                 id=booking.id,
                 trip=trip_brief(trip, viewer, booking),
-                passenger=passenger_card(booking.passenger, counts.get(booking.passenger_id, 0)),
+                passenger=passenger_card(booking.passenger, counts.get(booking.passenger_id)),
                 subscription_id=booking.subscription_id,
                 seats=booking.seats,
                 amount=booking.seats * trip.price_per_seat,

@@ -8,7 +8,6 @@ horaria, mejor calificacion del conductor (paso 11) y salida mas temprana.
 """
 
 import math
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -33,6 +32,8 @@ from app.modules.search.schemas import (
     VehicleCard,
 )
 from app.modules.settings.service import SettingsService
+from app.modules.stats.models import UserStats
+from app.modules.stats.summary import stats_for
 from app.modules.trips.models import Trip, TripRule, TripStop
 from app.modules.trips.schemas import ALLOWED, NOT_ALLOWED, RuleOut
 from app.modules.users.models import User
@@ -144,13 +145,20 @@ class SearchService:
                 func.ST_DWithin(route_geo, cast(dropoff_geom, Geography), radius),
                 pickup_fraction < dropoff_fraction,
             )
-            .order_by(pickup_distance, time_gap, Trip.departs_at, Trip.id)
+            .outerjoin(UserStats, UserStats.user_id == Trip.driver_id)
+            .order_by(
+                pickup_distance,
+                time_gap,
+                UserStats.rating_avg.desc().nulls_last(),
+                Trip.departs_at,
+                Trip.id,
+            )
             .limit(MAX_RESULTS)
         )
         query = rules_filter(query, prefs, viewer)
         rows = (await self.session.execute(query)).all()
 
-        counts = await self.driver_trip_counts({row.Trip.driver_id for row in rows})
+        stats = await stats_for(self.session, {row.Trip.driver_id for row in rows})
         results = []
         for row in rows:
             trip: Trip = row.Trip
@@ -168,9 +176,7 @@ class SearchService:
             if board.eta >= alight.eta and board.kind == alight.kind == "stop":
                 continue  # Misma parada para subir y bajar: no hay trayecto.
             results.append(
-                self.result(
-                    trip, board, alight, target, counts.get(trip.driver_id, 0), row.free_seats
-                )
+                self.result(trip, board, alight, target, stats.get(trip.driver_id), row.free_seats)
             )
         return results
 
@@ -209,23 +215,13 @@ class SearchService:
             walk_m=round(walk_m(wanted, on_route)),
         )
 
-    async def driver_trip_counts(self, driver_ids: set[uuid.UUID]) -> dict[uuid.UUID, int]:
-        if not driver_ids:
-            return {}
-        rows = await self.session.execute(
-            select(Trip.driver_id, func.count())
-            .where(Trip.driver_id.in_(driver_ids), Trip.status == TripStatus.COMPLETED)
-            .group_by(Trip.driver_id)
-        )
-        return {driver_id: count for driver_id, count in rows}
-
     @staticmethod
     def result(
         trip: Trip,
         board: MatchPoint,
         alight: MatchPoint,
         target: datetime,
-        trips_done: int,
+        driver_stats: UserStats | None,
         free_seats: int,
     ) -> SearchResult:
         stops: list[TripStop] = trip.stops
@@ -245,8 +241,8 @@ class SearchService:
             driver=DriverCard(
                 id=trip.driver.id,
                 full_name=trip.driver.full_name,
-                rating=None,
-                trips_as_driver=trips_done,
+                rating=driver_stats.rating_avg if driver_stats else None,
+                trips_as_driver=driver_stats.trips_as_driver if driver_stats else 0,
             ),
             vehicle=VehicleCard(
                 vehicle_id=trip.vehicle.id,
