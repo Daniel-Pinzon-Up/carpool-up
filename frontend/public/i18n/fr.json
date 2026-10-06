@@ -199,7 +199,12 @@
     "TRIP_NOT_SHAREABLE": "Seuls les trajets à venir ou en cours peuvent être partagés.",
     "TRIP_NOT_ACTIVE": "Le trajet n'est pas actif.",
     "TRUSTED_CONTACTS_LIMIT": "Vous avez déjà les {{max}} contacts autorisés.",
-    "EMERGENCY_HANDLED": "Cette urgence a déjà été traitée."
+    "EMERGENCY_HANDLED": "Cette urgence a déjà été traitée.",
+    "RATING_NOT_OPEN": "Vous pourrez évaluer une fois le trajet terminé.",
+    "RATING_WINDOW_CLOSED": "Le délai de {{days}} jours pour évaluer ce trajet est passé.",
+    "RATING_TARGET_INVALID": "Vous ne pouvez pas évaluer cette personne pour ce trajet.",
+    "RATING_CRITERIA_INVALID": "Notez tous les critères.",
+    "RATING_EXISTS": "Vous avez déjà évalué cette personne pour ce trajet."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -643,7 +648,10 @@
       "trip_not_held": "Votre trajet n'a pas été démarré à temps et n'a pas eu lieu.",
       "passenger_no_show": "Le conducteur a indiqué que vous ne vous êtes pas présenté.",
       "booking_suspended": "Vos réservations sont suspendues pendant {{days}} jours pour absences répétées.",
-      "emergency_alert": "Urgence signalée par {{user_name}}. Consultez-la maintenant."
+      "emergency_alert": "Urgence signalée par {{user_name}}. Consultez-la maintenant.",
+      "rating_pending": "Votre trajet est terminé. Évaluez les personnes qui ont voyagé avec vous.",
+      "rating_reminder": "Demain se termine le délai pour évaluer votre trajet.",
+      "rating_received": "Vous avez reçu une nouvelle évaluation."
     }
   },
   "vehicles": {
@@ -970,7 +978,8 @@
     },
     "yourTrip": "Votre prise en charge et dépose",
     "seatsLeft": "{{free}} sur {{total}} libres",
-    "pendingRequests": "À décider : {{count}}"
+    "pendingRequests": "À décider : {{count}}",
+    "driverRating": "{{rating}} sur 5 ({{count}})"
   },
   "search": {
     "title": "Chercher un trajet",
@@ -1099,7 +1108,8 @@
       "fromSubscription": "Série",
       "paymentNote": "Infos pour la participation",
       "cancelReason": "Motif de l'annulation",
-      "tripChanged": "Le conducteur a modifié le trajet : vous pouvez annuler sans pénalité."
+      "tripChanged": "Le conducteur a modifié le trajet : vous pouvez annuler sans pénalité.",
+      "rating": "{{rating}} sur 5"
     },
     "passengers": {
       "title": "Passagers",
@@ -1289,5 +1299,64 @@
     "expires": "Ce lien fonctionne jusqu'à {{time}}.",
     "gone": "Ce lien n'est plus disponible",
     "goneHint": "Les liens de trajet sont désactivés peu après la fin du trajet."
+  },
+  "ratings": {
+    "title": "Évaluer",
+    "subtitle": "Votre avis aide la communauté à mieux voyager. Notez chaque critère de 1 à 5 étoiles.",
+    "for": {
+      "driver": "Conducteur : {{name}}",
+      "passenger": "Passager : {{name}}"
+    },
+    "closes": "Vous pouvez évaluer jusqu'au {{when}}.",
+    "criteriaLegend": "Critères",
+    "comment": "Commentaire (facultatif)",
+    "commentHint": "Jusqu'à {{max}} caractères. La personne le verra sans votre nom.",
+    "missing": "Notez tous les critères.",
+    "send": "Envoyer l'évaluation",
+    "thanks": "Merci pour votre évaluation.",
+    "none": "Aucune évaluation en attente",
+    "allDone": "C'est fait, vous avez tout évalué",
+    "noneHint": "Après chaque trajet, vous avez 7 jours pour évaluer.",
+    "rateDriver": "Évaluer le conducteur",
+    "ratePassengers": "Évaluer les passagers ({{count}})",
+    "rateTrip": "Évaluer ce trajet",
+    "state": {
+      "done": "Déjà évalué",
+      "closed": "Délai d'évaluation dépassé"
+    },
+    "criteria": {
+      "punctuality": "Ponctualité",
+      "safe_driving": "Conduite sûre",
+      "courtesy": "Amabilité",
+      "cleanliness": "Propreté du véhicule",
+      "compliance": "Respect des règles"
+    }
+  },
+  "stats": {
+    "passengerTitle": "Mes indicateurs",
+    "driverTitle": "Statistiques",
+    "driverSubtitle": "Vos trajets, le taux d'occupation, les participations et l'avis de vos passagers.",
+    "trips": "Trajets",
+    "tripsCount": "{{count}} trajets",
+    "passengers": "Passagers",
+    "spent": "Participation totale",
+    "spentHint": "Selon les tickets émis.",
+    "contributions": "Participations",
+    "confirmed": "Participations confirmées",
+    "cancellations": "Annulations",
+    "driverCancellations": "Trajets annulés",
+    "noShows": "Absences",
+    "occupancy": "Occupation moyenne",
+    "occupancyHint": "Places utilisées sur places proposées dans vos trajets terminés.",
+    "tripsByMonth": "Trajets par mois (12 derniers mois)",
+    "topOrigins": "Lieux de départ les plus utilisés",
+    "noTrips": "Vous n'avez pas encore de trajets terminés.",
+    "ratingAverage": "Note {{value}} sur 5 ({{count}})",
+    "noRatings": "Pas encore de notes",
+    "historyLine": "{{passengers}} sur {{total}} places · participations {{amount}}"
+  },
+  "charts": {
+    "table": "Voir en tableau",
+    "month": "Mois"
   }
 }

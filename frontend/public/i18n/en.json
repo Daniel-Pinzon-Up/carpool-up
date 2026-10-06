@@ -199,7 +199,12 @@
     "TRIP_NOT_SHAREABLE": "Only upcoming or ongoing rides can be shared.",
     "TRIP_NOT_ACTIVE": "The ride is not active.",
     "TRUSTED_CONTACTS_LIMIT": "You already have the {{max}} allowed contacts.",
-    "EMERGENCY_HANDLED": "This emergency was already handled."
+    "EMERGENCY_HANDLED": "This emergency was already handled.",
+    "RATING_NOT_OPEN": "You can rate once the ride has ended.",
+    "RATING_WINDOW_CLOSED": "The {{days}}-day period to rate this ride has passed.",
+    "RATING_TARGET_INVALID": "You cannot rate this person on this ride.",
+    "RATING_CRITERIA_INVALID": "Rate every criterion.",
+    "RATING_EXISTS": "You already rated this person on this ride."
   },
   "catalog": {
     "title": "Component catalog",
@@ -643,7 +648,10 @@
       "trip_not_held": "Your ride was not started in time and did not take place.",
       "passenger_no_show": "The driver marked that you did not show up.",
       "booking_suspended": "Your bookings are suspended for {{days}} days for repeated no-shows.",
-      "emergency_alert": "Emergency reported by {{user_name}}. Check it now."
+      "emergency_alert": "Emergency reported by {{user_name}}. Check it now.",
+      "rating_pending": "Your ride ended. Rate the people who rode with you.",
+      "rating_reminder": "Tomorrow the period to rate your ride closes.",
+      "rating_received": "You received a new rating."
     }
   },
   "vehicles": {
@@ -970,7 +978,8 @@
     },
     "yourTrip": "Your pick-up and drop-off",
     "seatsLeft": "{{free}} of {{total}} free",
-    "pendingRequests": "To decide: {{count}}"
+    "pendingRequests": "To decide: {{count}}",
+    "driverRating": "{{rating}} of 5 ({{count}})"
   },
   "search": {
     "title": "Find a ride",
@@ -1099,7 +1108,8 @@
       "fromSubscription": "Series",
       "paymentNote": "Contribution details",
       "cancelReason": "Cancellation reason",
-      "tripChanged": "The driver changed the ride: you can cancel with no penalty."
+      "tripChanged": "The driver changed the ride: you can cancel with no penalty.",
+      "rating": "{{rating}} of 5"
     },
     "passengers": {
       "title": "Passengers",
@@ -1289,5 +1299,64 @@
     "expires": "This link works until {{time}}.",
     "gone": "This link is no longer available",
     "goneHint": "Ride links are turned off shortly after the ride ends."
+  },
+  "ratings": {
+    "title": "Rate",
+    "subtitle": "Your feedback helps the community ride better. Rate each criterion from 1 to 5 stars.",
+    "for": {
+      "driver": "Driver: {{name}}",
+      "passenger": "Passenger: {{name}}"
+    },
+    "closes": "You can rate until {{when}}.",
+    "criteriaLegend": "Criteria",
+    "comment": "Comment (optional)",
+    "commentHint": "Up to {{max}} characters. The person will see it without your name.",
+    "missing": "Rate every criterion.",
+    "send": "Send rating",
+    "thanks": "Thanks for rating.",
+    "none": "No pending ratings",
+    "allDone": "Done, you rated everyone",
+    "noneHint": "After each ride you have 7 days to rate.",
+    "rateDriver": "Rate the driver",
+    "ratePassengers": "Rate passengers ({{count}})",
+    "rateTrip": "Rate this ride",
+    "state": {
+      "done": "Already rated",
+      "closed": "Rating period closed"
+    },
+    "criteria": {
+      "punctuality": "Punctuality",
+      "safe_driving": "Safe driving",
+      "courtesy": "Courtesy",
+      "cleanliness": "Vehicle cleanliness",
+      "compliance": "Following the rules"
+    }
+  },
+  "stats": {
+    "passengerTitle": "My metrics",
+    "driverTitle": "Statistics",
+    "driverSubtitle": "Your rides, occupancy, contributions and what your passengers think.",
+    "trips": "Rides",
+    "tripsCount": "{{count}} rides",
+    "passengers": "Passengers",
+    "spent": "Total contribution",
+    "spentHint": "Based on the issued tickets.",
+    "contributions": "Contributions",
+    "confirmed": "Confirmed contributions",
+    "cancellations": "Cancellations",
+    "driverCancellations": "Cancelled rides",
+    "noShows": "No-shows",
+    "occupancy": "Average occupancy",
+    "occupancyHint": "Seats used over seats offered in your completed rides.",
+    "tripsByMonth": "Rides per month (last 12 months)",
+    "topOrigins": "Most used departure places",
+    "noTrips": "You have no completed rides yet.",
+    "ratingAverage": "Rating {{value}} of 5 ({{count}})",
+    "noRatings": "No ratings yet",
+    "historyLine": "{{passengers}} of {{total}} seats · contributions {{amount}}"
+  },
+  "charts": {
+    "table": "Show as table",
+    "month": "Month"
   }
 }

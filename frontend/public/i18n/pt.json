@@ -199,7 +199,12 @@
     "TRIP_NOT_SHAREABLE": "Só viagens próximas ou em andamento podem ser compartilhadas.",
     "TRIP_NOT_ACTIVE": "A viagem não está ativa.",
     "TRUSTED_CONTACTS_LIMIT": "Você já tem os {{max}} contatos permitidos.",
-    "EMERGENCY_HANDLED": "Esta emergência já foi atendida."
+    "EMERGENCY_HANDLED": "Esta emergência já foi atendida.",
+    "RATING_NOT_OPEN": "Você poderá avaliar quando a viagem terminar.",
+    "RATING_WINDOW_CLOSED": "Já passou o prazo de {{days}} dias para avaliar esta viagem.",
+    "RATING_TARGET_INVALID": "Você não pode avaliar esta pessoa nesta viagem.",
+    "RATING_CRITERIA_INVALID": "Avalie todos os critérios.",
+    "RATING_EXISTS": "Você já avaliou esta pessoa nesta viagem."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -643,7 +648,10 @@
       "trip_not_held": "Sua viagem não foi iniciada a tempo e ficou como não realizada.",
       "passenger_no_show": "O motorista marcou que você não compareceu.",
       "booking_suspended": "Suas reservas foram suspensas por {{days}} dias por ausências repetidas.",
-      "emergency_alert": "Emergência informada por {{user_name}}. Verifique agora."
+      "emergency_alert": "Emergência informada por {{user_name}}. Verifique agora.",
+      "rating_pending": "Sua viagem terminou. Avalie quem viajou com você.",
+      "rating_reminder": "Amanhã termina o prazo para avaliar sua viagem.",
+      "rating_received": "Você recebeu uma nova avaliação."
     }
   },
   "vehicles": {
@@ -970,7 +978,8 @@
     },
     "yourTrip": "Seu embarque e desembarque",
     "seatsLeft": "{{free}} de {{total}} livres",
-    "pendingRequests": "Para decidir: {{count}}"
+    "pendingRequests": "Para decidir: {{count}}",
+    "driverRating": "{{rating}} de 5 ({{count}})"
   },
   "search": {
     "title": "Buscar carona",
@@ -1099,7 +1108,8 @@
       "fromSubscription": "Série",
       "paymentNote": "Dados para a contribuição",
       "cancelReason": "Motivo do cancelamento",
-      "tripChanged": "O motorista mudou a viagem: você pode cancelar sem penalidade."
+      "tripChanged": "O motorista mudou a viagem: você pode cancelar sem penalidade.",
+      "rating": "{{rating}} de 5"
     },
     "passengers": {
       "title": "Passageiros",
@@ -1289,5 +1299,64 @@
     "expires": "Este link funciona até {{time}}.",
     "gone": "Este link não está mais disponível",
     "goneHint": "Os links de viagem são desativados pouco depois do fim da viagem."
+  },
+  "ratings": {
+    "title": "Avaliar",
+    "subtitle": "Sua opinião ajuda a comunidade a viajar melhor. Avalie cada critério de 1 a 5 estrelas.",
+    "for": {
+      "driver": "Motorista: {{name}}",
+      "passenger": "Passageiro: {{name}}"
+    },
+    "closes": "Você pode avaliar até {{when}}.",
+    "criteriaLegend": "Critérios",
+    "comment": "Comentário (opcional)",
+    "commentHint": "Até {{max}} caracteres. A pessoa avaliada verá sem o seu nome.",
+    "missing": "Avalie todos os critérios.",
+    "send": "Enviar avaliação",
+    "thanks": "Obrigado por avaliar.",
+    "none": "Nenhuma avaliação pendente",
+    "allDone": "Pronto, você avaliou todos",
+    "noneHint": "Após cada viagem você tem 7 dias para avaliar.",
+    "rateDriver": "Avaliar o motorista",
+    "ratePassengers": "Avaliar passageiros ({{count}})",
+    "rateTrip": "Avaliar esta viagem",
+    "state": {
+      "done": "Já avaliado",
+      "closed": "Prazo de avaliação encerrado"
+    },
+    "criteria": {
+      "punctuality": "Pontualidade",
+      "safe_driving": "Direção segura",
+      "courtesy": "Cordialidade",
+      "cleanliness": "Limpeza do veículo",
+      "compliance": "Cumprimento das regras"
+    }
+  },
+  "stats": {
+    "passengerTitle": "Minhas métricas",
+    "driverTitle": "Estatísticas",
+    "driverSubtitle": "Suas viagens, a ocupação, as contribuições e o que seus passageiros acham.",
+    "trips": "Viagens",
+    "tripsCount": "{{count}} viagens",
+    "passengers": "Passageiros",
+    "spent": "Contribuição total",
+    "spentHint": "Segundo os tickets emitidos.",
+    "contributions": "Contribuições",
+    "confirmed": "Contribuições confirmadas",
+    "cancellations": "Cancelamentos",
+    "driverCancellations": "Viagens canceladas",
+    "noShows": "Ausências",
+    "occupancy": "Ocupação média",
+    "occupancyHint": "Vagas usadas sobre vagas oferecidas nas suas viagens concluídas.",
+    "tripsByMonth": "Viagens por mês (últimos 12 meses)",
+    "topOrigins": "Locais de saída mais usados",
+    "noTrips": "Você ainda não tem viagens concluídas.",
+    "ratingAverage": "Avaliação {{value}} de 5 ({{count}})",
+    "noRatings": "Ainda sem avaliações",
+    "historyLine": "{{passengers}} de {{total}} vagas · contribuições {{amount}}"
+  },
+  "charts": {
+    "table": "Ver como tabela",
+    "month": "Mês"
   }
 }

@@ -199,7 +199,12 @@
     "TRIP_NOT_SHAREABLE": "Solo se comparten viajes próximos o en curso.",
     "TRIP_NOT_ACTIVE": "El viaje no está activo.",
     "TRUSTED_CONTACTS_LIMIT": "Ya tienes los {{max}} contactos permitidos.",
-    "EMERGENCY_HANDLED": "Esta emergencia ya fue atendida."
+    "EMERGENCY_HANDLED": "Esta emergencia ya fue atendida.",
+    "RATING_NOT_OPEN": "Podrás calificar cuando el viaje termine.",
+    "RATING_WINDOW_CLOSED": "Ya pasó el plazo de {{days}} días para calificar este viaje.",
+    "RATING_TARGET_INVALID": "No puedes calificar a esta persona en este viaje.",
+    "RATING_CRITERIA_INVALID": "Califica todos los criterios.",
+    "RATING_EXISTS": "Ya calificaste a esta persona en este viaje."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -643,7 +648,10 @@
       "trip_not_held": "Tu viaje no se inició a tiempo y quedó como no realizado.",
       "passenger_no_show": "El conductor marcó que no te presentaste al viaje.",
       "booking_suspended": "Tus reservas quedaron suspendidas por {{days}} días por ausencias repetidas.",
-      "emergency_alert": "Emergencia reportada por {{user_name}}. Revísala ahora."
+      "emergency_alert": "Emergencia reportada por {{user_name}}. Revísala ahora.",
+      "rating_pending": "Tu viaje terminó. Califica a quienes viajaron contigo.",
+      "rating_reminder": "Mañana se cierra el plazo para calificar tu viaje.",
+      "rating_received": "Recibiste una nueva calificación."
     }
   },
   "vehicles": {
@@ -970,7 +978,8 @@
     },
     "yourTrip": "Tu recogida y bajada",
     "seatsLeft": "{{free}} de {{total}} libres",
-    "pendingRequests": "Por decidir: {{count}}"
+    "pendingRequests": "Por decidir: {{count}}",
+    "driverRating": "{{rating}} de 5 ({{count}})"
   },
   "search": {
     "title": "Buscar viaje",
@@ -1099,7 +1108,8 @@
       "fromSubscription": "Serie",
       "paymentNote": "Datos para el aporte",
       "cancelReason": "Motivo de la cancelación",
-      "tripChanged": "El conductor cambió el viaje: puedes cancelar sin penalización."
+      "tripChanged": "El conductor cambió el viaje: puedes cancelar sin penalización.",
+      "rating": "{{rating}} de 5"
     },
     "passengers": {
       "title": "Pasajeros",
@@ -1289,5 +1299,64 @@
     "expires": "Este enlace funciona hasta {{time}}.",
     "gone": "Este enlace ya no está disponible",
     "goneHint": "Los enlaces de viaje se desactivan poco después de terminar el viaje."
+  },
+  "ratings": {
+    "title": "Calificar",
+    "subtitle": "Tu opinión ayuda a que la comunidad viaje mejor. Califica cada criterio de 1 a 5 estrellas.",
+    "for": {
+      "driver": "Conductor: {{name}}",
+      "passenger": "Pasajero: {{name}}"
+    },
+    "closes": "Puedes calificar hasta {{when}}.",
+    "criteriaLegend": "Criterios",
+    "comment": "Comentario (opcional)",
+    "commentHint": "Hasta {{max}} caracteres. Lo verá la persona calificada, sin tu nombre.",
+    "missing": "Califica todos los criterios.",
+    "send": "Enviar calificación",
+    "thanks": "Gracias por calificar.",
+    "none": "No tienes calificaciones pendientes",
+    "allDone": "Listo, calificaste todo",
+    "noneHint": "Después de cada viaje tienes 7 días para calificar.",
+    "rateDriver": "Calificar al conductor",
+    "ratePassengers": "Calificar pasajeros ({{count}})",
+    "rateTrip": "Calificar este viaje",
+    "state": {
+      "done": "Ya calificaste",
+      "closed": "Plazo para calificar vencido"
+    },
+    "criteria": {
+      "punctuality": "Puntualidad",
+      "safe_driving": "Conducción segura",
+      "courtesy": "Amabilidad",
+      "cleanliness": "Limpieza del vehículo",
+      "compliance": "Cumplimiento de las reglas"
+    }
+  },
+  "stats": {
+    "passengerTitle": "Mis métricas",
+    "driverTitle": "Estadísticas",
+    "driverSubtitle": "Tus viajes, la ocupación, los aportes y lo que opinan tus pasajeros.",
+    "trips": "Viajes",
+    "tripsCount": "{{count}} viajes",
+    "passengers": "Pasajeros",
+    "spent": "Aporte total",
+    "spentHint": "Según los tickets emitidos.",
+    "contributions": "Aportes",
+    "confirmed": "Aportes confirmados",
+    "cancellations": "Cancelaciones",
+    "driverCancellations": "Viajes cancelados",
+    "noShows": "Ausencias",
+    "occupancy": "Ocupación promedio",
+    "occupancyHint": "Puestos usados sobre puestos ofrecidos en tus viajes completados.",
+    "tripsByMonth": "Viajes por mes (últimos 12 meses)",
+    "topOrigins": "Lugares de salida más usados",
+    "noTrips": "Aún no tienes viajes completados.",
+    "ratingAverage": "Calificación {{value}} de 5 ({{count}})",
+    "noRatings": "Aún no tienes calificaciones",
+    "historyLine": "{{passengers}} de {{total}} puestos · aportes {{amount}}"
+  },
+  "charts": {
+    "table": "Ver como tabla",
+    "month": "Mes"
   }
 }
