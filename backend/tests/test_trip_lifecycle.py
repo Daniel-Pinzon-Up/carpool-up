@@ -119,7 +119,7 @@ async def test_complete_trip_from_start_to_tickets(
     assert re.fullmatch(r"CP-[2-9A-HJKMNP-Z]{4}-[2-9A-HJKMNP-Z]{4}", ticket["code"])
     assert ticket["amount"] == 2000
     assert ticket["paid_confirmed"] is False
-    assert (await kinds(db, rider))[-1] == "trip_finished"
+    assert (await kinds(db, rider))[-2:] == ["trip_finished", "rating_pending"]
     assert (await routing_api.get(f"{API}/tickets/mine", headers=auth(absent))).json() == []
     driver_tickets = (
         await routing_api.get(
