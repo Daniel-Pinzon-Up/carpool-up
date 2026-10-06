@@ -17,7 +17,7 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { MAP_BOUNDS, PAMPLONA_CENTER, ROUTE_COLORS, buildMapStyle } from './map-style';
 
-export type MarkerKind = 'origin' | 'stop' | 'destination' | 'pin';
+export type MarkerKind = 'origin' | 'stop' | 'destination' | 'pin' | 'vehicle';
 
 export interface MapMarker {
   lat: number;
@@ -36,6 +36,7 @@ const MARKER_COLORS: Record<MarkerKind, string> = {
   stop: 'var(--primary)',
   destination: 'var(--danger)',
   pin: 'var(--warning)',
+  vehicle: 'var(--success)',
 };
 
 let protocolReady: Promise<void> | null = null;

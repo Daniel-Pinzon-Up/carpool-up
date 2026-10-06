@@ -129,6 +129,8 @@ export interface Booking {
   free_cancel: boolean;
   created_at: string;
   decided_at: string | null;
+  boarded_at: string | null;
+  no_show_at: string | null;
   cancelled_at: string | null;
   cancel_reason: string | null;
   cancellation: Cancellation | null;
