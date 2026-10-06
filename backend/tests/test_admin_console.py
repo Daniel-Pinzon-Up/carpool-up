@@ -333,3 +333,18 @@ async def test_rating_comments_moderation_and_overview(
     assert overview["occupancy"] == pytest.approx(1 / 3, abs=0.001)
     roles = {item["key"]: item["count"] for item in overview["users"]}
     assert roles["passenger:active"] >= 1
+
+
+async def test_audit_log_names_who_acted(
+    api: AsyncClient, make_user: UserFactory, su_headers: dict[str, str], superadmin: User
+) -> None:
+    passenger = await make_user(UserRole.PASSENGER)
+    await api.post(
+        f"{API}/admin/users/{passenger.id}/suspend",
+        json={"reason": "Prueba de auditoria"},
+        headers=su_headers,
+    )
+    entries = (await api.get(f"{API}/admin/audit", headers=su_headers)).json()["items"]
+    entry = next(e for e in entries if e["action"] == "user.suspend")
+    assert entry["actor_name"] == superadmin.full_name
+    assert entry["entity_id"] == str(passenger.id)

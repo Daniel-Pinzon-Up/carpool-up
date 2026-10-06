@@ -10,6 +10,7 @@ class AuditEntryOut(BaseModel):
 
     id: uuid.UUID
     actor_id: uuid.UUID | None
+    actor_name: str | None = None
     action: str
     entity: str
     entity_id: str | None
