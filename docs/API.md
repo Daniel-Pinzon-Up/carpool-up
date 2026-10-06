@@ -302,6 +302,26 @@ El detalle del viaje agrega `chat_id` (el chat grupal) para el conductor y los p
    - `chat.ack {client_id, message}` y `error {code, client_id}` (`NOT_FOUND`, `RATE_LIMITED`, `MESSAGE_INVALID`, `CONVERSATION_CLOSED`, `BAD_REQUEST`).
 5. Cierres: `4401` sin autenticación válida, `4001` token vencido (renovar y reconectar). Un origen no permitido se rechaza con HTTP 403.
 
+### Ciclo del viaje y seguridad (paso 10)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `POST /trips/{id}/start` | Conductor dueño | Inicia el viaje. Errores `TRIP_START_TOO_EARLY`, `TRIP_START_TOO_LATE`, `TRIP_NOT_STARTABLE`, `PICO_PLACA_RESTRICTED`. |
+| `POST /bookings/{id}/boarded` | Conductor dueño | Marca que el pasajero subió (viaje en curso). |
+| `POST /bookings/{id}/no-show` | Conductor dueño | Desde la salida más la espera. Puede crear una suspensión automática. `NO_SHOW_TOO_EARLY`. |
+| `POST /trips/{id}/finish` | Conductor dueño | Emite los tickets. `PASSENGERS_UNMARKED`. |
+| `GET /tickets/mine?role=passenger\|driver&trip_id` | Usuario activo | Tickets propios o de los viajes que conduce. |
+| `POST /tickets/{id}/paid` | Conductor del viaje | `{paid}`: confirma (o desmarca) que recibió el aporte. |
+| `GET /trips/{id}/location` | Participante | Última ubicación del conductor (nula si no hay). |
+| `POST /trips/{id}/share-links` | Participante, 10 por minuto | `{token, path, expires_at}`; el token se muestra una sola vez. |
+| `GET /public/share/{token}` | Público, 60 por minuto | Ruta, paradas, vehículo con placa, hora estimada y ubicación. Sin datos personales. |
+| `POST /trips/{id}/emergency` | Participante, 5 por minuto | `{lat?, lon?, note?}` → `{emergency, phone}`. Alerta en vivo a los administradores. |
+| `GET /me/trusted-contacts`, `POST`, `PATCH /{id}`, `DELETE /{id}` | Usuario activo | `{name, phone, relationship?}`, máximo 5. `TRUSTED_CONTACTS_LIMIT`. |
+| `GET /admin/emergencies?include_handled` | Administrador | Abiertas primero. |
+| `POST /admin/emergencies/{id}/handle` | Administrador | `{resolution}`. Queda en la auditoría. `EMERGENCY_HANDLED`. |
+
+WebSocket: el conductor envía `location.update {trip_id, lat, lon, accuracy?, heading?, speed?}`. Los participantes reciben `location`, `trip.started` y `trip.finished`; los administradores, `emergency` y `emergency.handled`.
+
 ## Cabeceras
 
 - `X-Request-ID`: se acepta del cliente o se genera, y se devuelve en cada respuesta para correlacionar logs.
