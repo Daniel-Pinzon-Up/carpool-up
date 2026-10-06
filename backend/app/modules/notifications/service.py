@@ -60,6 +60,10 @@ class Kind:
     PASSENGER_NO_SHOW = "passenger_no_show"
     BOOKING_SUSPENDED = "booking_suspended"
     EMERGENCY_ALERT = "emergency_alert"
+    # Calificaciones (paso 11).
+    RATING_PENDING = "rating_pending"
+    RATING_REMINDER = "rating_reminder"
+    RATING_RECEIVED = "rating_received"
 
 
 class NotificationService:

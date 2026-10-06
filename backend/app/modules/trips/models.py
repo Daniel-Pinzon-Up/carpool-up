@@ -80,6 +80,8 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     cancel_reason: Mapped[str | None] = mapped_column(Text)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Ultimo aviso para calificar antes de que cierre el plazo.
+    rating_reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     driver: Mapped[User] = relationship(lazy="selectin")
