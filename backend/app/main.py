@@ -13,6 +13,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestLogMiddleware, SecurityHeadersMiddleware
 from app.core.rate_limit import limiter
 from app.core.redis import redis_client
+from app.modules.admin import console_router
 from app.modules.admin import router as admin
 from app.modules.audit import router as audit
 from app.modules.auth import router as auth
@@ -109,6 +110,7 @@ def create_app() -> FastAPI:
         legal.admin_router,
         audit.admin_router,
         admin.router,
+        console_router.router,
         safety.admin_router,
     ):
         api.include_router(admin_router)
