@@ -92,6 +92,32 @@ def upgrade() -> None:
     op.add_column(
         "trips", sa.Column("rating_reminded_at", sa.DateTime(timezone=True), nullable=True)
     )
+    # Resumen inicial de quienes ya tienen viajes o reservas (aun no hay calificaciones).
+    op.execute(
+        """
+        INSERT INTO user_stats (
+            user_id, rating_count, trips_as_driver, trips_as_passenger,
+            driver_cancellations, passenger_no_shows, criteria, updated_at
+        )
+        SELECT
+            u.id,
+            0,
+            (SELECT count(*) FROM trips t
+             WHERE t.driver_id = u.id AND t.status = 'completed'),
+            (SELECT count(*) FROM bookings b
+             WHERE b.passenger_id = u.id AND b.status = 'completed'),
+            (SELECT count(*) FROM trips t
+             WHERE t.driver_id = u.id AND t.status = 'cancelled_by_driver'
+               AND t.deleted_at IS NULL),
+            (SELECT count(*) FROM bookings b
+             WHERE b.passenger_id = u.id AND b.status = 'no_show'),
+            '{}'::jsonb,
+            now()
+        FROM users u
+        WHERE EXISTS (SELECT 1 FROM trips t WHERE t.driver_id = u.id)
+           OR EXISTS (SELECT 1 FROM bookings b WHERE b.passenger_id = u.id)
+        """
+    )
 
 
 def downgrade() -> None:
