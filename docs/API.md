@@ -99,7 +99,7 @@ Los códigos de negocio se documentan aquí en el paso que los introduce.
 
 ### Configuración y catálogos (paso 1)
 
-Autenticación: `Authorization: Bearer <token de acceso>`. Todo lo que está bajo `/admin` exige rol **superadmin** con cuenta activa, y cada cambio queda en la auditoría con el valor antes y después.
+Autenticación: `Authorization: Bearer <token de acceso>`. Las rutas `/admin` de esta sección exigen rol **superadmin** con cuenta activa (las de aprobaciones, emergencias y el panel del paso 12 admiten también al administrador), y cada cambio queda en la auditoría con el valor antes y después.
 
 | Método y ruta | Acceso | Descripción |
 |---------------|--------|-------------|
@@ -336,6 +336,27 @@ WebSocket: el conductor envía `location.update {trip_id, lat, lon, accuracy?, h
 | `GET /stats/driver` | Conductor | Viajes, pasajeros, ocupación, aportes, cancelaciones, calificación y meses. |
 
 Criterios: conductor `punctuality`, `safe_driving`, `courtesy`, `cleanliness`; pasajero `punctuality`, `courtesy`, `compliance`. En la búsqueda, `driver.rating` y `driver.trips_as_driver` vienen de `user_stats`.
+
+### Panel de administración (paso 12)
+
+| Método y ruta | Acceso | Descripción |
+|---------------|--------|-------------|
+| `GET /admin/stats?days` | Administrador | Indicadores de los últimos `days` (7 a 180, por defecto 30). |
+| `GET /admin/users?q&role&status&limit&cursor` | Administrador | Búsqueda por nombre o correo. |
+| `GET /admin/users/{id}` | Administrador | Ficha: documentos, métricas, suspensiones y suspensión de reservas vigente. |
+| `POST /admin/users/{id}/suspend` | Administrador | `{reason, days?}` (1 a 365; sin `days`, hasta reactivarla). `USER_STATUS_INVALID`. |
+| `POST /admin/users/{id}/reinstate` | Administrador | `{reason?}`. |
+| `POST /admin/users/{id}/block` | Administrador | `{reason}`. Cierra sus sesiones. |
+| `POST /admin/suspensions/{id}/end` | Administrador | `{reason?}`. Levanta una suspensión de reservas. `SUSPENSION_ENDED`. |
+| `GET /admin/trips?status&day&q&limit&cursor` | Administrador | Viajes con conductor, ocupación y emergencias abiertas. |
+| `GET /admin/trips/{id}` | Administrador | Detalle con reservas y emergencias. |
+| `POST /admin/trips/{id}/cancel` | Administrador | `{reason}`. Solo viajes programados (`TRIP_NOT_EDITABLE`). |
+| `GET /admin/trips/{id}/messages` | Administrador | Chat del viaje. Cada lectura queda en la auditoría. |
+| `POST /admin/messages/{id}/hide` | Administrador | `{hidden}`. |
+| `GET /admin/ratings?hidden&limit&cursor` | Administrador | Calificaciones con comentario. |
+| `POST /admin/ratings/{id}/hide` | Administrador | `{hidden}`. |
+
+"Administrador" incluye al superadmin. Sobre otro administrador solo actúa el superadmin, y nadie sobre un superadmin ni sobre sí mismo (`FORBIDDEN`). Las entradas de `GET /admin/audit` traen `actor_name`.
 
 ## Cabeceras
 
