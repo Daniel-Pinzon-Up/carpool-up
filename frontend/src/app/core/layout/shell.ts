@@ -10,6 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
   LucideBell,
+  LucideEllipsis,
   LucideWifiOff,
   LucideDynamicIcon,
   LucidePalette,
@@ -32,6 +33,7 @@ import { NAV_BY_ROLE } from './navigation';
  */
 @Component({
   selector: 'cp-shell',
+  host: { '(document:keydown.escape)': 'moreOpen.set(false)' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     Brand,
@@ -41,6 +43,7 @@ import { NAV_BY_ROLE } from './navigation';
     TranslocoPipe,
     LucideDynamicIcon,
     LucideBell,
+    LucideEllipsis,
     LucideWifiOff,
     LucidePalette,
     LucidePanelLeftClose,
@@ -219,7 +222,44 @@ import { NAV_BY_ROLE } from './navigation';
           <span class="max-w-full truncate">{{ 'navShort.' + item.key | transloco }}</span>
         </a>
       }
+      @if (overflowItems().length) {
+        <button
+          type="button"
+          class="flex min-h-12 min-w-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[0.7rem] font-medium text-muted transition"
+          aria-controls="cp-more-menu"
+          [attr.aria-expanded]="moreOpen()"
+          (click)="moreOpen.set(!moreOpen())"
+        >
+          <span
+            class="grid h-7 w-12 place-items-center rounded-full"
+            [class.bg-accent/20]="moreOpen()"
+          >
+            <svg lucideEllipsis class="size-5" aria-hidden="true"></svg>
+          </span>
+          <span>{{ 'navShort.more' | transloco }}</span>
+        </button>
+      }
     </nav>
+    @if (moreOpen()) {
+      <ul
+        id="cp-more-menu"
+        class="glass-2 fixed right-3 bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+4.5rem)] z-40 flex min-w-52 flex-col gap-1 p-2 sm:hidden"
+      >
+        @for (item of overflowItems(); track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-accent/15"
+              class="flex min-h-11 items-center gap-3 rounded-xl px-3 font-medium"
+              (click)="moreOpen.set(false)"
+            >
+              <svg [lucideIcon]="item.icon" class="size-5" aria-hidden="true"></svg>
+              {{ 'nav.' + item.key | transloco }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
   `,
 })
 export class Shell {
@@ -228,7 +268,13 @@ export class Shell {
   protected readonly notifications = inject(NotificationsStore);
   private readonly chatUnread = inject(ChatUnread);
   protected readonly items = computed(() => NAV_BY_ROLE[this.auth.user()?.role ?? 'passenger']);
-  protected readonly mobileItems = computed(() => this.items().slice(0, 5));
+  /** La barra inferior admite cinco destinos; si hay mas, el quinto es el menu Mas. */
+  protected readonly mobileItems = computed(() => {
+    const items = this.items();
+    return items.length > 5 ? items.slice(0, 4) : items;
+  });
+  protected readonly overflowItems = computed(() => this.items().slice(this.mobileItems().length));
+  protected readonly moreOpen = signal(false);
   protected readonly collapsed = signal(
     globalThis.innerWidth !== undefined && globalThis.innerWidth < 1024,
   );

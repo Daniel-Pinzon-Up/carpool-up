@@ -65,6 +65,10 @@ const ICONS: Record<string, LucideIcon> = {
   passenger_no_show: LucideUserX,
   booking_suspended: LucideUserX,
   emergency_alert: LucideSiren,
+  account_suspended: LucideUserX,
+  account_reinstated: LucideCircleCheck,
+  booking_ban_lifted: LucideCircleCheck,
+  trip_cancelled_by_admin: LucideCalendarX,
   rating_pending: LucideStar,
   rating_reminder: LucideStar,
   rating_received: LucideStar,
@@ -88,6 +92,9 @@ const LINKS: Record<string, string> = {
   subscription_ended: '/mis-viajes',
   booking_suspended: '/mis-viajes',
   emergency_alert: '/admin/emergencias',
+  account_suspended: '/perfil',
+  account_reinstated: '/perfil',
+  booking_ban_lifted: '/mis-viajes',
 };
 
 /** Bandeja de avisos; los nuevos llegan en vivo y se agregan arriba. */

@@ -44,7 +44,8 @@
     "trips": "Trips",
     "emergencies": "Emergencies",
     "settings": "Settings",
-    "catalog": "Component catalog"
+    "catalog": "Component catalog",
+    "moderation": "Moderation"
   },
   "navShort": {
     "search": "Search",
@@ -59,11 +60,9 @@
     "users": "Users",
     "trips": "Trips",
     "emergencies": "SOS",
-    "settings": "Settings"
-  },
-  "placeholder": {
-    "title": "We are building this section",
-    "description": "It will be available soon. In the meantime, explore the other menu options."
+    "settings": "Settings",
+    "moderation": "Moderate",
+    "more": "More"
   },
   "ui": {
     "rating": {
@@ -204,7 +203,9 @@
     "RATING_WINDOW_CLOSED": "The {{days}}-day period to rate this ride has passed.",
     "RATING_TARGET_INVALID": "You cannot rate this person on this ride.",
     "RATING_CRITERIA_INVALID": "Rate every criterion.",
-    "RATING_EXISTS": "You already rated this person on this ride."
+    "RATING_EXISTS": "You already rated this person on this ride.",
+    "USER_STATUS_INVALID": "That action does not apply to the account’s current status.",
+    "SUSPENSION_ENDED": "That suspension has already ended."
   },
   "catalog": {
     "title": "Component catalog",
@@ -651,7 +652,11 @@
       "emergency_alert": "Emergency reported by {{user_name}}. Check it now.",
       "rating_pending": "Your ride ended. Rate the people who rode with you.",
       "rating_reminder": "Tomorrow the period to rate your ride closes.",
-      "rating_received": "You received a new rating."
+      "rating_received": "You received a new rating.",
+      "account_suspended": "Your account was suspended. Reason: {{reason}}",
+      "account_reinstated": "Your account is active again.",
+      "booking_ban_lifted": "You can book trips again.",
+      "trip_cancelled_by_admin": "An administrator cancelled one of your trips. Reason: {{reason}}"
     }
   },
   "vehicles": {
@@ -1358,5 +1363,225 @@
   "charts": {
     "table": "Show as table",
     "month": "Month"
+  },
+  "admin": {
+    "audited": "Every action is recorded in the audit log under your name.",
+    "dashboard": {
+      "title": "Admin dashboard",
+      "subtitle": "How Carpool UP is being used in the selected period.",
+      "period": "Period",
+      "lastDays": "Last {{count}} days",
+      "pendingApprovals": "Pending approvals: {{count}}",
+      "openEmergencies": "Open emergencies: {{count}}",
+      "completed": "Completed trips",
+      "passengerCancellations": "Cancelled bookings",
+      "perDay": "Trips per day",
+      "day": "Day",
+      "perHour": "Trips by departure hour",
+      "hourHeader": "Hour",
+      "hour": "{{hour}}:00",
+      "routes": "Most frequent routes",
+      "noData": "No data for this period yet.",
+      "ratings": "Rating distribution",
+      "starsHeader": "Stars",
+      "ratingCount": "Ratings",
+      "stars": "{{count}} stars",
+      "users": "Users by role and status"
+    },
+    "users": {
+      "search": "Name or email",
+      "role": "Role",
+      "status": "Status",
+      "any": "All",
+      "none": "No users match these filters",
+      "statuses": {
+        "active": "Active",
+        "pending_email": "Email not verified",
+        "pending_approval": "Awaiting approval",
+        "suspended": "Suspended",
+        "blocked": "Blocked"
+      },
+      "kinds": {
+        "account": "Account suspension",
+        "booking_ban": "Booking ban"
+      },
+      "document": "Student ID or certificate",
+      "license": "Driving licence",
+      "noDocument": "Not submitted",
+      "lastLogin": "Last sign-in",
+      "actions": "Actions",
+      "suspend": "Suspend",
+      "suspendTitle": "Suspend {{name}}",
+      "suspendHelp": "They cannot sign in while it lasts. Their scheduled trips and active bookings are cancelled and those affected are notified.",
+      "duration": "Duration",
+      "days": "{{count}} days",
+      "untilReinstated": "Until reinstated",
+      "reinstate": "Reinstate",
+      "reinstateTitle": "Reinstate {{name}}",
+      "block": "Block",
+      "blockTitle": "Block {{name}}",
+      "liftBan": "Lift booking ban",
+      "liftBanTitle": "Lift the booking ban for {{name}}",
+      "reasonHelp": "The reason is kept in the audit log and sent to the person.",
+      "suspended": "Account suspended.",
+      "reinstated": "Account reinstated.",
+      "blocked": "Account blocked and sessions closed.",
+      "banLifted": "They can book again.",
+      "changeRole": "Change role",
+      "changeRoleMessage": "{{name}} will get the {{role}} role. They will be notified.",
+      "saveRole": "Save role",
+      "roleChanged": "Role updated.",
+      "suspensions": "Sanction history",
+      "noSuspensions": "No sanctions.",
+      "automatic": "automatic",
+      "rating": "Rating",
+      "ratingCount": "{{count}} ratings",
+      "tripsDriver": "Trips as driver",
+      "tripsPassenger": "Trips as passenger",
+      "active": "Active bookings and trips"
+    },
+    "bookingStatus": {
+      "requested": "Requested",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "cancel_requested": "Cancellation pending",
+      "cancelled_by_passenger": "Cancelled by passenger",
+      "cancelled_by_driver": "Cancelled by driver",
+      "auto_cancelled_late": "Cancelled for lateness",
+      "auto_cancelled_pico_placa": "Cancelled by pico y placa",
+      "expired": "Expired",
+      "no_show": "No-show",
+      "completed": "Completed"
+    },
+    "trips": {
+      "search": "Place or driver",
+      "day": "Departure day",
+      "seats": "{{booked}} of {{total}} seats",
+      "seatsLabel": "Occupancy",
+      "emergencies": "{{count}} emergencies",
+      "none": "No trips match these filters",
+      "vehicle": "Vehicle",
+      "bookings": "Bookings",
+      "noBookings": "No bookings.",
+      "cancel": "Cancel trip",
+      "cancelMessage": "The driver and passengers are notified with your reason. It does not count against the driver’s reputation.",
+      "cancelled": "Trip cancelled.",
+      "viewChat": "View chat",
+      "chatWarning": "Open the chat only if needed to handle a report or an emergency. It will be recorded in the audit log.",
+      "chat": "Trip chat",
+      "chatAudited": "Your access was recorded in the audit log. Hiding a message does not delete it.",
+      "noMessages": "No messages."
+    },
+    "emergencies": {
+      "subtitle": "Open ones come first and arrive in real time.",
+      "includeHandled": "Also show handled ones",
+      "open": "Open",
+      "handled": "Handled",
+      "handle": "Mark as handled",
+      "handleTitle": "Handle emergency",
+      "resolution": "What was done",
+      "map": "View location",
+      "none": "No open emergencies",
+      "done": "Emergency handled.",
+      "goTo": "Go to emergencies"
+    },
+    "moderation": {
+      "subtitle": "Rating comments. Hiding does not delete and can be undone.",
+      "tabs": {
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "byFor": "{{author}} about {{target}}",
+      "hide": "Hide",
+      "show": "Show",
+      "hidden": "Content hidden.",
+      "shown": "Content visible again.",
+      "none": "No comments here"
+    },
+    "settings": {
+      "subtitle": "Business rules, catalogs, legal documents, administrators and audit log.",
+      "tabs": {
+        "parameters": "Parameters",
+        "semesters": "Semesters",
+        "places": "Places",
+        "picoPlaca": "Pico y placa",
+        "legal": "Legal",
+        "admins": "Administrators",
+        "audit": "Audit log"
+      },
+      "filter": "Find a parameter",
+      "updated": "Updated {{when}}",
+      "yes": "Yes",
+      "no": "No",
+      "save": "Save",
+      "saved": "Saved {{key}}.",
+      "invalidJson": "The value is not valid. Check quotes, commas and brackets.",
+      "required": "Check this field.",
+      "update": "Save changes",
+      "savedItem": "Changes saved.",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete {{name}}",
+      "deleteMessage": "This action is recorded in the audit log and cannot be undone.",
+      "deleted": "Deleted."
+    },
+    "semesters": {
+      "name": "Name",
+      "starts": "Start",
+      "ends": "End",
+      "deadline": "Revalidation deadline",
+      "deadlineHint": "Optional. If empty it is computed from the revalidation_days parameter.",
+      "deadlineShort": "revalidate by {{date}}",
+      "add": "Add semester"
+    },
+    "places": {
+      "name": "Name",
+      "kind": "Type",
+      "lat": "Latitude",
+      "lon": "Longitude",
+      "add": "Add place"
+    },
+    "picoPlaca": {
+      "vehicle": "Vehicle type",
+      "weekday": "Day",
+      "digits": "Restricted digits",
+      "digitsHint": "Last plate digit, comma separated. Example: 1, 2",
+      "from": "Valid from",
+      "to": "Valid until",
+      "toHint": "Optional. Leave empty if open-ended.",
+      "open": "no end date",
+      "add": "Add rule"
+    },
+    "legal": {
+      "kind": "Document",
+      "kinds": {
+        "terms": "Terms and conditions",
+        "data_policy": "Data policy"
+      },
+      "language": "Language",
+      "version": "Version",
+      "versionInvalid": "Use the number.number format, for example 1.1.",
+      "body": "Text (Markdown)",
+      "bodyHint": "At least 50 characters.",
+      "bodyInvalid": "Write at least 50 characters.",
+      "publish": "Publish version",
+      "publishMessage": "The new version takes effect immediately and everyone must accept it at their next sign-in.",
+      "published": "Version published.",
+      "current": "Current"
+    },
+    "admins": {
+      "password": "Initial password",
+      "passwordHint": "Share it through a secure channel. It must meet the configured minimum length.",
+      "create": "Create administrator",
+      "created": "Account created for {{name}}."
+    },
+    "audit": {
+      "action": "Action",
+      "entity": "Entity",
+      "system": "System",
+      "before": "Before",
+      "after": "After",
+      "none": "No entries match these filters"
+    }
   }
 }

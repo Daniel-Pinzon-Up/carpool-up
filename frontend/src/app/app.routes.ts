@@ -1,4 +1,4 @@
-import { Route, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import {
   activeGuard,
   canPublishGuard,
@@ -9,15 +9,6 @@ import {
 } from './core/auth/auth.guards';
 import { devOnlyGuard } from './core/guards/dev-only.guard';
 import { Shell } from './core/layout/shell';
-
-/** Destino aun no construido; cada paso del plan lo reemplaza por su feature con carga diferida. */
-const comingSoon = (path: string, section: string, extra: Partial<Route> = {}): Route => ({
-  path,
-  loadComponent: () => import('./features/placeholder/coming-soon'),
-  data: { section },
-  title: `nav.${section}`,
-  ...extra,
-});
 
 const authLayout = () => import('./features/auth/auth-layout');
 
@@ -236,16 +227,55 @@ export const routes: Routes = [
         path: 'admin',
         canMatch: [roleGuard('admin', 'superadmin')],
         children: [
-          comingSoon('', 'dashboard', { pathMatch: 'full' }),
+          {
+            path: '',
+            pathMatch: 'full',
+            loadComponent: () => import('./features/admin/dashboard'),
+            title: 'nav.dashboard',
+          },
           {
             path: 'aprobaciones',
             loadComponent: () => import('./features/admin/approvals'),
             title: 'nav.approvals',
           },
-          comingSoon('usuarios', 'users'),
-          comingSoon('viajes', 'trips'),
-          comingSoon('emergencias', 'emergencies'),
-          comingSoon('configuracion', 'settings', { canMatch: [roleGuard('superadmin')] }),
+          {
+            path: 'usuarios',
+            loadComponent: () => import('./features/admin/users'),
+            title: 'nav.users',
+          },
+          {
+            path: 'usuarios/:id',
+            loadComponent: () =>
+              import('./features/admin/users').then((m) => m.AdminUserDetailPage),
+            title: 'nav.users',
+          },
+          {
+            path: 'viajes',
+            loadComponent: () => import('./features/admin/trips'),
+            title: 'nav.trips',
+          },
+          {
+            path: 'viajes/:id',
+            loadComponent: () =>
+              import('./features/admin/trips').then((m) => m.AdminTripDetailPage),
+            title: 'nav.trips',
+          },
+          {
+            path: 'emergencias',
+            loadComponent: () => import('./features/admin/emergencies'),
+            title: 'nav.emergencies',
+          },
+          {
+            path: 'moderacion',
+            loadComponent: () => import('./features/admin/moderation'),
+            title: 'nav.moderation',
+          },
+          {
+            path: 'configuracion',
+            canMatch: [roleGuard('superadmin')],
+            loadComponent: () => import('./features/admin/settings/settings-page'),
+            title: 'nav.settings',
+          },
         ],
       },
     ],

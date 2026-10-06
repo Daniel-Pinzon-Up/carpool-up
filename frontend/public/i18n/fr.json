@@ -44,7 +44,8 @@
     "trips": "Trajets",
     "emergencies": "Urgences",
     "settings": "Paramètres",
-    "catalog": "Catalogue de composants"
+    "catalog": "Catalogue de composants",
+    "moderation": "Modération"
   },
   "navShort": {
     "search": "Chercher",
@@ -59,11 +60,9 @@
     "users": "Membres",
     "trips": "Trajets",
     "emergencies": "Urgences",
-    "settings": "Réglages"
-  },
-  "placeholder": {
-    "title": "Cette section est en construction",
-    "description": "Elle sera bientôt disponible. En attendant, explorez les autres options du menu."
+    "settings": "Réglages",
+    "moderation": "Modérer",
+    "more": "Plus"
   },
   "ui": {
     "rating": {
@@ -204,7 +203,9 @@
     "RATING_WINDOW_CLOSED": "Le délai de {{days}} jours pour évaluer ce trajet est passé.",
     "RATING_TARGET_INVALID": "Vous ne pouvez pas évaluer cette personne pour ce trajet.",
     "RATING_CRITERIA_INVALID": "Notez tous les critères.",
-    "RATING_EXISTS": "Vous avez déjà évalué cette personne pour ce trajet."
+    "RATING_EXISTS": "Vous avez déjà évalué cette personne pour ce trajet.",
+    "USER_STATUS_INVALID": "Cette action ne s’applique pas au statut actuel du compte.",
+    "SUSPENSION_ENDED": "Cette suspension est déjà terminée."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -651,7 +652,11 @@
       "emergency_alert": "Urgence signalée par {{user_name}}. Consultez-la maintenant.",
       "rating_pending": "Votre trajet est terminé. Évaluez les personnes qui ont voyagé avec vous.",
       "rating_reminder": "Demain se termine le délai pour évaluer votre trajet.",
-      "rating_received": "Vous avez reçu une nouvelle évaluation."
+      "rating_received": "Vous avez reçu une nouvelle évaluation.",
+      "account_suspended": "Votre compte a été suspendu. Motif : {{reason}}",
+      "account_reinstated": "Votre compte est de nouveau actif.",
+      "booking_ban_lifted": "Vous pouvez de nouveau réserver des trajets.",
+      "trip_cancelled_by_admin": "Un administrateur a annulé un de vos trajets. Motif : {{reason}}"
     }
   },
   "vehicles": {
@@ -1358,5 +1363,225 @@
   "charts": {
     "table": "Voir en tableau",
     "month": "Mois"
+  },
+  "admin": {
+    "audited": "Chaque action est enregistrée dans le journal d’audit à votre nom.",
+    "dashboard": {
+      "title": "Tableau d’administration",
+      "subtitle": "Comment Carpool UP est utilisé sur la période choisie.",
+      "period": "Période",
+      "lastDays": "{{count}} derniers jours",
+      "pendingApprovals": "Validations en attente : {{count}}",
+      "openEmergencies": "Urgences ouvertes : {{count}}",
+      "completed": "Trajets effectués",
+      "passengerCancellations": "Réservations annulées",
+      "perDay": "Trajets par jour",
+      "day": "Jour",
+      "perHour": "Trajets par heure de départ",
+      "hourHeader": "Heure",
+      "hour": "{{hour}} h",
+      "routes": "Itinéraires les plus fréquents",
+      "noData": "Pas encore de données sur cette période.",
+      "ratings": "Répartition des notes",
+      "starsHeader": "Étoiles",
+      "ratingCount": "Notes",
+      "stars": "{{count}} étoiles",
+      "users": "Membres par rôle et statut"
+    },
+    "users": {
+      "search": "Nom ou e-mail",
+      "role": "Rôle",
+      "status": "Statut",
+      "any": "Tous",
+      "none": "Aucun membre ne correspond à ces filtres",
+      "statuses": {
+        "active": "Active",
+        "pending_email": "E-mail non vérifié",
+        "pending_approval": "En attente de validation",
+        "suspended": "Suspendue",
+        "blocked": "Bloquée"
+      },
+      "kinds": {
+        "account": "Suspension du compte",
+        "booking_ban": "Interdiction de réserver"
+      },
+      "document": "Carte ou attestation",
+      "license": "Permis",
+      "noDocument": "Non envoyé",
+      "lastLogin": "Dernière connexion",
+      "actions": "Actions",
+      "suspend": "Suspendre",
+      "suspendTitle": "Suspendre {{name}}",
+      "suspendHelp": "Cette personne ne pourra pas se connecter pendant la durée. Ses trajets prévus et réservations actives sont annulés et les personnes concernées prévenues.",
+      "duration": "Durée",
+      "days": "{{count}} jours",
+      "untilReinstated": "Jusqu’à réactivation",
+      "reinstate": "Réactiver",
+      "reinstateTitle": "Réactiver {{name}}",
+      "block": "Bloquer",
+      "blockTitle": "Bloquer {{name}}",
+      "liftBan": "Lever l’interdiction de réserver",
+      "liftBanTitle": "Lever l’interdiction de réserver de {{name}}",
+      "reasonHelp": "Le motif est conservé dans l’audit et envoyé à la personne.",
+      "suspended": "Compte suspendu.",
+      "reinstated": "Compte réactivé.",
+      "blocked": "Compte bloqué et sessions fermées.",
+      "banLifted": "Cette personne peut de nouveau réserver.",
+      "changeRole": "Changer de rôle",
+      "changeRoleMessage": "{{name}} aura le rôle {{role}}. La personne sera prévenue.",
+      "saveRole": "Enregistrer le rôle",
+      "roleChanged": "Rôle mis à jour.",
+      "suspensions": "Historique des sanctions",
+      "noSuspensions": "Aucune sanction.",
+      "automatic": "automatique",
+      "rating": "Note",
+      "ratingCount": "{{count}} notes",
+      "tripsDriver": "Trajets comme conducteur",
+      "tripsPassenger": "Trajets comme passager",
+      "active": "Réservations et trajets actifs"
+    },
+    "bookingStatus": {
+      "requested": "Demandée",
+      "accepted": "Acceptée",
+      "rejected": "Refusée",
+      "cancel_requested": "Annulation en attente",
+      "cancelled_by_passenger": "Annulée par le passager",
+      "cancelled_by_driver": "Annulée par le conducteur",
+      "auto_cancelled_late": "Annulée pour retard",
+      "auto_cancelled_pico_placa": "Annulée (pico y placa)",
+      "expired": "Expirée",
+      "no_show": "Absent",
+      "completed": "Terminée"
+    },
+    "trips": {
+      "search": "Lieu ou conducteur",
+      "day": "Jour de départ",
+      "seats": "{{booked}} sur {{total}} places",
+      "seatsLabel": "Occupation",
+      "emergencies": "{{count}} urgences",
+      "none": "Aucun trajet ne correspond à ces filtres",
+      "vehicle": "Véhicule",
+      "bookings": "Réservations",
+      "noBookings": "Aucune réservation.",
+      "cancel": "Annuler le trajet",
+      "cancelMessage": "Le conducteur et les passagers sont prévenus avec votre motif. Cela ne compte pas dans la réputation du conducteur.",
+      "cancelled": "Trajet annulé.",
+      "viewChat": "Voir la discussion",
+      "chatWarning": "N’ouvrez la discussion que si c’est nécessaire pour traiter un signalement ou une urgence. Ce sera enregistré dans l’audit.",
+      "chat": "Discussion du trajet",
+      "chatAudited": "Votre consultation est enregistrée dans l’audit. Masquer un message ne le supprime pas.",
+      "noMessages": "Aucun message."
+    },
+    "emergencies": {
+      "subtitle": "Les urgences ouvertes apparaissent en premier, en temps réel.",
+      "includeHandled": "Afficher aussi celles traitées",
+      "open": "Ouverte",
+      "handled": "Traitée",
+      "handle": "Marquer comme traitée",
+      "handleTitle": "Traiter l’urgence",
+      "resolution": "Ce qui a été fait",
+      "map": "Voir la position",
+      "none": "Aucune urgence ouverte",
+      "done": "Urgence traitée.",
+      "goTo": "Aller aux urgences"
+    },
+    "moderation": {
+      "subtitle": "Commentaires des notes. Masquer ne supprime pas et peut être annulé.",
+      "tabs": {
+        "visible": "Visibles",
+        "hidden": "Masqués"
+      },
+      "byFor": "{{author}} à propos de {{target}}",
+      "hide": "Masquer",
+      "show": "Afficher",
+      "hidden": "Contenu masqué.",
+      "shown": "Contenu de nouveau visible.",
+      "none": "Aucun commentaire ici"
+    },
+    "settings": {
+      "subtitle": "Règles métier, catalogues, documents légaux, administrateurs et audit.",
+      "tabs": {
+        "parameters": "Paramètres",
+        "semesters": "Semestres",
+        "places": "Lieux",
+        "picoPlaca": "Pico y placa",
+        "legal": "Légal",
+        "admins": "Administrateurs",
+        "audit": "Audit"
+      },
+      "filter": "Chercher un paramètre",
+      "updated": "Mis à jour {{when}}",
+      "yes": "Oui",
+      "no": "Non",
+      "save": "Enregistrer",
+      "saved": "{{key}} enregistré.",
+      "invalidJson": "La valeur n’est pas valide. Vérifiez guillemets, virgules et crochets.",
+      "required": "Vérifiez ce champ.",
+      "update": "Enregistrer",
+      "savedItem": "Modifications enregistrées.",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer {{name}}",
+      "deleteMessage": "Cette action est enregistrée dans l’audit et ne peut pas être annulée.",
+      "deleted": "Supprimé."
+    },
+    "semesters": {
+      "name": "Nom",
+      "starts": "Début",
+      "ends": "Fin",
+      "deadline": "Date limite de revalidation",
+      "deadlineHint": "Facultatif. Vide, elle est calculée avec le paramètre revalidation_days.",
+      "deadlineShort": "revalider avant le {{date}}",
+      "add": "Ajouter un semestre"
+    },
+    "places": {
+      "name": "Nom",
+      "kind": "Type",
+      "lat": "Latitude",
+      "lon": "Longitude",
+      "add": "Ajouter un lieu"
+    },
+    "picoPlaca": {
+      "vehicle": "Type de véhicule",
+      "weekday": "Jour",
+      "digits": "Chiffres concernés",
+      "digitsHint": "Dernier chiffre de la plaque, séparés par des virgules. Exemple : 1, 2",
+      "from": "Valable à partir du",
+      "to": "Valable jusqu’au",
+      "toHint": "Facultatif. Vide si sans fin.",
+      "open": "sans date de fin",
+      "add": "Ajouter une règle"
+    },
+    "legal": {
+      "kind": "Document",
+      "kinds": {
+        "terms": "Conditions d’utilisation",
+        "data_policy": "Politique de données"
+      },
+      "language": "Langue",
+      "version": "Version",
+      "versionInvalid": "Utilisez le format nombre.nombre, par exemple 1.1.",
+      "body": "Texte (Markdown)",
+      "bodyHint": "Au moins 50 caractères.",
+      "bodyInvalid": "Écrivez au moins 50 caractères.",
+      "publish": "Publier la version",
+      "publishMessage": "La nouvelle version s’applique immédiatement et chacun devra l’accepter à sa prochaine connexion.",
+      "published": "Version publiée.",
+      "current": "En vigueur"
+    },
+    "admins": {
+      "password": "Mot de passe initial",
+      "passwordHint": "Transmettez-le par un canal sûr. Il doit respecter la longueur minimale configurée.",
+      "create": "Créer un administrateur",
+      "created": "Compte de {{name}} créé."
+    },
+    "audit": {
+      "action": "Action",
+      "entity": "Entité",
+      "system": "Système",
+      "before": "Avant",
+      "after": "Après",
+      "none": "Aucune entrée ne correspond à ces filtres"
+    }
   }
 }

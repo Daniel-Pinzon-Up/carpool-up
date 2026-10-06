@@ -12,6 +12,7 @@ import {
   LucideSettings,
   LucideShieldCheck,
   LucideSiren,
+  LucideMessageSquareWarning,
   LucideSquarePlus,
   LucideUsers,
 } from '@lucide/angular';
@@ -46,6 +47,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { key: 'users', path: '/admin/usuarios', icon: LucideUsers },
     { key: 'trips', path: '/admin/viajes', icon: LucideRoute },
     { key: 'emergencies', path: '/admin/emergencias', icon: LucideSiren },
+    { key: 'moderation', path: '/admin/moderacion', icon: LucideMessageSquareWarning },
   ],
   superadmin: [
     { key: 'dashboard', path: '/admin', icon: LucideLayoutDashboard },
@@ -53,6 +55,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { key: 'users', path: '/admin/usuarios', icon: LucideUsers },
     { key: 'trips', path: '/admin/viajes', icon: LucideRoute },
     { key: 'emergencies', path: '/admin/emergencias', icon: LucideSiren },
+    { key: 'moderation', path: '/admin/moderacion', icon: LucideMessageSquareWarning },
     { key: 'settings', path: '/admin/configuracion', icon: LucideSettings },
   ],
 };

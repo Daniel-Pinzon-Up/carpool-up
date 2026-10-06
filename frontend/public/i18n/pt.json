@@ -44,7 +44,8 @@
     "trips": "Viagens",
     "emergencies": "Emergências",
     "settings": "Configurações",
-    "catalog": "Catálogo de componentes"
+    "catalog": "Catálogo de componentes",
+    "moderation": "Moderação"
   },
   "navShort": {
     "search": "Buscar",
@@ -59,11 +60,9 @@
     "users": "Usuários",
     "trips": "Viagens",
     "emergencies": "Alertas",
-    "settings": "Ajustes"
-  },
-  "placeholder": {
-    "title": "Estamos construindo esta seção",
-    "description": "Em breve você poderá usá-la. Enquanto isso, explore as outras opções do menu."
+    "settings": "Ajustes",
+    "moderation": "Moderar",
+    "more": "Mais"
   },
   "ui": {
     "rating": {
@@ -204,7 +203,9 @@
     "RATING_WINDOW_CLOSED": "Já passou o prazo de {{days}} dias para avaliar esta viagem.",
     "RATING_TARGET_INVALID": "Você não pode avaliar esta pessoa nesta viagem.",
     "RATING_CRITERIA_INVALID": "Avalie todos os critérios.",
-    "RATING_EXISTS": "Você já avaliou esta pessoa nesta viagem."
+    "RATING_EXISTS": "Você já avaliou esta pessoa nesta viagem.",
+    "USER_STATUS_INVALID": "Essa ação não se aplica ao status atual da conta.",
+    "SUSPENSION_ENDED": "Essa suspensão já terminou."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -651,7 +652,11 @@
       "emergency_alert": "Emergência informada por {{user_name}}. Verifique agora.",
       "rating_pending": "Sua viagem terminou. Avalie quem viajou com você.",
       "rating_reminder": "Amanhã termina o prazo para avaliar sua viagem.",
-      "rating_received": "Você recebeu uma nova avaliação."
+      "rating_received": "Você recebeu uma nova avaliação.",
+      "account_suspended": "Sua conta foi suspensa. Motivo: {{reason}}",
+      "account_reinstated": "Sua conta está ativa novamente.",
+      "booking_ban_lifted": "Você já pode reservar viagens novamente.",
+      "trip_cancelled_by_admin": "Um administrador cancelou uma viagem sua. Motivo: {{reason}}"
     }
   },
   "vehicles": {
@@ -1358,5 +1363,225 @@
   "charts": {
     "table": "Ver como tabela",
     "month": "Mês"
+  },
+  "admin": {
+    "audited": "Cada ação fica registrada na auditoria com seu nome.",
+    "dashboard": {
+      "title": "Painel de administração",
+      "subtitle": "Como o Carpool UP está sendo usado no período escolhido.",
+      "period": "Período",
+      "lastDays": "Últimos {{count}} dias",
+      "pendingApprovals": "Aprovações pendentes: {{count}}",
+      "openEmergencies": "Emergências abertas: {{count}}",
+      "completed": "Viagens concluídas",
+      "passengerCancellations": "Reservas canceladas",
+      "perDay": "Viagens por dia",
+      "day": "Dia",
+      "perHour": "Viagens por hora de saída",
+      "hourHeader": "Hora",
+      "hour": "{{hour}}h",
+      "routes": "Rotas mais frequentes",
+      "noData": "Ainda não há dados neste período.",
+      "ratings": "Distribuição das avaliações",
+      "starsHeader": "Estrelas",
+      "ratingCount": "Avaliações",
+      "stars": "{{count}} estrelas",
+      "users": "Usuários por papel e status"
+    },
+    "users": {
+      "search": "Nome ou e-mail",
+      "role": "Papel",
+      "status": "Status",
+      "any": "Todos",
+      "none": "Nenhum usuário com esses filtros",
+      "statuses": {
+        "active": "Ativa",
+        "pending_email": "E-mail não verificado",
+        "pending_approval": "Em aprovação",
+        "suspended": "Suspensa",
+        "blocked": "Bloqueada"
+      },
+      "kinds": {
+        "account": "Suspensão da conta",
+        "booking_ban": "Suspensão de reservas"
+      },
+      "document": "Carteirinha ou declaração",
+      "license": "Habilitação",
+      "noDocument": "Não enviado",
+      "lastLogin": "Último acesso",
+      "actions": "Ações",
+      "suspend": "Suspender",
+      "suspendTitle": "Suspender {{name}}",
+      "suspendHelp": "Não poderá entrar enquanto durar. Suas viagens programadas e reservas ativas são canceladas e os afetados são avisados.",
+      "duration": "Duração",
+      "days": "{{count}} dias",
+      "untilReinstated": "Até reativar",
+      "reinstate": "Reativar",
+      "reinstateTitle": "Reativar {{name}}",
+      "block": "Bloquear",
+      "blockTitle": "Bloquear {{name}}",
+      "liftBan": "Suspender bloqueio de reservas",
+      "liftBanTitle": "Retirar a suspensão de reservas de {{name}}",
+      "reasonHelp": "O motivo fica na auditoria e a pessoa o recebe no aviso.",
+      "suspended": "Conta suspensa.",
+      "reinstated": "Conta reativada.",
+      "blocked": "Conta bloqueada e sessões encerradas.",
+      "banLifted": "Já pode reservar novamente.",
+      "changeRole": "Alterar papel",
+      "changeRoleMessage": "{{name}} passará a ter o papel {{role}}. Receberá um aviso.",
+      "saveRole": "Salvar papel",
+      "roleChanged": "Papel atualizado.",
+      "suspensions": "Histórico de sanções",
+      "noSuspensions": "Sem sanções.",
+      "automatic": "automática",
+      "rating": "Avaliação",
+      "ratingCount": "{{count}} avaliações",
+      "tripsDriver": "Viagens como motorista",
+      "tripsPassenger": "Viagens como passageiro",
+      "active": "Reservas e viagens ativas"
+    },
+    "bookingStatus": {
+      "requested": "Solicitada",
+      "accepted": "Aceita",
+      "rejected": "Recusada",
+      "cancel_requested": "Cancelamento pendente",
+      "cancelled_by_passenger": "Cancelada pelo passageiro",
+      "cancelled_by_driver": "Cancelada pelo motorista",
+      "auto_cancelled_late": "Cancelada por atraso",
+      "auto_cancelled_pico_placa": "Cancelada por rodízio",
+      "expired": "Expirada",
+      "no_show": "Não compareceu",
+      "completed": "Concluída"
+    },
+    "trips": {
+      "search": "Local ou motorista",
+      "day": "Dia de saída",
+      "seats": "{{booked}} de {{total}} lugares",
+      "seatsLabel": "Ocupação",
+      "emergencies": "{{count}} emergências",
+      "none": "Nenhuma viagem com esses filtros",
+      "vehicle": "Veículo",
+      "bookings": "Reservas",
+      "noBookings": "Sem reservas.",
+      "cancel": "Cancelar viagem",
+      "cancelMessage": "O motorista e os passageiros são avisados com seu motivo. Não conta na reputação do motorista.",
+      "cancelled": "Viagem cancelada.",
+      "viewChat": "Ver o chat",
+      "chatWarning": "Abra o chat só se for necessário para atender uma denúncia ou emergência. Ficará na auditoria.",
+      "chat": "Chat da viagem",
+      "chatAudited": "Seu acesso ficou registrado na auditoria. Ocultar uma mensagem não a apaga.",
+      "noMessages": "Sem mensagens."
+    },
+    "emergencies": {
+      "subtitle": "As abertas aparecem primeiro e chegam em tempo real.",
+      "includeHandled": "Mostrar também as atendidas",
+      "open": "Aberta",
+      "handled": "Atendida",
+      "handle": "Marcar como atendida",
+      "handleTitle": "Atender emergência",
+      "resolution": "O que foi feito",
+      "map": "Ver localização",
+      "none": "Não há emergências abertas",
+      "done": "Emergência atendida.",
+      "goTo": "Ir para emergências"
+    },
+    "moderation": {
+      "subtitle": "Comentários das avaliações. Ocultar não apaga e pode ser desfeito.",
+      "tabs": {
+        "visible": "Visíveis",
+        "hidden": "Ocultos"
+      },
+      "byFor": "{{author}} sobre {{target}}",
+      "hide": "Ocultar",
+      "show": "Mostrar",
+      "hidden": "Conteúdo ocultado.",
+      "shown": "Conteúdo visível novamente.",
+      "none": "Não há comentários aqui"
+    },
+    "settings": {
+      "subtitle": "Regras de negócio, catálogos, documentos legais, administradores e auditoria.",
+      "tabs": {
+        "parameters": "Parâmetros",
+        "semesters": "Semestres",
+        "places": "Locais",
+        "picoPlaca": "Rodízio",
+        "legal": "Legal",
+        "admins": "Administradores",
+        "audit": "Auditoria"
+      },
+      "filter": "Buscar parâmetro",
+      "updated": "Atualizado {{when}}",
+      "yes": "Sim",
+      "no": "Não",
+      "save": "Salvar",
+      "saved": "{{key}} salvo.",
+      "invalidJson": "O valor não tem um formato válido. Confira aspas, vírgulas e colchetes.",
+      "required": "Confira este campo.",
+      "update": "Salvar alterações",
+      "savedItem": "Alterações salvas.",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "deleteTitle": "Excluir {{name}}",
+      "deleteMessage": "Esta ação fica na auditoria e não pode ser desfeita.",
+      "deleted": "Excluído."
+    },
+    "semesters": {
+      "name": "Nome",
+      "starts": "Início",
+      "ends": "Fim",
+      "deadline": "Prazo de revalidação",
+      "deadlineHint": "Opcional. Se ficar vazio, é calculado com o parâmetro revalidation_days.",
+      "deadlineShort": "revalidar até {{date}}",
+      "add": "Adicionar semestre"
+    },
+    "places": {
+      "name": "Nome",
+      "kind": "Tipo",
+      "lat": "Latitude",
+      "lon": "Longitude",
+      "add": "Adicionar local"
+    },
+    "picoPlaca": {
+      "vehicle": "Tipo de veículo",
+      "weekday": "Dia",
+      "digits": "Dígitos restritos",
+      "digitsHint": "Último dígito da placa, separados por vírgulas. Exemplo: 1, 2",
+      "from": "Válido a partir de",
+      "to": "Válido até",
+      "toHint": "Opcional. Vazio se não tiver fim.",
+      "open": "sem data de fim",
+      "add": "Adicionar regra"
+    },
+    "legal": {
+      "kind": "Documento",
+      "kinds": {
+        "terms": "Termos e condições",
+        "data_policy": "Política de dados"
+      },
+      "language": "Idioma",
+      "version": "Versão",
+      "versionInvalid": "Use o formato número.número, por exemplo 1.1.",
+      "body": "Texto (Markdown)",
+      "bodyHint": "Mínimo de 50 caracteres.",
+      "bodyInvalid": "Escreva pelo menos 50 caracteres.",
+      "publish": "Publicar versão",
+      "publishMessage": "A nova versão entra em vigor imediatamente e todos deverão aceitá-la no próximo acesso.",
+      "published": "Versão publicada.",
+      "current": "Vigente"
+    },
+    "admins": {
+      "password": "Senha inicial",
+      "passwordHint": "Compartilhe por um canal seguro. Deve cumprir o tamanho mínimo configurado.",
+      "create": "Criar administrador",
+      "created": "Conta de {{name}} criada."
+    },
+    "audit": {
+      "action": "Ação",
+      "entity": "Entidade",
+      "system": "Sistema",
+      "before": "Antes",
+      "after": "Depois",
+      "none": "Nenhum registro com esses filtros"
+    }
   }
 }
