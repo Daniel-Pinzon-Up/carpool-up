@@ -71,7 +71,9 @@ export interface MonthValue {
         <table class="mt-2 w-full text-left">
           <thead>
             <tr class="text-muted">
-              <th scope="col" class="py-1 font-medium">{{ 'charts.month' | transloco }}</th>
+              <th scope="col" class="py-1 font-medium">
+                {{ keyLabel() ?? ('charts.month' | transloco) }}
+              </th>
               <th scope="col" class="py-1 text-right font-medium">{{ valueLabel() }}</th>
             </tr>
           </thead>
@@ -91,6 +93,8 @@ export interface MonthValue {
 export class MonthColumns {
   readonly title = input.required<string>();
   readonly valueLabel = input.required<string>();
+  /** Encabezado de la primera columna de la tabla (por defecto, Mes). */
+  readonly keyLabel = input<string | null>(null);
   readonly items = input.required<MonthValue[]>();
 
   protected readonly active = signal<number | null>(null);
