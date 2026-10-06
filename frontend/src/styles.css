@@ -9,6 +9,7 @@
 @theme inline {
   --color-bg: var(--bg);
   --color-text: var(--text);
+  --color-chart: var(--chart-mark);
   --color-muted: var(--text-muted);
   --color-primary: var(--primary);
   --color-accent: var(--accent);
@@ -40,6 +41,8 @@
   --text-muted: #3b5378;
   --primary: #1e5aa8;
   --accent: #0b7a5a;
+  /* Marcas de graficos: un solo tono, validado contra las superficies de cada tema. */
+  --chart-mark: #1e5aa8;
   --on-accent: #ffffff;
   --danger: #c0392b;
   --warning: #865c00;
@@ -68,6 +71,7 @@
   --text-muted: #b9cce8;
   --primary: #5aa9ff;
   --accent: #3ddba7;
+  --chart-mark: #4a94ea;
   --on-accent: #0a1f44;
   --danger: #ff6b6b;
   --warning: #ffc857;
