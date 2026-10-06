@@ -12,6 +12,7 @@ from app.core.logging import configure_logging
 from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
 from app.modules.chat.service import close_finished_conversations, purge_chat
 from app.modules.documents.revalidation import run_revalidation
+from app.modules.ratings.jobs import remind_pending_ratings
 from app.modules.series.service import finish_past_series
 from app.modules.trips.jobs import mark_not_held, recompute_traffic_factors, send_trip_reminders
 from app.modules.trips.service import recheck_pico_placa
@@ -92,6 +93,12 @@ async def traffic_factors(ctx: dict[str, Any]) -> dict[str, int]:
         return await recompute_traffic_factors(session)
 
 
+async def close_rating_window(ctx: dict[str, Any]) -> int:
+    """Diario: ultimo aviso para calificar antes de que cierre el plazo."""
+    async with SessionLocal() as session:
+        return await remind_pending_ratings(session)
+
+
 async def startup(ctx: dict[str, Any]) -> None:
     configure_logging(json_output=get_settings().environment != "development")
     logger.info("worker_started")
@@ -111,6 +118,7 @@ class WorkerSettings:
         not_held,
         trip_reminders,
         traffic_factors,
+        close_rating_window,
     ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(heartbeat, minute={0, 15, 30, 45}, run_at_startup=True),
@@ -127,6 +135,8 @@ class WorkerSettings:
         cron(trip_reminders, minute=set(range(1, 60, 5))),
         # Domingos 9:40 UTC = 4:40 a. m. en Pamplona.
         cron(traffic_factors, weekday={6}, hour={9}, minute={40}),
+        # 14:00 UTC = 9:00 a. m. en Pamplona (de dia, para que el aviso se vea).
+        cron(close_rating_window, hour={14}, minute={0}),
     ]
     on_startup = startup
     max_tries = 5
