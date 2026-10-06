@@ -129,6 +129,8 @@ const BOOKING: Booking = {
   free_cancel: true,
   created_at: '2099-10-01T12:00:00Z',
   decided_at: null,
+  boarded_at: null,
+  no_show_at: null,
   cancelled_at: null,
   cancel_reason: null,
   cancellation: null,
