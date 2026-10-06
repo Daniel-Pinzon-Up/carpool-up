@@ -127,6 +127,22 @@ export const routes: Routes = [
         title: 'nav.myTrips',
       },
       {
+        path: 'calificar',
+        loadComponent: () => import('./features/ratings/rate-page'),
+        title: 'ratings.title',
+      },
+      {
+        path: 'calificar/:tripId',
+        loadComponent: () => import('./features/ratings/rate-page'),
+        title: 'ratings.title',
+      },
+      {
+        path: 'estadisticas',
+        canMatch: [roleGuard('driver')],
+        loadComponent: () => import('./features/stats/stats-views'),
+        title: 'stats.driverTitle',
+      },
+      {
         path: 'solicitudes',
         canMatch: [roleGuard('driver')],
         loadComponent: () => import('./features/bookings/driver-inbox'),

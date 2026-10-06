@@ -107,6 +107,10 @@
         </cp-glass-card>
       }
 
+      @if (auth.user()?.role === 'passenger') {
+        <cp-passenger-metrics />
+      }
+
       <cp-trusted-contacts />
 
       <cp-glass-card>

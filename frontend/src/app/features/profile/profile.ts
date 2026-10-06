@@ -6,6 +6,7 @@ import {
   resource,
   signal,
 } from '@angular/core';
+import { PassengerMetrics } from '../stats/stats-views';
 import { TrustedContacts } from './trusted-contacts';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -49,6 +50,7 @@ const DOC_TONES: Record<string, BadgeTone> = {
     Skeleton,
     StatusBadge,
     TrustedContacts,
+    PassengerMetrics,
     LucideLaptop,
     LucideLogOut,
     LucideShieldOff,

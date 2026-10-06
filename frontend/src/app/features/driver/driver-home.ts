@@ -9,6 +9,7 @@ import {
   LucideDynamicIcon,
   LucideIcon,
   LucideIdCard,
+  LucideChartColumn,
   LucideInbox,
   LucideSquarePlus,
   LucideTriangleAlert,
@@ -59,6 +60,7 @@ const STATE_TONE: Record<StepState, string> = {
     GlassButton,
     GlassCard,
     LucideDynamicIcon,
+    LucideChartColumn,
     LucideInbox,
     LucideSquarePlus,
   ],
@@ -88,6 +90,10 @@ const STATE_TONE: Record<StepState, string> = {
             <a cp-button size="lg" variant="secondary" routerLink="/solicitudes">
               <svg lucideInbox class="size-5" aria-hidden="true"></svg>
               {{ 'bookings.inbox.title' | transloco }}
+            </a>
+            <a cp-button size="lg" variant="secondary" routerLink="/estadisticas">
+              <svg lucideChartColumn class="size-5" aria-hidden="true"></svg>
+              {{ 'stats.driverTitle' | transloco }}
             </a>
           </div>
         } @else {
