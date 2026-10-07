@@ -42,10 +42,10 @@ ps:
 	$(DC) ps
 
 migrate:
-	$(DC) exec api alembic upgrade head
+	$(DC) exec -T api alembic upgrade head
 
 seed:
-	$(DC) exec api python -m app.seed
+	$(DC) exec -T api python -m app.seed
 
 token:
 	@$(DC) exec api python -m app.cli token $(EMAIL)
@@ -59,11 +59,11 @@ test-e2e:
 	cd frontend && npx playwright test
 
 backup-check:
-	$(DC) exec backup sh /restore.sh
+	$(DC) exec -T backup sh /restore.sh
 
 restore:
 	$(DC) stop api worker
-	$(DC) exec backup sh /restore.sh $(FILE) live
+	$(DC) exec -T backup sh /restore.sh $(FILE) live
 	$(DC) start api worker
 
 test: test-backend test-frontend

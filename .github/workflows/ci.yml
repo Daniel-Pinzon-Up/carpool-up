@@ -72,6 +72,47 @@ jobs:
       - name: Build
         run: npx ng build
 
+  e2e:
+    # Stack completo con make up, como en un equipo nuevo, y la suite de Playwright: recorrido
+    # de punta a punta, ciclo de vida de una cuenta y axe en 24 pantallas (Chrome del runner).
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Datos de OSRM en cache
+        id: osrm
+        uses: actions/cache@v4
+        with:
+          path: infra/osrm/data
+          key: osrm-${{ hashFiles('infra/scripts/build_osrm.sh', 'infra/osrm/clip.py') }}
+      - name: Datos de OSRM
+        if: steps.osrm.outputs.cache-hit != 'true'
+        run: make osrm
+      - name: Levantar la app
+        run: make up
+      - name: Datos semilla y cuentas de prueba
+        run: make seed && make e2e-users
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - name: Pruebas E2E
+        run: npx playwright test
+        working-directory: frontend
+      - name: Resultados de las pruebas fallidas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: frontend/test-results
+      - name: Logs del stack
+        if: failure()
+        run: make ps && docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml logs --tail=200
+
   images:
     runs-on: ubuntu-latest
     needs: [backend, frontend]

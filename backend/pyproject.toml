@@ -78,3 +78,7 @@ source = ["app"]
 # SQLAlchemy asincrono ejecuta el codigo en greenlets; sin esto se pierden lineas.
 concurrency = ["greenlet", "thread"]
 omit = ["app/workers/*"]
+
+[tool.coverage.report]
+# Definicion de terminado: cobertura de al menos 80 %. Si baja, las pruebas fallan.
+fail_under = 80
