@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideArrowLeft } from '@lucide/angular';
+import { LucideArrowLeft } from '@icons';
 import { marked } from 'marked';
 import { LegalDocument, LegalKind } from '../../core/auth/auth.models';
 import { LanguageService } from '../../core/i18n/language.service';

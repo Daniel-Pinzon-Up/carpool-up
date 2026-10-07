@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideArrowRight, LucideBellDot, LucideRepeat, LucideUsers } from '@lucide/angular';
+import { LucideArrowRight, LucideBellDot, LucideRepeat, LucideUsers } from '@icons';
 import { LanguageService } from '../../core/i18n/language.service';
 import { formatCop } from '../../shared/map/routing.api';
 import { StatusBadge } from '../../shared/ui/status-badge';

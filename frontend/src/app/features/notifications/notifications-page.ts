@@ -23,7 +23,7 @@ import {
   LucideDynamicIcon,
   LucideIcon,
   LucideUserCog,
-} from '@lucide/angular';
+} from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { EmptyState } from '../../shared/ui/empty-state';

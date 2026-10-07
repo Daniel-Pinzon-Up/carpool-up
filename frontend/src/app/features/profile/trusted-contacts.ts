@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucidePencil, LucidePhone, LucidePlus, LucideTrash2 } from '@lucide/angular';
+import { LucidePencil, LucidePhone, LucidePlus, LucideTrash2 } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { fieldError } from '../../shared/forms/validation';
 import { DialogService } from '../../shared/ui/dialog.service';

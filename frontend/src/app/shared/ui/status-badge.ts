@@ -7,7 +7,7 @@ import {
   LucideDynamicIcon,
   LucideIcon,
   LucideTriangleAlert,
-} from '@lucide/angular';
+} from '@icons';
 
 export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'pending';
 

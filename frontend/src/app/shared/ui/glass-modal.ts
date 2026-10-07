@@ -1,7 +1,7 @@
 import { CdkDialogContainer, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideX } from '@lucide/angular';
+import { LucideX } from '@icons';
 import { uniqueId } from './form-control';
 
 /**

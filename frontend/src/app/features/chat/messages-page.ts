@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideLock, LucideMessagesSquare, LucideUser, LucideUsers } from '@lucide/angular';
+import { LucideLock, LucideMessagesSquare, LucideUser, LucideUsers } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';

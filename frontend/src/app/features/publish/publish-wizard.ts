@@ -24,7 +24,7 @@ import {
   LucideRepeat,
   LucideTrash2,
   LucideTriangleAlert,
-} from '@lucide/angular';
+} from '@icons';
 import { debounceTime } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';

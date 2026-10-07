@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { LucideCircleCheck, LucideDynamicIcon, LucideIcon } from '@lucide/angular';
+import { LucideCircleCheck, LucideDynamicIcon, LucideIcon } from '@icons';
 import { FormControlBase, uniqueId } from './form-control';
 
 export interface Choice {

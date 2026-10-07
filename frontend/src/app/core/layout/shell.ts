@@ -16,7 +16,7 @@ import {
   LucidePalette,
   LucidePanelLeftClose,
   LucidePanelLeftOpen,
-} from '@lucide/angular';
+} from '@icons';
 import { Brand } from '../../shared/ui/brand';
 import { ChatUnread } from '../../features/chat/chat.api';
 import { NotificationsStore } from '../notifications/notifications.store';

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideCircleAlert, LucideRotateCcw } from '@lucide/angular';
+import { LucideCircleAlert, LucideRotateCcw } from '@icons';
 import { GlassButton } from './glass-button';
 
 /**

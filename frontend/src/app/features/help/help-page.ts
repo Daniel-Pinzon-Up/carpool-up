@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideArrowLeft, LucideChevronDown } from '@lucide/angular';
+import { LucideArrowLeft, LucideChevronDown } from '@icons';
 import { MetaService } from '../../core/meta/meta.service';
 import { GlassCard } from '../../shared/ui/glass-card';
 

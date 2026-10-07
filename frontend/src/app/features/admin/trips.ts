@@ -19,7 +19,7 @@ import {
   LucideMessageCircle,
   LucideSearch,
   LucideSiren,
-} from '@lucide/angular';
+} from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';

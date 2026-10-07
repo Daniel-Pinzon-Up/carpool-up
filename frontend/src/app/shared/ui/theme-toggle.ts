@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideDynamicIcon, LucideMonitor, LucideMoon, LucideSun } from '@lucide/angular';
+import { LucideDynamicIcon, LucideMonitor, LucideMoon, LucideSun } from '@icons';
 import { ThemePreference, ThemeService } from '../../core/theme/theme.service';
 
 const ORDER: ThemePreference[] = ['system', 'light', 'dark'];

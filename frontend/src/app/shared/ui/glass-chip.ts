@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
-import { LucideCheck, LucideDynamicIcon, LucideIcon } from '@lucide/angular';
+import { LucideCheck, LucideDynamicIcon, LucideIcon } from '@icons';
 
 /** Chip conmutable para filtros y preferencias. Usa aria-pressed. */
 @Component({

@@ -8,13 +8,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import {
-  LucideCircleAlert,
-  LucideDynamicIcon,
-  LucideEye,
-  LucideEyeOff,
-  LucideIcon,
-} from '@lucide/angular';
+import { LucideCircleAlert, LucideDynamicIcon, LucideEye, LucideEyeOff, LucideIcon } from '@icons';
 import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
 
 /** Campo de texto con etiqueta, ayuda y error accesibles. */

@@ -10,7 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCarFront, LucideClock, LucideLink2Off, LucideMapPin } from '@lucide/angular';
+import { LucideCarFront, LucideClock, LucideLink2Off, LucideMapPin } from '@icons';
 import { LanguageService } from '../../core/i18n/language.service';
 import { MapMarker, MapView } from '../../shared/map/map-view';
 import { Brand } from '../../shared/ui/brand';

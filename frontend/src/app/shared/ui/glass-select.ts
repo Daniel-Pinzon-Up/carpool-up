@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { LucideChevronDown } from '@lucide/angular';
+import { LucideChevronDown } from '@icons';
 import { FIELD_CLASSES, FormControlBase, uniqueId } from './form-control';
 
 export interface SelectOption {

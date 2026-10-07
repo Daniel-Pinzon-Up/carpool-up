@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCircleAlert, LucideIdCard } from '@lucide/angular';
+import { LucideCircleAlert, LucideIdCard } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { LicenseSummary } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';

@@ -22,7 +22,7 @@ import {
   LucideStar,
   LucideWallet,
   LucideX,
-} from '@lucide/angular';
+} from '@icons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';

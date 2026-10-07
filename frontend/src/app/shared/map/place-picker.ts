@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideMapPin, LucideMapPinned, LucideX } from '@lucide/angular';
+import { LucideMapPin, LucideMapPinned, LucideX } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { DialogService } from '../ui/dialog.service';
 import { FIELD_CLASSES, FormControlBase, uniqueId } from '../ui/form-control';

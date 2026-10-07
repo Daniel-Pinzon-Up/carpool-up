@@ -9,7 +9,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCircleAlert, LucideMailCheck } from '@lucide/angular';
+import { LucideCircleAlert, LucideMailCheck } from '@icons';
 import { homeFor } from '../../core/auth/auth.guards';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorCode, apiErrorMessage } from '../../core/http/api-error-message';

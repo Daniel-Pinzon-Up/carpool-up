@@ -11,13 +11,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  LucideArrowLeft,
-  LucideBan,
-  LucideRotateCcw,
-  LucideSearch,
-  LucideUserX,
-} from '@lucide/angular';
+import { LucideArrowLeft, LucideBan, LucideRotateCcw, LucideSearch, LucideUserX } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserRole } from '../../core/auth/auth.models';

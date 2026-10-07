@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideStar } from '@lucide/angular';
+import { LucideStar } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { ErrorState } from '../../shared/ui/error-state';
 import { LanguageService } from '../../core/i18n/language.service';

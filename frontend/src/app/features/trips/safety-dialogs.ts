@@ -11,7 +11,7 @@ import {
   LucidePhoneCall,
   LucideShare2,
   LucideSiren,
-} from '@lucide/angular';
+} from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassModal } from '../../shared/ui/glass-modal';

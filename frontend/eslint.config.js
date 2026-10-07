@@ -38,4 +38,9 @@ module.exports = defineConfig([
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {},
   },
+  {
+    // Los iconos conservan los selectores de Lucide (svg[lucideSearch]) para no cambiar plantillas.
+    files: ['src/app/shared/icons/**/*.ts'],
+    rules: { '@angular-eslint/directive-selector': 'off' },
+  },
 ]);

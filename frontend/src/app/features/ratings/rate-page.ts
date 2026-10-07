@@ -11,7 +11,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideStar } from '@lucide/angular';
+import { LucideStar } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';

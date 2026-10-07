@@ -13,7 +13,7 @@ import {
   LucideInbox,
   LucideSquarePlus,
   LucideTriangleAlert,
-} from '@lucide/angular';
+} from '@icons';
 import { PublishBlocker } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
 import { GlassButton } from '../../shared/ui/glass-button';

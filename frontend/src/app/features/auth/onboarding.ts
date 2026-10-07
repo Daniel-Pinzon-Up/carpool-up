@@ -7,7 +7,7 @@ import {
   LucideHandCoins,
   LucideRoute,
   LucideShieldCheck,
-} from '@lucide/angular';
+} from '@icons';
 import { ONBOARDED_KEY } from '../../core/auth/auth.guards';
 import { writePref } from '../../core/storage/local-preferences';
 import { GlassButton } from '../../shared/ui/glass-button';

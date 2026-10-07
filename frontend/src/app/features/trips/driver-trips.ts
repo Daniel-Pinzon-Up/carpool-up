@@ -7,7 +7,7 @@ import {
   LucideInbox,
   LucidePlus,
   LucideTriangleAlert,
-} from '@lucide/angular';
+} from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';

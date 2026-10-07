@@ -18,7 +18,7 @@ import {
   LucideReceipt,
   LucideShare2,
   LucideSiren,
-} from '@lucide/angular';
+} from '@icons';
 import { apiErrorCode, apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { LocationSharingService } from '../../core/location/location-sharing.service';

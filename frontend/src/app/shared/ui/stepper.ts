@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideCheck } from '@lucide/angular';
+import { LucideCheck } from '@icons';
 
 /** Indicador de progreso de un asistente en pasos. current es base 0. */
 @Component({

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, forwardRef, input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideMinus, LucidePlus } from '@lucide/angular';
+import { LucideMinus, LucidePlus } from '@icons';
 import { FormControlBase, uniqueId } from './form-control';
 
 /** Selector de puestos con botones grandes. El rango lo dicta la capacidad del vehiculo. */

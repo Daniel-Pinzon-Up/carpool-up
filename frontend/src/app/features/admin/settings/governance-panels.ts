@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideSearch, LucideSend, LucideUserPlus } from '@lucide/angular';
+import { LucideSearch, LucideSend, LucideUserPlus } from '@icons';
 import { apiErrorMessage } from '../../../core/http/api-error-message';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { DialogService } from '../../../shared/ui/dialog.service';

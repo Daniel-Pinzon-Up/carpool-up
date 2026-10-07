@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideFileCheck, LucideUpload, LucideX } from '@lucide/angular';
+import { LucideFileCheck, LucideUpload, LucideX } from '@icons';
 import { FormControlBase, uniqueId } from './form-control';
 
 export const DOCUMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];

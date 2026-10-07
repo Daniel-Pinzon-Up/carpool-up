@@ -11,7 +11,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideShieldCheck, LucideSiren } from '@lucide/angular';
+import { LucideShieldCheck, LucideSiren } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { Meter } from '../../shared/charts/meter';

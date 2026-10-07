@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideChevronDown, LucideLanguages } from '@lucide/angular';
+import { LucideChevronDown, LucideLanguages } from '@icons';
 import { LANGUAGES, Language, LanguageService, isLanguage } from '../../core/i18n/language.service';
 import { uniqueId } from './form-control';
 

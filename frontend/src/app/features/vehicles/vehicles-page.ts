@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  LucideBackpack,
-  LucidePencil,
-  LucidePlus,
-  LucideTrash2,
-  LucideUsers,
-} from '@lucide/angular';
+import { LucideBackpack, LucidePencil, LucidePlus, LucideTrash2, LucideUsers } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { DialogService } from '../../shared/ui/dialog.service';

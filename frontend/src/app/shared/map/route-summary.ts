@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideClock, LucideHandCoins, LucideInfo, LucideRoute } from '@lucide/angular';
+import { LucideClock, LucideHandCoins, LucideInfo, LucideRoute } from '@icons';
 import { LanguageService } from '../../core/i18n/language.service';
 import { RoutePreview, formatCop } from './routing.api';
 

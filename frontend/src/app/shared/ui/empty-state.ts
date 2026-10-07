@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { LucideDynamicIcon, LucideIcon, LucideInbox } from '@lucide/angular';
+import { LucideDynamicIcon, LucideIcon, LucideInbox } from '@icons';
 
 /** Estado vacio con explicacion y una accion principal opcional (contenido proyectado). */
 @Component({

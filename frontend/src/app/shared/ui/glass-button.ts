@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { LucideLoaderCircle } from '@lucide/angular';
+import { LucideLoaderCircle } from '@icons';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 export type ButtonSize = 'md' | 'lg';

@@ -15,7 +15,7 @@ import {
   LucideMessageSquareWarning,
   LucideSquarePlus,
   LucideUsers,
-} from '@lucide/angular';
+} from '@icons';
 import { UserRole } from '../auth/auth.models';
 
 export interface NavItem {

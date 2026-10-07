@@ -17,7 +17,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideArrowLeft, LucideBike, LucideCar, LucideCircleAlert } from '@lucide/angular';
+import { LucideArrowLeft, LucideBike, LucideCar, LucideCircleAlert } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { MetaService } from '../../core/meta/meta.service';

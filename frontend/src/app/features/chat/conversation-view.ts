@@ -15,13 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  LucideArrowLeft,
-  LucideLock,
-  LucideRotateCw,
-  LucideSendHorizontal,
-  LucideX,
-} from '@lucide/angular';
+import { LucideArrowLeft, LucideLock, LucideRotateCw, LucideSendHorizontal, LucideX } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';

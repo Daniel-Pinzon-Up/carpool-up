@@ -8,7 +8,7 @@ import {
   LucideRepeat,
   LucideStar,
   LucideUsers,
-} from '@lucide/angular';
+} from '@icons';
 import { LanguageService } from '../../core/i18n/language.service';
 import { formatCop } from '../../shared/map/routing.api';
 import { Avatar } from '../../shared/ui/avatar';

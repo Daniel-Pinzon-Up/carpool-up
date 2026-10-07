@@ -9,7 +9,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl, SafeUrl } from '@angular/platform-browser';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCheck, LucideInbox, LucideRefreshCw, LucideX } from '@lucide/angular';
+import { LucideCheck, LucideInbox, LucideRefreshCw, LucideX } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { LoadedFile, SecureFileService } from '../../core/files/secure-file.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';

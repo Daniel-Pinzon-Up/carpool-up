@@ -10,7 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCircleCheck, LucideUsers } from '@lucide/angular';
+import { LucideCircleCheck, LucideUsers } from '@icons';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { ToastService } from '../../shared/ui/toast.service';
 import { LifecycleApi } from '../trips/lifecycle.api';

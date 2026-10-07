@@ -19,7 +19,7 @@ import {
   LucideHourglass,
   LucideRepeat,
   LucideTicket,
-} from '@lucide/angular';
+} from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';

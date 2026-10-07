@@ -10,13 +10,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  LucideArrowRight,
-  LucideCopy,
-  LucidePencil,
-  LucideTriangleAlert,
-  LucideX,
-} from '@lucide/angular';
+import { LucideArrowRight, LucideCopy, LucidePencil, LucideTriangleAlert, LucideX } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';

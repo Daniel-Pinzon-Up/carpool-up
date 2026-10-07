@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideArrowUpDown, LucideCircleAlert, LucideSearch, LucideSearchX } from '@lucide/angular';
+import { LucideArrowUpDown, LucideCircleAlert, LucideSearch, LucideSearchX } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { readPref, writePref } from '../../core/storage/local-preferences';

@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { LucideBike, LucideCar } from '@lucide/angular';
+import { LucideBike, LucideCar } from '@icons';
 import { LoadedFile, SecureFileService } from '../../core/files/secure-file.service';
 import { VehicleType, VehiclesApi } from './vehicles.api';
 

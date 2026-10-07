@@ -9,7 +9,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCircleCheck, LucideMapPin, LucideSiren } from '@lucide/angular';
+import { LucideCircleCheck, LucideMapPin, LucideSiren } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';

@@ -14,7 +14,7 @@ import {
   LucideIcon,
   LucideLogOut,
   LucideRefreshCw,
-} from '@lucide/angular';
+} from '@icons';
 import { homeFor } from '../../core/auth/auth.guards';
 import { AuthService } from '../../core/auth/auth.service';
 import { DocKind } from '../../core/auth/auth.models';

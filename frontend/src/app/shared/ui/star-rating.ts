@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideStar } from '@lucide/angular';
+import { LucideStar } from '@icons';
 import { FormControlBase, uniqueId } from './form-control';
 
 const STARS = [1, 2, 3, 4, 5] as const;

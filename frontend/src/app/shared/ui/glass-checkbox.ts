@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { LucideCheck } from '@lucide/angular';
+import { LucideCheck } from '@icons';
 import { FormControlBase, uniqueId } from './form-control';
 
 /** Casilla nativa con estilo propio. El texto (con enlaces si hace falta) va proyectado. */

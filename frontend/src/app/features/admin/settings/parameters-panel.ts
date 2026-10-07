@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideSave } from '@lucide/angular';
+import { LucideSave } from '@icons';
 import { apiErrorMessage } from '../../../core/http/api-error-message';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { GlassButton } from '../../../shared/ui/glass-button';

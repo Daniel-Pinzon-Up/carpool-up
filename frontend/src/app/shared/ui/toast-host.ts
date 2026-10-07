@@ -8,7 +8,7 @@ import {
   LucideInfo,
   LucideTriangleAlert,
   LucideX,
-} from '@lucide/angular';
+} from '@icons';
 import { ToastService, ToastTone } from './toast.service';
 
 const TONE_ICONS: Record<ToastTone, LucideIcon> = {

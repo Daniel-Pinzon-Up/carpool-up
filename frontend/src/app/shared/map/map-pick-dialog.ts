@@ -2,7 +2,7 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideCircleAlert } from '@lucide/angular';
+import { LucideCircleAlert } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { GlassButton } from '../ui/glass-button';
 import { GlassInput } from '../ui/glass-input';

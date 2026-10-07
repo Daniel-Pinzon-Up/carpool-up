@@ -11,7 +11,7 @@ import {
   LucideSearchX,
   LucideTrash2,
   LucideVenus,
-} from '@lucide/angular';
+} from '@icons';
 import { ThemeService } from '../../core/theme/theme.service';
 import { Avatar } from '../../shared/ui/avatar';
 import { DialogService } from '../../shared/ui/dialog.service';
