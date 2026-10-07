@@ -174,5 +174,18 @@
         {{ 'profile.logout' | transloco }}
       </button>
     </cp-glass-card>
+
+    @if (me.role !== 'superadmin') {
+      <cp-glass-card class="flex flex-wrap items-center justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <h2 class="text-lg font-bold">{{ 'profile.delete.title' | transloco }}</h2>
+          <p class="text-sm text-muted">{{ 'profile.delete.hint' | transloco }}</p>
+        </div>
+        <button cp-button variant="secondary" type="button" (click)="deleteAccount()">
+          <svg lucideTrash2 class="size-4" aria-hidden="true"></svg>
+          {{ 'profile.delete.open' | transloco }}
+        </button>
+      </cp-glass-card>
+    }
   </div>
 }

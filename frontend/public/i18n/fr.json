@@ -209,7 +209,10 @@
     "RATING_CRITERIA_INVALID": "Notez tous les critères.",
     "RATING_EXISTS": "Vous avez déjà évalué cette personne pour ce trajet.",
     "USER_STATUS_INVALID": "Cette action ne s’applique pas au statut actuel du compte.",
-    "SUSPENSION_ENDED": "Cette suspension est déjà terminée."
+    "SUSPENSION_ENDED": "Cette suspension est déjà terminée.",
+    "PASSWORD_INCORRECT": "Le mot de passe est incorrect.",
+    "ACCOUNT_DELETE_NOT_ALLOWED": "Ce compte ne peut pas être supprimé depuis l’application.",
+    "ACCOUNT_DELETE_TRIP_IN_PROGRESS": "Vous avez un trajet en cours. Terminez-le avant de supprimer votre compte."
   },
   "catalog": {
     "title": "Catalogue de composants",
@@ -550,7 +553,19 @@
       "confirmBody": "Vous serez déconnecté de tous les appareils sauf celui-ci.",
       "closed": "Nous avons fermé {{count}} sessions."
     },
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "delete": {
+      "title": "Supprimer mon compte",
+      "hint": "Efface vos données personnelles de Carpool UP. Action irréversible.",
+      "open": "Supprimer le compte",
+      "intro": "Voici ce qui va se passer :",
+      "erased": "Vos nom, e-mail, photo, documents et contacts de confiance sont effacés.",
+      "trips": "Vos trajets et réservations à venir sont annulés et les autres personnes sont prévenues.",
+      "kept": "Les trajets déjà effectués sont conservés comme registres, sans données permettant de vous identifier.",
+      "understood": "Je comprends que c’est irréversible.",
+      "confirm": "Supprimer définitivement",
+      "done": "Votre compte a été supprimé."
+    }
   },
   "approvals": {
     "subtitle": "Vérifiez les documents par ordre d'arrivée. Comparez le nom et le sexe avec le document.",

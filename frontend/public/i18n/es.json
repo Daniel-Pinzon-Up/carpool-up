@@ -209,7 +209,10 @@
     "RATING_CRITERIA_INVALID": "Califica todos los criterios.",
     "RATING_EXISTS": "Ya calificaste a esta persona en este viaje.",
     "USER_STATUS_INVALID": "Esa acción no aplica al estado actual de la cuenta.",
-    "SUSPENSION_ENDED": "Esa suspensión ya terminó."
+    "SUSPENSION_ENDED": "Esa suspensión ya terminó.",
+    "PASSWORD_INCORRECT": "La contraseña no es correcta.",
+    "ACCOUNT_DELETE_NOT_ALLOWED": "Esta cuenta no se puede eliminar desde la app.",
+    "ACCOUNT_DELETE_TRIP_IN_PROGRESS": "Tienes un viaje en curso. Termínalo antes de eliminar tu cuenta."
   },
   "catalog": {
     "title": "Catálogo de componentes",
@@ -550,7 +553,19 @@
       "confirmBody": "Saldrás de la app en todos los dispositivos menos en este.",
       "closed": "Cerramos {{count}} sesiones."
     },
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "delete": {
+      "title": "Eliminar mi cuenta",
+      "hint": "Borra tus datos personales de Carpool UP. No se puede deshacer.",
+      "open": "Eliminar cuenta",
+      "intro": "Esto es lo que pasará:",
+      "erased": "Se borran tu nombre, correo, foto, documentos y contactos de confianza.",
+      "trips": "Se cancelan tus viajes y reservas futuros, y avisamos a las demás personas.",
+      "kept": "Los viajes ya hechos se conservan como registro, sin datos que te identifiquen.",
+      "understood": "Entiendo que no se puede deshacer.",
+      "confirm": "Eliminar definitivamente",
+      "done": "Tu cuenta fue eliminada."
+    }
   },
   "approvals": {
     "subtitle": "Revisa los documentos en orden de llegada. Compara el nombre y el sexo con el documento.",

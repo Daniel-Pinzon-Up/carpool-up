@@ -166,6 +166,12 @@ export class AuthService {
     this.setChallenge(null);
   }
 
+  /** Elimina la cuenta propia (no se puede deshacer) y cierra la sesion local. */
+  async deleteAccount(password: string): Promise<void> {
+    await firstValueFrom(this.http.post<void>(`${API}/users/me/delete`, { password }));
+    this.clearSession();
+  }
+
   async logout(): Promise<void> {
     try {
       await firstValueFrom(this.http.post<void>(`${API}/auth/logout`, {}));

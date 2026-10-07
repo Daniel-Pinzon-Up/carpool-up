@@ -7,12 +7,14 @@ import {
   signal,
 } from '@angular/core';
 import { PassengerMetrics } from '../stats/stats-views';
+import { DeleteAccountDialog } from './delete-account-dialog';
 import { TrustedContacts } from './trusted-contacts';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideLaptop, LucideLogOut, LucideShieldOff } from '@lucide/angular';
+import { LucideLaptop, LucideLogOut, LucideShieldOff, LucideTrash2 } from '@icons';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { ThemePreference, ThemeService } from '../../core/theme/theme.service';
@@ -54,6 +56,7 @@ const DOC_TONES: Record<string, BadgeTone> = {
     LucideLaptop,
     LucideLogOut,
     LucideShieldOff,
+    LucideTrash2,
   ],
   templateUrl: './profile.html',
 })
@@ -152,6 +155,13 @@ export default class Profile {
 
   protected async logout(): Promise<void> {
     await this.auth.logout();
+    await this.router.navigateByUrl('/ingresar');
+  }
+
+  protected async deleteAccount(): Promise<void> {
+    const ref = this.dialogs.open<boolean, undefined, DeleteAccountDialog>(DeleteAccountDialog);
+    if (!(await firstValueFrom(ref.closed))) return;
+    this.toasts.show(this.transloco.translate('profile.delete.done'), 'success');
     await this.router.navigateByUrl('/ingresar');
   }
 }

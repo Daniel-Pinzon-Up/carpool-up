@@ -209,7 +209,10 @@
     "RATING_CRITERIA_INVALID": "Rate every criterion.",
     "RATING_EXISTS": "You already rated this person on this ride.",
     "USER_STATUS_INVALID": "That action does not apply to the account’s current status.",
-    "SUSPENSION_ENDED": "That suspension has already ended."
+    "SUSPENSION_ENDED": "That suspension has already ended.",
+    "PASSWORD_INCORRECT": "The password is not correct.",
+    "ACCOUNT_DELETE_NOT_ALLOWED": "This account cannot be deleted from the app.",
+    "ACCOUNT_DELETE_TRIP_IN_PROGRESS": "You have a trip in progress. Finish it before deleting your account."
   },
   "catalog": {
     "title": "Component catalog",
@@ -550,7 +553,19 @@
       "confirmBody": "You will be signed out on every device except this one.",
       "closed": "We closed {{count}} sessions."
     },
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "delete": {
+      "title": "Delete my account",
+      "hint": "Erases your personal data from Carpool UP. This cannot be undone.",
+      "open": "Delete account",
+      "intro": "This is what will happen:",
+      "erased": "Your name, email, photo, documents and trusted contacts are erased.",
+      "trips": "Your future trips and bookings are cancelled and the other people are notified.",
+      "kept": "Past trips are kept as records, without data that identifies you.",
+      "understood": "I understand this cannot be undone.",
+      "confirm": "Delete permanently",
+      "done": "Your account was deleted."
+    }
   },
   "approvals": {
     "subtitle": "Review documents in order of arrival. Compare the name and sex with the document.",
