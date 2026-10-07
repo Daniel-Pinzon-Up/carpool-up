@@ -16,6 +16,7 @@ import { apiErrorMessage } from '../../core/http/api-error-message';
 import { Avatar } from '../../shared/ui/avatar';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassSelect, SelectOption } from '../../shared/ui/glass-select';
@@ -34,6 +35,7 @@ import { RejectDialog } from './reject-dialog';
     TranslocoPipe,
     Avatar,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassSelect,
@@ -58,6 +60,7 @@ export default class Approvals {
   protected readonly items = signal<ApprovalItem[]>([]);
   protected readonly counts = signal<Record<ApprovalType, number>>({ identity: 0, license: 0 });
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly selectedId = signal<string | null>(null);
   protected readonly selected = computed(
     () => this.items().find((item) => item.id === this.selectedId()) ?? null,
@@ -102,13 +105,14 @@ export default class Approvals {
 
   protected async reload(): Promise<void> {
     this.loading.set(true);
+    this.loadError.set(null);
     try {
       const [page, counts] = await Promise.all([this.api.queue(this.type()), this.api.counts()]);
       this.items.set(page.items);
       this.counts.set(counts);
       await this.select(page.items[0] ?? null);
     } catch (error) {
-      this.toasts.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     } finally {
       this.loading.set(false);
     }

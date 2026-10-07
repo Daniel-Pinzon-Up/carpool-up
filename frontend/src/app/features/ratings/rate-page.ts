@@ -15,6 +15,7 @@ import { LucideStar } from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassTextarea } from '../../shared/ui/glass-textarea';
@@ -46,6 +47,7 @@ interface Pending extends PendingRating {
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassTextarea,
@@ -59,7 +61,11 @@ interface Pending extends PendingRating {
         <p class="text-muted">{{ 'ratings.subtitle' | transloco }}</p>
       </header>
 
-      @if (items() === null) {
+      @if (loadError(); as message) {
+        <cp-glass-card
+          ><cp-error-state [message]="message" (retry)="load(filter())"
+        /></cp-glass-card>
+      } @else if (items() === null) {
         <cp-glass-card><cp-skeleton [lines]="4" /></cp-glass-card>
       } @else {
         @for (item of items(); track item.key) {
@@ -133,10 +139,11 @@ export default class RatePage {
   protected readonly doneIcon = LucideStar;
   protected readonly commentMax = COMMENT_MAX;
   protected readonly items = signal<Pending[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly busy = signal<string | null>(null);
   protected readonly sent = signal(0);
   private readonly tried = signal(new Set<string>());
-  private readonly filter = computed(() => this.tripId() ?? null);
+  protected readonly filter = computed(() => this.tripId() ?? null);
 
   constructor() {
     effect(() => {
@@ -145,7 +152,8 @@ export default class RatePage {
     });
   }
 
-  private async load(tripId: string | null): Promise<void> {
+  protected async load(tripId: string | null): Promise<void> {
+    this.loadError.set(null);
     try {
       const pending = await this.api.pending();
       this.items.set(
@@ -171,8 +179,7 @@ export default class RatePage {
           })),
       );
     } catch (error) {
-      this.items.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

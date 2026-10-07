@@ -8,6 +8,7 @@ import { DialogService } from '../../shared/ui/dialog.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassInput } from '../../shared/ui/glass-input';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ToastService } from '../../shared/ui/toast.service';
 import { LifecycleApi, TrustedContact } from '../trips/lifecycle.api';
@@ -27,6 +28,7 @@ const MAX_CONTACTS = 5;
     GlassButton,
     GlassCard,
     GlassInput,
+    ErrorState,
     Skeleton,
     LucidePencil,
     LucidePhone,
@@ -37,7 +39,9 @@ const MAX_CONTACTS = 5;
     <cp-glass-card>
       <h2 class="mb-1 text-lg font-bold">{{ 'safety.contacts.title' | transloco }}</h2>
       <p class="mb-4 text-sm text-muted">{{ 'safety.contacts.help' | transloco }}</p>
-      @if (contacts() === null) {
+      @if (loadError(); as message) {
+        <cp-error-state [message]="message" (retry)="load()" />
+      } @else if (contacts() === null) {
         <cp-skeleton [lines]="2" />
       } @else {
         <ul class="mb-4 flex flex-col gap-2">
@@ -119,6 +123,7 @@ export class TrustedContacts {
 
   protected readonly max = MAX_CONTACTS;
   protected readonly contacts = signal<TrustedContact[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly editing = signal<string | null>(null);
   protected readonly busy = signal(false);
   private readonly submitted = signal(false);
@@ -132,12 +137,12 @@ export class TrustedContacts {
     void this.load();
   }
 
-  private async load(): Promise<void> {
+  protected async load(): Promise<void> {
+    this.loadError.set(null);
     try {
       this.contacts.set(await this.api.contacts());
     } catch (error) {
-      this.contacts.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

@@ -7,6 +7,7 @@ import { apiErrorMessage } from '../../../core/http/api-error-message';
 import { LanguageService } from '../../../core/i18n/language.service';
 import { DialogService } from '../../../shared/ui/dialog.service';
 import { EmptyState } from '../../../shared/ui/empty-state';
+import { ErrorState } from '../../../shared/ui/error-state';
 import { GlassButton } from '../../../shared/ui/glass-button';
 import { GlassCard } from '../../../shared/ui/glass-card';
 import { GlassInput } from '../../../shared/ui/glass-input';
@@ -327,6 +328,7 @@ export class AdminsPanel {
     ReactiveFormsModule,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassInput,
@@ -356,6 +358,9 @@ export class AdminsPanel {
           </button>
         </form>
       </cp-glass-card>
+      @if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load()" /></cp-glass-card>
+      }
       <ul class="flex flex-col gap-2">
         @for (entry of items(); track entry.id) {
           <li class="glass-1 !rounded-2xl p-4 text-sm">
@@ -390,7 +395,9 @@ export class AdminsPanel {
             </details>
           </li>
         } @empty {
-          <cp-empty-state [title]="'admin.audit.none' | transloco" />
+          @if (!loadError()) {
+            <li><cp-empty-state [title]="'admin.audit.none' | transloco" /></li>
+          }
         }
       </ul>
       @if (cursor()) {
@@ -418,6 +425,7 @@ export class AuditPanel {
     entity: new FormControl('', { nonNullable: true }),
   });
   protected readonly items = signal<AuditEntry[]>([]);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
 
   constructor() {
@@ -426,6 +434,7 @@ export class AuditPanel {
 
   protected async load(more = false): Promise<void> {
     const { action, entity } = this.filters.getRawValue();
+    if (!more) this.loadError.set(null);
     try {
       const page = await this.api.audit({
         action: action.trim(),
@@ -435,7 +444,11 @@ export class AuditPanel {
       this.items.update((list) => (more ? [...list, ...page.items] : page.items));
       this.cursor.set(page.next_cursor);
     } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (more) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else {
+        this.items.set([]);
+        this.loadError.set(apiErrorMessage(this.transloco, error));
+      }
     }
   }
 

@@ -25,6 +25,7 @@ import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassInput } from '../../shared/ui/glass-input';
@@ -47,6 +48,7 @@ import { AdminApi, AdminMessage, AdminTripDetail, AdminTripRow } from './admin.a
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassInput,
@@ -86,7 +88,9 @@ import { AdminApi, AdminMessage, AdminTripDetail, AdminTripRow } from './admin.a
           </button>
         </form>
       </cp-glass-card>
-      @if (rows() === null) {
+      @if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="search()" /></cp-glass-card>
+      } @else if (rows() === null) {
         <cp-glass-card><cp-skeleton [lines]="5" /></cp-glass-card>
       } @else {
         <ul class="flex flex-col gap-2">
@@ -120,7 +124,7 @@ import { AdminApi, AdminMessage, AdminTripDetail, AdminTripRow } from './admin.a
               </a>
             </li>
           } @empty {
-            <cp-empty-state [title]="'admin.trips.none' | transloco" />
+            <li><cp-empty-state [title]="'admin.trips.none' | transloco" /></li>
           }
         </ul>
         @if (cursor()) {
@@ -150,6 +154,7 @@ export default class AdminTrips {
     day: new FormControl('', { nonNullable: true }),
   });
   protected readonly rows = signal<AdminTripRow[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly statusOptions = computed(() => {
     this.language.current();
@@ -167,6 +172,7 @@ export default class AdminTrips {
   }
 
   protected async search(more = false): Promise<void> {
+    if (!more) this.loadError.set(null);
     try {
       const page = await this.api.trips({
         ...this.filters.getRawValue(),
@@ -175,8 +181,8 @@ export default class AdminTrips {
       this.rows.update((list) => (more ? [...(list ?? []), ...page.items] : page.items));
       this.cursor.set(page.next_cursor);
     } catch (error) {
-      this.rows.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (more) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 
@@ -200,6 +206,7 @@ export default class AdminTrips {
     RouterLink,
     TranslocoPipe,
     GlassButton,
+    ErrorState,
     GlassCard,
     Skeleton,
     StatusBadge,
@@ -360,6 +367,8 @@ export default class AdminTrips {
             </ul>
           </cp-glass-card>
         }
+      } @else if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load(id())" /></cp-glass-card>
       } @else {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
       }
@@ -376,6 +385,7 @@ export class AdminTripDetailPage {
   private readonly toast = inject(ToastService);
 
   protected readonly trip = signal<AdminTripDetail | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly messages = signal<AdminMessage[] | null>(null);
 
   constructor() {
@@ -385,12 +395,14 @@ export class AdminTripDetailPage {
     });
   }
 
-  private async load(id: string): Promise<void> {
+  protected async load(id: string): Promise<void> {
     this.messages.set(null);
+    this.loadError.set(null);
     try {
       this.trip.set(await this.api.trip(id));
     } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (this.trip()) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

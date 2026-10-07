@@ -14,6 +14,7 @@ import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassTabs, TabItem } from '../../shared/ui/glass-tabs';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { DriverHistoryItem } from '../ratings/history-items';
@@ -32,6 +33,7 @@ type Tab = 'upcoming' | 'series' | 'history';
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassTabs,
@@ -78,7 +80,7 @@ type Tab = 'upcoming' | 'series' | 'history';
         class="flex flex-col gap-3"
       >
         @if (error()) {
-          <p role="alert" class="text-danger">{{ error() }}</p>
+          <cp-glass-card><cp-error-state [message]="error()" (retry)="load()" /></cp-glass-card>
         } @else if (loading()) {
           @for (row of [1, 2, 3]; track row) {
             <cp-glass-card><cp-skeleton [lines]="2" /></cp-glass-card>

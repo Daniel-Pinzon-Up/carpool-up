@@ -12,6 +12,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -27,6 +28,7 @@ import { Vehicle, VehiclesApi } from './vehicles.api';
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     Skeleton,
@@ -57,6 +59,8 @@ import { Vehicle, VehiclesApi } from './vehicles.api';
             <cp-glass-card><cp-skeleton [lines]="4" /></cp-glass-card>
           }
         </div>
+      } @else if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load()" /></cp-glass-card>
       } @else if (vehicles().length === 0) {
         <cp-glass-card>
           <cp-empty-state
@@ -148,16 +152,19 @@ export default class VehiclesPage {
 
   protected readonly vehicles = signal<Vehicle[]>([]);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<string | null>(null);
 
   constructor() {
     void this.load();
   }
 
-  private async load(): Promise<void> {
+  protected async load(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
     try {
       this.vehicles.set(await this.api.list());
     } catch (error) {
-      this.toasts.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     } finally {
       this.loading.set(false);
     }

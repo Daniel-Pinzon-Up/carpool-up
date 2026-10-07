@@ -4,6 +4,7 @@ import { LucideEye, LucideEyeOff, LucideStar } from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassTabs } from '../../shared/ui/glass-tabs';
@@ -20,6 +21,7 @@ type View = 'visible' | 'hidden';
   imports: [
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassTabs,
@@ -47,7 +49,9 @@ type View = 'visible' | 'hidden';
         [attr.aria-labelledby]="tabsRef.tabId(view())"
         class="flex flex-col gap-3"
       >
-        @if (items() === null) {
+        @if (loadError(); as message) {
+          <cp-glass-card><cp-error-state [message]="message" (retry)="load()" /></cp-glass-card>
+        } @else if (items() === null) {
           <cp-glass-card><cp-skeleton [lines]="4" /></cp-glass-card>
         } @else {
           @for (r of items(); track r.id) {
@@ -103,6 +107,7 @@ export default class AdminModeration {
 
   protected readonly view = signal<View>('visible');
   protected readonly items = signal<AdminRating[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly tabs = computed(() => {
     this.language.current();
@@ -117,14 +122,17 @@ export default class AdminModeration {
   }
 
   protected async load(more = false): Promise<void> {
-    if (!more) this.items.set(null);
+    if (!more) {
+      this.items.set(null);
+      this.loadError.set(null);
+    }
     try {
       const page = await this.api.ratings(this.view() === 'hidden', more ? this.cursor() : null);
       this.items.update((list) => (more ? [...(list ?? []), ...page.items] : page.items));
       this.cursor.set(page.next_cursor);
     } catch (error) {
-      this.items.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (more) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

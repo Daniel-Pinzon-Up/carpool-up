@@ -25,6 +25,7 @@ import { apiErrorMessage } from '../../core/http/api-error-message';
 import { LanguageService } from '../../core/i18n/language.service';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassInput } from '../../shared/ui/glass-input';
@@ -64,6 +65,7 @@ function shortDate(iso: string | null, lang: string): string {
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassInput,
@@ -102,7 +104,9 @@ function shortDate(iso: string | null, lang: string): string {
           </button>
         </form>
       </cp-glass-card>
-      @if (rows() === null) {
+      @if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="search()" /></cp-glass-card>
+      } @else if (rows() === null) {
         <cp-glass-card><cp-skeleton [lines]="5" /></cp-glass-card>
       } @else {
         <ul class="flex flex-col gap-2">
@@ -123,7 +127,7 @@ function shortDate(iso: string | null, lang: string): string {
               </a>
             </li>
           } @empty {
-            <cp-empty-state [title]="'admin.users.none' | transloco" />
+            <li><cp-empty-state [title]="'admin.users.none' | transloco" /></li>
           }
         </ul>
         @if (cursor()) {
@@ -153,6 +157,7 @@ export default class AdminUsers {
     status: new FormControl('', { nonNullable: true }),
   });
   protected readonly rows = signal<AdminUserRow[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly roleOptions = computed(() => {
     this.language.current();
@@ -180,6 +185,7 @@ export default class AdminUsers {
   }
 
   protected async search(more = false): Promise<void> {
+    if (!more) this.loadError.set(null);
     try {
       const page = await this.api.users({
         ...this.filters.getRawValue(),
@@ -188,8 +194,8 @@ export default class AdminUsers {
       this.rows.update((list) => (more ? [...(list ?? []), ...page.items] : page.items));
       this.cursor.set(page.next_cursor);
     } catch (error) {
-      this.rows.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (more) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 
@@ -208,6 +214,7 @@ export default class AdminUsers {
     TranslocoPipe,
     GlassButton,
     GlassCard,
+    ErrorState,
     GlassSelect,
     Skeleton,
     StatTiles,
@@ -345,6 +352,8 @@ export default class AdminUsers {
             }
           </ul>
         </cp-glass-card>
+      } @else if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load(id())" /></cp-glass-card>
       } @else {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
       }
@@ -362,6 +371,7 @@ export class AdminUserDetailPage {
   private readonly toast = inject(ToastService);
 
   protected readonly user = signal<AdminUserDetail | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly role = new FormControl<string>('', { nonNullable: true });
   protected readonly isSuperadmin = computed(() => this.auth.user()?.role === 'superadmin');
   protected readonly canManage = computed(() => {
@@ -407,13 +417,15 @@ export class AdminUserDetailPage {
     });
   }
 
-  private async load(id: string): Promise<void> {
+  protected async load(id: string): Promise<void> {
+    this.loadError.set(null);
     try {
       const user = await this.api.user(id);
       this.user.set(user);
       this.role.setValue(user.role);
     } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (this.user()) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

@@ -190,7 +190,7 @@ describe('Emergencias', () => {
   });
 
   function names(fixture: { nativeElement: HTMLElement }): string[] {
-    return [...fixture.nativeElement.querySelectorAll('li')].map((li) =>
+    return [...fixture.nativeElement.querySelectorAll('li:has(cp-status-badge)')].map((li) =>
       li.querySelector('cp-status-badge')!.textContent!.trim(),
     );
   }
@@ -227,6 +227,7 @@ describe('Emergencias', () => {
     fixture.detectChanges();
 
     expect(api.handleEmergency).toHaveBeenCalledWith('a', 'Llamamos a la pasajera');
-    expect(fixture.nativeElement.querySelectorAll('li')).toHaveLength(0);
+    expect(fixture.nativeElement.querySelectorAll('cp-status-badge')).toHaveLength(0);
+    expect(fixture.nativeElement.textContent).toContain('No hay emergencias abiertas');
   });
 });

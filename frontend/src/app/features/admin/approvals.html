@@ -31,6 +31,8 @@
             <cp-skeleton [lines]="2" />
           }
         </div>
+      } @else if (loadError(); as message) {
+        <cp-error-state [message]="message" (retry)="reload()" />
       } @else if (items().length === 0) {
         <cp-empty-state
           [icon]="emptyIcon"

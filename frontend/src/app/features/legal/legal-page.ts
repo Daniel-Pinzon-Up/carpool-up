@@ -8,6 +8,7 @@ import { marked } from 'marked';
 import { LegalDocument, LegalKind } from '../../core/auth/auth.models';
 import { LanguageService } from '../../core/i18n/language.service';
 import { GlassCard } from '../../shared/ui/glass-card';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 
 const KIND_BY_SLUG: Record<string, LegalKind> = { terminos: 'terms', datos: 'data_policy' };
@@ -16,7 +17,7 @@ const KIND_BY_SLUG: Record<string, LegalKind> = { terminos: 'terms', datos: 'dat
 @Component({
   selector: 'cp-legal-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, GlassCard, Skeleton, LucideArrowLeft],
+  imports: [RouterLink, TranslocoPipe, ErrorState, GlassCard, Skeleton, LucideArrowLeft],
   styles: `
     :host ::ng-deep .legal h1 {
       font-size: 1.6rem;
@@ -61,6 +62,8 @@ const KIND_BY_SLUG: Record<string, LegalKind> = { terminos: 'terms', datos: 'dat
       <cp-glass-card [level]="2" class="!p-6 sm:!p-10">
         @if (documents.isLoading()) {
           <div aria-busy="true"><cp-skeleton [lines]="8" /></div>
+        } @else if (documents.error()) {
+          <cp-error-state (retry)="documents.reload()" />
         } @else if (html(); as body) {
           <article class="legal" [innerHTML]="body"></article>
           <p class="mt-8 text-sm text-muted">

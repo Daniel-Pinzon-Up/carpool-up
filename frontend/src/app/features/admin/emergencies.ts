@@ -16,6 +16,7 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { LiveEvent, RealtimeService } from '../../core/ws/realtime.service';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -40,6 +41,7 @@ interface EmergencyEvent extends LiveEvent {
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     Skeleton,
@@ -65,7 +67,9 @@ interface EmergencyEvent extends LiveEvent {
           {{ 'admin.emergencies.includeHandled' | transloco }}
         </label>
       </header>
-      @if (items() === null) {
+      @if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="reload()" /></cp-glass-card>
+      } @else if (items() === null) {
         <cp-glass-card><cp-skeleton [lines]="4" /></cp-glass-card>
       } @else {
         <ul class="flex flex-col gap-3" aria-live="polite">
@@ -135,7 +139,7 @@ interface EmergencyEvent extends LiveEvent {
               </cp-glass-card>
             </li>
           } @empty {
-            <cp-empty-state [title]="'admin.emergencies.none' | transloco" />
+            <li><cp-empty-state [title]="'admin.emergencies.none' | transloco" /></li>
           }
         </ul>
       }
@@ -151,6 +155,7 @@ export default class AdminEmergencies {
 
   protected readonly includeHandled = signal(false);
   protected readonly items = signal<Emergency[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly sorted = computed(() =>
     [...(this.items() ?? [])].sort(
       (a, b) =>
@@ -167,12 +172,16 @@ export default class AdminEmergencies {
   }
 
   private async load(): Promise<void> {
+    this.loadError.set(null);
     try {
       this.items.set(await this.api.emergencies(this.includeHandled()));
     } catch (error) {
-      this.items.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     }
+  }
+
+  protected reload(): void {
+    void this.load();
   }
 
   private upsert(emergency: Emergency): void {

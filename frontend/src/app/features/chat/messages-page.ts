@@ -9,6 +9,7 @@ import { LanguageService } from '../../core/i18n/language.service';
 import { RealtimeService } from '../../core/ws/realtime.service';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassCard } from '../../shared/ui/glass-card';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ChatApi, Conversation, MessageEvent } from './chat.api';
 import { ConversationView } from './conversation-view';
@@ -26,6 +27,7 @@ import { ConversationView } from './conversation-view';
     TranslocoPipe,
     ConversationView,
     EmptyState,
+    ErrorState,
     GlassCard,
     Skeleton,
     LucideLock,
@@ -100,16 +102,18 @@ import { ConversationView } from './conversation-view';
                   </a>
                 </li>
               } @empty {
-                <cp-empty-state
-                  [icon]="emptyIcon"
-                  [title]="'chat.none' | transloco"
-                  [description]="'chat.noneHint' | transloco"
-                />
+                <li>
+                  <cp-empty-state
+                    [icon]="emptyIcon"
+                    [title]="'chat.none' | transloco"
+                    [description]="'chat.noneHint' | transloco"
+                  />
+                </li>
               }
             </ul>
           }
           @if (error()) {
-            <p role="alert" class="p-3 text-danger">{{ error() }}</p>
+            <cp-error-state [message]="error()" (retry)="load()" />
           }
         </cp-glass-card>
 
@@ -181,7 +185,8 @@ export default class MessagesPage {
       .subscribe(() => void this.load());
   }
 
-  private async load(): Promise<void> {
+  protected async load(): Promise<void> {
+    this.error.set(null);
     try {
       const list = await this.api.list();
       const open = this.openId();

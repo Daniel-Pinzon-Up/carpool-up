@@ -27,6 +27,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -105,6 +106,7 @@ const LINKS: Record<string, string> = {
     RouterLink,
     TranslocoPipe,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     Skeleton,
@@ -134,6 +136,8 @@ const LINKS: Record<string, string> = {
               <cp-skeleton [lines]="2" />
             }
           </div>
+        } @else if (loadError(); as message) {
+          <cp-error-state [message]="message" (retry)="load()" />
         } @else if (items().length === 0) {
           <cp-empty-state
             [icon]="emptyIcon"
@@ -191,6 +195,7 @@ export default class NotificationsPage {
   protected readonly emptyIcon = LucideBellOff;
   protected readonly items = signal<AppNotification[]>([]);
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<string | null>(null);
   protected hasUnread = () => this.items().some((item) => !item.read_at);
 
   constructor() {
@@ -202,7 +207,9 @@ export default class NotificationsPage {
       );
   }
 
-  private async load(): Promise<void> {
+  protected async load(): Promise<void> {
+    this.loading.set(true);
+    this.loadError.set(null);
     try {
       const page = await firstValueFrom(
         this.http.get<{ items: AppNotification[] }>('/api/v1/notifications', {
@@ -211,7 +218,7 @@ export default class NotificationsPage {
       );
       this.items.set(page.items);
     } catch (error) {
-      this.toasts.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     } finally {
       this.loading.set(false);
     }

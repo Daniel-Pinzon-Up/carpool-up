@@ -18,6 +18,7 @@ import { Meter } from '../../shared/charts/meter';
 import { MonthColumns, MonthValue } from '../../shared/charts/month-columns';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassSelect } from '../../shared/ui/glass-select';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { ToastService } from '../../shared/ui/toast.service';
 import { StatTiles } from '../stats/stats-views';
@@ -38,6 +39,7 @@ import { AdminApi, AdminOverview } from './admin.api';
     GlassSelect,
     Meter,
     MonthColumns,
+    ErrorState,
     Skeleton,
     StatTiles,
     LucideShieldCheck,
@@ -150,6 +152,8 @@ import { AdminApi, AdminOverview } from './admin.api';
             </table>
           </cp-glass-card>
         </div>
+      } @else if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load(days())" /></cp-glass-card>
       } @else {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
       }
@@ -171,8 +175,9 @@ export default class AdminDashboard {
     'blocked',
   ];
   protected readonly period = new FormControl('30', { nonNullable: true });
-  private readonly days = toSignal(this.period.valueChanges, { initialValue: '30' });
+  protected readonly days = toSignal(this.period.valueChanges, { initialValue: '30' });
   protected readonly data = signal<AdminOverview | null>(null);
+  protected readonly loadError = signal<string | null>(null);
 
   protected readonly periods = computed(() => {
     this.language.current();
@@ -237,11 +242,13 @@ export default class AdminDashboard {
     });
   }
 
-  private async load(days: number): Promise<void> {
+  protected async load(days: number | string): Promise<void> {
+    this.loadError.set(null);
     try {
-      this.data.set(await this.api.overview(days));
+      this.data.set(await this.api.overview(Number(days)));
     } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      if (this.data()) this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      else this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

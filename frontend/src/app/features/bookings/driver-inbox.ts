@@ -10,6 +10,7 @@ import { Avatar } from '../../shared/ui/avatar';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { BookingActions } from './booking-actions';
 import { BookingCard } from './booking-card';
@@ -37,6 +38,7 @@ const INBOX_KINDS = new Set([
     Avatar,
     BookingCard,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     Skeleton,
@@ -169,7 +171,7 @@ const INBOX_KINDS = new Set([
           </section>
         }
       } @else if (error()) {
-        <p role="alert" class="text-danger">{{ error() }}</p>
+        <cp-glass-card><cp-error-state [message]="error()" (retry)="load()" /></cp-glass-card>
       } @else {
         @for (row of [1, 2]; track row) {
           <cp-glass-card><cp-skeleton [lines]="3" /></cp-glass-card>

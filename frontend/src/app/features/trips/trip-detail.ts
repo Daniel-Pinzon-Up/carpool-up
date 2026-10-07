@@ -34,6 +34,7 @@ import { formatCop } from '../../shared/map/routing.api';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
@@ -68,6 +69,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     GlassButton,
     GlassCard,
     MapView,
+    ErrorState,
     Skeleton,
     StatusBadge,
     LucideCopy,
@@ -85,7 +87,7 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
   template: `
     <div class="mx-auto flex max-w-5xl flex-col gap-5 py-2">
       @if (error()) {
-        <p role="alert" class="text-danger">{{ error() }}</p>
+        <cp-glass-card><cp-error-state [message]="error()" (retry)="load(id())" /></cp-glass-card>
       } @else if (trip(); as t) {
         <header class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex flex-col gap-1">
@@ -452,7 +454,7 @@ export default class TripDetail {
       });
   }
 
-  private async load(id: string): Promise<void> {
+  protected async load(id: string): Promise<void> {
     this.error.set(null);
     const state = (globalThis.history?.state ?? {}) as {
       match?: SearchResult;

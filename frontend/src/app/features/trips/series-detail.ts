@@ -25,6 +25,7 @@ import { formatCop } from '../../shared/map/routing.api';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
+import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
@@ -48,6 +49,7 @@ import { Series, TripsApi } from './trips.api';
     TranslocoPipe,
     GlassButton,
     GlassCard,
+    ErrorState,
     Skeleton,
     StatusBadge,
     SubscribePanel,
@@ -61,7 +63,7 @@ import { Series, TripsApi } from './trips.api';
   template: `
     <div class="mx-auto flex max-w-4xl flex-col gap-5 py-2">
       @if (error()) {
-        <p role="alert" class="text-danger">{{ error() }}</p>
+        <cp-glass-card><cp-error-state [message]="error()" (retry)="reload()" /></cp-glass-card>
       } @else if (series(); as s) {
         <header class="flex flex-wrap items-start justify-between gap-3">
           <div class="flex flex-col gap-1">

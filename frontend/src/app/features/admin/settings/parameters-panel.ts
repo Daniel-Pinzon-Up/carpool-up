@@ -8,6 +8,7 @@ import { LanguageService } from '../../../core/i18n/language.service';
 import { GlassButton } from '../../../shared/ui/glass-button';
 import { GlassCard } from '../../../shared/ui/glass-card';
 import { GlassInput } from '../../../shared/ui/glass-input';
+import { ErrorState } from '../../../shared/ui/error-state';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { ToastService } from '../../../shared/ui/toast.service';
 import { AdminApi, SystemSetting } from '../admin.api';
@@ -52,6 +53,7 @@ export function fromDraft(original: unknown, draft: string): unknown {
     GlassButton,
     GlassCard,
     GlassInput,
+    ErrorState,
     Skeleton,
     LucideSave,
   ],
@@ -63,7 +65,9 @@ export function fromDraft(original: unknown, draft: string): unknown {
         [formControl]="filter"
         [label]="'admin.settings.filter' | transloco"
       />
-      @if (settings() === null) {
+      @if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load()" /></cp-glass-card>
+      } @else if (settings() === null) {
         <cp-glass-card><cp-skeleton [lines]="6" /></cp-glass-card>
       }
       @for (s of visible(); track s.key) {
@@ -134,6 +138,7 @@ export class ParametersPanel {
   protected readonly filter = new FormControl('', { nonNullable: true });
   private readonly term = toSignal(this.filter.valueChanges, { initialValue: '' });
   protected readonly settings = signal<SystemSetting[] | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   private readonly drafts = signal<Record<string, string>>({});
   protected readonly visible = computed(() => {
     const term = this.term().trim().toLowerCase();
@@ -146,12 +151,12 @@ export class ParametersPanel {
     void this.load();
   }
 
-  private async load(): Promise<void> {
+  protected async load(): Promise<void> {
+    this.loadError.set(null);
     try {
       this.settings.set(await this.api.settings());
     } catch (error) {
-      this.settings.set([]);
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     }
   }
 

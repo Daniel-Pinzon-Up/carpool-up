@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideStar } from '@lucide/angular';
 import { apiErrorMessage } from '../../core/http/api-error-message';
+import { ErrorState } from '../../shared/ui/error-state';
 import { LanguageService } from '../../core/i18n/language.service';
 import { Meter } from '../../shared/charts/meter';
 import { MonthColumns, MonthValue } from '../../shared/charts/month-columns';
@@ -73,9 +74,10 @@ export class StatTiles {
 })
 export class RatingBreakdown {
   readonly rating = input.required<RatingBlock>();
-  readonly role = input.required<TargetRole>();
+  /** A quien califican (no se llama "role" para no chocar con el atributo ARIA). */
+  readonly target = input.required<TargetRole>();
   private readonly language = inject(LanguageService);
-  protected readonly criteria = computed(() => CRITERIA[this.role()]);
+  protected readonly criteria = computed(() => CRITERIA[this.target()]);
 
   protected fixed(value: number | null): string {
     return value === null
@@ -88,7 +90,16 @@ export class RatingBreakdown {
 @Component({
   selector: 'cp-passenger-metrics',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, GlassCard, Meter, MonthColumns, RatingBreakdown, Skeleton, StatTiles],
+  imports: [
+    TranslocoPipe,
+    ErrorState,
+    GlassCard,
+    Meter,
+    MonthColumns,
+    RatingBreakdown,
+    Skeleton,
+    StatTiles,
+  ],
   template: `
     <cp-glass-card class="flex flex-col gap-5">
       <h2 class="text-lg font-bold">{{ 'stats.passengerTitle' | transloco }}</h2>
@@ -113,7 +124,9 @@ export class RatingBreakdown {
             <p class="text-sm text-muted">{{ 'stats.noTrips' | transloco }}</p>
           }
         </section>
-        <cp-rating-breakdown [rating]="s.rating" role="passenger" />
+        <cp-rating-breakdown [rating]="s.rating" target="passenger" />
+      } @else if (loadError(); as message) {
+        <cp-error-state [message]="message" (retry)="load()" />
       } @else {
         <cp-skeleton [lines]="4" />
       }
@@ -127,6 +140,7 @@ export class PassengerMetrics {
   private readonly toast = inject(ToastService);
 
   protected readonly stats = signal<PassengerStats | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly tiles = computed(() => {
     const s = this.stats();
     if (!s) return [];
@@ -151,10 +165,16 @@ export class PassengerMetrics {
   );
 
   constructor() {
-    this.api.passengerStats().then(
-      (stats) => this.stats.set(stats),
-      (error) => this.toast.show(apiErrorMessage(this.transloco, error), 'danger'),
-    );
+    void this.load();
+  }
+
+  protected async load(): Promise<void> {
+    this.loadError.set(null);
+    try {
+      this.stats.set(await this.api.passengerStats());
+    } catch (error) {
+      this.loadError.set(apiErrorMessage(this.transloco, error));
+    }
   }
 }
 
@@ -162,7 +182,16 @@ export class PassengerMetrics {
 @Component({
   selector: 'cp-driver-stats',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, GlassCard, Meter, MonthColumns, RatingBreakdown, Skeleton, StatTiles],
+  imports: [
+    TranslocoPipe,
+    ErrorState,
+    GlassCard,
+    Meter,
+    MonthColumns,
+    RatingBreakdown,
+    Skeleton,
+    StatTiles,
+  ],
   template: `
     <div class="mx-auto flex max-w-4xl flex-col gap-5 py-2">
       <header>
@@ -188,7 +217,7 @@ export class PassengerMetrics {
             />
           </cp-glass-card>
           <cp-glass-card>
-            <cp-rating-breakdown [rating]="s.rating" role="driver" />
+            <cp-rating-breakdown [rating]="s.rating" target="driver" />
           </cp-glass-card>
         </div>
         <cp-glass-card>
@@ -198,6 +227,8 @@ export class PassengerMetrics {
             [items]="months()"
           />
         </cp-glass-card>
+      } @else if (loadError(); as message) {
+        <cp-glass-card><cp-error-state [message]="message" (retry)="load()" /></cp-glass-card>
       } @else {
         <cp-glass-card><cp-skeleton [lines]="5" /></cp-glass-card>
       }
@@ -211,6 +242,7 @@ export default class DriverStatsPage {
   private readonly toast = inject(ToastService);
 
   protected readonly stats = signal<DriverStats | null>(null);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly tiles = computed(() => {
     const s = this.stats();
     if (!s) return [];
@@ -235,10 +267,16 @@ export default class DriverStatsPage {
   );
 
   constructor() {
-    this.api.driverStats().then(
-      (stats) => this.stats.set(stats),
-      (error) => this.toast.show(apiErrorMessage(this.transloco, error), 'danger'),
-    );
+    void this.load();
+  }
+
+  protected async load(): Promise<void> {
+    this.loadError.set(null);
+    try {
+      this.stats.set(await this.api.driverStats());
+    } catch (error) {
+      this.loadError.set(apiErrorMessage(this.transloco, error));
+    }
   }
 
   protected money(amount: number): string {

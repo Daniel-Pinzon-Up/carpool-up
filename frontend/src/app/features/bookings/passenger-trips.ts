@@ -15,6 +15,7 @@ import { apiErrorMessage } from '../../core/http/api-error-message';
 import { NotificationsStore } from '../../core/notifications/notifications.store';
 import { LanguageService } from '../../core/i18n/language.service';
 import { EmptyState } from '../../shared/ui/empty-state';
+import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassTabs, TabItem } from '../../shared/ui/glass-tabs';
@@ -46,6 +47,7 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
     BookingCard,
     PassengerHistoryItem,
     EmptyState,
+    ErrorState,
     GlassButton,
     GlassCard,
     GlassTabs,
@@ -83,6 +85,10 @@ type Tab = 'upcoming' | 'history' | 'series' | 'waitlist';
           @for (row of [1, 2]; track row) {
             <cp-glass-card><cp-skeleton [lines]="3" /></cp-glass-card>
           }
+        } @else if (loadError(); as message) {
+          <cp-glass-card
+            ><cp-error-state [message]="message" (retry)="load(tab())"
+          /></cp-glass-card>
         } @else if (tab() === 'history') {
           @for (entry of history(); track entry.booking_id) {
             <cp-passenger-history-item [entry]="entry" />
@@ -254,6 +260,7 @@ export default class PassengerTrips {
     }));
   });
   protected readonly loading = signal(true);
+  protected readonly loadError = signal<string | null>(null);
   protected readonly bookings = signal<Booking[]>([]);
   protected readonly nextCursor = signal<string | null>(null);
   protected readonly subscriptions = signal<Subscription[]>([]);
@@ -275,8 +282,9 @@ export default class PassengerTrips {
       });
   }
 
-  private async load(tab: Tab): Promise<void> {
+  protected async load(tab: Tab): Promise<void> {
     this.loading.set(true);
+    this.loadError.set(null);
     try {
       if (tab === 'series') {
         this.subscriptions.set(await this.api.mySubscriptions());
@@ -292,7 +300,7 @@ export default class PassengerTrips {
         this.nextCursor.set(page.next_cursor);
       }
     } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
+      this.loadError.set(apiErrorMessage(this.transloco, error));
     } finally {
       this.loading.set(false);
     }
