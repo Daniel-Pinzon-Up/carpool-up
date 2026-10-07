@@ -7,7 +7,7 @@ export type ButtonSize = 'md' | 'lg';
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-on-accent shadow-lg hover:brightness-110',
   secondary: 'glass-1 !rounded-full text-text hover:bg-glass-strong',
-  danger: 'bg-danger text-white hover:brightness-110',
+  danger: 'bg-danger text-on-danger hover:brightness-110',
   ghost: 'text-text hover:bg-glass',
 };
 

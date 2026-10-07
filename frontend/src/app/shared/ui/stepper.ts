@@ -21,7 +21,7 @@ import { LucideCheck } from '@lucide/angular';
               i < current()
                 ? 'bg-accent text-on-accent'
                 : i === current()
-                  ? 'bg-primary text-white ring-4 ring-primary/25'
+                  ? 'bg-primary text-on-primary ring-4 ring-primary/25'
                   : 'border border-glass-border bg-glass text-muted'
             "
           >

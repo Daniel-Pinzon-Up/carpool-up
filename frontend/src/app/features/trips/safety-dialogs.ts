@@ -196,7 +196,7 @@ export class ShareTripDialog {
       <div class="flex flex-col gap-4">
         <a
           [href]="'tel:' + phone()"
-          class="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-danger px-4 text-lg font-bold text-white"
+          class="flex min-h-14 items-center justify-center gap-3 rounded-2xl bg-danger px-4 text-lg font-bold text-on-danger"
         >
           <svg lucidePhoneCall class="size-6" aria-hidden="true"></svg>
           {{ 'safety.emergency.call' | transloco: { phone: phone() } }}

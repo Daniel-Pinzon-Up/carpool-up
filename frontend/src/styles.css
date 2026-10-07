@@ -12,9 +12,11 @@
   --color-chart: var(--chart-mark);
   --color-muted: var(--text-muted);
   --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
   --color-accent: var(--accent);
   --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-glass: var(--glass);
@@ -40,13 +42,15 @@
   --text: #0a1f44;
   --text-muted: #3b5378;
   --primary: #1e5aa8;
-  --accent: #0b7a5a;
+  --on-primary: #ffffff;
+  --accent: #0b7556;
   /* Marcas de graficos: un solo tono, validado contra las superficies de cada tema. */
   --chart-mark: #1e5aa8;
   --on-accent: #ffffff;
-  --danger: #c0392b;
+  --danger: #ba372a;
+  --on-danger: #ffffff;
   --warning: #865c00;
-  --success: #0b7a5a;
+  --success: #0b7556;
   --focus-ring: #1e5aa8;
   --shadow: 0 8px 32px rgba(10, 31, 68, 0.12);
   --scrim: rgba(10, 31, 68, 0.35);
@@ -62,24 +66,26 @@
   --bg-blob-2: #0f2e5c;
   --bg-blob-3: #0f5e5a;
   --glass: rgba(255, 255, 255, 0.08);
-  --glass-strong: rgba(255, 255, 255, 0.14);
+  --glass-strong: rgba(255, 255, 255, 0.12);
   --glass-border: rgba(255, 255, 255, 0.22);
   --glass-shine: rgba(255, 255, 255, 0.35);
   --surface-1-solid: #12305f;
   --surface-2-solid: #183a6f;
   --text: #f2f7ff;
   --text-muted: #b9cce8;
-  --primary: #5aa9ff;
+  --primary: #90c5ff;
+  --on-primary: #0a1f44;
   --accent: #3ddba7;
   --chart-mark: #4a94ea;
   --on-accent: #0a1f44;
-  --danger: #ff6b6b;
+  --danger: #ffabab;
+  --on-danger: #0a1f44;
   --warning: #ffc857;
   --success: #3ddba7;
   --focus-ring: #3ddba7;
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --scrim: rgba(0, 0, 0, 0.55);
-  --blob-opacity: 0.55;
+  --blob-opacity: 0.4;
   color-scheme: dark;
 }
 
