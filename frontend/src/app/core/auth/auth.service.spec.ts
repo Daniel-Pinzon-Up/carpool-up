@@ -85,6 +85,44 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
   });
 
+  it('restore reintenta ante un error pasajero y recupera la sesion', async () => {
+    vi.useFakeTimers();
+    try {
+      const restore = service.restore();
+      http
+        .expectOne('/api/v1/auth/refresh')
+        .flush({ code: 'RATE_LIMITED' }, { status: 429, statusText: 'Too Many Requests' });
+      await vi.advanceTimersByTimeAsync(1000);
+      http.expectOne('/api/v1/auth/refresh').error(new ProgressEvent('error'));
+      await vi.advanceTimersByTimeAsync(2000);
+      http.expectOne('/api/v1/auth/refresh').flush(authenticated());
+      await restore;
+      expect(service.isAuthenticated()).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('restore se rinde tras varios fallos pasajeros sin colgar la app', async () => {
+    vi.useFakeTimers();
+    try {
+      const restore = service.restore();
+      for (const delay of [1000, 2000, 4000]) {
+        http
+          .expectOne('/api/v1/auth/refresh')
+          .flush({ code: 'INTERNAL_ERROR' }, { status: 503, statusText: 'Unavailable' });
+        await vi.advanceTimersByTimeAsync(delay);
+      }
+      http
+        .expectOne('/api/v1/auth/refresh')
+        .flush({ code: 'INTERNAL_ERROR' }, { status: 503, statusText: 'Unavailable' });
+      await restore;
+      expect(service.isAuthenticated()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('logout limpia la sesion aunque falle la red', async () => {
     const login = service.login('a@unipamplona.edu.co', 'x');
     http.expectOne('/api/v1/auth/login').flush(authenticated());

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -20,6 +20,28 @@ const VERIFY_ENDPOINT: Record<ChallengePurpose, string> = {
   two_factor: `${API}/auth/2fa/verify`,
   password_reset: `${API}/auth/password/reset`,
 };
+
+/** Esperas entre reintentos al recuperar la sesion (ms); despues se rinde. */
+export const RESTORE_RETRIES = [1000, 2000, 4000];
+const MAX_RETRY_AFTER_MS = 10_000;
+
+/** El servidor dijo que la sesion no sirve (no es un fallo pasajero). */
+export function isSessionRejected(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
+}
+
+/** Respeta Retry-After (429) si viene, con un tope; si no, la espera por defecto. */
+function retryDelay(error: unknown, fallback: number): number {
+  const header = error instanceof HttpErrorResponse ? error.headers?.get('Retry-After') : null;
+  const seconds = header ? Number(header) : NaN;
+  return Number.isFinite(seconds) && seconds > 0
+    ? Math.min(seconds * 1000, MAX_RETRY_AFTER_MS)
+    : fallback;
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function readChallenge(): PendingChallenge | null {
   try {
@@ -59,12 +81,24 @@ export class AuthService {
     return this.token;
   }
 
-  /** Intenta recuperar la sesion con la cookie al abrir la app. Nunca falla. */
+  /**
+   * Intenta recuperar la sesion con la cookie al abrir la app. Nunca falla.
+   * Un 401 o 403 significa que no hay sesion. Un error pasajero (sin red, 429, 5xx) no:
+   * se reintenta unas veces antes de rendirse, para no mandar a /ingresar a alguien con
+   * una sesion valida solo porque el servidor tardo o limito las peticiones.
+   */
   async restore(): Promise<void> {
-    try {
-      await this.refresh();
-    } catch {
-      this.clearSession();
+    for (let attempt = 0; ; attempt++) {
+      try {
+        await this.refresh();
+        return;
+      } catch (error) {
+        if (isSessionRejected(error) || attempt >= RESTORE_RETRIES.length) {
+          this.clearSession();
+          return;
+        }
+        await wait(retryDelay(error, RESTORE_RETRIES[attempt]));
+      }
     }
   }
 

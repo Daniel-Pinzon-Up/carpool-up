@@ -70,6 +70,21 @@ describe('authInterceptor', () => {
     expect(navigate).toHaveBeenCalledWith(['/ingresar']);
   });
 
+  it('si la renovacion falla por algo pasajero conserva la sesion', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const result = firstValueFrom(http.get('/api/v1/users/me'));
+    backend
+      .expectOne('/api/v1/users/me')
+      .flush({ code: 'UNAUTHORIZED' }, { status: 401, statusText: 'Unauthorized' });
+    await Promise.resolve();
+    backend
+      .expectOne('/api/v1/auth/refresh')
+      .flush({ code: 'RATE_LIMITED' }, { status: 429, statusText: 'Too Many Requests' });
+    await expect(result).rejects.toBeTruthy();
+    expect(auth.isAuthenticated()).toBe(true);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it('no reintenta el login', async () => {
     const result = firstValueFrom(http.post('/api/v1/auth/login', {}));
     backend
