@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+# Credenciales generadas por "python -m app.cli e2e-users"; nunca al repositorio.
+/e2e/.auth/
+/test-results/
+/playwright-report/
