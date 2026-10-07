@@ -1,10 +1,17 @@
 from functools import lru_cache
 from typing import Annotated, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 from app.core.enums import Sex
+
+# Valores de ejemplo y de desarrollo que nunca deben llegar a produccion.
+INSECURE_SECRETS = {
+    "dev-insecure-key-change-me-0123456789",
+    "cambia-esta-clave-por-una-larga-y-aleatoria",
+}
+INSECURE_PASSWORDS = {"cambia-esta-clave", "carpool_dev_password"}
 
 
 class Settings(BaseSettings):
@@ -54,6 +61,26 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
+
+    @model_validator(mode="after")
+    def safe_for_production(self) -> "Settings":
+        """En produccion no arranca con claves de ejemplo: con la SECRET_KEY publica del
+        repositorio cualquiera podria firmar tokens validos."""
+        if self.environment != "production":
+            return self
+        problems = []
+        if self.secret_key in INSECURE_SECRETS or len(set(self.secret_key)) < 10:
+            problems.append("SECRET_KEY es un valor de ejemplo o poco aleatorio")
+        if not self.cookie_secure:
+            problems.append("COOKIE_SECURE debe ser true")
+        password = self.superadmin_password.get_secret_value() if self.superadmin_password else ""
+        if password in INSECURE_PASSWORDS:
+            problems.append("SUPERADMIN_PASSWORD es la de ejemplo")
+        if any(item in self.database_url for item in INSECURE_PASSWORDS):
+            problems.append("DATABASE_URL usa la contrasena de ejemplo")
+        if problems:
+            raise ValueError("Configuracion insegura para produccion: " + "; ".join(problems))
+        return self
 
     @property
     def is_production(self) -> bool:
