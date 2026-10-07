@@ -5,6 +5,7 @@ from arq.connections import RedisSettings
 from fastapi import APIRouter, Cookie, Depends, File, Form, Request, Response, UploadFile, status
 from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
+from slowapi.util import get_remote_address
 
 from app.core.auth import Claims, CurrentUser, client_ip
 from app.core.config import get_settings
@@ -12,6 +13,7 @@ from app.core.deps import DbSession
 from app.core.email import ArqEmailQueue, EmailQueue
 from app.core.enums import DocKind, Language, Sex, UserRole
 from app.core.rate_limit import limiter
+from app.core.security import parse_refresh_token
 from app.modules.auth.schemas import (
     AuthResult,
     CodeVerifyRequest,
@@ -153,8 +155,16 @@ async def resend_code(request: Request, body: ResendRequest, auth: Auth) -> Rese
     return ResendResult(resend_after_seconds=await auth.resend(body.challenge_id))
 
 
+def refresh_key(request: Request) -> str:
+    """Limite por sesion: en el campus muchas personas comparten una IP publica. Sin una cookie
+    con forma valida cuenta la IP (y el tope por IP de abajo frena a quien invente sesiones)."""
+    parsed = parse_refresh_token(request.cookies.get(REFRESH_COOKIE) or "")
+    return f"session:{parsed[0]}" if parsed else get_remote_address(request)
+
+
 @router.post("/refresh")
-@limiter.limit("30/minute")
+@limiter.limit("300/minute")
+@limiter.limit("30/minute", key_func=refresh_key)
 async def refresh(
     request: Request, response: Response, auth: Auth, token: RefreshCookie = None
 ) -> AuthResult:
