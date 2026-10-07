@@ -2,16 +2,23 @@ import uuid
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi import APIRouter, File, Form, Request, UploadFile, status
 from fastapi.responses import FileResponse
 
-from app.core.auth import CurrentUser
+from app.core.auth import Actor, CurrentUser, client_ip
 from app.core.deps import DbSession
 from app.core.enums import DocKind
 from app.core.errors import NotFoundError
 from app.core.storage import private_file_response
 from app.modules.documents.service import DocumentService, LicenseService
-from app.modules.users.schemas import DocumentSummary, LicenseSummary, MeOut, MeUpdate
+from app.modules.users.deletion import AccountDeletion
+from app.modules.users.schemas import (
+    AccountDeleteRequest,
+    DocumentSummary,
+    LicenseSummary,
+    MeOut,
+    MeUpdate,
+)
 from app.modules.users.service import UserService
 
 router = APIRouter(prefix="/users/me", tags=["users"])
@@ -29,6 +36,23 @@ async def get_me(user: CurrentUser, session: DbSession) -> MeOut:
 @router.patch("")
 async def update_me(body: MeUpdate, user: CurrentUser, session: DbSession) -> MeOut:
     return await UserService(session).update_me(user, body)
+
+
+@router.post(
+    "/delete",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        409: {"description": "ACCOUNT_DELETE_NOT_ALLOWED o ACCOUNT_DELETE_TRIP_IN_PROGRESS"},
+        422: {"description": "PASSWORD_INCORRECT"},
+    },
+)
+async def delete_me(
+    body: AccountDeleteRequest, user: CurrentUser, request: Request, session: DbSession
+) -> None:
+    """Elimina la cuenta propia: anonimiza los datos personales, borra documentos y contactos,
+    retira a la persona de sus viajes futuros y cierra todas sus sesiones. No se puede deshacer.
+    """
+    await AccountDeletion(session).delete(Actor(user=user, ip=client_ip(request)), body.password)
 
 
 @router.get("/documents")

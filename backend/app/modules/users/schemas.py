@@ -71,6 +71,12 @@ Program = Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, 
 PaymentNote = Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)]
 
 
+class AccountDeleteRequest(BaseModel):
+    """La contrasena confirma que quien pide borrar la cuenta es su duena."""
+
+    password: Annotated[str, StringConstraints(min_length=1, max_length=128)]
+
+
 class MeUpdate(BaseModel):
     """Lo que el usuario puede cambiar. Nombre, sexo y rol los valida un administrador."""
 
