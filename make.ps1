@@ -1,5 +1,5 @@
 # Equivalente del Makefile para Windows sin make.
-# Uso: .\make.ps1 token <correo> | up | down | logs | ps | migrate | seed | test | test-backend | test-frontend | lint | build | osrm | tiles | clean
+# Uso: .\make.ps1 token <correo> | up | down | logs | ps | migrate | seed | e2e-users | test | test-backend | test-frontend | test-e2e | lint | build | osrm | tiles | backup-check | restore <archivo> | clean
 param(
     [Parameter(Position = 0)][string]$Target = 'help',
     [Parameter(Position = 1)][string]$Email = ''
@@ -65,8 +65,20 @@ switch ($Target) {
     'build' { Invoke-Compose @('build') }
     'osrm' { & bash infra/scripts/build_osrm.sh }
     'tiles' { & bash infra/scripts/build_tiles.sh }
+    'e2e-users' {
+        New-Item -ItemType Directory -Force 'frontend/e2e/.auth' | Out-Null
+        & docker @Compose exec -T api python -m app.cli e2e-users | Out-File -Encoding ascii 'frontend/e2e/.auth/credentials.json'
+        Write-Host 'Cuentas E2E listas (credenciales en frontend/e2e/.auth, ignorado por git)'
+    }
+    'test-e2e' { Push-Location frontend; npx playwright test; Pop-Location }
+    'backup-check' { Invoke-Compose @('exec', 'backup', 'sh', '/restore.sh') }
+    'restore' {
+        Invoke-Compose @('stop', 'api', 'worker')
+        Invoke-Compose @('exec', 'backup', 'sh', '/restore.sh', $Email, 'live')
+        Invoke-Compose @('start', 'api', 'worker')
+    }
     'clean' { Invoke-Compose @('down', '-v') }
     default {
-        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, token <correo>, test, test-backend, test-frontend, lint, build, osrm, tiles, clean'
+        Write-Host 'Objetivos: up, down, logs, ps, migrate, seed, token <correo>, e2e-users, test, test-backend, test-frontend, test-e2e, lint, build, osrm, tiles, backup-check, restore <archivo>, clean'
     }
 }
