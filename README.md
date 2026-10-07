@@ -19,7 +19,8 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 10 | Ciclo del viaje y seguridad: iniciar, abordaje, no-show con sanción, tickets, ubicación en vivo, enlace público, contactos de confianza, emergencias y factores de tráfico | Hecho |
 | 11 | Calificaciones, historial y estadísticas: calificación por criterio con plazo, reputación en búsqueda, historial con tickets y métricas por rol | Hecho |
 | 12 | Panel de administración: indicadores, usuarios con suspensión y bloqueo, monitoreo de viajes, emergencias en vivo, moderación y configuración completa del superadmin, todo auditado | Hecho |
-| 13 y 14 | Ver plan maestro, sección 16 | Pendiente |
+| 13 | Internacionalización y pulido: cuatro idiomas revisados, pantalla de ayuda, estados de error con reintento, contraste AA en ambos temas, sesión estable ante fallos pasajeros y axe sin errores graves en 24 pantallas | Hecho |
+| 14 | Ver plan maestro, sección 16 | Pendiente |
 
 ## Requisitos
 
@@ -85,6 +86,21 @@ cd backend
 uv sync --python 3.12
 uv run python -m pytest -m "not integration"   # pruebas que no necesitan servicios
 ```
+
+### Pruebas de extremo a extremo y accesibilidad
+
+Corren con Playwright contra la app levantada (`make up`) y usan el Chrome instalado en el equipo.
+
+```bash
+# 1. Cuentas de prueba (solo desarrollo). La contrasena es aleatoria y queda en un archivo ignorado por git.
+docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml \
+  exec -T api python -m app.cli e2e-users > frontend/e2e/.auth/credentials.json
+
+# 2. Pruebas: axe en 24 pantallas, ambos temas, escritorio y telefono; idioma y tema sin recargar.
+cd frontend && npm run e2e
+```
+
+Para probar otro servidor, define `E2E_BASE_URL` (por defecto `https://localhost`).
 
 ## Comandos
 
