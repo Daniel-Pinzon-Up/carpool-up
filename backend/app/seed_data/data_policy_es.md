@@ -27,7 +27,7 @@ En cumplimiento de la **Ley 1581 de 2012** y sus decretos reglamentarios, al reg
 
 ## 4. Derechos del titular
 
-Usted puede conocer, actualizar y rectificar sus datos desde su perfil, solicitar prueba de esta autorización, revocarla y pedir la eliminación de su cuenta. Al eliminar la cuenta se anonimizan sus datos personales y se conservan solo los registros operativos que exija la ley.
+Usted puede conocer, actualizar y rectificar sus datos desde su perfil, solicitar prueba de esta autorización, revocarla y eliminar su cuenta desde el perfil. Al eliminar la cuenta se anonimizan sus datos personales, se borran sus documentos y contactos de confianza, y se conservan solo los registros operativos de los viajes (sin datos que lo identifiquen).
 
 ## 5. Responsable
 

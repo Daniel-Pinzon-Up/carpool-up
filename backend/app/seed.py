@@ -163,24 +163,28 @@ async def seed_traffic_factors(session: AsyncSession) -> None:
     logger.info("seed_traffic_factors", created=created)
 
 
+LEGAL_FILES = {LegalKind.TERMS: "terms", LegalKind.DATA_POLICY: "data_policy"}
+
+
 async def seed_legal(session: AsyncSession) -> None:
-    sources = {LegalKind.TERMS: "terms_es.md", LegalKind.DATA_POLICY: "data_policy_es.md"}
-    for kind, filename in sources.items():
-        current = await session.scalar(
-            select(LegalDocument).where(
-                LegalDocument.kind == kind,
-                LegalDocument.language == Language.ES,
-                LegalDocument.is_current.is_(True),
+    """Version 1.0 de terminos y politica de datos en los cuatro idiomas (la espanola manda)."""
+    for kind, stem in LEGAL_FILES.items():
+        for language in Language:
+            current = await session.scalar(
+                select(LegalDocument).where(
+                    LegalDocument.kind == kind,
+                    LegalDocument.language == language,
+                    LegalDocument.is_current.is_(True),
+                )
             )
-        )
-        if current is not None:
-            continue
-        body = (SEED_DATA / filename).read_text(encoding="utf-8")
-        await LegalService(session).publish(
-            LegalPublish(kind=kind, version="1.0", language=Language.ES, body_markdown=body),
-            actor=None,
-        )
-        logger.info("seed_legal", kind=kind, version="1.0")
+            if current is not None:
+                continue
+            body = (SEED_DATA / f"{stem}_{language.value}.md").read_text(encoding="utf-8")
+            await LegalService(session).publish(
+                LegalPublish(kind=kind, version="1.0", language=language, body_markdown=body),
+                actor=None,
+            )
+            logger.info("seed_legal", kind=kind, language=language, version="1.0")
 
 
 async def run() -> None:

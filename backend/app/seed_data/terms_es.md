@@ -4,7 +4,7 @@
 
 ## 1. Objeto
 
-Carpool Universitario es una plataforma para que estudiantes, docentes y personal administrativo de la Universidad de Pamplona compartan trayectos en carro o moto dentro del municipio de Pamplona, Norte de Santander.
+Carpool UP (Carpool Universitario) es una plataforma para que estudiantes, docentes y personal administrativo de la Universidad de Pamplona compartan trayectos en carro o moto dentro del municipio de Pamplona, Norte de Santander.
 
 ## 2. Quién puede usarla
 
@@ -16,7 +16,7 @@ Carpool Universitario es una plataforma para que estudiantes, docentes y persona
 
 - El valor por puesto es una **contribución para cubrir gastos** del trayecto (combustible y desgaste), no un pago por un servicio de transporte ni un ingreso comercial.
 - La plataforma no procesa pagos. El dinero se entrega en efectivo o por transferencia directamente entre las personas. El ticket que emite la aplicación es solo informativo.
-- El valor sugerido se calcula con la distancia y tiene un tope máximo definido por la administración.
+- Si la administración lo define, la aplicación sugiere un valor según la distancia y aplica un tope máximo por puesto.
 
 ## 4. Obligaciones del conductor
 
