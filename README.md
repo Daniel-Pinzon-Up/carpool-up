@@ -27,6 +27,7 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 - [Guía de despliegue](docs/DESPLIEGUE.md): arranque desde cero, producción, certificados, respaldos y actualizaciones.
 - [Guía de administración](docs/GUIA_ADMINISTRACION.md): panel, aprobaciones, sanciones, emergencias, moderación y parámetros.
 - [API](docs/API.md): endpoints, errores, límites y autorización. La documentación interactiva está en `/api/v1/docs`.
+- [Casos de uso de prueba](docs/CASOS_DE_USO.md): 20 recorridos completos con datos concretos y resultados esperados.
 - [Decisiones](docs/DECISIONES.md), [diagrama entidad-relación](docs/DIAGRAMA_ER.md) y [cómo funciona por dentro](docs/COMO_FUNCIONA.md).
 
 ## Requisitos
