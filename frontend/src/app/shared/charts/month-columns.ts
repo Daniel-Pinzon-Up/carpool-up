@@ -12,7 +12,7 @@ export interface MonthValue {
 }
 
 /**
- * Columnas por mes de una sola serie (un tono, magnitud). Columnas finas de hasta 24 px
+ * Columnas por mes de una sola serie (un tono, magnitud). Columnas de 24 px como minimo
  * con extremo redondeado y base recta, sin cuadricula; el maximo lleva etiqueta directa
  * y cada columna muestra su valor al pasar o al recibir foco. La tabla da el detalle sin
  * depender del color ni del mouse.
@@ -25,45 +25,49 @@ export interface MonthValue {
   template: `
     <figure class="flex flex-col gap-2">
       <figcaption class="text-sm font-semibold">{{ title() }}</figcaption>
-      <div class="relative" (pointerleave)="active.set(null)">
-        @if (activeItem(); as item) {
-          <div
-            class="pointer-events-none absolute -top-1 z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-[var(--surface-2-solid)] px-2 py-1 text-xs whitespace-nowrap shadow-md"
-            [style.left.%]="activeLeft()"
-            role="status"
-          >
-            <span class="font-semibold text-text">{{ item.display }}</span>
-            <span class="text-muted"> · {{ item.title }}</span>
-          </div>
-        }
-        <div class="flex h-40 items-end gap-0.5 border-b border-glass-border pt-6">
-          @for (item of items(); track item.title; let i = $index) {
-            <button
-              type="button"
-              class="group flex h-full min-w-0 flex-1 flex-col items-center justify-end focus-visible:outline-2 focus-visible:outline-primary"
-              [attr.aria-label]="item.title + ': ' + item.display"
-              (pointerenter)="active.set(i)"
-              (focus)="active.set(i)"
-              (blur)="active.set(null)"
+      <!-- Cada columna mide al menos 24 px (WCAG 2.2, tamano de objetivo); si no caben,
+           el grafico se desplaza en horizontal en lugar de encoger las columnas. -->
+      <div class="overflow-x-auto" (pointerleave)="active.set(null)">
+        <div class="relative" [style.min-width.px]="items().length * 26">
+          @if (activeItem(); as item) {
+            <div
+              class="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-lg bg-[var(--surface-2-solid)] px-2 py-1 text-xs whitespace-nowrap shadow-md"
+              [style.left.%]="activeLeft()"
+              role="status"
             >
-              @if (i === peak() && item.value > 0) {
-                <span class="mb-1 text-[0.7rem] font-semibold text-text">{{ item.display }}</span>
-              }
-              <span
-                class="block w-full max-w-6 rounded-t bg-chart transition-opacity"
-                [class.opacity-60]="active() !== null && active() !== i"
-                [style.height.%]="height(item.value)"
-                [style.min-height.px]="item.value > 0 ? 2 : 0"
-              ></span>
-            </button>
+              <span class="font-semibold text-text">{{ item.display }}</span>
+              <span class="text-muted"> · {{ item.title }}</span>
+            </div>
           }
-        </div>
-        <div class="mt-1 flex gap-0.5" aria-hidden="true">
-          @for (item of items(); track item.title; let i = $index) {
-            <span class="min-w-0 flex-1 truncate text-center text-[0.65rem] text-muted">
-              {{ i % 2 === items().length % 2 ? item.label : '' }}
-            </span>
-          }
+          <div class="flex h-44 items-end gap-0.5 border-b border-glass-border pt-10">
+            @for (item of items(); track item.title; let i = $index) {
+              <button
+                type="button"
+                class="group flex h-full min-w-6 flex-1 flex-col items-center justify-end focus-visible:outline-2 focus-visible:outline-primary"
+                [attr.aria-label]="item.title + ': ' + item.display"
+                (pointerenter)="active.set(i)"
+                (focus)="active.set(i)"
+                (blur)="active.set(null)"
+              >
+                @if (i === peak() && item.value > 0) {
+                  <span class="mb-1 text-[0.7rem] font-semibold text-text">{{ item.display }}</span>
+                }
+                <span
+                  class="block w-full max-w-6 rounded-t bg-chart transition-opacity"
+                  [class.opacity-60]="active() !== null && active() !== i"
+                  [style.height.%]="height(item.value)"
+                  [style.min-height.px]="item.value > 0 ? 2 : 0"
+                ></span>
+              </button>
+            }
+          </div>
+          <div class="mt-1 flex gap-0.5" aria-hidden="true">
+            @for (item of items(); track item.title; let i = $index) {
+              <span class="min-w-6 flex-1 truncate text-center text-[0.65rem] text-muted">
+                {{ i % 2 === items().length % 2 ? item.label : '' }}
+              </span>
+            }
+          </div>
         </div>
       </div>
       <details class="text-sm">
@@ -112,7 +116,9 @@ export class MonthColumns {
   });
   protected readonly activeLeft = computed(() => {
     const index = this.active() ?? 0;
-    return ((index + 0.5) / Math.max(1, this.items().length)) * 100;
+    const center = ((index + 0.5) / Math.max(1, this.items().length)) * 100;
+    // El globo se centra en la columna, sin salirse por los bordes del grafico.
+    return Math.min(85, Math.max(15, center));
   });
 
   protected height(value: number): number {
