@@ -27,6 +27,9 @@ import { ThemeToggle } from '../../shared/ui/theme-toggle';
         </div>
       </main>
       <footer class="mt-8 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted">
+        <a routerLink="/ayuda" class="underline-offset-4 hover:underline">
+          {{ 'help.title' | transloco }}
+        </a>
         <a routerLink="/legal/terminos" class="underline-offset-4 hover:underline">
           {{ 'legal.terms' | transloco }}
         </a>

@@ -87,6 +87,10 @@
       "choose": "Choose a file or drag it here",
       "rules": "{{types}}, up to {{max}} MB",
       "remove": "Remove {{name}}"
+    },
+    "loadError": {
+      "title": "We could not load this information",
+      "retry": "Try again"
     }
   },
   "errors": {
@@ -1582,6 +1586,80 @@
       "before": "Before",
       "after": "After",
       "none": "No entries match these filters"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "Answers to the most common questions about Carpool UP.",
+    "legal": "The full rules are in the",
+    "groups": {
+      "account": "Your account",
+      "passenger": "Riding as a passenger",
+      "driver": "Driving",
+      "safety": "Safety",
+      "privacy": "Privacy and ratings"
+    },
+    "q": {
+      "who": {
+        "q": "Who can use Carpool UP?",
+        "a": "Anyone in the university community with an institutional email ending in {{suffix}}. When you sign up you upload your student ID or certificate, and an administrator reviews it before activating your account."
+      },
+      "code": {
+        "q": "I did not get the code. What should I do?",
+        "a": "Check your spam folder. The code expires in {{minutes}} minutes, and you can request a new one from the same screen after {{seconds}} seconds."
+      },
+      "revalidate": {
+        "q": "Why do I have to upload my document every semester?",
+        "a": "To confirm you are still part of the university. You have {{days}} days from the start of the semester to upload your current ID or certificate."
+      },
+      "search": {
+        "q": "How do I find a ride?",
+        "a": "Enter where to pick you up, where you are going and the time. You will see rides whose route passes within {{meters}} m of your points and that leave up to {{window}} minutes before or after that time."
+      },
+      "cancel": {
+        "q": "Can I cancel a booking?",
+        "a": "Yes. Up to {{hours}} hours before departure you can cancel without penalty. After that, the driver has to approve the cancellation."
+      },
+      "noShow": {
+        "q": "What happens if I do not show up?",
+        "a": "The driver waits {{wait}} minutes and can then mark you as a no-show. If you reach {{limit}} no-shows within {{windowDays}} days, you will not be able to book for {{ban}} days."
+      },
+      "waitlist": {
+        "q": "The ride is full. What can I do?",
+        "a": "Join the waiting list. If a seat opens up we notify you, and you have {{offer}} minutes to accept it before it goes to the next person."
+      },
+      "become": {
+        "q": "How do I start driving?",
+        "a": "Upload your valid driving licence and register at least one vehicle. Once an administrator approves the licence, you can publish rides."
+      },
+      "series": {
+        "q": "What is a series?",
+        "a": "A trip you repeat on certain weekdays during the semester. Passengers can subscribe to some days or to the whole series, and they get a direct chat with you."
+      },
+      "picoPlaca": {
+        "q": "What about pico y placa?",
+        "a": "The app will not let you publish a ride on a pico y placa day for your vehicle. If the rules change and a ride becomes restricted, it is cancelled automatically and passengers are notified."
+      },
+      "price": {
+        "q": "How much should I charge?",
+        "a": "Carpool UP is not a transport service: the contribution only helps cover trip costs. If the university sets a cost per kilometre, the app suggests an amount based on distance, and if it sets a cap per seat you cannot go over it."
+      },
+      "share": {
+        "q": "How do I share my ride with someone I trust?",
+        "a": "On the ride screen, tap Share ride. Whoever opens the link sees the route, the vehicle with its plate and the live location, but no names or phone numbers. The link stops working when the ride ends."
+      },
+      "emergency": {
+        "q": "What do I do in an emergency?",
+        "a": "Tap Emergency on the ride screen. You will see buttons to call {{phone}} and your trusted contacts, and to Alert the university, which notifies the administrators right away with your location."
+      },
+      "data": {
+        "q": "Who can see my information?",
+        "a": "Others see your name and rating. Your email, phone number and document are never shown to other users. The vehicle plate is only visible to passengers with an accepted booking and to anyone with a shared ride link."
+      },
+      "ratings": {
+        "q": "Who can see my ratings?",
+        "a": "Anyone can see your average and the comments, but nobody sees who wrote each rating. You have {{ratingDays}} days after the ride to leave a rating."
+      }
     }
   }
 }

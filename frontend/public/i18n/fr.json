@@ -87,6 +87,10 @@
       "choose": "Choisissez un fichier ou glissez-le ici",
       "rules": "{{types}}, {{max}} Mo maximum",
       "remove": "Retirer {{name}}"
+    },
+    "loadError": {
+      "title": "Impossible de charger ces informations",
+      "retry": "Réessayer"
     }
   },
   "errors": {
@@ -1582,6 +1586,80 @@
       "before": "Avant",
       "after": "Après",
       "none": "Aucune entrée ne correspond à ces filtres"
+    }
+  },
+  "help": {
+    "title": "Aide",
+    "subtitle": "Réponses aux questions les plus fréquentes sur Carpool UP.",
+    "legal": "Les règles complètes figurent dans",
+    "groups": {
+      "account": "Votre compte",
+      "passenger": "Voyager comme passager",
+      "driver": "Conduire",
+      "safety": "Sécurité",
+      "privacy": "Confidentialité et notes"
+    },
+    "q": {
+      "who": {
+        "q": "Qui peut utiliser Carpool UP ?",
+        "a": "Toute personne de la communauté universitaire ayant une adresse institutionnelle se terminant par {{suffix}}. À l’inscription, vous envoyez votre carte ou attestation, et un administrateur la vérifie avant d’activer votre compte."
+      },
+      "code": {
+        "q": "Je n’ai pas reçu le code. Que faire ?",
+        "a": "Vérifiez vos courriers indésirables. Le code expire au bout de {{minutes}} minutes et vous pouvez en demander un autre sur le même écran après {{seconds}} secondes."
+      },
+      "revalidate": {
+        "q": "Pourquoi dois-je envoyer mon document chaque semestre ?",
+        "a": "Pour confirmer que vous faites toujours partie de l’université. Vous avez {{days}} jours après le début du semestre pour envoyer votre carte ou attestation en cours."
+      },
+      "search": {
+        "q": "Comment trouver un trajet ?",
+        "a": "Indiquez où l’on vous prend, où vous allez et l’heure. Vous verrez les trajets dont l’itinéraire passe à moins de {{meters}} m de vos points et qui partent jusqu’à {{window}} minutes avant ou après cette heure."
+      },
+      "cancel": {
+        "q": "Puis-je annuler une réservation ?",
+        "a": "Oui. Jusqu’à {{hours}} heures avant le départ, vous annulez sans pénalité. Ensuite, l’annulation doit être acceptée par le conducteur."
+      },
+      "noShow": {
+        "q": "Que se passe-t-il si je ne me présente pas ?",
+        "a": "Le conducteur vous attend {{wait}} minutes puis peut vous déclarer absent. Si vous cumulez {{limit}} absences en {{windowDays}} jours, vous ne pourrez plus réserver pendant {{ban}} jours."
+      },
+      "waitlist": {
+        "q": "Le trajet est complet. Que faire ?",
+        "a": "Inscrivez-vous sur la liste d’attente. Si une place se libère, nous vous prévenons et vous avez {{offer}} minutes pour l’accepter avant qu’elle passe à la personne suivante."
+      },
+      "become": {
+        "q": "Comment commencer à conduire ?",
+        "a": "Envoyez votre permis de conduire en cours de validité et enregistrez au moins un véhicule. Une fois le permis validé par un administrateur, vous pourrez publier des trajets."
+      },
+      "series": {
+        "q": "Qu’est-ce qu’une série ?",
+        "a": "C’est un trajet que vous répétez certains jours de la semaine pendant le semestre. Les passagers peuvent s’abonner à quelques jours ou à toute la série et disposent d’une discussion directe avec vous."
+      },
+      "picoPlaca": {
+        "q": "Et le pico y placa ?",
+        "a": "L’application ne vous laisse pas publier un trajet un jour de pico y placa pour votre véhicule. Si les règles changent et qu’un trajet devient interdit, il est annulé automatiquement et les passagers sont prévenus."
+      },
+      "price": {
+        "q": "Combien dois-je demander ?",
+        "a": "Carpool UP n’est pas un service de transport : la contribution aide seulement à couvrir les frais du trajet. Si l’université fixe un coût par kilomètre, l’application suggère un montant selon la distance, et si elle fixe un plafond par place, vous ne pouvez pas le dépasser."
+      },
+      "share": {
+        "q": "Comment partager mon trajet avec un proche ?",
+        "a": "Sur l’écran du trajet, touchez Partager le trajet. La personne qui ouvre le lien voit l’itinéraire, le véhicule avec sa plaque et la position en direct, mais aucun nom ni numéro de téléphone. Le lien cesse de fonctionner à la fin du trajet."
+      },
+      "emergency": {
+        "q": "Que faire en cas d’urgence ?",
+        "a": "Touchez Urgence sur l'écran du trajet. Vous verrez des boutons pour appeler le {{phone}} et vos contacts de confiance, et pour Alerter l'université, ce qui prévient immédiatement les administrateurs avec votre position."
+      },
+      "data": {
+        "q": "Qui voit mes informations ?",
+        "a": "Les autres voient votre nom et votre note. Votre e-mail, votre téléphone et votre document ne sont jamais montrés aux autres utilisateurs. La plaque du véhicule n’est visible que pour les passagers dont la réservation est acceptée et pour les personnes ayant le lien d’un trajet partagé."
+      },
+      "ratings": {
+        "q": "Qui voit mes notes ?",
+        "a": "Tout le monde voit votre moyenne et les commentaires, mais personne ne voit qui a écrit chaque note. Vous avez {{ratingDays}} jours après le trajet pour noter."
+      }
     }
   }
 }

@@ -64,6 +64,11 @@ export const routes: Routes = [
 
   // Publico para todos
   {
+    path: 'ayuda',
+    loadComponent: () => import('./features/help/help-page'),
+    title: 'help.title',
+  },
+  {
     path: 'legal/:kind',
     loadComponent: () => import('./features/legal/legal-page'),
     title: 'legal.pageTitle',

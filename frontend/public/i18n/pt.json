@@ -87,6 +87,10 @@
       "choose": "Escolha um arquivo ou arraste-o aqui",
       "rules": "{{types}}, até {{max}} MB",
       "remove": "Remover {{name}}"
+    },
+    "loadError": {
+      "title": "Não foi possível carregar estas informações",
+      "retry": "Tentar de novo"
     }
   },
   "errors": {
@@ -415,7 +419,7 @@
       "title": "Redefina sua senha",
       "why": "Digite-o junto com sua nova senha."
     },
-    "code": "Código de 6 números",
+    "code": "Código de 6 dígitos",
     "codeHint": "Vence em {{minutes}} minutos. Verifique também a pasta de spam.",
     "submit": "Verificar",
     "resend": "Enviar um novo código",
@@ -1448,7 +1452,7 @@
       "cancelled_by_passenger": "Cancelada pelo passageiro",
       "cancelled_by_driver": "Cancelada pelo motorista",
       "auto_cancelled_late": "Cancelada por atraso",
-      "auto_cancelled_pico_placa": "Cancelada por rodízio",
+      "auto_cancelled_pico_placa": "Cancelada por pico y placa",
       "expired": "Expirada",
       "no_show": "Não compareceu",
       "completed": "Concluída"
@@ -1504,7 +1508,7 @@
         "parameters": "Parâmetros",
         "semesters": "Semestres",
         "places": "Locais",
-        "picoPlaca": "Rodízio",
+        "picoPlaca": "Pico y placa",
         "legal": "Legal",
         "admins": "Administradores",
         "audit": "Auditoria"
@@ -1582,6 +1586,80 @@
       "before": "Antes",
       "after": "Depois",
       "none": "Nenhum registro com esses filtros"
+    }
+  },
+  "help": {
+    "title": "Ajuda",
+    "subtitle": "Respostas às perguntas mais comuns sobre o Carpool UP.",
+    "legal": "As regras completas estão em",
+    "groups": {
+      "account": "Sua conta",
+      "passenger": "Viajar como passageiro",
+      "driver": "Dirigir",
+      "safety": "Segurança",
+      "privacy": "Privacidade e avaliações"
+    },
+    "q": {
+      "who": {
+        "q": "Quem pode usar o Carpool UP?",
+        "a": "Qualquer pessoa da comunidade universitária com um e-mail institucional terminado em {{suffix}}. Ao se cadastrar você envia sua carteirinha ou declaração, e um administrador a revisa antes de ativar sua conta."
+      },
+      "code": {
+        "q": "Não recebi o código. O que faço?",
+        "a": "Verifique a pasta de spam. O código vence em {{minutes}} minutos e você pode pedir outro na mesma tela depois de {{seconds}} segundos."
+      },
+      "revalidate": {
+        "q": "Por que preciso enviar meu documento a cada semestre?",
+        "a": "Para confirmar que você continua vinculado à universidade. Você tem {{days}} dias desde o início do semestre para enviar a carteirinha ou declaração vigente."
+      },
+      "search": {
+        "q": "Como encontro uma viagem?",
+        "a": "Informe onde buscar você, para onde vai e o horário. Você verá as viagens cuja rota passa a menos de {{meters}} m dos seus pontos e que saem até {{window}} minutos antes ou depois desse horário."
+      },
+      "cancel": {
+        "q": "Posso cancelar uma reserva?",
+        "a": "Sim. Até {{hours}} horas antes da saída você cancela sem penalidade. Depois disso, o cancelamento precisa da aprovação do motorista."
+      },
+      "noShow": {
+        "q": "O que acontece se eu não aparecer?",
+        "a": "O motorista espera {{wait}} minutos e depois pode marcar sua ausência. Se você acumular {{limit}} ausências em {{windowDays}} dias, não poderá reservar durante {{ban}} dias."
+      },
+      "waitlist": {
+        "q": "A viagem está lotada. O que faço?",
+        "a": "Entre na lista de espera. Se um lugar ficar livre, avisamos você, e você tem {{offer}} minutos para aceitá-lo antes que passe para a próxima pessoa."
+      },
+      "become": {
+        "q": "Como começo a dirigir?",
+        "a": "Envie sua habilitação vigente e cadastre pelo menos um veículo. Quando um administrador aprovar a habilitação, você poderá publicar viagens."
+      },
+      "series": {
+        "q": "O que é uma série?",
+        "a": "É um trajeto que você repete em certos dias da semana durante o semestre. Os passageiros podem se inscrever em alguns dias ou na série inteira e têm um chat direto com você."
+      },
+      "picoPlaca": {
+        "q": "E o pico y placa?",
+        "a": "O app não deixa publicar uma viagem em um dia de pico y placa do seu veículo. Se as regras mudarem e uma viagem ficar restrita, ela é cancelada automaticamente e os passageiros são avisados."
+      },
+      "price": {
+        "q": "Quanto devo cobrar?",
+        "a": "O Carpool UP não é um serviço de transporte: a contribuição ajuda a cobrir os custos da viagem. Se a universidade definir um custo por quilômetro, o app sugere um valor conforme a distância e, se fixar um teto por lugar, não deixa ultrapassá-lo."
+      },
+      "share": {
+        "q": "Como compartilho minha viagem com alguém de confiança?",
+        "a": "Na tela da viagem, toque em Compartilhar viagem. Quem abrir o link vê a rota, o veículo com a placa e a localização ao vivo, mas não nomes nem telefones. O link deixa de funcionar quando a viagem termina."
+      },
+      "emergency": {
+        "q": "O que faço em uma emergência?",
+        "a": "Toque em Emergência na tela da viagem. Você verá botões para ligar para o {{phone}} e para seus contatos de confiança, e para Avisar a universidade, que alerta os administradores na hora com sua localização."
+      },
+      "data": {
+        "q": "Quem vê meus dados?",
+        "a": "Os outros veem seu nome e sua avaliação. Seu e-mail, telefone e documento nunca são mostrados a outros usuários. A placa do veículo só aparece para passageiros com reserva aceita e para quem tiver o link de uma viagem compartilhada."
+      },
+      "ratings": {
+        "q": "Quem vê minhas avaliações?",
+        "a": "Qualquer pessoa vê sua média e os comentários, mas ninguém vê quem escreveu cada avaliação. Você tem {{ratingDays}} dias depois da viagem para avaliar."
+      }
     }
   }
 }

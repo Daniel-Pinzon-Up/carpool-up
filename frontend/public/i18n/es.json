@@ -87,6 +87,10 @@
       "choose": "Elige un archivo o arrástralo aquí",
       "rules": "{{types}}, máximo {{max}} MB",
       "remove": "Quitar {{name}}"
+    },
+    "loadError": {
+      "title": "No pudimos cargar esta información",
+      "retry": "Reintentar"
     }
   },
   "errors": {
@@ -1582,6 +1586,80 @@
       "before": "Antes",
       "after": "Después",
       "none": "No hay registros con esos filtros"
+    }
+  },
+  "help": {
+    "title": "Ayuda",
+    "subtitle": "Respuestas a las preguntas más comunes sobre Carpool UP.",
+    "legal": "Las reglas completas están en",
+    "groups": {
+      "account": "Tu cuenta",
+      "passenger": "Viajar como pasajero",
+      "driver": "Conducir",
+      "safety": "Seguridad",
+      "privacy": "Privacidad y calificaciones"
+    },
+    "q": {
+      "who": {
+        "q": "¿Quién puede usar Carpool UP?",
+        "a": "Cualquier persona de la comunidad universitaria con un correo institucional terminado en {{suffix}}. Al registrarte subes tu carnet o constancia y un administrador lo revisa antes de activar tu cuenta."
+      },
+      "code": {
+        "q": "No me llegó el código, ¿qué hago?",
+        "a": "Revisa la carpeta de correo no deseado. El código vence en {{minutes}} minutos y puedes pedir otro desde la misma pantalla cuando pasen {{seconds}} segundos."
+      },
+      "revalidate": {
+        "q": "¿Por qué debo subir mi documento cada semestre?",
+        "a": "Para confirmar que sigues vinculado a la universidad. Tienes {{days}} días desde el inicio del semestre para subir el carnet o la constancia vigente."
+      },
+      "search": {
+        "q": "¿Cómo encuentro un viaje?",
+        "a": "Indica dónde te recogen, a dónde vas y la hora. Verás los viajes cuya ruta pasa a menos de {{meters}} m de tus puntos y que salen hasta {{window}} minutos antes o después de esa hora."
+      },
+      "cancel": {
+        "q": "¿Puedo cancelar una reserva?",
+        "a": "Sí. Hasta {{hours}} horas antes de la salida cancelas sin penalización. Después, la cancelación necesita la aprobación del conductor."
+      },
+      "noShow": {
+        "q": "¿Qué pasa si no me presento?",
+        "a": "El conductor te espera {{wait}} minutos y luego puede marcarte como ausente. Si acumulas {{limit}} ausencias en {{windowDays}} días, no podrás reservar durante {{ban}} días."
+      },
+      "waitlist": {
+        "q": "El viaje está lleno, ¿qué hago?",
+        "a": "Únete a la lista de espera. Si se libera un puesto te avisamos y tienes {{offer}} minutos para aceptarlo antes de que pase a la siguiente persona."
+      },
+      "become": {
+        "q": "¿Cómo empiezo a conducir?",
+        "a": "Sube tu licencia de conducción vigente y registra al menos un vehículo. Cuando un administrador apruebe la licencia podrás publicar viajes."
+      },
+      "series": {
+        "q": "¿Qué es una serie?",
+        "a": "Es un trayecto que repites ciertos días de la semana durante el semestre. Los pasajeros pueden suscribirse a algunos días o a toda la serie y tienen un chat directo contigo."
+      },
+      "picoPlaca": {
+        "q": "¿Qué pasa con el pico y placa?",
+        "a": "La app no deja publicar un viaje en un día de pico y placa de tu vehículo. Si cambian las reglas y un viaje queda restringido, se cancela solo y avisamos a los pasajeros."
+      },
+      "price": {
+        "q": "¿Cuánto debo cobrar?",
+        "a": "Carpool UP no es un servicio de transporte: el aporte es una contribución a los gastos del viaje. Si la universidad define un costo por kilómetro, la app sugiere un valor según la distancia, y si fija un tope por puesto no deja pasarlo."
+      },
+      "share": {
+        "q": "¿Cómo comparto mi viaje con alguien de confianza?",
+        "a": "En la pantalla del viaje toca Compartir viaje. Quien abra el enlace ve la ruta, el vehículo con su placa y la ubicación en vivo, pero no nombres ni teléfonos. El enlace deja de funcionar al terminar el viaje."
+      },
+      "emergency": {
+        "q": "¿Qué hago en una emergencia?",
+        "a": "Toca Emergencia en la pantalla del viaje. Verás botones para llamar al {{phone}} y a tus contactos de confianza, y para Avisar a la universidad: eso alerta de inmediato a los administradores con tu ubicación."
+      },
+      "data": {
+        "q": "¿Quién ve mis datos?",
+        "a": "Los demás ven tu nombre y tu calificación. Tu correo, teléfono y documento nunca se muestran a otros usuarios. La placa del vehículo solo la ven los pasajeros con reserva aceptada y quien tenga el enlace de un viaje compartido."
+      },
+      "ratings": {
+        "q": "¿Quién ve mis calificaciones?",
+        "a": "Cualquiera ve tu promedio y los comentarios, pero nadie ve quién escribió cada calificación. Tienes {{ratingDays}} días después del viaje para calificar."
+      }
     }
   }
 }
