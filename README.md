@@ -20,7 +20,14 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 | 11 | Calificaciones, historial y estadísticas: calificación por criterio con plazo, reputación en búsqueda, historial con tickets y métricas por rol | Hecho |
 | 12 | Panel de administración: indicadores, usuarios con suspensión y bloqueo, monitoreo de viajes, emergencias en vivo, moderación y configuración completa del superadmin, todo auditado | Hecho |
 | 13 | Internacionalización y pulido: cuatro idiomas revisados, pantalla de ayuda, estados de error con reintento, contraste AA en ambos temas, sesión estable ante fallos pasajeros y axe sin errores graves en 24 pantallas | Hecho |
-| 14 | Ver plan maestro, sección 16 | Pendiente |
+| 14 | Calidad final y entrega: eliminación de cuenta (Ley 1581), términos en cuatro idiomas, carga inicial de 745 a 436 kB, revisión de seguridad (propiedad, límites, cabeceras, dependencias), respaldos verificados, E2E de punta a punta, CI y guías de despliegue y administración | Hecho |
+
+## Documentación
+
+- [Guía de despliegue](docs/DESPLIEGUE.md): arranque desde cero, producción, certificados, respaldos y actualizaciones.
+- [Guía de administración](docs/GUIA_ADMINISTRACION.md): panel, aprobaciones, sanciones, emergencias, moderación y parámetros.
+- [API](docs/API.md): endpoints, errores, límites y autorización. La documentación interactiva está en `/api/v1/docs`.
+- [Decisiones](docs/DECISIONES.md), [diagrama entidad-relación](docs/DIAGRAMA_ER.md) y [cómo funciona por dentro](docs/COMO_FUNCIONA.md).
 
 ## Requisitos
 
@@ -113,6 +120,9 @@ Para probar otro servidor, define `E2E_BASE_URL` (por defecto `https://localhost
 | `make token EMAIL=...` | Token de acceso de desarrollo para probar la API |
 | `make test` | Pruebas de backend (con PostGIS real) y frontend |
 | `make lint` | ruff, mypy, ESLint y Prettier |
+| `make e2e-users` / `make test-e2e` | Cuentas de prueba y suite E2E con accesibilidad (solo desarrollo) |
+| `make backup-check` | Restaura el último respaldo en una base aparte y lo compara con la actual |
+| `make restore FILE=...` | Restaura un respaldo sobre la base en uso |
 | `make clean` | Detener y borrar volúmenes |
 
 En Windows sin `make`, usa `.\make.ps1 <objetivo>` con los mismos nombres.

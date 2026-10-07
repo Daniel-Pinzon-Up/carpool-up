@@ -137,7 +137,7 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `POST /auth/verify-email` | Público | 10/min | `{challenge_id, code, device_label?}`. Pasa la cuenta a `pending_approval` y abre sesión. |
 | `POST /auth/2fa/verify` | Público | 10/min | `{challenge_id, code, device_label?}`. |
 | `POST /auth/codes/resend` | Público | 5/min | `{challenge_id}`. Respeta `auth_code_resend_seconds`. |
-| `POST /auth/refresh` | Cookie | 30/min | Rota el refresh y devuelve un token de acceso nuevo. |
+| `POST /auth/refresh` | Cookie | 30/min por sesión y 300/min por IP | Rota el refresh y devuelve un token de acceso nuevo. Presentar uno ya usado revoca todas las sesiones (`REFRESH_REUSED`). |
 | `POST /auth/logout` | Cookie | | Revoca la sesión de la cookie. |
 | `POST /auth/logout-others` | Sesión | | Revoca todas las sesiones salvo la actual. |
 | `GET /auth/sessions` | Sesión | | Sesiones activas con `current`. |
@@ -146,6 +146,7 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `GET, PATCH /users/me` | Sesión (cualquier estado) | | Perfil propio con `document` y `pending_legal`. Se puede cambiar `program`, `preferred_language`, `theme_preference` y `payment_note` (solo conductores). |
 | `GET, POST /users/me/documents` | Sesión (cualquier estado) | | Historial y carga de carnet o constancia (multipart: `kind`, `document`). |
 | `POST /legal/accept` | Sesión | | `{document_ids}` de versiones vigentes pendientes. |
+| `POST /users/me/delete` | Sesión | | `{password}`. Elimina la cuenta propia (Ley 1581): anonimiza nombre, correo, foto, programa y contraseña; borra documentos, licencia, contactos de confianza y avisos; cancela sus viajes y reservas futuros con aviso; cierra todas sus sesiones. Conserva los registros operativos. 204. Errores `PASSWORD_INCORRECT` (422), `ACCOUNT_DELETE_TRIP_IN_PROGRESS` y `ACCOUNT_DELETE_NOT_ALLOWED` (superadmin) (409). |
 
 ### Aprobaciones, licencias y notificaciones (paso 3)
 
@@ -357,6 +358,17 @@ Criterios: conductor `punctuality`, `safe_driving`, `courtesy`, `cleanliness`; p
 | `POST /admin/ratings/{id}/hide` | Administrador | `{hidden}`. |
 
 "Administrador" incluye al superadmin. Sobre otro administrador solo actúa el superadmin, y nadie sobre un superadmin ni sobre sí mismo (`FORBIDDEN`). Las entradas de `GET /admin/audit` traen `actor_name`.
+
+## Límites de peticiones
+
+- Límite general por IP: `RATE_LIMIT_DEFAULT` (120 por minuto por defecto). Los endpoints de autenticación declaran el suyo (columna Límite).
+- La renovación de sesión se cuenta **por sesión**: en el campus muchas personas salen por la misma IP pública.
+- La IP es la que ve Nginx: reemplaza `X-Forwarded-For`, así un cliente no puede inventar otra para esquivar los límites.
+- Al superarlo se responde 429 con `RATE_LIMITED`.
+
+## Autorización por propiedad
+
+Además del rol, cada ruta que recibe un id comprueba que el recurso sea de quien lo pide (o de su viaje). Una prueba recorre todas esas rutas como un extraño y exige 403 o 404; una ruta nueva sin clasificar hace fallar la prueba (`tests/test_ownership.py`).
 
 ## Cabeceras
 
