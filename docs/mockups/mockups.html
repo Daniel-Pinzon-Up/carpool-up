@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carpool UP · Mockups</title>
+<!--
+  Mockups de fidelidad media de Carpool UP. Cada <section class="frame"> es una pantalla y se
+  exporta como PNG con render.mjs. Los textos, rutas y estados son los de la app real
+  (frontend/public/i18n/es.json). Componentes reutilizables (se expanden con el script del final):
+    <i data-i="nombre"></i>                      icono de Lucide (icons.js)
+    <div data-c="topbar" data-badge="3"></div>     barra superior movil
+    <div data-c="tabbar" data-role="passenger|driver" data-active="..."></div>
+    <div data-c="map" data-h="220" data-car data-pickup data-stop></div>
+    <div class="desk" data-role="admin|superadmin" data-active="..."> ... </div>
+-->
+<style>
+  :root {
+    --ink: #22272e; --muted: #6b7280; --faint: #9aa1ab; --line: #cfd4dc; --line2: #e3e6ea;
+    --bg: #f6f7f9; --card: #ffffff; --fill: #eef0f3; --accent: #1e5aa8; --accent-soft: #e3edf9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #dfe2e6; font: 13px/1.4 "Segoe UI", system-ui, sans-serif; color: var(--ink);
+         display: flex; flex-wrap: wrap; gap: 32px; padding: 32px; }
+  .frame { background: #fff; border: 1px solid #c7ccd3; position: relative; overflow: hidden; }
+  .frame.m { width: 480px; height: 1000px; }
+  .frame.d { width: 1600px; height: 900px; }
+  .fhead { height: 96px; padding: 18px 24px 0; border-bottom: 1px dashed var(--line); background: #fbfbfc; }
+  .frame.d .fhead { height: 76px; padding-top: 14px; display: flex; align-items: baseline; gap: 16px; }
+  .fnum { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: .08em; }
+  .ftitle { font-size: 19px; font-weight: 700; white-space: nowrap; }
+  .fsub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .frame.d .fsub { margin: 0; }
+
+  /* Telefono */
+  .phone { position: absolute; left: 44px; top: 122px; width: 392px; height: 846px; border: 2px solid #3a3f47;
+           border-radius: 38px; background: var(--bg); overflow: hidden; }
+  .status { height: 30px; display: flex; justify-content: space-between; align-items: center; padding: 6px 26px 0;
+            font-size: 11px; font-weight: 600; color: var(--muted); }
+  .status .dots { display: flex; gap: 3px; } .status .dots b { width: 14px; height: 7px; border-radius: 2px; background: #b9bec6; }
+  .scr { position: absolute; inset: 30px 0 0; overflow: hidden; padding: 0 16px; }
+  .scr.navpad { padding-bottom: 80px; }
+
+  /* Escritorio */
+  .browser { position: absolute; left: 40px; top: 96px; width: 1520px; height: 780px; border: 2px solid #3a3f47;
+             border-radius: 12px; background: var(--bg); overflow: hidden; }
+  .bbar { height: 34px; background: #eceef1; border-bottom: 1px solid var(--line); display: flex; align-items: center;
+          gap: 8px; padding: 0 14px; }
+  .bbar .dot { width: 10px; height: 10px; border-radius: 50%; background: #c3c8cf; }
+  .bbar .url { margin-left: 18px; flex: 0 0 520px; height: 22px; border-radius: 11px; background: #fff; border: 1px solid var(--line);
+               font-size: 11px; color: var(--muted); padding: 3px 12px; }
+  .desk { position: absolute; inset: 34px 0 0; display: flex; }
+  .side { width: 232px; background: #fff; border-right: 1px solid var(--line); padding: 18px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .side .nav { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; font-size: 14px; color: var(--ink); }
+  .side .nav.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .side .bottom { margin-top: auto; }
+  .dmain { flex: 1; padding: 0 32px 24px; overflow: hidden; position: relative; }
+  .dtop { height: 60px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+
+  /* Comunes */
+  svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .s14 svg.ic, svg.ic.s14 { width: 14px; height: 14px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+  .logo { width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--accent); color: var(--accent);
+          display: grid; place-items: center; }
+  .topbar { height: 52px; display: flex; align-items: center; justify-content: space-between; }
+  .roundbtn { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; display: grid;
+              place-items: center; position: relative; color: var(--ink); }
+  .badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent);
+           color: #fff; font-size: 10px; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
+  .tabbar { position: absolute; left: 10px; right: 10px; bottom: 12px; height: 62px; background: #fff; border: 1.5px solid var(--line);
+            border-radius: 20px; display: flex; justify-content: space-around; align-items: center; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10.5px; color: var(--muted);
+         width: 64px; padding: 6px 0; border-radius: 12px; position: relative; }
+  .tab.on { color: var(--accent); font-weight: 700; background: var(--accent-soft); }
+  .tab .badge { top: 0; right: 12px; }
+  h1 { font-size: 21px; line-height: 1.2; font-weight: 700; }
+  h2 { font-size: 15px; font-weight: 700; }
+  h3 { font-size: 13px; font-weight: 700; }
+  .muted { color: var(--muted); } .faint { color: var(--faint); } .small { font-size: 11.5px; } .tiny { font-size: 10.5px; }
+  .b { font-weight: 700; } .acc { color: var(--accent); } .mono { font-family: Consolas, monospace; font-size: 12px; }
+  .card { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; }
+  .card.flat { border-style: dashed; background: transparent; }
+  .row { display: flex; align-items: center; gap: 8px; } .row.sb { justify-content: space-between; } .row.top { align-items: flex-start; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .gap4 { gap: 4px; } .gap12 { gap: 12px; } .gap16 { gap: 16px; } .wrap { flex-wrap: wrap; } .grow { flex: 1; min-width: 0; }
+  .mt4 { margin-top: 4px; } .mt8 { margin-top: 8px; } .mt12 { margin-top: 12px; } .mt16 { margin-top: 16px; } .mt20 { margin-top: 20px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .hr { height: 1px; background: var(--line2); margin: 10px 0; }
+
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; font-weight: 600; }
+  .input { height: 40px; border: 1.5px solid #bfc5ce; border-radius: 10px; background: #fff; display: flex; align-items: center;
+           gap: 8px; padding: 0 12px; color: var(--ink); }
+  .input.ph { color: var(--faint); } .input.area { height: 70px; align-items: flex-start; padding-top: 9px; }
+  .input.focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .hint { font-size: 11px; color: var(--muted); }
+  .btn { height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+         font-weight: 600; padding: 0 16px; border: 1.5px solid var(--line); background: #fff; color: var(--ink); white-space: nowrap; }
+  .btn.pri { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .btn.out { border-color: var(--accent); color: var(--accent); }
+  .btn.dis { background: var(--fill); color: var(--faint); border-color: var(--line2); }
+  .btn.sm { height: 32px; font-size: 12px; padding: 0 12px; border-radius: 10px; }
+  .btn.full { width: 100%; }
+  .link { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px;
+          border: 1.5px solid var(--line); background: #fff; font-size: 11.5px; white-space: nowrap; }
+  .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .st { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 9px; border-radius: 11px; font-size: 11px;
+        font-weight: 600; border: 1.5px solid #aeb4bd; color: #4b5563; background: #fff; }
+  .st.acc { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .st.dark { border-color: var(--ink); background: var(--ink); color: #fff; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--fill); border: 1.5px solid var(--line);
+            display: grid; place-items: center; font-weight: 700; font-size: 12px; color: #4b5563; flex-shrink: 0; }
+  .avatar.lg { width: 60px; height: 60px; font-size: 18px; }
+  .stars { display: inline-flex; gap: 2px; color: var(--accent); }
+  .stars svg.ic { width: 14px; height: 14px; }
+  .stars .on { fill: var(--accent); } .stars .off { color: #c3c8cf; }
+  .stars.big svg.ic { width: 26px; height: 26px; }
+  .seg { display: flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+  .seg span { flex: 1; text-align: center; padding: 7px 4px; font-size: 11.5px; border-left: 1.5px solid var(--line); }
+  .seg span:first-child { border-left: 0; } .seg span.on { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .stepper { display: flex; gap: 4px; } .stepper b { flex: 1; height: 5px; border-radius: 3px; background: var(--line2); }
+  .stepper b.on { background: var(--accent); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--line2); }
+  .tabs span { padding: 8px 10px; font-size: 12px; color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
+  .tabs span.on { color: var(--accent); border-color: var(--accent); font-weight: 700; }
+  .counter { display: flex; align-items: center; border: 1.5px solid #bfc5ce; border-radius: 10px; height: 40px; background: #fff; }
+  .counter span { width: 38px; display: grid; place-items: center; color: var(--muted); }
+  .counter b { flex: 1; text-align: center; font-size: 15px; }
+  .check { width: 18px; height: 18px; border: 1.5px solid #9aa1ab; border-radius: 5px; background: #fff; display: grid; place-items: center; flex-shrink: 0; }
+  .check.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .check.on svg.ic { width: 12px; height: 12px; stroke-width: 3; }
+  .radio { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #9aa1ab; background: #fff; flex-shrink: 0; }
+  .radio.on { border: 5px solid var(--accent); }
+  .toggle { width: 36px; height: 20px; border-radius: 10px; background: #c9ced6; position: relative; flex-shrink: 0; }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  .toggle.on { background: var(--accent); } .toggle.on::after { left: 18px; }
+  .opt { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; background: #fff; display: flex; gap: 10px; align-items: flex-start; }
+  .opt.on { border-color: var(--accent); background: var(--accent-soft); }
+  .note { border-left: 3px solid var(--accent); background: #fff; padding: 8px 10px; border-radius: 0 8px 8px 0; font-size: 11.5px; color: #4b5563; }
+  .ico-box { width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+  .ico-box.gray { background: var(--fill); color: #4b5563; }
+  .dotunread { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .placeholder { background: repeating-linear-gradient(45deg, #f1f2f4, #f1f2f4 10px, #e8eaed 10px, #e8eaed 20px);
+                 border: 1.5px dashed #aeb4bd; border-radius: 12px; display: grid; place-items: center; color: var(--muted); }
+  .map { border-radius: 14px; overflow: hidden; border: 1.5px solid var(--line); background: #eceef1; position: relative; }
+  .map svg { display: block; width: 100%; height: 100%; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1.5px solid var(--line);
+           border-radius: 22px 22px 0 0; padding: 14px 16px 22px; box-shadow: 0 -8px 24px rgba(0,0,0,.08); }
+  .scrim { position: absolute; inset: 0; background: rgba(34,39,46,.35); }
+  .grab { width: 40px; height: 4px; border-radius: 2px; background: #c3c8cf; margin: 0 auto 12px; }
+  .modal { position: absolute; background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: 0 16px 40px rgba(0,0,0,.15); }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th { text-align: left; font-size: 11.5px; color: var(--muted); font-weight: 600; padding: 9px 12px; border-bottom: 1.5px solid var(--line); background: #fafbfc; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line2); font-size: 12.5px; vertical-align: middle; }
+  tr.sel td { background: var(--accent-soft); }
+  .tablewrap { border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .kpi { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .kpi .v { font-size: 26px; font-weight: 700; margin-top: 2px; }
+  .bars { display: flex; align-items: flex-end; gap: 5px; height: 120px; border-bottom: 1.5px solid var(--line); padding: 0 2px; }
+  .bars b { flex: 1; background: #c9d6e8; border-radius: 3px 3px 0 0; }
+  .bars b.hi { background: var(--accent); }
+  .hbar { height: 10px; border-radius: 5px; background: var(--fill); overflow: hidden; } .hbar b { display: block; height: 100%; background: var(--accent); }
+  .msg { max-width: 76%; padding: 8px 11px; border-radius: 14px; background: #fff; border: 1.5px solid var(--line); }
+  .msg.me { background: var(--accent-soft); border-color: #b9cfec; margin-left: auto; border-bottom-right-radius: 4px; }
+  .msg.them { border-bottom-left-radius: 4px; }
+  .callout { position: absolute; background: #fff8d6; border: 1px solid #e3cf6a; color: #5c4d00; font-size: 11px; padding: 4px 8px; border-radius: 6px; }
+  .json { font-family: Consolas, monospace; font-size: 11.5px; background: #fafbfc; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; white-space: pre; line-height: 1.5; }
+  del { color: var(--faint); }
+</style>
+</head>
+<body>
+
+<!-- ============================== 01 INICIO DE SESION ============================== -->
+<section class="frame m" data-n="01" data-t="Inicio de sesión" data-s="Todos los roles · móvil · /ingresar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="col" style="align-items:center;margin-top:56px;gap:10px">
+      <div class="logo" style="width:64px;height:64px;border-radius:18px"><i data-i="car" style="--s:30px"></i></div>
+      <div class="b" style="font-size:24px">Carpool UP</div>
+      <div class="muted small">Carpool Universitario · Universidad de Pamplona</div>
+    </div>
+    <div class="card mt20" style="padding:20px">
+      <h1>Iniciar sesión</h1>
+      <p class="muted mt4">Entra con tu correo institucional.</p>
+      <div class="col gap12 mt16">
+        <div class="field"><label>Correo</label><div class="input"><i data-i="mail"></i>laura.gomez@unipamplona.edu.co</div></div>
+        <div class="field"><label>Contraseña</label><div class="input"><i data-i="lock"></i><span class="grow">••••••••••••</span><i data-i="eye"></i></div></div>
+        <div class="row" style="justify-content:flex-end"><span class="link small">¿Olvidaste tu contraseña?</span></div>
+        <div class="btn pri full">Entrar</div>
+      </div>
+    </div>
+    <p class="mt20" style="text-align:center">¿Aún no tienes cuenta? <span class="link">Regístrate</span></p>
+    <div class="note mt20">Primer ingreso y después de cambiar la contraseña: se pide un código de 6 números enviado al correo.</div>
+  </div></div>
+</section>
+
+<!-- ============================== 02 REGISTRO ============================== -->
+<section class="frame m" data-n="02a" data-t="Registro · Paso 1: Tus datos" data-s="Registro en 4 pasos · /registro">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <h1>Crear cuenta</h1>
+    <div class="row sb mt8 small"><span class="b">Tus datos</span><span class="muted">Paso 1 de 4</span></div>
+    <div class="stepper mt4"><b class="on"></b><b></b><b></b><b></b></div>
+    <p class="muted small mt8">Usa tu nombre real y tu correo institucional.</p>
+    <div class="col gap12 mt12">
+      <div class="field"><label>Nombre completo</label><div class="input">Daniel Pinzón</div><span class="hint">Como aparece en tu carnet o constancia.</span></div>
+      <div class="field"><label>Correo institucional</label><div class="input">daniel.pinzonqui@unipamplona.edu.co</div><span class="hint">Debe terminar en .edu.co.</span></div>
+      <div class="field"><label>Contraseña</label><div class="input"><span class="grow">••••••••••••</span><i data-i="eye"></i></div><span class="hint">Mínimo 10 caracteres. Usa una frase que recuerdes.</span></div>
+      <div class="field"><label>Repite la contraseña</label><div class="input"><span class="grow">••••••••••••</span><i data-i="eye"></i></div></div>
+      <div class="field"><label>Sexo</label><div class="input"><span class="grow">Hombre</span><i data-i="chevron-down"></i></div><span class="hint">Debe coincidir con tu documento. Permite ofrecer y reservar viajes solo para mujeres.</span></div>
+      <div class="field"><label>Programa o dependencia</label><div class="input">Ingeniería de Sistemas</div><span class="hint">Opcional.</span></div>
+    </div>
+    <div class="row mt16"><div class="btn pri grow">Continuar</div></div>
+    <p class="mt12" style="text-align:center"><span class="link small">Ya tengo cuenta</span></p>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="02b" data-t="Registro · Paso 2: Tu rol" data-s="Pasajero o conductor; un administrador puede cambiarlo después">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <h1>Crear cuenta</h1>
+    <div class="row sb mt8 small"><span class="b">Tu rol</span><span class="muted">Paso 2 de 4</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b></b><b></b></div>
+    <p class="muted small mt8">Elige cómo vas a usar la app. Un administrador puede cambiarlo después.</p>
+    <h3 class="mt16">¿Cómo vas a usar la app?</h3>
+    <div class="col gap12 mt8">
+      <div class="opt on"><div class="radio on"></div><div class="ico-box"><i data-i="user-round"></i></div><div><div class="b">Pasajero</div><div class="muted small">Busco viajes y pido cupo a los conductores.</div></div></div>
+      <div class="opt"><div class="radio"></div><div class="ico-box gray"><i data-i="car"></i></div><div><div class="b">Conductor</div><div class="muted small">Ofrezco puestos en mi carro o moto.</div></div></div>
+    </div>
+    <div class="note mt16">Si eres conductor, después de activar tu cuenta subirás tu licencia y los datos de tu vehículo.</div>
+    <div class="row mt20"><div class="btn">Atrás</div><div class="btn pri grow">Continuar</div></div>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="02c" data-t="Registro · Paso 3: Tu documento" data-s="Carnet estudiantil o constancia institucional">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <h1>Crear cuenta</h1>
+    <div class="row sb mt8 small"><span class="b">Tu documento</span><span class="muted">Paso 3 de 4</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b></b></div>
+    <p class="muted small mt8">Un administrador revisará tu documento antes de activar tu cuenta.</p>
+    <h3 class="mt16">Tipo de documento</h3>
+    <div class="col gap8 mt8">
+      <div class="opt on"><div class="radio on"></div><div class="ico-box"><i data-i="id-card"></i></div><div><div class="b">Carnet estudiantil</div><div class="muted small">Si eres estudiante.</div></div></div>
+      <div class="opt"><div class="radio"></div><div class="ico-box gray"><i data-i="file-text"></i></div><div><div class="b">Constancia institucional</div><div class="muted small">Si eres docente o personal administrativo.</div></div></div>
+    </div>
+    <h3 class="mt16">Foto o PDF del documento</h3>
+    <div class="placeholder mt8" style="height:118px;gap:6px;grid-auto-flow:row">
+      <i data-i="upload"></i><span class="small">Elige un archivo o arrástralo aquí</span><span class="tiny faint">JPG, PNG o PDF, máximo 5 MB</span>
+    </div>
+    <div class="card row mt8" style="padding:10px"><i data-i="file-text"></i><span class="grow small">carnet-daniel.jpg · 1,8 MB</span><i data-i="x" class="s14"></i></div>
+    <p class="hint mt8"><i data-i="lock" class="s14"></i> Solo lo ven los administradores. Quitamos los datos ocultos de las fotos, como la ubicación.</p>
+    <div class="row mt16"><div class="btn">Atrás</div><div class="btn pri grow">Continuar</div></div>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="02d" data-t="Registro · Paso 4: Confirmación" data-s="Resumen y aceptación de términos y política de datos">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <h1>Crear cuenta</h1>
+    <div class="row sb mt8 small"><span class="b">Confirmación</span><span class="muted">Paso 4 de 4</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b></div>
+    <p class="muted small mt8">Revisa tus datos y acepta los términos para terminar.</p>
+    <div class="card mt12 col gap4">
+      <div class="row sb"><span class="muted small">Nombre completo</span><span>Daniel Pinzón</span></div>
+      <div class="row sb"><span class="muted small">Correo institucional</span><span class="small">daniel.pinzonqui@unipamplona.edu.co</span></div>
+      <div class="row sb"><span class="muted small">Sexo</span><span>Hombre</span></div>
+      <div class="row sb"><span class="muted small">Rol</span><span>Pasajero</span></div>
+      <div class="row sb"><span class="muted small">Documento</span><span>Carnet estudiantil</span></div>
+    </div>
+    <div class="col gap12 mt16">
+      <div class="row top"><div class="check on"><i data-i="check"></i></div><span>Leí y acepto los <span class="link">Términos y condiciones</span></span></div>
+      <div class="row top"><div class="check on"><i data-i="check"></i></div><span>Autorizo el tratamiento de mis datos según la política de <span class="link">tratamiento de datos</span></span></div>
+    </div>
+    <div class="note mt16">El valor de cada viaje es un aporte para cubrir gastos, no un pago comercial. La app no cobra ni recibe dinero.</div>
+    <div class="row mt20"><div class="btn">Atrás</div><div class="btn pri grow">Crear cuenta</div></div>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="02e" data-t="Registro · Verificación del correo" data-s="Código de 6 números enviado al correo institucional · /verificar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <div class="card mt20" style="padding:20px">
+      <div class="ico-box"><i data-i="mail"></i></div>
+      <h1 class="mt12">Verifica tu correo</h1>
+      <p class="muted mt4">Así confirmamos que el correo institucional es tuyo.</p>
+      <p class="mt12">Enviamos un código a <b>da**************@unipamplona.edu.co</b>.</p>
+      <div class="field mt16"><label>Código de 6 números</label>
+        <div class="row" style="gap:8px">
+          <div class="input b" style="width:44px;justify-content:center;font-size:18px">4</div><div class="input b" style="width:44px;justify-content:center;font-size:18px">8</div><div class="input b" style="width:44px;justify-content:center;font-size:18px">1</div>
+          <div class="input focus" style="width:44px"></div><div class="input" style="width:44px"></div><div class="input" style="width:44px"></div>
+        </div>
+        <span class="hint">Vence en 10 minutos. Revisa también la carpeta de spam.</span>
+      </div>
+      <div class="btn pri full mt16">Verificar</div>
+      <div class="btn dis full mt8">Enviar un código nuevo</div>
+      <p class="hint mt4" style="text-align:center">Podrás pedir otro código en 42 s</p>
+    </div>
+    <p class="mt16" style="text-align:center"><span class="link small">Volver a iniciar sesión</span></p>
+    <div class="note mt16">5 intentos fallidos invalidan el código; se puede pedir otro cada 60 s.</div>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="02f" data-t="Registro · Cuenta en revisión" data-s="Estado mientras un administrador aprueba el documento · /cuenta/estado">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr">
+    <div class="topbar"><div class="brand"><div class="logo"><i data-i="car"></i></div>Carpool UP</div></div>
+    <p class="muted mt8">Hola, Daniel</p>
+    <h1>Estado de tu cuenta</h1>
+    <div class="card mt16" style="padding:20px">
+      <div class="ico-box"><i data-i="hourglass"></i></div>
+      <h2 class="mt12">Estamos revisando tu documento</h2>
+      <p class="muted mt4">Un administrador lo revisará pronto. Te avisaremos cuando tu cuenta esté activa; puedes volver a revisar el estado cuando quieras.</p>
+      <div class="row mt12"><span class="st">En revisión</span><span class="muted small">Carnet estudiantil · enviado hoy 9:38</span></div>
+      <div class="btn out full mt16"><i data-i="refresh-cw"></i>Revisar estado</div>
+    </div>
+    <div class="card mt12">
+      <h3>¿Te equivocaste de archivo? Reemplázalo</h3>
+      <div class="placeholder mt8" style="height:84px"><span class="small">Elige un archivo o arrástralo aquí</span></div>
+      <div class="btn dis full mt8">Enviar documento</div>
+    </div>
+    <div class="note mt16">Mientras la cuenta esté en revisión no se puede buscar ni publicar. Al aprobarse llega el aviso "Aprobamos tu documento. Tu cuenta está activa."</div>
+  </div></div>
+</section>
+
+<!-- ============================== 03 BUSCAR ============================== -->
+<section class="frame m" data-n="03" data-t="Pasajero · Buscar viaje" data-s="Formulario de búsqueda y resultados · /buscar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <h1>Buscar viaje</h1>
+    <p class="muted small">Encuentra quién pasa cerca de ti a la hora que necesitas.</p>
+    <div class="card mt8 col gap8" style="padding:12px">
+      <div class="row"><div class="col grow gap8">
+        <div class="field"><label>¿Dónde te recogen?</label><div class="input"><i data-i="map-pin"></i>Barrio El Carmen</div></div>
+        <div class="field"><label>¿A dónde vas?</label><div class="input"><i data-i="flag"></i>Ciudad Universitaria</div></div>
+      </div><div class="roundbtn" style="margin-top:18px"><i data-i="arrow-up-down"></i></div></div>
+      <div class="grid3">
+        <div class="field"><label>Fecha</label><div class="input small">jue 15 oct</div></div>
+        <div class="field"><label>Hora</label><div class="input small">06:45</div></div>
+        <div class="field"><label>Puestos</label><div class="counter" style="height:40px"><span>−</span><b style="font-size:13px">1</b><span>+</span></div></div>
+      </div>
+      <div class="field"><label>Preferencias</label><div class="row wrap gap4">
+        <span class="chip"><i data-i="paw-print" class="s14"></i>Viajo con mascota</span><span class="chip"><i data-i="luggage" class="s14"></i>Llevo equipaje grande</span>
+        <span class="chip on"><i data-i="cigarette-off" class="s14"></i>Sin humo</span><span class="chip"><i data-i="music" class="s14"></i>Con música</span><span class="chip"><i data-i="venus" class="s14"></i>Solo mujeres</span>
+      </div></div>
+      <div class="btn pri full"><i data-i="search"></i>Buscar</div>
+    </div>
+    <p class="b mt12">Viajes encontrados: 2</p>
+    <div class="card mt8" style="padding:12px">
+      <div class="row sb top"><div><div class="b" style="font-size:17px">6:36 <span class="muted" style="font-size:13px;font-weight:500">→ 6:44</span></div>
+        <div class="small"><span class="muted">Recogida:</span> Parque Principal Agueda Gallardo</div><div class="small acc">A 120 m de tu punto</div></div>
+        <div style="text-align:right"><div class="b" style="font-size:17px">$ 2.000</div><div class="small muted">Cupos: 2</div></div></div>
+      <div class="hr"></div>
+      <div class="row"><div class="avatar">LR</div><div class="grow"><div class="b">Linda Rodríguez</div><div class="small muted"><span class="stars"><i data-i="star" class="on"></i></span> 4,8 · Viajes: 16</div></div><span class="small muted">Renault 9, rojo</span></div>
+      <div class="row wrap gap4 mt8"><span class="chip">Mascotas: No permitido</span><span class="chip">Fumar: No permitido</span></div>
+    </div>
+    <div class="card mt8" style="padding:12px;height:90px">
+      <div class="row sb top"><div><div class="b" style="font-size:17px">6:58 <span class="muted" style="font-size:13px;font-weight:500">→ 7:10</span></div><div class="small"><span class="muted">Recogida:</span> Punto en la ruta</div><div class="small acc">A 340 m de tu punto</div></div><div style="text-align:right"><div class="b" style="font-size:17px">$ 1.500</div><div class="small muted">Cupos: 3</div></div></div>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="search"></div></div>
+</section>
+
+<!-- ============================== 04 DETALLE ============================== -->
+<section class="frame m" data-n="04a" data-t="Pasajero · Detalle del viaje" data-s="Antes de solicitar: la placa aún no se muestra · /viajes/:id">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i><span class="badge">3</span></div></div>
+    <span class="st acc">Programado</span>
+    <h1 class="mt8" style="font-size:19px">Barrio El Carmen – Ciudad Universitaria</h1>
+    <p class="muted">jue, 15 oct, 6:30</p>
+    <div data-c="map" data-h="210" data-pickup data-stop class="mt12"></div>
+    <div class="card mt12">
+      <h3>Tu recogida y bajada</h3>
+      <div class="row mt8"><span class="ico-box" style="width:28px;height:28px;border-radius:8px"><i data-i="map-pin" class="s14"></i></span><div class="grow small"><b>Recogida:</b> Parque Principal Agueda Gallardo<div class="acc">A 120 m de tu punto</div></div><b>6:36</b></div>
+      <div class="row mt8"><span class="ico-box gray" style="width:28px;height:28px;border-radius:8px"><i data-i="flag" class="s14"></i></span><div class="grow small"><b>Bajada:</b> Ciudad Universitaria (campus principal)</div><b>6:44</b></div>
+    </div>
+    <div class="card mt12">
+      <div class="row"><i data-i="route"></i><h3>Paradas de la ruta</h3></div>
+      <div class="col gap4 mt8 small">
+        <div class="row"><span class="dotunread"></span><span class="grow">Barrio El Carmen</span><b>6:30</b></div>
+        <div class="row"><span class="dotunread" style="background:#9aa1ab"></span><span class="grow">Parque Principal Agueda Gallardo</span><b>6:36</b></div>
+        <div class="row"><span class="dotunread" style="background:var(--ink)"></span><span class="grow">Ciudad Universitaria (campus principal)</span><b>6:44</b></div>
+      </div>
+      <div class="grid2 mt12 small">
+        <div><div class="muted">Distancia</div><b>4,2 km</b></div><div><div class="muted">Duración</div><b>14 min</b></div>
+        <div><div class="muted">Aporte por puesto (COP)</div><b>$ 2.000</b></div><div><div class="muted">Cupos ofrecidos</div><b><i data-i="users" class="s14"></i> 2 de 3 libres</b></div>
+      </div>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="search"></div></div>
+</section>
+
+<section class="frame m" data-n="04b" data-t="Pasajero · Detalle del viaje (cont.)" data-s="Al aceptar la reserva se muestran la placa y los datos del aporte, y se abre el chat">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i><span class="badge">3</span></div></div>
+    <div class="card col gap8">
+      <div><div class="muted small">Vehículo</div><b>Renault 9, rojo</b></div>
+      <div><div class="muted small">Conductor</div><div class="row mt4"><div class="avatar">LR</div><div><b>Linda Rodríguez</b><div class="small muted"><span class="stars"><i data-i="star" class="on"></i></span> 4,8 de 5 (16)</div></div></div></div>
+      <div><div class="muted small">Viajan contigo</div><b>Jhonatan Vera</b></div>
+      <div><div class="muted small">Reglas</div><div class="row wrap gap4 mt4"><span class="chip">Mascotas: No permitido</span><span class="chip">Fumar: No permitido</span><span class="chip">Música: Permitido</span><span class="chip">Espero máximo 5 minutos</span></div></div>
+    </div>
+    <div class="card mt12" style="border-color:var(--accent)">
+      <div class="row"><i data-i="ticket"></i><h2>Tu reserva</h2></div>
+      <div class="field mt12"><label>Recogida</label><div class="input"><i data-i="map-pin"></i><span class="grow">Parque Principal Agueda Gallardo</span><i data-i="chevron-down"></i></div></div>
+      <div class="field mt8"><label>Bajada</label><div class="input"><i data-i="flag"></i><span class="grow">Ciudad Universitaria (campus principal)</span><i data-i="chevron-down"></i></div></div>
+      <div class="row mt8"><div class="field grow"><label>Puestos</label><div class="counter"><span>−</span><b>1</b><span>+</span></div></div><div class="grow" style="text-align:right"><div class="muted small">Aporte total</div><b style="font-size:18px">$ 2.000</b></div></div>
+      <div class="btn pri full mt12">Solicitar cupo</div>
+      <p class="hint mt8">El conductor aprueba cada solicitud. Mientras tanto no se aparta el cupo.</p>
+      <p class="hint mt4">Es una contribución para cubrir gastos del viaje, no un pago comercial.</p>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="search"></div></div>
+</section>
+
+<!-- ============================== 05 MIS VIAJES ============================== -->
+<section class="frame m" data-n="05a" data-t="Pasajero · Mis viajes · Próximos" data-s="Reservas con su estado; cada tarjeta abre el detalle · /mis-viajes">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <h1>Mis viajes</h1>
+    <div class="tabs mt8"><span class="on">Próximos</span><span>Historial</span><span>Series</span><span>Lista de espera</span></div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st acc"><i data-i="circle-check" class="s14"></i>Aceptada</span><span class="small muted">jue 15 oct · 6:30</span></div>
+      <div class="b mt8">Barrio El Carmen <span class="muted" style="font-weight:400">hacia</span> Ciudad Universitaria</div>
+      <div class="row mt8"><div class="avatar">LR</div><div class="grow small"><b>Linda Rodríguez</b> · 4,8 de 5<div class="muted">Renault 9, rojo · ABC123</div></div><i data-i="chevron-right"></i></div>
+      <div class="small mt8"><span class="muted">Recogida:</span> Parque Principal Agueda Gallardo · 6:36 · Puestos: 1</div>
+      <div class="note mt8"><b>Datos para el aporte:</b> Efectivo o transferencia al llegar.</div>
+      <div class="row mt12"><div class="btn sm">Cancelar reserva</div><span class="grow"></span><span class="link small">Ver viaje</span></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st"><i data-i="hourglass" class="s14"></i>Solicitada</span><span class="small muted">vie 16 oct · 7:00</span></div>
+      <div class="b mt8">Barrio Chapinero <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+      <div class="row mt8"><div class="avatar">LR</div><div class="grow small"><b>Linda Rodríguez</b> · 4,8 de 5</div><span class="chip"><i data-i="venus" class="s14"></i>Solo mujeres</span></div>
+      <p class="hint mt8">Esperando la respuesta del conductor.</p>
+      <div class="row mt8"><div class="btn sm">Cancelar reserva</div></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st">Cancelación pendiente</span><span class="small muted">lun 19 oct · 6:30</span></div>
+      <div class="b mt8">Barrio Cariongo <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+      <p class="hint mt4">El conductor está revisando tu solicitud de cancelación.</p>
+    </div>
+    <div class="note mt12">Cada tarjeta abre el detalle del viaje; desde ahí, o desde Mensajes, se abre el chat.</div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="myTrips"></div></div>
+</section>
+
+<section class="frame m" data-n="05b" data-t="Pasajero · Mis viajes · Historial" data-s="Viajes terminados o cancelados, tickets y acceso a calificar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <h1>Mis viajes</h1>
+    <div class="tabs mt8"><span>Próximos</span><span class="on">Historial</span><span>Series</span><span>Lista de espera</span></div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st dark">Completada</span><span class="small muted">jue 8 oct · 6:30</span></div>
+      <div class="b mt8">Barrio El Carmen <span class="muted" style="font-weight:400">hacia</span> Ciudad Universitaria</div>
+      <div class="small muted mt4">Linda Rodríguez · Renault 9, rojo</div>
+      <div class="row sb mt8 card flat" style="padding:8px 10px"><span class="row small"><i data-i="ticket" class="s14"></i>Tu ticket <b class="mono">CP-7K2M-9QXA</b></span><b>$ 2.000</b></div>
+      <p class="hint mt4">El conductor confirmó tu aporte.</p>
+      <div class="btn pri sm mt8"><i data-i="star" class="s14"></i>Calificar al conductor</div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st dark">Completada</span><span class="small muted">lun 5 oct · 6:30</span></div>
+      <div class="b mt8">Barrio Cariongo <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+      <div class="row sb mt8"><span class="small muted">Ticket CP-3H8D-2LNP · $ 1.500</span><span class="st"><i data-i="check" class="s14"></i>Ya calificaste</span></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st">Cancelada por el conductor</span><span class="small muted">vie 2 oct · 7:00</span></div>
+      <div class="b mt8">Terminal de Transportes <span class="muted" style="font-weight:400">hacia</span> Ciudad Universitaria</div>
+      <div class="small mt4"><span class="muted">Motivo de la cancelación:</span> Se dañó el carro</div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st">Cancelada por ti</span><span class="small muted">mié 30 sep · 6:15</span></div>
+      <div class="b mt8">Barrio Chapinero <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="myTrips"></div></div>
+</section>
+
+<!-- ============================== 06 CONDUCTOR PANEL ============================== -->
+<section class="frame m" data-n="06a" data-t="Conductor · Panel (requisitos pendientes)" data-s="Licencia aprobada y vehículo activo para publicar · /inicio">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="1"></div>
+    <p class="muted">Hola, Linda</p>
+    <h1>Tu panel de conductor</h1>
+    <div class="card mt16">
+      <h2>Completa estos pasos para publicar</h2>
+      <p class="muted small mt4">Necesitas una licencia aprobada y vigente y al menos un vehículo activo.</p>
+      <div class="col gap8 mt12">
+        <div class="opt" style="align-items:center"><div class="ico-box"><i data-i="id-card"></i></div><div class="grow"><div class="b">Licencia de conducción</div><div class="muted small">Un administrador la está revisando.</div></div><span class="st"><i data-i="hourglass" class="s14"></i>En revisión</span></div>
+        <div class="opt" style="align-items:center"><div class="ico-box"><i data-i="car"></i></div><div class="grow"><div class="b">Vehículo</div><div class="muted small">Tienes un vehículo activo.</div></div><span class="st acc"><i data-i="circle-check" class="s14"></i>Listo</span></div>
+      </div>
+      <div class="btn dis full mt16"><i data-i="square-plus"></i>Publicar</div>
+      <p class="hint mt4">Podrás publicar cuando completes los pasos de arriba.</p>
+    </div>
+    <div class="card mt12 col gap8">
+      <h3>Tu vehículo</h3>
+      <div class="row"><div class="ico-box gray"><i data-i="car"></i></div><div class="grow"><b>Renault 9 · ABC123</b><div class="small muted">Rojo · 1987 · 4 puestos en total</div></div><span class="st acc">Activo</span></div>
+    </div>
+    <div class="note mt12">Cada requisito abre su pantalla: Licencia (/licencia) o Mis vehículos (/vehiculos).</div>
+  </div><div data-c="tabbar" data-role="driver" data-active="home"></div></div>
+</section>
+
+<section class="frame m" data-n="06b" data-t="Conductor · Panel (listo para publicar)" data-s="Accesos a Publicar, Solicitudes y Estadísticas · /inicio">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <p class="muted">Hola, Linda</p>
+    <h1>Tu panel de conductor</h1>
+    <div class="card mt16">
+      <div class="placeholder" style="height:110px"><i data-i="car"></i></div>
+      <h2 class="mt12">Todo listo para publicar</h2>
+      <p class="muted small mt4">Publica un viaje puntual o una serie para tus trayectos de cada semana.</p>
+      <div class="col gap8 mt16">
+        <div class="btn pri full"><i data-i="square-plus"></i>Publicar</div>
+        <div class="btn full"><i data-i="inbox"></i>Solicitudes</div>
+        <div class="btn full"><i data-i="chart-column"></i>Estadísticas</div>
+      </div>
+    </div>
+    <div class="card mt12 col gap8">
+      <div class="row"><span class="ico-box" style="width:30px;height:30px;border-radius:9px"><i data-i="id-card" class="s14"></i></span><span class="grow">Licencia de conducción</span><span class="st acc">Aprobada y vigente</span></div>
+      <div class="row"><span class="ico-box" style="width:30px;height:30px;border-radius:9px"><i data-i="car" class="s14"></i></span><span class="grow">Vehículo</span><span class="st acc">Activo</span></div>
+    </div>
+    <div class="note mt12">Los próximos viajes y sus solicitudes por decidir están en Mis viajes (06c) y en Solicitudes (08).</div>
+  </div><div data-c="tabbar" data-role="driver" data-active="home"></div></div>
+</section>
+
+<section class="frame m" data-n="06c" data-t="Conductor · Mis viajes · Próximos" data-s="Viajes publicados con puestos libres y solicitudes por decidir">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Mis viajes</h1>
+    <p class="muted small">Tus viajes publicados, tus series y el historial.</p>
+    <div class="tabs mt8"><span class="on">Próximos</span><span>Series</span><span>Historial</span></div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st acc">Programado</span><span class="b">jue 15 oct · 6:30</span></div>
+      <div class="b mt8">Barrio El Carmen <span class="muted" style="font-weight:400">hacia</span> Ciudad Universitaria</div>
+      <div class="row wrap gap4 mt8"><span class="chip"><i data-i="users" class="s14"></i>1 de 3 libres</span><span class="chip">Paradas: 1</span><span class="chip on">Por decidir: 2</span></div>
+      <p class="hint mt8">Editar, duplicar o cancelar: desde el detalle del viaje.</p>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st acc">Programado</span><span class="b">vie 16 oct · 7:00</span></div>
+      <div class="b mt8">Barrio Chapinero <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+      <div class="row wrap gap4 mt8"><span class="chip"><i data-i="users" class="s14"></i>3 de 3 libres</span><span class="chip"><i data-i="venus" class="s14"></i>Solo mujeres</span><span class="chip on">Por decidir: 1</span></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st"><i data-i="repeat" class="s14"></i>Serie</span><span class="b">lun 19 oct · 6:30</span></div>
+      <div class="b mt8">Barrio Cariongo <span class="muted" style="font-weight:400">hacia</span> Sede Casona</div>
+      <div class="row wrap gap4 mt8"><span class="chip"><i data-i="users" class="s14"></i>3 de 4 libres</span><span class="chip">próximo: lun 19 oct</span></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><span class="st">Pico y placa</span><span class="b">mar 20 oct · 6:30</span></div>
+      <p class="small muted mt4">Este viaje cayó en pico y placa y se canceló automáticamente. No se puede reservar.</p>
+    </div>
+  </div><div data-c="tabbar" data-role="driver" data-active="myTrips"></div></div>
+</section>
+
+<!-- ============================== 07 PUBLICAR ============================== -->
+<section class="frame m" data-n="07a" data-t="Publicar viaje · 1 Tipo" data-s="Conductor · Asistente de 7 pasos · /publicar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <p class="muted small">Comparte tu trayecto con la comunidad. Revisa cada paso antes de publicar.</p>
+    <div class="row sb mt12 small"><span class="b">Tipo</span><span class="muted">Paso 1 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+    <div class="tiny muted mt4">Tipo · Ruta · Fecha y hora · Vehículo y puestos · Aporte · Reglas · Resumen</div>
+    <h3 class="mt16">Tipo de viaje</h3>
+    <div class="col gap12 mt8">
+      <div class="opt on"><div class="radio on"></div><div class="ico-box"><i data-i="calendar"></i></div><div><div class="b">Viaje puntual</div><div class="muted small">Un solo viaje en una fecha y hora.</div></div></div>
+      <div class="opt"><div class="radio"></div><div class="ico-box gray"><i data-i="repeat"></i></div><div><div class="b">Serie recurrente</div><div class="muted small">El mismo trayecto varios días de la semana durante 15 días, 4 semanas o el semestre.</div></div></div>
+    </div>
+    <div class="row mt20"><div class="btn dis">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07b" data-t="Publicar viaje · 2 Ruta" data-s="Conductor · Origen, paradas (máximo 5) y destino con la ruta calculada">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Ruta</span><span class="muted">Paso 2 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b></b><b></b><b></b><b></b><b></b></div>
+    <div class="col gap8 mt12">
+      <div class="field"><label>Origen</label><div class="input"><i data-i="circle-dot"></i>Barrio El Carmen</div></div>
+      <div class="field"><label>Parada 1</label><div class="row"><div class="input grow"><i data-i="map-pin"></i>Parque Principal Agueda Gallardo</div><div class="roundbtn"><i data-i="x"></i></div></div></div>
+      <div class="row"><span class="link small"><i data-i="plus" class="s14"></i> Agregar parada</span><span class="grow"></span><span class="link small"><i data-i="map-pinned" class="s14"></i> Elegir en el mapa</span></div>
+      <div class="field"><label>Destino</label><div class="input"><i data-i="flag"></i>Ciudad Universitaria (campus principal)</div></div>
+    </div>
+    <div data-c="map" data-h="190" data-stop class="mt12"></div>
+    <div class="grid2 mt8 small card" style="padding:10px"><div><div class="muted">Distancia</div><b>4,2 km</b></div><div><div class="muted">Duración</div><b>14 min</b></div></div>
+    <p class="hint mt4">Los tiempos son estimados y pueden variar con el tráfico.</p>
+    <div class="row mt12"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07c" data-t="Publicar viaje · 3 Fecha y hora (puntual)" data-s="Conductor · Calendario con pico y placa del vehículo">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Fecha y hora</span><span class="muted">Paso 3 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b><b></b></div>
+    <div class="card mt12">
+      <div class="row sb"><b>Octubre 2026</b><span class="row muted"><i data-i="chevron-right" style="transform:scaleX(-1)"></i><i data-i="chevron-right"></i></span></div>
+      <div class="grid7 mt8" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px">
+        <span class="muted">L</span><span class="muted">M</span><span class="muted">X</span><span class="muted">J</span><span class="muted">V</span><span class="muted">S</span><span class="muted">D</span>
+        <span class="faint">5</span><span class="faint">6</span><span class="faint">7</span><span class="faint">8</span><span>9</span><span>10</span><span>11</span>
+        <span>12</span><span><del>13</del></span><span>14</span><span style="background:var(--accent);color:#fff;border-radius:8px;font-weight:700">15</span><span>16</span><span>17</span><span>18</span>
+        <span>19</span><span><del>20</del></span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+      </div>
+      <p class="hint mt8"><del>13</del> tachado: pico y placa para tu vehículo (placa termina en 3, martes).</p>
+    </div>
+    <div class="grid2 mt12">
+      <div class="field"><label>Fecha</label><div class="input">jue 15 oct 2026</div></div>
+      <div class="field"><label>Hora de salida</label><div class="input"><i data-i="clock"></i>06:30</div><span class="hint">Hora de Pamplona.</span></div>
+    </div>
+    <div class="note mt12">Mínimo 15 minutos de antelación y máximo 60 días. Si se cruza con otro viaje tuyo, no se publica.</div>
+    <div class="row mt16"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07d" data-t="Publicar viaje · 3 Fecha y hora (serie)" data-s="Conductor · Variante de serie recurrente: días de repetición y duración">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Fecha y hora · Serie recurrente</span><span class="muted">Paso 3 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b><b></b></div>
+    <div class="field mt12"><label>Días de la semana</label><div class="row gap4"><span class="chip on">Lun</span><span class="chip on">Mar</span><span class="chip on">Mié</span><span class="chip">Jue</span><span class="chip">Vie</span><span class="chip">Sáb</span><span class="chip">Dom</span></div></div>
+    <div class="grid2 mt12">
+      <div class="field"><label>Fecha de inicio</label><div class="input">lun 19 oct 2026</div></div>
+      <div class="field"><label>Hora de salida</label><div class="input"><i data-i="clock"></i>06:30</div></div>
+    </div>
+    <div class="field mt12"><label>Duración de la serie</label><div class="seg"><span>15 días</span><span class="on">28 días</span><span>Hasta el fin del semestre</span></div></div>
+    <div class="card mt12">
+      <b>Viajes que se publicarán: 8 de 12</b>
+      <div class="row wrap gap4 mt8">
+        <span class="chip">lun 19</span><span class="chip"><del>mar 20</del></span><span class="chip">mié 21</span><span class="chip">lun 26</span><span class="chip"><del>mar 27</del></span><span class="chip">mié 28</span>
+        <span class="chip">lun 2</span><span class="chip"><del>mar 3</del></span><span class="chip">mié 4</span><span class="chip">lun 9</span><span class="chip"><del>mar 10</del></span><span class="chip">mié 11</span>
+      </div>
+      <p class="hint mt8">4 fechas caen en pico y placa: se crean canceladas y no se pueden reservar.</p>
+    </div>
+    <div class="row mt16"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07e" data-t="Publicar viaje · 4 Vehículo y puestos" data-s="Conductor · Solo vehículos activos; los puestos dependen de la capacidad">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Vehículo y puestos</span><span class="muted">Paso 4 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b></div>
+    <h3 class="mt16">Vehículo</h3>
+    <div class="col gap8 mt8">
+      <div class="opt on" style="align-items:center"><div class="radio on"></div><div class="ico-box"><i data-i="car"></i></div><div class="grow"><b>Renault 9 · ABC123</b><div class="small muted">Rojo · 1987 · 4 puestos en total</div></div></div>
+    </div>
+    <div class="field mt16"><label>Cupos ofrecidos</label><div class="counter" style="width:170px"><span><i data-i="minus"></i></span><b>3</b><span><i data-i="plus"></i></span></div>
+      <span class="hint">Puedes ofrecer hasta 3 puestos con este vehículo.</span></div>
+    <div class="note mt16">La capacidad incluye el puesto del conductor. Una moto ofrece exactamente 1 puesto.</div>
+    <div class="row mt20"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07f" data-t="Publicar viaje · 5 Aporte" data-s="Conductor · Aporte sugerido por distancia; no es una tarifa">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Aporte</span><span class="muted">Paso 5 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b></div>
+    <div class="card mt16 row sb"><div><div class="muted small">Aporte sugerido</div><b style="font-size:20px">$ 2.100</b><div class="hint">Según 4,2 km y 3 cupos</div></div><div class="btn out sm">Usar el sugerido</div></div>
+    <div class="field mt16"><label>Aporte por puesto (COP)</label><div class="input focus"><span class="muted">$</span>2.000</div><span class="hint">Máximo permitido: 3.000. Puedes dejarlo en 0.</span></div>
+    <div class="note mt16">Es un aporte para compartir gastos de combustible, no una tarifa. El aporte se acuerda y se paga fuera de la app.</div>
+    <div class="row mt20"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07g" data-t="Publicar viaje · 6 Reglas" data-s="Conductor · Reglas del viaje; Solo mujeres solo para conductoras">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Reglas</span><span class="muted">Paso 6 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b></b></div>
+    <div class="card mt12 row"><i data-i="venus"></i><div class="grow"><b>Solo mujeres</b><div class="hint">Solo pasajeras podrán solicitar puesto.</div></div><div class="toggle"></div></div>
+    <div class="col gap12 mt12">
+      <div class="field"><label><i data-i="paw-print" class="s14"></i> Mascotas</label><div class="seg"><span>Sin indicar</span><span>Permitido</span><span class="on">No permitido</span></div></div>
+      <div class="field"><label><i data-i="luggage" class="s14"></i> Equipaje grande</label><div class="seg"><span class="on">Sin indicar</span><span>Permitido</span><span>No permitido</span></div></div>
+      <div class="field"><label><i data-i="cigarette-off" class="s14"></i> Fumar</label><div class="seg"><span>Sin indicar</span><span>Permitido</span><span class="on">No permitido</span></div></div>
+      <div class="field"><label><i data-i="music" class="s14"></i> Música</label><div class="seg"><span>Sin indicar</span><span class="on">Permitido</span><span>No permitido</span></div></div>
+      <div class="field"><label>Otra regla (opcional)</label><div class="input">Espero máximo 5 minutos</div><span class="hint">Por ejemplo: espero máximo 5 minutos.</span></div>
+    </div>
+    <div class="row mt16"><div class="btn">Atrás</div><div class="btn pri grow">Siguiente</div></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<section class="frame m" data-n="07h" data-t="Publicar viaje · 7 Resumen" data-s="Conductor · Revisión final antes de publicar">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="2"></div>
+    <h1>Publicar viaje</h1>
+    <div class="row sb mt8 small"><span class="b">Resumen</span><span class="muted">Paso 7 de 7</span></div>
+    <div class="stepper mt4"><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b><b class="on"></b></div>
+    <div class="card mt12 col gap8">
+      <div class="row sb"><span class="muted small">Tipo</span><b>Viaje puntual</b></div>
+      <div class="row sb"><span class="muted small">Cuándo</span><b>jue 15 oct · 6:30</b></div>
+      <div class="hr" style="margin:2px 0"></div>
+      <div class="small row"><span class="dotunread"></span><span class="grow">Barrio El Carmen</span><b>6:30</b></div>
+      <div class="small row"><span class="dotunread" style="background:#9aa1ab"></span><span class="grow">Parque Principal Agueda Gallardo</span><b>6:36</b></div>
+      <div class="small row"><span class="dotunread" style="background:var(--ink)"></span><span class="grow">Ciudad Universitaria (campus principal)</span><b>6:44</b></div>
+      <div class="hr" style="margin:2px 0"></div>
+      <div class="row sb"><span class="muted small">Vehículo</span><b>Renault 9 · ABC123</b></div>
+      <div class="row sb"><span class="muted small">Puestos: 3</span><b>$ 2.000 por puesto</b></div>
+      <div class="row wrap gap4"><span class="chip">Mascotas: No permitido</span><span class="chip">Fumar: No permitido</span><span class="chip">Música: Permitido</span><span class="chip">Espero máximo 5 minutos</span></div>
+    </div>
+    <div data-c="map" data-h="150" data-stop class="mt12"></div>
+    <div class="row mt12"><div class="btn">Atrás</div><div class="btn pri grow"><i data-i="send"></i>Publicar</div></div>
+    <p class="hint mt8" style="text-align:center">Al publicar aparece en Mis viajes y en la búsqueda de los pasajeros.</p>
+  </div><div data-c="tabbar" data-role="driver" data-active="publish"></div></div>
+</section>
+
+<!-- ============================== 08 SOLICITUDES ============================== -->
+<section class="frame m" data-n="08" data-t="Conductor · Solicitudes de pasajeros" data-s="Reservas, cancelaciones y series que esperan respuesta · /solicitudes">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Inicio</span></div><div class="roundbtn"><i data-i="bell"></i><span class="badge">2</span></div></div>
+    <div class="row sb"><h1>Solicitudes</h1><div class="btn sm"><i data-i="refresh-cw" class="s14"></i>Actualizar</div></div>
+    <p class="muted small">Reservas, cancelaciones y series que esperan tu respuesta.</p>
+    <h3 class="mt12">Reservas por aprobar (2)</h3>
+    <div class="card mt8">
+      <div class="small muted">jue 15 oct · 6:30 · Barrio El Carmen hacia Ciudad Universitaria</div>
+      <div class="row mt8"><div class="avatar">LG</div><div class="grow"><b>Laura Gómez</b><div class="small muted"><span class="stars"><i data-i="star" class="on"></i></span> 4,9 de 5 · Viajes: 14</div></div><span class="chip">Puestos: 1</span></div>
+      <div class="small mt8"><span class="muted">Recogida:</span> Parque Principal Agueda Gallardo · 6:36</div>
+      <div class="small"><span class="muted">Bajada:</span> Ciudad Universitaria (campus principal)</div>
+      <div class="row mt12"><div class="btn sm grow">Rechazar</div><div class="btn pri sm grow"><i data-i="check" class="s14"></i>Aceptar</div></div>
+    </div>
+    <div class="card mt8">
+      <div class="small muted">jue 15 oct · 6:30 · Barrio El Carmen hacia Ciudad Universitaria</div>
+      <div class="row mt8"><div class="avatar">JV</div><div class="grow"><b>Jhonatan Vera</b><div class="small muted"><span class="stars"><i data-i="star" class="on"></i></span> 4,6 de 5 · Viajes: 9</div></div><span class="chip">Puestos: 1</span></div>
+      <div class="small mt8"><span class="muted">Recogida:</span> Punto en la ruta · 6:33</div>
+      <div class="row mt12"><div class="btn sm grow">Rechazar</div><div class="btn pri sm grow"><i data-i="check" class="s14"></i>Aceptar</div></div>
+    </div>
+    <h3 class="mt12">Cancelaciones por decidir (1)</h3>
+    <p class="hint">Faltan menos de 2 horas: si aceptas, el cupo se libera.</p>
+    <div class="card mt8">
+      <div class="row"><div class="avatar">VR</div><div class="grow"><b>Valentina Ruiz</b><div class="small muted">Motivo: Me enfermé</div></div></div>
+      <div class="row mt8"><div class="btn sm grow">Mantener la reserva</div><div class="btn out sm grow">Aceptar cancelación</div></div>
+    </div>
+    <h3 class="mt12 muted">Suscripciones a series (0)</h3>
+  </div><div data-c="tabbar" data-role="driver" data-active="home"></div></div>
+</section>
+
+<!-- ============================== 09 VIAJE EN CURSO CONDUCTOR ============================== -->
+<section class="frame m" data-n="09" data-t="Conductor · Viaje en curso" data-s="Ubicación compartida, marcaje de pasajeros y finalización · /viajes/:id">
+  <div class="phone"><div class="status"><span>6:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i></div></div>
+    <div class="row"><span class="st dark"><i data-i="radio" class="s14"></i>En curso</span><span class="small muted">jue 15 oct · 6:30</span></div>
+    <h1 class="mt4" style="font-size:18px">Barrio El Carmen – Ciudad Universitaria</h1>
+    <div data-c="map" data-h="200" data-car="0.45" data-stop class="mt8"></div>
+    <div class="note mt8 row"><i data-i="navigation" class="s14"></i>Compartiendo tu ubicación con los pasajeros. La pantalla se mantiene encendida.</div>
+    <div class="row mt8"><div class="btn sm grow"><i data-i="share2" class="s14"></i>Compartir viaje</div><div class="btn dark sm grow"><i data-i="siren" class="s14"></i>Emergencia</div></div>
+    <div class="card mt8">
+      <h3>Pasajeros · Confirmados</h3>
+      <div class="row mt8"><div class="avatar">LG</div><div class="grow"><b>Laura Gómez</b><div class="small muted">Parque Principal · 6:36 · 1 puesto</div></div><span class="st acc"><i data-i="check" class="s14"></i>A bordo</span></div>
+      <div class="hr"></div>
+      <div class="row"><div class="avatar">JV</div><div class="grow"><b>Jhonatan Vera</b><div class="small muted">Punto en la ruta · 6:33 · 1 puesto</div></div></div>
+      <div class="row mt8"><div class="btn out sm grow"><i data-i="user-check" class="s14"></i>Abordó</div><div class="btn sm grow"><i data-i="user-x" class="s14"></i>No se presentó</div></div>
+      <p class="hint mt4">"No se presentó" se habilita 10 minutos después de la salida.</p>
+    </div>
+    <div class="row mt8"><div class="btn sm grow"><i data-i="message-circle" class="s14"></i>Abrir el chat del viaje</div></div>
+    <div class="btn pri full mt8"><i data-i="flag"></i>Finalizar viaje</div>
+  </div><div data-c="tabbar" data-role="driver" data-active="myTrips"></div></div>
+</section>
+
+<!-- ============================== 10 VIAJE EN CURSO PASAJERO ============================== -->
+<section class="frame m" data-n="10a" data-t="Pasajero · Viaje en curso" data-s="Vehículo en vivo sobre la ruta, llegada estimada y seguridad">
+  <div class="phone"><div class="status"><span>6:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i><span class="badge">1</span></div></div>
+    <div class="row"><span class="st dark"><i data-i="radio" class="s14"></i>En curso</span><span class="small muted">jue 15 oct · 6:30</span></div>
+    <h1 class="mt4" style="font-size:18px">Barrio El Carmen – Ciudad Universitaria</h1>
+    <div data-c="map" data-h="250" data-car="0.45" data-pickup data-stop class="mt8"></div>
+    <p class="hint mt4"><i data-i="locate-fixed" class="s14"></i> Ubicación del conductor actualizada a las 6:41.</p>
+    <div class="row mt8"><div class="btn grow"><i data-i="share2"></i>Compartir viaje</div><div class="btn dark grow"><i data-i="siren"></i>Emergencia</div></div>
+    <div class="card mt12 col gap8">
+      <div class="row sb"><span class="muted small">Tu recogida</span><b>Parque Principal · 6:36</b></div>
+      <div class="row sb"><span class="muted small">Bajada (hora estimada)</span><b style="font-size:16px">Ciudad Universitaria · 6:44</b></div>
+      <div class="hr" style="margin:0"></div>
+      <div class="row sb"><span class="muted small">Vehículo</span><b>Renault 9, rojo · ABC123</b></div>
+      <div class="row sb"><span class="muted small">Conductor</span><b>Linda Rodríguez</b></div>
+    </div>
+    <div class="btn full mt8"><i data-i="message-circle"></i>Abrir el chat del viaje</div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="myTrips"></div></div>
+</section>
+
+<section class="frame m" data-n="10b" data-t="Pasajero · Emergencia" data-s="Llamar primero; avisar a la universidad con la ubicación">
+  <div class="phone"><div class="status"><span>6:47</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i></div></div>
+    <span class="st dark">En curso</span>
+    <div data-c="map" data-h="250" data-car="0.6" data-pickup data-stop class="mt8"></div>
+    <div class="scrim"></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="row"><div class="ico-box" style="background:var(--ink);color:#fff"><i data-i="siren"></i></div><h1>Emergencia</h1></div>
+      <p class="muted mt8">Si estás en peligro llama primero. Además puedes avisar a la universidad con tu ubicación.</p>
+      <div class="col gap8 mt12">
+        <div class="btn dark full"><i data-i="phone"></i>Llamar al 123</div>
+        <div class="btn full"><i data-i="phone"></i>Llamar a Mamá</div>
+      </div>
+      <div class="field mt12"><label>¿Qué está pasando? (opcional)</label><div class="input area">El conductor tomó otra vía</div></div>
+      <div class="btn pri full mt12"><i data-i="shield-alert"></i>Avisar a la universidad</div>
+      <p class="hint mt8">El aviso llega en tiempo real a los administradores con tu ubicación y el viaje.</p>
+    </div>
+  </div></div>
+</section>
+
+<section class="frame m" data-n="10c" data-t="Pasajero · Compartir el viaje" data-s="Enlace público sin nombres ni teléfonos; vence al terminar el viaje">
+  <div class="phone"><div class="status"><span>6:42</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Detalle del viaje</span></div><div class="roundbtn"><i data-i="bell"></i></div></div>
+    <span class="st dark">En curso</span>
+    <div data-c="map" data-h="250" data-car="0.5" data-pickup data-stop class="mt8"></div>
+    <div class="scrim"></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <h1>Compartir el viaje</h1>
+      <p class="muted mt8">Quien tenga el enlace verá la ruta, el vehículo con su placa y la ubicación en vivo. No verá nombres ni teléfonos.</p>
+      <div class="field mt12"><label>Enlace del viaje</label><div class="row"><div class="input grow small">https://carpool.../compartido/8f3k…</div><div class="btn out sm"><i data-i="copy" class="s14"></i>Copiar enlace</div></div></div>
+      <p class="hint mt4">El enlace deja de funcionar al terminar el viaje (hacia las 7:14).</p>
+      <h3 class="mt12">Contactos de confianza</h3>
+      <div class="col gap8 mt8">
+        <div class="row card" style="padding:10px"><div class="avatar">M</div><div class="grow"><b>Mamá</b><div class="small muted">Madre</div></div><div class="btn sm">Enviar por SMS a Mamá</div></div>
+        <div class="row card" style="padding:10px"><div class="avatar">C</div><div class="grow"><b>Carlos</b><div class="small muted">Hermano</div></div><div class="btn sm">Enviar por SMS a Carlos</div></div>
+      </div>
+      <div class="btn full mt12"><i data-i="share2"></i>Enviar</div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============================== 11 CHAT ============================== -->
+<section class="frame m" data-n="11a" data-t="Mensajes · Conversaciones" data-s="Chats de viaje y directos, con mensajes sin leer · /mensajes">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <h1>Conversaciones</h1>
+    <div class="col gap8 mt12">
+      <div class="card row" style="border-color:var(--accent)"><div class="ico-box"><i data-i="users"></i></div><div class="grow"><div class="row sb"><b>Chat del viaje · jue 15 oct, 6:30</b><span class="tiny muted">6:22</span></div><div class="small b">Linda: Salgo en 5 min</div></div><span class="badge" style="position:static">2</span></div>
+      <div class="card row"><div class="avatar">LR</div><div class="grow"><div class="row sb"><b class="small">Chat directo del viaje El Carmen – Ciudad Universitaria</b></div><div class="small muted">Tú: Estoy en la esquina del parque</div></div></div>
+      <div class="card row"><div class="ico-box gray"><i data-i="repeat"></i></div><div class="grow"><div class="row sb"><b class="small">Chat directo de la serie Barrio Cariongo – Sede Casona</b><span class="badge" style="position:static">1</span></div><div class="small b">Linda: Mañana salgo 6:15</div></div></div>
+      <div class="card row" style="opacity:.75"><div class="ico-box gray"><i data-i="users"></i></div><div class="grow"><div class="row sb"><b>Chat del viaje · jue 8 oct, 6:30</b><span class="st">Cerrado</span></div><div class="small muted">Gracias, buen día</div></div></div>
+    </div>
+    <div class="note mt16">El chat del viaje se abre al aceptar la reserva y se cierra al terminar o cancelar el viaje. Se borra 30 días después.</div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="messages" data-badge="3"></div></div>
+</section>
+
+<section class="frame m" data-n="11b" data-t="Mensajes · Chat del viaje" data-s="Mensajes en tiempo real con remitente e indicador de escritura · /mensajes/:id">
+  <div class="phone"><div class="status"><span>6:23</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad" style="display:flex;flex-direction:column">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><div><b>Chat del viaje · jue 15 oct, 6:30</b><div class="tiny muted">Linda Rodríguez, Jhonatan Vera y tú</div></div></div><span class="link small">Ver viaje</span></div>
+    <div class="col gap8 mt8" style="flex:1">
+      <div class="tiny muted" style="text-align:center">Hoy</div>
+      <div><div class="tiny muted">Linda Rodríguez · 6:05</div><div class="msg them">Buenos días. Salimos puntuales de El Carmen.</div></div>
+      <div class="msg me">Perfecto, te espero en el Parque Principal.<div class="tiny muted" style="text-align:right">Tú · 6:07</div></div>
+      <div><div class="tiny muted">Jhonatan Vera · 6:10</div><div class="msg them">Yo estoy en la ruta, cerca del puente.</div></div>
+      <div class="row" style="gap:6px"><span style="flex:1;height:1.5px;background:var(--accent)"></span><span class="tiny acc b">2 mensajes sin leer</span><span style="flex:1;height:1.5px;background:var(--accent)"></span></div>
+      <div><div class="tiny muted">Linda Rodríguez · 6:21</div><div class="msg them">Salgo en 5 min</div></div>
+      <div><div class="tiny muted">Linda Rodríguez · 6:22</div><div class="msg them">Voy en el Renault 9 rojo.</div></div>
+      <div class="tiny muted mt8"><i data-i="ellipsis" class="s14"></i> Linda está escribiendo...</div>
+    </div>
+    <div class="row" style="margin-bottom:8px"><div class="input grow ph">Escribe un mensaje</div><div class="roundbtn" style="background:var(--accent);border-color:var(--accent);color:#fff"><i data-i="send"></i></div></div>
+    <p class="hint" style="margin-bottom:6px">Quedan 1.000 caracteres</p>
+  </div><div data-c="tabbar" data-role="passenger" data-active="messages"></div></div>
+</section>
+
+<!-- ============================== 12 NOTIFICACIONES ============================== -->
+<section class="frame m" data-n="12" data-t="Notificaciones" data-s="Avisos leídos y sin leer · /notificaciones">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <div class="row sb"><h1>Notificaciones</h1><span class="link small">Marcar todo como leído</span></div>
+    <h3 class="mt12 acc">Sin leer</h3>
+    <div class="col gap8 mt8">
+      <div class="card row" style="border-color:var(--accent)"><span class="dotunread"></span><div class="ico-box"><i data-i="circle-check"></i></div><div class="grow"><b>¡Tu reserva fue aceptada!</b><div class="tiny muted">Hace 2 min</div></div></div>
+      <div class="card row" style="border-color:var(--accent)"><span class="dotunread"></span><div class="ico-box"><i data-i="message-circle"></i></div><div class="grow"><b>Linda Rodríguez te escribió en el chat.</b><div class="tiny muted">Hace 5 min</div></div></div>
+      <div class="card row" style="border-color:var(--accent)"><span class="dotunread"></span><div class="ico-box"><i data-i="clock"></i></div><div class="grow"><b>Tu viaje sale en 30 minutos.</b><div class="tiny muted">Hace 20 min</div></div></div>
+    </div>
+    <h3 class="mt16 muted">Anteriores</h3>
+    <div class="col gap8 mt8">
+      <div class="card row"><span style="width:8px"></span><div class="ico-box gray"><i data-i="star"></i></div><div class="grow"><span>Tu viaje terminó. Califica a quienes viajaron contigo.</span><div class="tiny muted">Ayer, 6:50</div></div></div>
+      <div class="card row"><span style="width:8px"></span><div class="ico-box gray"><i data-i="ticket"></i></div><div class="grow"><span>Viaje terminado. Tu ticket es CP-7K2M-9QXA.</span><div class="tiny muted">Ayer, 6:46</div></div></div>
+      <div class="card row"><span style="width:8px"></span><div class="ico-box gray"><i data-i="badge-check"></i></div><div class="grow"><span>Aprobamos tu documento. Tu cuenta está activa.</span><div class="tiny muted">3 oct</div></div></div>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="notifications" data-badge="3"></div></div>
+</section>
+
+<!-- ============================== 13 CALIFICAR ============================== -->
+<section class="frame m" data-n="13a" data-t="Calificar · Pasajero califica al conductor" data-s="4 criterios de 1 a 5 estrellas; comentario anónimo · /calificar/:tripId">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Mis viajes</span></div><div class="roundbtn"><i data-i="bell"></i></div></div>
+    <h1>Calificar</h1>
+    <p class="muted small">Tu opinión ayuda a que la comunidad viaje mejor. Califica cada criterio de 1 a 5 estrellas.</p>
+    <div class="card mt12">
+      <div class="row"><div class="avatar">LR</div><div><b>Conductor: Linda Rodríguez</b><div class="small muted">jue 8 oct · El Carmen hacia Ciudad Universitaria</div></div></div>
+      <p class="hint mt8">Puedes calificar hasta el jue 15 oct.</p>
+      <h3 class="mt12">Criterios</h3>
+      <div class="col gap12 mt8">
+        <div class="row sb"><span>Puntualidad</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i></span></div>
+        <div class="row sb"><span>Conducción segura</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i></span></div>
+        <div class="row sb"><span>Amabilidad</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="off"></i></span></div>
+        <div class="row sb"><span>Limpieza del vehículo</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="off"></i><i data-i="star" class="off"></i></span></div>
+      </div>
+      <div class="field mt16"><label>Comentario (opcional)</label><div class="input area">Muy puntual y amable.</div><span class="hint">Hasta 500 caracteres. Lo verá la persona calificada, sin tu nombre.</span></div>
+      <div class="btn pri full mt12"><i data-i="send"></i>Enviar calificación</div>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="myTrips"></div></div>
+</section>
+
+<section class="frame m" data-n="13b" data-t="Calificar · Conductor califica a pasajeros" data-s="3 criterios por pasajero que abordó">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div class="topbar"><div class="row"><i data-i="arrow-left"></i><span class="b">Mis viajes</span></div><div class="roundbtn"><i data-i="bell"></i></div></div>
+    <h1>Calificar</h1>
+    <p class="muted small">Tu opinión ayuda a que la comunidad viaje mejor. Califica cada criterio de 1 a 5 estrellas.</p>
+    <div class="card mt12">
+      <div class="row"><div class="avatar">LG</div><div><b>Pasajero: Laura Gómez</b><div class="small muted">jue 8 oct · El Carmen hacia Ciudad Universitaria</div></div></div>
+      <p class="hint mt8">Puedes calificar hasta el jue 15 oct.</p>
+      <h3 class="mt12">Criterios</h3>
+      <div class="col gap12 mt8">
+        <div class="row sb"><span>Puntualidad</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i></span></div>
+        <div class="row sb"><span>Amabilidad</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i></span></div>
+        <div class="row sb"><span>Cumplimiento de las reglas</span><span class="stars big"><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="on"></i><i data-i="star" class="off"></i></span></div>
+      </div>
+      <div class="field mt16"><label>Comentario (opcional)</label><div class="input area ph">Escribe un comentario</div></div>
+      <div class="btn pri full mt12"><i data-i="send"></i>Enviar calificación</div>
+    </div>
+    <div class="card flat mt12 row"><i data-i="user-x"></i><span class="small muted">Jhonatan Vera no se presentó: no se puede calificar ni recibe ticket.</span></div>
+  </div><div data-c="tabbar" data-role="driver" data-active="myTrips"></div></div>
+</section>
+
+<!-- ============================== 14 PERFIL ============================== -->
+<section class="frame m" data-n="14a" data-t="Perfil · Datos y preferencias" data-s="Datos validados, idioma y tema · /perfil">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <div class="row gap12"><div class="avatar lg">LG</div><div><h1>Laura Gómez</h1><div class="small muted">laura.gomez@unipamplona.edu.co</div><div class="small b mt4">Pasajero</div></div></div>
+    <div class="card mt12">
+      <h2>Tus datos</h2>
+      <div class="field mt8"><label>Programa o dependencia</label><div class="input">Ingeniería de Sistemas</div></div>
+      <p class="hint mt8">Tu nombre, correo, sexo y rol los valida la administración y no se pueden cambiar aquí.</p>
+      <div class="btn pri sm mt8">Guardar cambios</div>
+    </div>
+    <div class="card mt12">
+      <h2>Preferencias</h2>
+      <div class="field mt8"><label>Idioma</label><div class="input"><i data-i="languages"></i><span class="grow">Español</span><i data-i="chevron-down"></i></div><span class="hint">Español · English · Português · Français</span></div>
+      <div class="field mt8"><label>Tema</label><div class="seg"><span><i data-i="sun" class="s14"></i> Claro</span><span><i data-i="moon" class="s14"></i> Oscuro</span><span class="on"><i data-i="monitor" class="s14"></i> Según el sistema</span></div></div>
+      <div class="row mt12"><span class="grow">Reducir transparencia</span><div class="toggle"></div></div>
+    </div>
+    <div class="card mt12">
+      <h2>Tu documento</h2>
+      <div class="row mt8"><i data-i="id-card"></i><span class="grow">Carnet estudiantil</span><span class="st acc">Aprobado</span></div>
+      <span class="link small mt8" style="display:inline-block">Subir o reemplazar documento</span>
+    </div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="profile"></div></div>
+</section>
+
+<section class="frame m" data-n="14b" data-t="Perfil · Métricas, contactos y cuenta" data-s="Continuación de /perfil">
+  <div class="phone"><div class="status"><span>9:41</span><span class="dots"><b></b><b></b></span></div><div class="scr navpad">
+    <div data-c="topbar" data-badge="3"></div>
+    <div class="card">
+      <h2>Mis métricas</h2>
+      <div class="grid2 mt8">
+        <div class="kpi" style="padding:10px"><div class="small muted">Viajes</div><div class="v" style="font-size:20px">14</div></div>
+        <div class="kpi" style="padding:10px"><div class="small muted">Aporte total</div><div class="v" style="font-size:20px">$ 27.500</div></div>
+        <div class="kpi" style="padding:10px"><div class="small muted">Cancelaciones</div><div class="v" style="font-size:20px">1</div></div>
+        <div class="kpi" style="padding:10px"><div class="small muted">Ausencias</div><div class="v" style="font-size:20px">0</div></div>
+      </div>
+      <div class="row mt8 small"><span class="stars"><i data-i="star" class="on"></i></span>Calificación 4,9 de 5 (12)</div>
+      <div class="small b mt8">Viajes por mes (últimos 12 meses)</div>
+      <div class="bars mt4" style="height:50px"><b style="height:20%"></b><b style="height:35%"></b><b style="height:30%"></b><b style="height:55%"></b><b style="height:45%"></b><b class="hi" style="height:80%"></b></div>
+    </div>
+    <div class="card mt12">
+      <div class="row sb"><h2>Contactos de confianza</h2><span class="link small">Agregar contacto</span></div>
+      <p class="hint mt4">Hasta 5 personas a quienes enviar tu viaje o llamar en una emergencia. Solo tú las ves.</p>
+      <div class="row mt8"><div class="avatar">M</div><div class="grow"><b>Mamá</b><div class="small muted">Madre</div></div><i data-i="pencil"></i><i data-i="trash2"></i></div>
+      <div class="row mt8"><div class="avatar">C</div><div class="grow"><b>Carlos</b><div class="small muted">Hermano</div></div><i data-i="pencil"></i><i data-i="trash2"></i></div>
+    </div>
+    <div class="card mt12">
+      <h2>Sesiones activas</h2>
+      <div class="row mt8 small"><i data-i="smartphone"></i><span class="grow">Chrome en Android · Este dispositivo</span></div>
+      <div class="row mt4 small"><i data-i="monitor"></i><span class="grow">Edge en Windows · Última actividad: ayer</span></div>
+      <span class="link small mt8" style="display:inline-block">Cerrar las demás sesiones</span>
+    </div>
+    <div class="row mt12"><div class="btn grow"><i data-i="log-out"></i>Cerrar sesión</div><div class="btn grow"><i data-i="trash2"></i>Eliminar cuenta</div></div>
+  </div><div data-c="tabbar" data-role="passenger" data-active="profile"></div></div>
+</section>
+
+<!-- ============================== 15 ADMIN DASHBOARD ============================== -->
+<section class="frame d" data-n="15" data-t="Administrador · Panel" data-s="Escritorio · resumen del periodo, accesos a aprobaciones y emergencias · /admin">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin</span></div>
+  <div class="desk" data-role="admin" data-active="dashboard"><div class="dmain">
+    <div class="row sb"><div><h1>Panel de administración</h1><p class="muted">Cómo se está usando Carpool UP en el periodo elegido.</p></div>
+      <div class="field" style="width:220px"><label>Periodo</label><div class="input"><span class="grow">Últimos 30 días</span><i data-i="chevron-down"></i></div></div></div>
+    <div class="row mt12 gap12"><span class="btn out sm"><i data-i="shield-check" class="s14"></i>Aprobaciones pendientes: 3</span><span class="btn dark sm"><i data-i="siren" class="s14"></i>Emergencias abiertas: 1</span></div>
+    <div class="grid4 mt16" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      <div class="kpi"><div class="small muted">Viajes completados</div><div class="v">128</div></div>
+      <div class="kpi"><div class="small muted">Viajes cancelados</div><div class="v">9</div></div>
+      <div class="kpi"><div class="small muted">Reservas canceladas</div><div class="v">21</div></div>
+      <div class="kpi"><div class="small muted">Ausencias</div><div class="v">6</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px" class="mt16">
+      <div class="card"><h3>Viajes por día</h3><div class="bars mt12" data-c="bars" data-v="3,5,4,6,7,2,1,4,6,5,7,8,3,1,5,6,6,7,9,2,1,5,4,6,8,7,3,2,6,7"></div><div class="row sb tiny muted mt4"><span>8 sep</span><span>8 oct</span></div></div>
+      <div class="card"><h3>Viajes por hora de salida</h3><div class="bars mt12" data-c="bars" data-v="0,1,6,18,22,9,4,3,5,2,6,11,8,4,2,1"></div><div class="row sb tiny muted mt4"><span>5:00</span><span>20:00</span></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" class="mt16">
+      <div class="card"><h3>Rutas más frecuentes</h3>
+        <div class="col gap8 mt8 small">
+          <div><div class="row sb"><span>El Carmen → Ciudad Universitaria</span><b>34</b></div><div class="hbar"><b style="width:100%"></b></div></div>
+          <div><div class="row sb"><span>Cariongo → Sede Casona</span><b>21</b></div><div class="hbar"><b style="width:62%"></b></div></div>
+          <div><div class="row sb"><span>Terminal → Ciudad Universitaria</span><b>15</b></div><div class="hbar"><b style="width:44%"></b></div></div>
+        </div></div>
+      <div class="card"><h3>Distribución de calificaciones</h3>
+        <div class="col gap8 mt8 small">
+          <div class="row"><span style="width:70px">5 estrellas</span><div class="hbar grow"><b style="width:78%"></b></div><b>96</b></div>
+          <div class="row"><span style="width:70px">4 estrellas</span><div class="hbar grow"><b style="width:30%"></b></div><b>37</b></div>
+          <div class="row"><span style="width:70px">3 estrellas</span><div class="hbar grow"><b style="width:8%"></b></div><b>10</b></div>
+          <div class="row"><span style="width:70px">2 estrellas</span><div class="hbar grow"><b style="width:2%"></b></div><b>2</b></div>
+        </div></div>
+      <div class="card"><h3>Usuarios por rol y estado</h3>
+        <table class="mt8"><tr><th>Rol</th><th>Activa</th><th>En aprobación</th><th>Suspendida</th></tr>
+          <tr><td>Pasajero</td><td>212</td><td>3</td><td>2</td></tr><tr><td>Conductor</td><td>47</td><td>1</td><td>0</td></tr><tr><td>Administrador</td><td>2</td><td>0</td><td>0</td></tr></table></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============================== 16 APROBACIONES ============================== -->
+<section class="frame d" data-n="16a" data-t="Administrador · Aprobación de carnets y licencias" data-s="Cola en orden de llegada, visor seguro y corrección del sexo · /admin/aprobaciones">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/aprobaciones</span></div>
+  <div class="desk" data-role="admin" data-active="approvals"><div class="dmain">
+    <div class="row sb"><div><h1>Aprobaciones</h1><p class="muted">Revisa los documentos en orden de llegada. Compara el nombre y el sexo con el documento.</p></div><div class="btn sm"><i data-i="refresh-cw" class="s14"></i>Actualizar</div></div>
+    <div class="tabs mt12" style="width:520px"><span class="on">Carnets y constancias (3)</span><span>Licencias (1)</span></div>
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:16px" class="mt12">
+      <div class="col gap8">
+        <div class="card" style="border-color:var(--accent);background:var(--accent-soft)"><b>Daniel Pinzón</b><div class="small muted">Ingeniería de Sistemas</div><div class="row sb mt4 small"><span>Carnet estudiantil</span><span class="muted">hoy 9:38</span></div></div>
+        <div class="card"><b>Valentina Ruiz</b><div class="small muted">Contaduría Pública</div><div class="row sb mt4 small"><span>Carnet estudiantil</span><span class="muted">hoy 10:02</span></div></div>
+        <div class="card"><b>Andrés Rojas</b><div class="small muted">Sin programa registrado</div><div class="row sb mt4 small"><span>Constancia institucional</span><span class="muted">hoy 10:15</span></div></div>
+      </div>
+      <div class="card" style="display:grid;grid-template-columns:1fr 330px;gap:18px">
+        <div><div class="small b">Documento de Daniel Pinzón</div><div class="placeholder mt8" style="height:470px"><div style="text-align:center"><i data-i="id-card"></i><div class="small mt4">Visor seguro del documento</div><div class="tiny faint">Se abre sin guardarse en el navegador</div></div></div></div>
+        <div class="col gap12">
+          <div><h2>Daniel Pinzón</h2><div class="muted small">Ingeniería de Sistemas</div></div>
+          <div class="grid2 small"><div><div class="muted">Documento</div><b>Carnet estudiantil</b></div><div><div class="muted">Semestre</div><b>2026-2</b></div></div>
+          <div class="note">Declarado al registrarse: <b>Hombre</b></div>
+          <div class="field"><label>Sexo según el documento</label><div class="input"><span class="grow">Hombre</span><i data-i="chevron-down"></i></div></div>
+          <p class="hint">Si no coincide con el documento, se corrige aquí: el sexo verificado decide el acceso a los viajes solo para mujeres.</p>
+          <div class="row" style="margin-top:auto"><div class="btn grow"><i data-i="x"></i>Rechazar</div><div class="btn pri grow"><i data-i="check"></i>Aprobar</div></div>
+          <p class="hint">Cada acción queda registrada en la auditoría con tu nombre.</p>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="16b" data-t="Administrador · Rechazar un documento" data-s="El motivo es obligatorio y la persona lo recibe en su aviso">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/aprobaciones</span></div>
+  <div class="desk" data-role="admin" data-active="approvals"><div class="dmain">
+    <h1>Aprobaciones</h1>
+    <div class="tabs mt12" style="width:520px"><span>Carnets y constancias (3)</span><span class="on">Licencias (1)</span></div>
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;opacity:.45" class="mt12">
+      <div class="card"><b>Andrés Rojas</b><div class="small muted">Licencia de conducción · vence 30 jun 2028</div></div>
+      <div class="placeholder" style="height:520px"></div>
+    </div>
+    <div class="scrim" style="inset:0"></div>
+    <div class="modal" style="left:340px;top:150px;width:520px">
+      <h2>Rechazar el documento de Andrés Rojas</h2>
+      <div class="field mt16"><label>Motivo del rechazo</label><div class="input area" style="height:110px">La foto está borrosa y no se lee la fecha de vencimiento. Sube una foto nítida por ambos lados.</div>
+        <span class="hint">La persona verá este texto. Explica qué debe corregir.</span></div>
+      <div class="row mt20" style="justify-content:flex-end"><div class="btn">Cancelar</div><div class="btn dark"><i data-i="x"></i>Rechazar documento</div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============================== 17 USUARIOS ============================== -->
+<section class="frame d" data-n="17a" data-t="Administrador · Gestión de usuarios" data-s="Búsqueda y filtros por rol y estado · /admin/usuarios">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/usuarios</span></div>
+  <div class="desk" data-role="admin" data-active="users"><div class="dmain">
+    <h1>Usuarios</h1>
+    <div class="row gap12 mt12">
+      <div class="field" style="width:360px"><label>Nombre o correo</label><div class="input"><i data-i="search"></i><span class="faint">Buscar</span></div></div>
+      <div class="field" style="width:200px"><label>Rol</label><div class="input"><span class="grow">Todos</span><i data-i="chevron-down"></i></div></div>
+      <div class="field" style="width:200px"><label>Estado</label><div class="input"><span class="grow">Todos</span><i data-i="chevron-down"></i></div></div>
+    </div>
+    <div class="tablewrap mt16"><table>
+      <tr><th>Nombre y correo</th><th>Rol</th><th>Estado</th><th></th></tr><tr><td><b>Laura Gómez</b><div class="small muted">laura.gomez@unipamplona.edu.co</div></td><td>Pasajero</td><td><span class="st acc">Activa</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr class="sel"><td><b>Jhonatan Vera</b><div class="small muted">jhonatan.veraric@unipamplona.edu.co</div></td><td>Pasajero</td><td><span class="st acc">Activa</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr><td><b>Linda Rodríguez</b><div class="small muted">linda.rodrigueztol@unipamplona.edu.co</div></td><td>Conductor</td><td><span class="st acc">Activa</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr><td><b>Daniel Pinzón</b><div class="small muted">daniel.pinzonqui@unipamplona.edu.co</div></td><td>Pasajero</td><td><span class="st">En aprobación</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr><td><b>Andrés Rojas</b><div class="small muted">andres.rojas@unipamplona.edu.co</div></td><td>Conductor</td><td><span class="st">Suspendida</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr><td><b>Valentina Ruiz</b><div class="small muted">valentina.ruiz@unipamplona.edu.co</div></td><td>Pasajero</td><td><span class="st">Correo sin verificar</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr><tr><td><b>Sofía Martínez</b><div class="small muted">sofia.martinez@unipamplona.edu.co</div></td><td>Administrador</td><td><span class="st acc">Activa</span></td><td style="width:40px"><i data-i="chevron-right"></i></td></tr></table></div>
+    <p class="hint mt8">Las cuentas eliminadas por sus dueños no aparecen. Nadie puede actuar sobre su propia cuenta ni sobre la del superadmin.</p>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="17b" data-t="Administrador · Detalle de usuario y sanciones" data-s="Documentos, métricas, acciones permitidas e historial · /admin/usuarios/:id">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/usuarios/…</span></div>
+  <div class="desk" data-role="admin" data-active="users"><div class="dmain">
+    <div class="row muted small"><i data-i="arrow-left" class="s14"></i>Usuarios</div>
+    <div class="row gap12 mt8"><div class="avatar lg">JV</div><div><h1>Jhonatan Vera</h1><div class="muted">jhonatan.veraric@unipamplona.edu.co · Pasajero</div></div><span class="st acc">Activa</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" class="mt16">
+      <div class="card col gap8"><h3>Documentos</h3><div class="row sb small"><span>Carnet o constancia</span><span class="st acc">Aprobado</span></div><div class="row sb small"><span>Licencia</span><span class="muted">Sin enviar</span></div><div class="row sb small"><span>Último ingreso</span><b>hoy 8:40</b></div></div>
+      <div class="card col gap8"><h3>Métricas</h3><div class="row sb small"><span>Calificación</span><b>4,6 · 5 calificaciones</b></div><div class="row sb small"><span>Viajes como pasajero</span><b>9</b></div><div class="row sb small"><span>Reservas y viajes activos</span><b>1</b></div></div>
+      <div class="card col gap8"><h3>Acciones</h3>
+        <div class="row wrap gap4"><span class="btn sm"><i data-i="ban" class="s14"></i>Suspender</span><span class="btn sm"><i data-i="lock" class="s14"></i>Bloquear</span><span class="btn out sm"><i data-i="user-check" class="s14"></i>Levantar suspensión de reservas</span></div>
+        <p class="hint">Cambiar rol solo lo ve el superadmin.</p></div>
+    </div>
+    <div class="card mt16"><h3>Historial de sanciones</h3>
+      <div class="tablewrap mt8"><table><tr><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Motivo</th><th>Autor</th></tr>
+        <tr><td>Suspensión de reservas <span class="st">automática</span></td><td>8 oct 2026</td><td>15 oct 2026</td><td>3 ausencias en 30 días</td><td>Sistema</td></tr>
+        <tr><td>Suspensión de la cuenta</td><td>20 sep 2026</td><td>23 sep 2026</td><td>Reportes de mal comportamiento</td><td>Sofía Martínez</td></tr>
+      </table></div></div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="17c" data-t="Administrador · Suspender a un usuario" data-s="Duración y motivo obligatorio; se cancelan sus viajes y reservas activas">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/usuarios/…</span></div>
+  <div class="desk" data-role="admin" data-active="users"><div class="dmain">
+    <div class="row muted small"><i data-i="arrow-left" class="s14"></i>Usuarios</div>
+    <div class="row gap12 mt8"><div class="avatar lg">JV</div><div><h1>Jhonatan Vera</h1><div class="muted">jhonatan.veraric@unipamplona.edu.co · Pasajero</div></div><span class="st acc">Activa</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" class="mt16">
+      <div class="card col gap8"><h3>Documentos</h3><div class="row sb small"><span>Carnet o constancia</span><span class="st acc">Aprobado</span></div><div class="row sb small"><span>Licencia</span><span class="muted">Sin enviar</span></div><div class="row sb small"><span>Último ingreso</span><b>hoy 8:40</b></div></div>
+      <div class="card col gap8"><h3>Métricas</h3><div class="row sb small"><span>Calificación</span><b>4,6 · 5 calificaciones</b></div><div class="row sb small"><span>Viajes como pasajero</span><b>9</b></div><div class="row sb small"><span>Reservas y viajes activos</span><b>1</b></div></div>
+      <div class="card col gap8"><h3>Acciones</h3>
+        <div class="row wrap gap4"><span class="btn sm"><i data-i="ban" class="s14"></i>Suspender</span><span class="btn sm"><i data-i="lock" class="s14"></i>Bloquear</span><span class="btn out sm"><i data-i="user-check" class="s14"></i>Levantar suspensión de reservas</span></div>
+        <p class="hint">Cambiar rol solo lo ve el superadmin.</p></div>
+    </div>
+    <div class="card mt16"><h3>Historial de sanciones</h3>
+      <div class="tablewrap mt8"><table><tr><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Motivo</th><th>Autor</th></tr>
+        <tr><td>Suspensión de reservas <span class="st">automática</span></td><td>8 oct 2026</td><td>15 oct 2026</td><td>3 ausencias en 30 días</td><td>Sistema</td></tr>
+        <tr><td>Suspensión de la cuenta</td><td>20 sep 2026</td><td>23 sep 2026</td><td>Reportes de mal comportamiento</td><td>Sofía Martínez</td></tr>
+      </table></div></div>
+    <div class="scrim" style="inset:0"></div>
+    <div class="modal" style="left:420px;top:140px;width:480px">
+      <h2>Suspender a Jhonatan Vera</h2>
+      <p class="muted small mt8">No podrá entrar mientras dure. Sus viajes programados y reservas activas se cancelan y se avisa a los afectados.</p>
+      <div class="field mt12"><label>Duración</label><div class="seg"><span>1 día</span><span class="on">3 días</span><span>7 días</span><span>30 días</span><span>Hasta reactivarla</span></div></div>
+      <div class="field mt12"><label>Motivo</label><div class="input area">Reportes de mal comportamiento</div><span class="hint">El motivo queda en la auditoría y la persona lo recibe en su aviso.</span></div>
+      <div class="row mt16" style="justify-content:flex-end"><div class="btn">Cancelar</div><div class="btn dark">Suspender</div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============================== 18 EMERGENCIAS ============================== -->
+<section class="frame d" data-n="18" data-t="Administrador · Emergencias" data-s="Llegan en tiempo real; atenderlas exige escribir qué se hizo · /admin/emergencias">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/emergencias</span></div>
+  <div class="desk" data-role="admin" data-active="emergencies" data-badge="1"><div class="dmain">
+    <div class="row sb"><div><h1>Emergencias</h1><p class="muted">Las abiertas aparecen primero y llegan en tiempo real.</p></div><div class="row"><div class="check"></div><span>Mostrar también las atendidas</span></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="mt16">
+      <div class="card" style="border:2px solid var(--ink)">
+        <div class="row sb"><span class="st dark"><i data-i="siren" class="s14"></i>Abierta</span><span class="muted small">jue 15 oct · 6:47</span></div>
+        <div class="row mt12"><div class="avatar">LG</div><div><b>Laura Gómez</b><div class="small muted">Pasajera</div></div></div>
+        <div class="small mt12"><span class="muted">Viaje:</span> jue 15 oct 6:30 · Barrio El Carmen hacia Ciudad Universitaria · Conductora Linda Rodríguez</div>
+        <div class="note mt8">"El conductor tomó otra vía"</div>
+        <div class="small mt8 muted"><i data-i="map-pin" class="s14"></i> 7.3741, -72.6463 · se abre en OpenStreetMap</div>
+        <div class="row mt12"><span class="btn sm"><i data-i="external-link" class="s14"></i>Ver ubicación</span><span class="grow"></span><span class="btn pri sm"><i data-i="check" class="s14"></i>Marcar como atendida</span></div>
+      </div>
+      <div class="col gap12">
+        <div class="modal" style="position:static;box-shadow:0 10px 30px rgba(0,0,0,.12)">
+          <h2>Atender emergencia</h2>
+          <div class="field mt12"><label>Qué se hizo</label><div class="input area" style="height:96px">Llamamos a la pasajera; desvío por obras, todo en orden.</div></div>
+          <p class="hint mt4">Queda en la auditoría. Desaparece de las abiertas para los demás administradores.</p>
+          <div class="row mt12" style="justify-content:flex-end"><div class="btn">Cancelar</div><div class="btn pri">Marcar como atendida</div></div>
+        </div>
+        <div class="card" style="opacity:.7">
+          <div class="row sb"><span class="st">Atendida</span><span class="muted small">lun 12 oct · 7:05</span></div>
+          <div class="small mt8"><b>Jhonatan Vera</b> · viaje Terminal de Transportes hacia Ciudad Universitaria</div>
+          <div class="small mt4"><span class="muted">Qué se hizo:</span> Falsa alarma confirmada por llamada.</div>
+        </div>
+      </div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============================== 19 CONFIGURACION ============================== -->
+<section class="frame d" data-n="19a" data-t="Superadministrador · Configuración · Parámetros" data-s="Reglas del negocio guardadas en system_settings · /admin/configuracion">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="0"></div>
+    <div class="field mt12" style="width:360px"><label>Buscar parámetro</label><div class="input"><i data-i="search"></i><span class="faint">cancel, no_show, precio...</span></div></div>
+    <div class="col gap8 mt12">
+      <div class="card row" style="padding:12px 14px"><div class="grow"><span class="mono b">cancel_free_hours</span><div class="small muted">Horas antes de la salida en que el pasajero cancela sin penalización</div><div class="tiny faint">Actualizado hace 5 días</div></div><div class="input" style="width:120px">2</div><div class="btn sm">Guardar</div></div>
+      <div class="card row" style="padding:12px 14px"><div class="grow"><span class="mono b">no_show_limit</span><div class="small muted">Ausencias que suspenden las reservas</div><div class="tiny faint">Actualizado hace 5 días</div></div><div class="input" style="width:120px">3</div><div class="btn sm">Guardar</div></div>
+      <div class="card row" style="padding:12px 14px"><div class="grow"><span class="mono b">search_radius_meters</span><div class="small muted">Distancia máxima de la ruta a los puntos del pasajero</div><div class="tiny faint">Actualizado hace 5 días</div></div><div class="input" style="width:120px">500</div><div class="btn sm">Guardar</div></div>
+      <div class="card row" style="padding:12px 14px;border-color:var(--accent)"><div class="grow"><span class="mono b">max_price_per_seat</span><div class="small muted">Tope de aporte por puesto (vacío: sin tope)</div><div class="tiny faint">Actualizado hoy</div></div><div class="input focus" style="width:120px">3000</div><div class="btn pri sm">Guardar</div></div>
+      <div class="card row" style="padding:12px 14px"><div class="grow"><span class="mono b">waitlist_offer_minutes</span><div class="small muted">Tiempo para aceptar un cupo de la lista de espera</div></div><div class="input" style="width:120px">15</div><div class="btn sm">Guardar</div></div>
+      <div class="card row" style="padding:12px 14px"><div class="grow"><span class="mono b">emergency_phone</span><div class="small muted">Línea de emergencias que muestra la app</div></div><div class="input" style="width:120px">123</div><div class="btn sm">Guardar</div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="19b" data-t="Superadministrador · Configuración · Semestres" data-s="Inicio, fin y límite de revalidación del carnet">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="1"></div>
+    <div style="display:grid;grid-template-columns:1fr 420px;gap:16px" class="mt16">
+      <div class="tablewrap"><table><tr><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Límite de revalidación</th><th></th></tr>
+        <tr><td><b>2026-2</b> <span class="st acc">Vigente</span></td><td>3 ago 2026</td><td>4 dic 2026</td><td>revalidar antes del 2 sep 2026</td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>2027-1</b></td><td>1 feb 2027</td><td>30 jun 2027</td><td>revalidar antes del 3 mar 2027</td><td><span class="link small">Editar</span> · <span class="link small">Eliminar</span></td></tr>
+        <tr><td><b>2026-1</b></td><td>2 feb 2026</td><td>26 jun 2026</td><td>revalidar antes del 4 mar 2026</td><td><span class="link small">Editar</span></td></tr></table></div>
+      <div class="card"><h2>Agregar semestre</h2>
+        <div class="field mt12"><label>Nombre</label><div class="input">2027-1</div></div>
+        <div class="grid2 mt8"><div class="field"><label>Inicio</label><div class="input">01/02/2027</div></div><div class="field"><label>Fin</label><div class="input">30/06/2027</div></div></div>
+        <div class="field mt8"><label>Límite de revalidación</label><div class="input ph">dd/mm/aaaa</div><span class="hint">Opcional. Si lo dejas vacío se calcula con el parámetro revalidation_days.</span></div>
+        <div class="btn pri mt12">Agregar semestre</div>
+        <p class="hint mt8">Si se cruza con otro semestre no se guarda.</p></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="19c" data-t="Superadministrador · Configuración · Lugares" data-s="Sedes, barrios y puntos de referencia del buscador">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="2"></div>
+    <div style="display:grid;grid-template-columns:1fr 420px;gap:16px" class="mt16">
+      <div class="tablewrap"><table><tr><th>Nombre</th><th>Tipo</th><th>Latitud</th><th>Longitud</th><th>Estado</th><th></th></tr>
+        <tr><td><b>Ciudad Universitaria (campus principal)</b></td><td>Sede</td><td>7.3818</td><td>-72.6520</td><td><span class="st acc">Activo</span></td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>Sede Casona</b></td><td>Sede</td><td>7.3755</td><td>-72.6486</td><td><span class="st acc">Activo</span></td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>Barrio El Carmen</b></td><td>Barrio</td><td>7.3712</td><td>-72.6447</td><td><span class="st acc">Activo</span></td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>Barrio Cariongo</b></td><td>Barrio</td><td>7.3790</td><td>-72.6431</td><td><span class="st acc">Activo</span></td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>Parque Principal Agueda Gallardo</b></td><td>Punto de referencia</td><td>7.3757</td><td>-72.6478</td><td><span class="st acc">Activo</span></td><td><span class="link small">Editar</span></td></tr>
+        <tr><td><b>Terminal de Transportes</b></td><td>Punto de referencia</td><td>7.3690</td><td>-72.6502</td><td><span class="st">Inactivo</span></td><td><span class="link small">Editar</span></td></tr></table></div>
+      <div class="card"><h2>Agregar lugar</h2>
+        <div class="field mt12"><label>Nombre</label><div class="input">Barrio Chapinero</div></div>
+        <div class="field mt8"><label>Tipo</label><div class="input"><span class="grow">Barrio</span><i data-i="chevron-down"></i></div></div>
+        <div class="grid2 mt8"><div class="field"><label>Latitud</label><div class="input">7.3731</div></div><div class="field"><label>Longitud</label><div class="input">-72.6459</div></div></div>
+        <div class="btn pri mt12">Agregar lugar</div>
+        <p class="hint mt8">Desactivar en vez de borrar: los viajes antiguos los siguen usando.</p></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="19d" data-t="Superadministrador · Configuración · Pico y placa" data-s="Reglas por tipo de vehículo, día y dígitos; recalcula viajes futuros">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="3"></div>
+    <div style="display:grid;grid-template-columns:1fr 420px;gap:16px" class="mt16">
+      <div class="tablewrap"><table><tr><th>Tipo de vehículo</th><th>Día</th><th>Dígitos restringidos</th><th>Vigencia</th><th></th></tr>
+        <tr><td>Carro</td><td>Lunes</td><td><b>0, 1</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr>
+        <tr><td>Carro</td><td>Martes</td><td><b>2, 3</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr>
+        <tr><td>Carro</td><td>Miércoles</td><td><b>4, 5</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr>
+        <tr class="sel"><td>Carro</td><td>Jueves</td><td><b>6, 7</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr>
+        <tr><td>Carro</td><td>Viernes</td><td><b>8, 9</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr>
+        <tr><td>Moto</td><td>Lunes</td><td><b>0, 1</b></td><td>desde 1 ago 2026 · sin fecha de fin</td><td><span class="link small">Editar</span></td></tr></table></div>
+      <div class="card"><h2>Editar regla</h2>
+        <div class="grid2 mt12"><div class="field"><label>Tipo de vehículo</label><div class="input">Carro</div></div><div class="field"><label>Día</label><div class="input">Jueves</div></div></div>
+        <div class="field mt8"><label>Dígitos restringidos</label><div class="input focus">6, 7</div><span class="hint">Último dígito de la placa, separados por comas. Ejemplo: 1, 2</span></div>
+        <div class="grid2 mt8"><div class="field"><label>Vigente desde</label><div class="input">01/08/2026</div></div><div class="field"><label>Vigente hasta</label><div class="input ph">dd/mm/aaaa</div><span class="hint">Opcional. Vacío si no tiene fin.</span></div></div>
+        <div class="btn pri mt12">Guardar cambios</div>
+        <div class="note mt12">Al guardar, los viajes futuros afectados se cancelan solos con aviso; si una regla deja de aplicar, vuelven a estar programados.</div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="19e" data-t="Superadministrador · Configuración · Documentos legales" data-s="Versiones de términos y política de datos por idioma">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="4"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="mt16">
+      <div class="tablewrap"><table><tr><th>Documento</th><th>Idioma</th><th>Versión</th><th>Publicada</th></tr>
+        <tr><td>Términos y condiciones</td><td>Español</td><td>1.0 <span class="st acc">Vigente</span></td><td>3 oct 2026</td></tr>
+        <tr><td>Política de datos</td><td>Español</td><td>1.0 <span class="st acc">Vigente</span></td><td>3 oct 2026</td></tr>
+        <tr><td>Términos y condiciones</td><td>English</td><td>1.0 <span class="st acc">Vigente</span></td><td>3 oct 2026</td></tr>
+        <tr><td>Términos y condiciones</td><td>Português</td><td>1.0 <span class="st acc">Vigente</span></td><td>3 oct 2026</td></tr>
+        <tr><td>Términos y condiciones</td><td>Français</td><td>1.0 <span class="st acc">Vigente</span></td><td>3 oct 2026</td></tr></table></div>
+      <div class="card"><h2>Publicar versión</h2>
+        <div class="grid3 mt12"><div class="field"><label>Documento</label><div class="input small">Términos y condiciones</div></div><div class="field"><label>Idioma</label><div class="input small">Español</div></div><div class="field"><label>Versión</label><div class="input small">1.1</div></div></div>
+        <div class="field mt8"><label>Texto (Markdown)</label><div class="input area mono" style="height:200px"># Términos y condiciones de Carpool UP&#10;&#10;## 1. Objeto&#10;Carpool UP conecta a la comunidad universitaria...</div><span class="hint">Mínimo 50 caracteres.</span></div>
+        <div class="btn pri mt12">Publicar versión</div>
+        <div class="note mt12">La versión nueva queda vigente de inmediato y todos deberán aceptarla en su próximo ingreso.</div></div>
+    </div>
+  </div></div></div>
+</section>
+
+<section class="frame d" data-n="19f" data-t="Superadministrador · Configuración · Administradores" data-s="Solo el superadmin crea cuentas de administrador">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="5"></div>
+    <div style="display:grid;grid-template-columns:1fr 460px;gap:16px" class="mt16">
+      <div class="tablewrap" style="align-self:start"><table><tr><th>Administradores</th><th>Correo</th></tr>
+        <tr><td><b>Sofía Martínez</b></td><td>sofia.martinez@unipamplona.edu.co</td></tr>
+        <tr><td><b>Carlos Mendoza</b></td><td>carlos.mendoza@unipamplona.edu.co</td></tr></table></div>
+      <div class="card"><h2>Crear administrador</h2>
+        <div class="field mt12"><label>Nombre completo</label><div class="input">Sofía Martínez</div></div>
+        <div class="field mt8"><label>Correo institucional</label><div class="input">sofia.martinez@unipamplona.edu.co</div></div>
+        <div class="field mt8"><label>Sexo</label><div class="input"><span class="grow">Mujer</span><i data-i="chevron-down"></i></div></div>
+        <div class="field mt8"><label>Contraseña inicial</label><div class="input"><span class="grow">••••••••••••</span><i data-i="eye"></i></div><span class="hint">Compártela por un canal seguro. Debe cumplir la longitud mínima configurada.</span></div>
+        <div class="btn pri mt12">Crear administrador</div>
+        <p class="hint mt8">Su primer ingreso pide un código enviado al correo.</p></div>
+    </div>
+  </div></div></div>
+</section>
+
+<!-- ============================== 20 AUDITORIA ============================== -->
+<section class="frame d" data-n="20" data-t="Superadministrador · Auditoría" data-s="Quién hizo qué, cuándo y sobre qué entidad, con el antes y el después">
+  <div class="browser"><div class="bbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">https://carpool.unipamplona.edu.co/admin/configuracion</span></div>
+  <div class="desk" data-role="superadmin" data-active="settings"><div class="dmain">
+    <h1>Configuración</h1><p class="muted">Reglas del negocio, catálogos, documentos legales, administradores y auditoría.</p>
+    <div class="tabs mt12" data-c="settingtabs" data-active="6"></div>
+    <div class="row gap12 mt12">
+      <div class="field" style="width:260px"><label>Acción</label><div class="input ph">identity_document.approve</div></div>
+      <div class="field" style="width:260px"><label>Entidad</label><div class="input ph">user, trip, setting...</div></div>
+      <div class="btn pri" style="align-self:flex-end">Buscar</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 470px;gap:16px" class="mt12">
+      <div class="tablewrap"><table><tr><th>Fecha</th><th>Autor</th><th>Acción</th><th>Entidad</th></tr>
+        <tr class="sel"><td>hoy 10:21</td><td>Sofía Martínez</td><td class="mono">identity_document.approve</td><td>identity_document</td></tr>
+        <tr><td>hoy 9:05</td><td>Superadministrador</td><td class="mono">pico_placa.update</td><td>pico_placa_rule</td></tr>
+        <tr><td>hoy 8:59</td><td>Superadministrador</td><td class="mono">setting.update</td><td>system_setting</td></tr>
+        <tr><td>hoy 7:12</td><td>Sofía Martínez</td><td class="mono">emergency.handle</td><td>emergency_event</td></tr>
+        <tr><td>ayer 18:40</td><td>Sofía Martínez</td><td class="mono">suspension.end</td><td>suspension</td></tr>
+        <tr><td>ayer 16:02</td><td>Sofía Martínez</td><td class="mono">rating.hide</td><td>rating</td></tr>
+        <tr><td>ayer 9:30</td><td>Sistema</td><td class="mono">user.reinstate_auto</td><td>user</td></tr>
+        <tr><td>6 oct 14:11</td><td>Superadministrador</td><td class="mono">admin.create</td><td>user</td></tr></table></div>
+      <div class="card"><h2>identity_document.approve</h2><p class="small muted">hoy 10:21 · Sofía Martínez</p>
+        <div class="grid2 mt12"><div><div class="small b">Antes</div><div class="json mt4">{
+  "status": "pending",
+  "reviewed_by": null
+}</div></div><div><div class="small b">Después</div><div class="json mt4" style="border-color:var(--accent)">{
+  "status": "approved",
+  "reviewed_by": "Sofía Martínez"
+}</div></div></div>
+        <p class="hint mt12">ID: <span class="mono">3f9c2a71-…-8d14</span> · Aprobación del carnet de Daniel Pinzón.</p></div>
+    </div>
+  </div></div></div>
+</section>
+
+<script src="icons.js"></script>
+<script>
+(function () {
+  const svg = (name, cls = 'ic') => `<svg class="${cls}" viewBox="0 0 24 24">${(window.ICONS[name] || '')}</svg>`;
+  const NAV = {
+    passenger: [['search','search','Buscar'],['myTrips','calendar-check','Mis viajes'],['messages','message-circle','Mensajes'],['notifications','bell','Avisos'],['profile','circle-user','Perfil']],
+    driver: [['home','house','Inicio'],['publish','square-plus','Publicar'],['myTrips','car','Mis viajes'],['messages','message-circle','Mensajes'],['profile','circle-user','Perfil']],
+  };
+  const DESK = [['dashboard','layout-dashboard','Panel'],['approvals','shield-check','Aprobaciones'],['users','users','Usuarios'],['trips','route','Viajes'],['emergencies','siren','Emergencias'],['moderation','message-square-warning','Moderación']];
+  const SETTING_TABS = ['Parámetros','Semestres','Lugares','Pico y placa','Legal','Administradores','Auditoría'];
+
+  // Encabezado de cada pantalla.
+  document.querySelectorAll('.frame').forEach((f) => {
+    const h = document.createElement('div');
+    h.className = 'fhead';
+    h.innerHTML = `<div class="fnum">CARPOOL UP · MOCKUP ${f.dataset.n}</div><div class="ftitle">${f.dataset.t}</div><div class="fsub">${f.dataset.s}</div>`;
+    if (f.classList.contains('d')) h.innerHTML = `<div class="fnum">MOCKUP ${f.dataset.n}</div><div class="ftitle">${f.dataset.t}</div><div class="fsub">${f.dataset.s}</div>`;
+    f.prepend(h);
+  });
+
+  document.querySelectorAll('[data-c="topbar"]').forEach((el) => {
+    const n = el.dataset.badge;
+    el.className = 'topbar';
+    el.innerHTML = `<div class="brand"><div class="logo">${svg('car')}</div>Carpool UP</div><div class="roundbtn">${svg('bell')}${n ? `<span class="badge">${n}</span>` : ''}</div>`;
+  });
+
+  document.querySelectorAll('[data-c="tabbar"]').forEach((el) => {
+    el.className = 'tabbar';
+    el.innerHTML = NAV[el.dataset.role].map(([k, ic, label]) =>
+      `<div class="tab ${k === el.dataset.active ? 'on' : ''}">${svg(ic)}<span>${label}</span>${k === 'messages' && el.dataset.badge ? '<span class="badge">2</span>' : ''}${k === 'notifications' && el.dataset.badge ? `<span class="badge">${el.dataset.badge}</span>` : ''}</div>`).join('');
+  });
+
+  document.querySelectorAll('.desk').forEach((el) => {
+    const items = DESK.concat(el.dataset.role === 'superadmin' ? [['settings','settings','Configuración']] : []);
+    const side = document.createElement('aside');
+    side.className = 'side';
+    side.innerHTML = `<div class="brand" style="padding:4px 8px 18px"><div class="logo">${svg('car')}</div>Carpool UP</div>` +
+      items.map(([k, ic, label]) => `<div class="nav ${k === el.dataset.active ? 'on' : ''}">${svg(ic)}<span class="grow">${label}</span>${k === 'emergencies' && el.dataset.badge ? '<span class="badge" style="position:static">1</span>' : ''}</div>`).join('') +
+      `<div class="nav bottom muted">${svg('panel-left-close')}Contraer menú</div>`;
+    el.prepend(side);
+    const main = el.querySelector('.dmain');
+    const top = document.createElement('div');
+    top.className = 'dtop';
+    const who = el.dataset.role === 'superadmin' ? 'Superadministrador' : 'Sofía Martínez · Administrador';
+    top.innerHTML = `<span class="small muted" style="margin-right:auto">${who}</span><div class="roundbtn">${svg('bell')}<span class="badge">2</span></div><div class="input" style="height:38px;border-radius:19px;width:150px">${svg('languages')}<span class="grow">Español</span>${svg('chevron-down')}</div><div class="roundbtn">${svg('monitor')}</div>`;
+    main.prepend(top);
+  });
+
+  document.querySelectorAll('[data-c="settingtabs"]').forEach((el) => {
+    el.innerHTML = SETTING_TABS.map((t, i) => `<span class="${String(i) === el.dataset.active ? 'on' : ''}">${t}</span>`).join('');
+  });
+
+  document.querySelectorAll('[data-c="bars"]').forEach((el) => {
+    const v = el.dataset.v.split(',').map(Number); const max = Math.max(...v);
+    el.innerHTML = v.map((x) => `<b class="${x === max ? 'hi' : ''}" style="height:${Math.max(2, (x / max) * 100)}%"></b>`).join('');
+  });
+
+  // Mapa esquematico: manzanas, calles, la ruta en el color de acento y los marcadores.
+  document.querySelectorAll('[data-c="map"]').forEach((el) => {
+    const h = Number(el.dataset.h || 200), w = 360;
+    el.classList.add('map');
+    el.style.height = h + 'px';
+    const route = [[38, h - 30], [90, h - 46], [130, h * 0.62], [170, h * 0.52], [215, h * 0.46], [255, h * 0.34], [300, h * 0.22], [328, 26]];
+    const at = (t) => { const seg = (route.length - 1) * t, i = Math.min(Math.floor(seg), route.length - 2), f = seg - i;
+      return [route[i][0] + (route[i + 1][0] - route[i][0]) * f, route[i][1] + (route[i + 1][1] - route[i][1]) * f]; };
+    let s = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><rect width="${w}" height="${h}" fill="#eceef1"/>`;
+    for (let x = -40; x < w + 40; x += 46) s += `<line x1="${x}" y1="0" x2="${x + 70}" y2="${h}" stroke="#fff" stroke-width="7"/>`;
+    for (let y = 18; y < h; y += 42) s += `<line x1="0" y1="${y}" x2="${w}" y2="${y - 22}" stroke="#fff" stroke-width="6"/>`;
+    s += `<path d="M0 ${h * 0.8} C 80 ${h * 0.7}, 140 ${h * 0.95}, ${w} ${h * 0.75}" stroke="#d3d7dd" stroke-width="10" fill="none"/>`;
+    s += `<rect x="250" y="${h * 0.55}" width="70" height="40" rx="6" fill="#dfe3e8"/><rect x="40" y="20" width="60" height="34" rx="6" fill="#dfe3e8"/>`;
+    s += `<polyline points="${route.map((p) => p.join(',')).join(' ')}" fill="none" stroke="#fff" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s += `<polyline points="${route.map((p) => p.join(',')).join(' ')}" fill="none" stroke="#1e5aa8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const [ox, oy] = route[0], [dx, dy] = route[route.length - 1];
+    s += `<circle cx="${ox}" cy="${oy}" r="8" fill="#fff" stroke="#22272e" stroke-width="3"/>`;
+    if (el.hasAttribute('data-stop')) { const [sx, sy] = at(0.4); s += `<circle cx="${sx}" cy="${sy}" r="6" fill="#fff" stroke="#6b7280" stroke-width="3"/>`; }
+    if (el.hasAttribute('data-pickup')) { const [px, py] = at(0.4); s += `<g transform="translate(${px - 11},${py - 32})"><path d="M11 0a11 11 0 0 1 11 11c0 8-11 19-11 19S0 19 0 11A11 11 0 0 1 11 0z" fill="#1e5aa8"/><circle cx="11" cy="11" r="4" fill="#fff"/></g>`; }
+    s += `<g transform="translate(${dx - 4},${dy - 24})"><line x1="4" y1="0" x2="4" y2="26" stroke="#22272e" stroke-width="3"/><path d="M4 1h16l-4 6 4 6H4z" fill="#22272e"/></g>`;
+    if (el.dataset.car) { const [cx, cy] = at(Number(el.dataset.car));
+      s += `<circle cx="${cx}" cy="${cy}" r="17" fill="#1e5aa8" opacity=".18"/><circle cx="${cx}" cy="${cy}" r="12" fill="#1e5aa8" stroke="#fff" stroke-width="3"/>`;
+      s += `<g transform="translate(${cx - 7},${cy - 7}) scale(.58)" stroke="#fff" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${window.ICONS.car}</g>`; }
+    if (el.hasAttribute('data-alert')) { const [ax, ay] = at(0.6); s += `<circle cx="${ax}" cy="${ay}" r="26" fill="none" stroke="#22272e" stroke-dasharray="4 4" stroke-width="2"/>`; }
+    s += `<rect x="${w - 34}" y="${h - 64}" width="24" height="48" rx="6" fill="#fff" stroke="#cfd4dc"/><text x="${w - 22}" y="${h - 45}" font-size="16" text-anchor="middle" fill="#22272e">+</text><text x="${w - 22}" y="${h - 23}" font-size="16" text-anchor="middle" fill="#22272e">−</text>`;
+    s += `<text x="8" y="${h - 8}" font-size="9" fill="#6b7280">© OpenStreetMap</text></svg>`;
+    el.innerHTML = s;
+  });
+
+  document.querySelectorAll('i[data-i]').forEach((el) => {
+    const t = document.createElement('span');
+    t.innerHTML = svg(el.dataset.i, 'ic ' + (el.className || ''));
+    const node = t.firstChild;
+    if (el.getAttribute('style')) node.setAttribute('style', el.getAttribute('style').replace('--s:', 'width:') + ';' + el.getAttribute('style').replace('--s:', 'height:'));
+    el.replaceWith(node);
+  });
+  document.body.dataset.ready = '1';
+})();
+</script>
+</body>
+</html>
