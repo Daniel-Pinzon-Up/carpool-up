@@ -2,13 +2,15 @@
 
     python -m app.cli token <correo>   emite un token de acceso para probar la API a mano
     python -m app.cli e2e-users        crea o renueva las cuentas de las pruebas E2E
+    python -m app.cli email-test <correo>   envia un correo de prueba con la configuracion SMTP
 
 e2e-users deja cuatro cuentas activas (pasajero, conductor, administrador y superadmin) con
 los terminos vigentes aceptados y sin segundo factor, todas con una contrasena aleatoria nueva
 en cada ejecucion. Imprime JSON con los correos y la contrasena para que las pruebas lo lean
 de un archivo ignorado por git; nunca se escribe en el repositorio.
 
-Estos comandos se niegan a correr en produccion.
+token y e2e-users se niegan a correr en produccion; email-test tambien sirve alli para
+comprobar el servidor de correo antes de abrir el registro.
 """
 
 import asyncio
@@ -20,6 +22,7 @@ from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal, engine
+from app.core.email import OutgoingEmail, send_smtp
 from app.core.enums import Language, Sex, UserRole, UserStatus
 from app.core.security import create_access_token, hash_password
 from app.models_registry import import_all_models
@@ -72,7 +75,28 @@ async def e2e_users() -> int:
     return 0
 
 
+async def email_test(to: str) -> int:
+    settings = get_settings()
+    server = f"{settings.smtp_host}:{settings.smtp_port}"
+    try:
+        await send_smtp(
+            OutgoingEmail(
+                to=to,
+                subject="Carpool UP: correo de prueba",
+                text="Si lees esto, el envío de correos de Carpool UP funciona.",
+                html="<p>Si lees esto, el envío de correos de Carpool UP funciona.</p>",
+            )
+        )
+    except Exception as error:  # la causa ayuda a corregir SMTP_*
+        print(f"No se pudo enviar por {server}: {error!r}", file=sys.stderr)
+        return 1
+    print(f"Enviado por {server}. Revisa la bandeja de entrada y la de spam.")
+    return 0
+
+
 def main(argv: list[str]) -> int:
+    if len(argv) == 2 and argv[0] == "email-test":
+        return asyncio.run(email_test(argv[1]))
     if get_settings().is_production:
         print("Este comando no esta disponible en produccion.", file=sys.stderr)
         return 2

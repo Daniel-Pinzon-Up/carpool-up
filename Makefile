@@ -4,7 +4,7 @@ OSRM_PROFILE = $(if $(wildcard infra/osrm/data/pamplona.osrm.mldgr),--profile os
 DC = docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml $(OSRM_PROFILE)
 DC_TEST_DB = sh -c 'export DATABASE_URL=$${DATABASE_URL%/*}/carpool_test && alembic upgrade head && pytest --cov=app --cov-report=term-missing'
 
-.PHONY: help env up down restart logs ps migrate seed token e2e-users test test-backend test-frontend test-e2e lint build osrm tiles backup-check restore clean
+.PHONY: help env up down restart logs ps migrate seed token email-test e2e-users test test-backend test-frontend test-e2e lint build osrm tiles backup-check restore clean
 
 help:
 	@echo "env            crea .env desde .env.example si no existe"
@@ -14,6 +14,7 @@ help:
 	@echo "migrate        aplica migraciones de Alembic"
 	@echo "seed           carga datos semilla"
 	@echo "token          token de desarrollo: make token EMAIL=correo"
+	@echo "email-test     correo de prueba con la config SMTP: make email-test TO=correo"
 	@echo "e2e-users      cuentas de las pruebas E2E (solo desarrollo)"
 	@echo "test-e2e       pruebas E2E y de accesibilidad contra la app levantada"
 	@echo "backup-check   restaura el ultimo respaldo en una base aparte y lo compara"
@@ -49,6 +50,9 @@ seed:
 
 token:
 	@$(DC) exec api python -m app.cli token $(EMAIL)
+
+email-test:
+	@$(DC) exec -T worker python -m app.cli email-test $(TO)
 
 e2e-users:
 	@mkdir -p frontend/e2e/.auth
