@@ -2,10 +2,18 @@
 
 Wireframes de fidelidad media de las pantallas reales de la app: mismos textos, rutas, estados y reglas que el código (`frontend/public/i18n/es.json`). Escala de grises con el azul de Carpool UP como único acento e iconos de Lucide, la misma librería de la app. Pasajero y conductor en móvil; administración en escritorio.
 
-- `png/`: una imagen por pantalla (móvil 960×2000, escritorio 3200×1800), lista para insertar en un PDF o una presentación.
-- `Carpool-UP-mockups.pdf`: todas las pantallas, una por página (A4 horizontal).
-- `mockups.html`: fuente editable. Cada `<section class="frame">` es una pantalla; los componentes comunes (barra superior, navegación, mapa, menú lateral) se generan con el script del final para que todas sean consistentes.
-- `render.mjs`: vuelve a exportar las imágenes y el PDF: `cd frontend && node ../docs/mockups/render.mjs`.
+Hay dos juegos con el mismo sistema visual:
+
+| Juego | Imágenes | PDF | Fuente |
+|-------|----------|-----|--------|
+| Celular (pasajero y conductor en móvil, administración en escritorio) | `png/` (49) | `Carpool-UP-mockups.pdf` | `mockups.html` |
+| Escritorio (las pantallas 01 a 14 en PC, con menú lateral) | `png-pc/` (33) | `Carpool-UP-mockups-pc.pdf` | `mockups-pc.html` |
+
+- Cada imagen es una pantalla (móvil 960×2000, escritorio 3200×1800), lista para insertar en un PDF o una presentación; los PDF tienen una pantalla por página (A4 horizontal).
+- `mockups.css` y `mockups.js` son el sistema visual común: barra superior, navegación, menú lateral, mapa, gráficos e iconos. Cada `<section class="frame">` de los HTML es una pantalla.
+- `render.mjs` vuelve a exportar: `cd frontend && node ../docs/mockups/render.mjs` (celular) o `node ../docs/mockups/render.mjs pc` (escritorio).
+
+En escritorio la app reparte el contenido en columnas: el detalle del viaje lleva el mapa y la reserva a la izquierda y las paradas a la derecha, publicar lleva el formulario a la izquierda y la ruta a la derecha, y Mensajes muestra la lista y el chat lado a lado. Las pantallas de administración (15 a 20) ya son de escritorio en el primer juego.
 
 ## Pantallas
 
