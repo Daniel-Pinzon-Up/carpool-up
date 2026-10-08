@@ -55,9 +55,17 @@ function ensureMapStyles(): Promise<void> {
   return stylesReady;
 }
 
+/**
+ * MapLibre 6 dibuja las teselas en un Web Worker que vive en un archivo aparte. El build no lo
+ * empaqueta: angular.json lo copia a /map/maplibre/ y aqui se le indica la ruta. Sin esto el
+ * worker no carga y el mapa se queda en el color de fondo, sin calles ni ruta.
+ */
+export const MAPLIBRE_WORKER_URL = '/map/maplibre/maplibre-gl-worker.mjs';
+
 /** Registra una sola vez el protocolo pmtiles:// en MapLibre. */
 async function ensurePmtilesProtocol(maplibre: typeof import('maplibre-gl')): Promise<void> {
   protocolReady ??= import('pmtiles').then(({ Protocol }) => {
+    maplibre.setWorkerUrl(MAPLIBRE_WORKER_URL);
     const protocol = new Protocol();
     maplibre.addProtocol('pmtiles', protocol.tile);
   });
