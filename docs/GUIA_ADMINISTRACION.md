@@ -112,4 +112,4 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 
 ## 10. Mantenimiento
 
-Ver la [guía de despliegue](DESPLIEGUE.md): respaldos diarios (`make backup-check` para comprobarlos), restauración, actualizaciones y problemas frecuentes.
+Ver la [guía de despliegue](DESPLIEGUE.md): correo real, respaldos diarios (`make backup-check` para comprobarlos), restauración, actualizaciones y problemas frecuentes.

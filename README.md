@@ -75,7 +75,7 @@ En Windows: `.\make.ps1 seed` y `.\make.ps1 token superadmin@unipamplona.edu.co`
 
 El superadmin inicial se toma de `SUPERADMIN_EMAIL` y `SUPERADMIN_PASSWORD` en `.env`.
 
-Los correos de verificación y recuperación llegan a Mailpit en desarrollo: http://localhost:8025.
+Los correos de verificación y recuperación llegan a Mailpit en desarrollo: http://localhost:8025. Para enviarlos a buzones reales (Gmail, Brevo o Resend, gratis) ver [DESPLIEGUE.md, sección 5](docs/DESPLIEGUE.md#5-correo-real) y probar con `make email-test TO=correo`.
 
 ## Desarrollo
 

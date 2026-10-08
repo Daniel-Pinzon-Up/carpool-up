@@ -100,7 +100,31 @@ docker compose --env-file .env -f infra/docker-compose.yml --profile osrm up -d 
 
 El API aplica las migraciones pendientes al arrancar. El seed es idempotente: se puede volver a correr y nunca sobrescribe datos existentes.
 
-## 5. Respaldos
+## 5. Correo real
+
+En desarrollo, Mailpit atrapa todos los correos: no llegan a ningún buzón. Para que los códigos lleguen de verdad basta un servidor SMTP; el código no cambia, solo `.env`.
+
+| Servicio (gratis) | Límite | Sin dominio propio | `SMTP_HOST` / `SMTP_PORT` | Usuario / contraseña |
+|-------------------|--------|--------------------|---------------------------|----------------------|
+| **Gmail** | ~500 al día | Sí, a cualquier destinatario | `smtp.gmail.com` / `587` | Tu Gmail / una **contraseña de aplicación** (exige la verificación en 2 pasos) |
+| **Brevo** | 300 al día | Sí, verificando el remitente (un correo tuyo) | `smtp-relay.brevo.com` / `587` | El login SMTP y la clave SMTP de *SMTP & API* |
+| **Resend** | 100 al día, 3000 al mes | **Solo hacia tu propio correo**; para otros destinatarios hay que verificar un dominio | `smtp.resend.com` / `465` | `resend` / una API key |
+| Correo de la universidad | El de la institución | — | `smtp.gmail.com` u `smtp.office365.com` / `587` | La cuenta de servicio que asigne TI |
+
+Pasos:
+
+1. Crea la cuenta y la clave en el servicio elegido. La clave va **solo en `.env`** (ignorado por git), nunca en el repositorio.
+2. Edita `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` y `SMTP_FROM` en `.env`. El remitente debe ser el correo autorizado en el servicio, por ejemplo `SMTP_FROM="Carpool UP <tu-correo@gmail.com>"`.
+3. `make up` vuelve a crear `api` y `worker` con la configuración nueva.
+4. `make email-test TO=tu-correo@unipamplona.edu.co` envía un correo de prueba y, si falla, muestra la causa (credenciales, puerto, remitente no verificado).
+
+El puerto decide el cifrado: 465 TLS directo, 587 STARTTLS. Si el servidor no responde, el worker reintenta a los 30, 60, 90 y 120 segundos (el código vence en 10 minutos); un destinatario rechazado no se reintenta.
+
+Si los correos llegan a spam, márcalos como "no es spam" una vez. Para un despliegue real conviene un dominio propio con SPF y DKIM (Brevo y Resend los guían) o el correo institucional.
+
+Con SMTP real, la prueba E2E de registro (`account.spec.ts`) ya no encuentra el código en Mailpit: para correr la suite vuelve a `SMTP_HOST=mailpit` y `SMTP_PORT=1025`.
+
+## 6. Respaldos
 
 - El contenedor `backup` hace un `pg_dump` al arrancar y luego cada 24 horas, y conserva los 7 últimos en `backups/`. Si la base no responde, reintenta cada 5 minutos.
 - Conviene copiar la carpeta `backups/` fuera del servidor (otro disco o almacenamiento de la universidad).
@@ -118,7 +142,7 @@ make backup-check        # Windows: .\make.ps1 backup-check
 make restore FILE=carpool-20261007T155151Z.dump      # Windows: .\make.ps1 restore carpool-20261007T155151Z.dump
 ```
 
-## 6. Verificar una instalación
+## 7. Verificar una instalación
 
 ```sh
 curl -k https://localhost/api/v1/health/ready   # {"status":"ok"} con base, PostGIS y Redis
@@ -126,7 +150,7 @@ make test                                       # pruebas de backend (cobertura 
 make e2e-users && make test-e2e                 # solo desarrollo: recorrido completo, cuentas y accesibilidad
 ```
 
-## 7. Probar desde un celular en la misma red
+## 8. Probar desde un celular en la misma red
 
 1. Averigua la IP del equipo en la red local (en Windows, `ipconfig`).
 2. En el celular abre `https://<IP-del-equipo>`.
@@ -134,12 +158,12 @@ make e2e-users && make test-e2e                 # solo desarrollo: recorrido com
 
 La interfaz se probó en ancho de teléfono (Pixel 7) dentro de la suite E2E; la prueba en un celular físico depende de la red local de cada equipo.
 
-## 8. Problemas frecuentes
+## 9. Problemas frecuentes
 
 | Síntoma | Causa y solución |
 |---------|------------------|
 | 502 en todas las llamadas a `/api` | El API está caído o reiniciando: `make logs`. Nginx vuelve a encontrar el API solo, aunque cambie de IP. |
 | "Configuración insegura para producción" al arrancar | Faltan las variables de 4.1. |
-| No llegan los códigos por correo | Revisa `SMTP_*` y los logs del `worker`. En desarrollo están en Mailpit. |
+| No llegan los códigos por correo | En desarrollo están en Mailpit. Con SMTP real: `make email-test TO=...` muestra la causa; revisa también spam y los logs del `worker`. |
 | "No hay ruta" al publicar | OSRM no tiene datos: `make osrm` y `make up`. |
 | El mapa sale en blanco | Faltan las teselas: `make tiles`. |
