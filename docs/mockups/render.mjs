@@ -1,7 +1,8 @@
-// Exporta cada pantalla de mockups.html como PNG individual (png/) y arma un PDF con una
-// pantalla por pagina. Usa el Playwright del frontend:
+// Exporta cada pantalla de los mockups como PNG individual y arma un PDF con una pantalla por
+// pagina. Usa el Playwright del frontend:
 //
-//   cd frontend && node ../docs/mockups/render.mjs
+//   cd frontend && node ../docs/mockups/render.mjs          movil (mockups.html -> png/)
+//   cd frontend && node ../docs/mockups/render.mjs pc       escritorio (mockups-pc.html -> png-pc/)
 import { createRequire } from 'node:module';
 import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -19,13 +20,16 @@ const slug = (text) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
-const out = join(here, 'png');
+const pc = process.argv[2] === 'pc';
+const source = pc ? 'mockups-pc.html' : 'mockups.html';
+const out = join(here, pc ? 'png-pc' : 'png');
+const pdfName = pc ? 'Carpool-UP-mockups-pc.pdf' : 'Carpool-UP-mockups.pdf';
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out);
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 1700, height: 1000 } });
-await page.goto(pathToFileURL(join(here, 'mockups.html')).href);
+await page.goto(pathToFileURL(join(here, source)).href);
 await page.waitForSelector('body[data-ready="1"]');
 
 const frames = await page.$$('.frame');
@@ -53,7 +57,7 @@ await pdf.setContent(`<!doctype html><style>
   img.d { width: 277mm } img.m { height: 196mm }
 </style>${pages}`);
 await pdf.waitForLoadState('load');
-await pdf.pdf({ path: join(here, 'Carpool-UP-mockups.pdf'), preferCSSPageSize: true, printBackground: true });
+await pdf.pdf({ path: join(here, pdfName), preferCSSPageSize: true, printBackground: true });
 
 await browser.close();
-console.log(`${files.length} pantallas exportadas en ${out} y Carpool-UP-mockups.pdf`);
+console.log(`${files.length} pantallas exportadas en ${out} y ${pdfName}`);
