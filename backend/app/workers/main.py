@@ -3,11 +3,12 @@ from typing import Any, ClassVar
 import structlog
 from arq.connections import RedisSettings
 from arq.cron import cron
+from arq.worker import Retry
 
 from app.core.clock import local_today
 from app.core.config import get_settings
 from app.core.db import SessionLocal
-from app.core.email import OutgoingEmail, send_smtp
+from app.core.email import TRANSIENT_SMTP_ERRORS, OutgoingEmail, send_smtp
 from app.core.logging import configure_logging
 from app.modules.admin.users import end_expired_account_suspensions
 from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
@@ -29,8 +30,14 @@ async def heartbeat(ctx: dict[str, Any]) -> str:
 
 
 async def send_email(ctx: dict[str, Any], email: dict[str, str]) -> None:
-    """Envia un correo encolado por la API. ARQ reintenta si el SMTP falla."""
-    await send_smtp(OutgoingEmail(**email))
+    """Envia un correo encolado por la API; si el SMTP falla de forma pasajera, reintenta."""
+    try:
+        await send_smtp(OutgoingEmail(**email))
+    except TRANSIENT_SMTP_ERRORS as error:
+        attempt = ctx.get("job_try", 1)
+        logger.warning("email_retry", attempt=attempt, error=type(error).__name__)
+        # 30, 60, 90 y 120 s: el codigo vence en 10 minutos.
+        raise Retry(defer=30 * attempt) from error
     # Nunca se registra el destinatario ni el contenido (lleva codigos).
     logger.info("email_sent", subject=email["subject"])
 

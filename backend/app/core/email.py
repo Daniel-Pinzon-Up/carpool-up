@@ -2,7 +2,8 @@
 
 Los textos llevan tildes porque los leen los usuarios; los comentarios del codigo no.
 
-La API solo encola el mensaje; el worker ARQ lo envia por SMTP (Mailpit en desarrollo).
+La API solo encola el mensaje; el worker ARQ lo envia por SMTP: Mailpit en desarrollo o un
+servidor real (Gmail, Brevo, Resend, el de la universidad) cuando se configura SMTP_*.
 """
 
 from dataclasses import asdict, dataclass
@@ -37,7 +38,19 @@ class ArqEmailQueue:
         await self.pool.enqueue_job("send_email", asdict(email))
 
 
+# Fallos pasajeros del servidor de correo: el worker reintenta. Un destinatario o remitente
+# rechazado, o credenciales malas, no se arreglan reintentando.
+TRANSIENT_SMTP_ERRORS: tuple[type[Exception], ...] = (
+    aiosmtplib.SMTPConnectError,
+    aiosmtplib.SMTPServerDisconnected,
+    aiosmtplib.SMTPTimeoutError,
+    TimeoutError,
+    OSError,
+)
+
+
 async def send_smtp(email: OutgoingEmail) -> None:
+    """Envia por SMTP. El puerto decide el cifrado: 465 TLS directo, 587 STARTTLS, otro sin TLS."""
     settings = get_settings()
     message = MimeMessage()
     message["From"] = settings.smtp_from
@@ -51,6 +64,7 @@ async def send_smtp(email: OutgoingEmail) -> None:
         port=settings.smtp_port,
         username=settings.smtp_user or None,
         password=settings.smtp_password or None,
+        use_tls=settings.smtp_port == 465,
         start_tls=settings.smtp_port == 587,
         timeout=20,
     )
