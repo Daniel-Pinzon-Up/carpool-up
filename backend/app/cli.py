@@ -3,11 +3,18 @@
     python -m app.cli token <correo>   emite un token de acceso para probar la API a mano
     python -m app.cli e2e-users        crea o renueva las cuentas de las pruebas E2E
     python -m app.cli email-test <correo>   envia un correo de prueba con la configuracion SMTP
+    python -m app.cli verify-email <correo> da por verificado el correo de una cuenta ficticia
+    python -m app.cli forget-unverified <correo>  borra un registro que nunca verifico su correo
 
 e2e-users deja cuatro cuentas activas (pasajero, conductor, administrador y superadmin) con
 los terminos vigentes aceptados y sin segundo factor, todas con una contrasena aleatoria nueva
 en cada ejecucion. Imprime JSON con los correos y la contrasena para que las pruebas lo lean
 de un archivo ignorado por git; nunca se escribe en el repositorio.
+
+verify-email sirve para las personas de prueba sin buzon real: hace lo mismo que escribir el
+codigo (pasa de pending_email a pending_approval y quita el segundo factor), y la cuenta sigue
+el camino normal: un administrador aprueba su carnet desde el panel. forget-unverified borra
+solo cuentas en pending_email (sin viajes ni historial) para repetir un registro desde cero.
 
 token y e2e-users se niegan a correr en produccion; email-test tambien sirve alli para
 comprobar el servidor de correo antes de abrir el registro.
@@ -19,13 +26,16 @@ import secrets
 import sys
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal, engine
 from app.core.email import OutgoingEmail, send_smtp
 from app.core.enums import Language, Sex, UserRole, UserStatus
 from app.core.security import create_access_token, hash_password
+from app.core.storage import delete_private_file
 from app.models_registry import import_all_models
+from app.modules.documents.models import DriverLicense, IdentityDocument
 from app.modules.legal.service import LegalService
 from app.modules.users.models import User
 
@@ -45,6 +55,66 @@ async def issue_token(email: str) -> int:
         print(f"No existe un usuario con el correo {email}", file=sys.stderr)
         return 1
     print(create_access_token(user.id, user.role))
+    return 0
+
+
+async def mark_email_verified(session: AsyncSession, email: str) -> str:
+    """Lo mismo que verificar el codigo, sin buzon. Devuelve el estado resultante."""
+    user = await session.scalar(select(User).where(User.email == email.lower()))
+    if user is None:
+        raise LookupError(f"No existe un usuario con el correo {email}")
+    if user.status == UserStatus.PENDING_EMAIL:
+        user.status = UserStatus.PENDING_APPROVAL
+    user.two_factor_required = False
+    user.failed_login_attempts = 0
+    user.locked_until = None
+    await session.flush()
+    return user.status.value
+
+
+async def forget_unverified(session: AsyncSession, email: str) -> None:
+    """Borra una cuenta que nunca verifico su correo, con sus archivos privados."""
+    user = await session.scalar(select(User).where(User.email == email.lower()))
+    if user is None:
+        raise LookupError(f"No existe un usuario con el correo {email}")
+    if user.status != UserStatus.PENDING_EMAIL:
+        raise PermissionError(
+            f"{email} ya verifico su correo ({user.status.value}): no se borra. "
+            "Para quitarla, que la persona elimine su cuenta desde el perfil."
+        )
+    paths = list(
+        await session.scalars(
+            select(IdentityDocument.file_path).where(IdentityDocument.user_id == user.id)
+        )
+    )
+    paths += await session.scalars(
+        select(DriverLicense.file_path).where(DriverLicense.user_id == user.id)
+    )
+    for path in paths:
+        delete_private_file(path)
+    await session.delete(user)
+    await session.flush()
+
+
+async def run_on_user(action: str, email: str) -> int:
+    import_all_models()
+    try:
+        async with SessionLocal() as session:
+            if action == "verify-email":
+                status = await mark_email_verified(session, email)
+                message = f"{email}: correo verificado, estado {status}, sin segundo factor."
+            else:
+                await forget_unverified(session, email)
+                message = (
+                    f"{email}: registro sin verificar borrado. Ya se puede registrar de nuevo."
+                )
+            await session.commit()
+    except (LookupError, PermissionError) as error:
+        print(error, file=sys.stderr)
+        return 1
+    finally:
+        await engine.dispose()
+    print(message)
     return 0
 
 
@@ -102,6 +172,8 @@ def main(argv: list[str]) -> int:
         return 2
     if len(argv) == 2 and argv[0] == "token":
         return asyncio.run(issue_token(argv[1]))
+    if len(argv) == 2 and argv[0] in ("verify-email", "forget-unverified"):
+        return asyncio.run(run_on_user(argv[0], argv[1]))
     if argv == ["e2e-users"]:
         return asyncio.run(e2e_users())
     print(__doc__, file=sys.stderr)

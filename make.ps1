@@ -1,5 +1,5 @@
 # Equivalente del Makefile para Windows sin make.
-# Uso: .\make.ps1 token <correo> | email-test <correo> | up | down | logs | ps | migrate | seed | e2e-users | test | test-backend | test-frontend | test-e2e | lint | build | osrm | tiles | backup-check | restore <archivo> | clean
+# Uso: .\make.ps1 token <correo> | email-test <correo> | verify-email <correo> | forget-unverified <correo> | up | down | logs | ps | migrate | seed | e2e-users | test | test-backend | test-frontend | test-e2e | lint | build | osrm | tiles | backup-check | restore <archivo> | clean
 param(
     [Parameter(Position = 0)][string]$Target = 'help',
     [Parameter(Position = 1)][string]$Email = ''
@@ -46,6 +46,8 @@ switch ($Target) {
     'seed' { Invoke-Compose @('exec', 'api', 'python', '-m', 'app.seed') }
     'token' { Invoke-Compose @('exec', 'api', 'python', '-m', 'app.cli', 'token', $Email) }
     'email-test' { Invoke-Compose @('exec', '-T', 'worker', 'python', '-m', 'app.cli', 'email-test', $Email) }
+    'verify-email' { Invoke-Compose @('exec', '-T', 'api', 'python', '-m', 'app.cli', 'verify-email', $Email) }
+    'forget-unverified' { Invoke-Compose @('exec', '-T', 'api', 'python', '-m', 'app.cli', 'forget-unverified', $Email) }
     'test-backend' {
         Ensure-Env
         Invoke-Compose @('up', '-d', 'db', 'redis')
