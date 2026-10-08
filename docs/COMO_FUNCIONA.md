@@ -19,7 +19,7 @@ Se usa para tres cosas (`AuthPurpose`): verificar el correo al registrarse, el s
    - el worker ARQ lo envía por SMTP con `aiosmtplib`;
    - así la petición responde rápido y un fallo del correo no tumba el registro.
 6. **El correo va en el idioma de la persona**: la plantilla usa `user.preferred_language` y tiene textos en es, en, pt y fr.
-7. **En desarrollo, los correos no salen a internet**: los atrapa Mailpit (`infra/docker-compose.dev.yml`), una bandeja de prueba.
+7. **Por dónde sale el correo** lo decide `.env` (`SMTP_*`): con Mailpit (`infra/docker-compose.dev.yml`) los correos quedan en una bandeja de prueba local; con un servidor real, como Gmail con una contraseña de aplicación, llegan al buzón de la persona. Si el servidor falla un momento, el worker reintenta a los 30, 60, 90 y 120 segundos.
 8. **El navegador nunca recibe el correo ni el id del usuario**:
    - recibe un `challenge_id` (un token firmado de corta vida);
    - recibe también el correo enmascarado (`email_hint`, por ejemplo `su********@unipamplona.edu.co`).
