@@ -195,9 +195,17 @@ test('recorrido completo: publicar, reservar, viajar, calificar y auditar', asyn
   const riderContext = await browserFor(browser, passenger, info);
   const rider: Page = await riderContext.newPage();
   await prepare(rider);
+  // El mapa dibuja en un worker aparte: si no carga, el mapa queda gris sin dar otro error.
+  const mapErrors: string[] = [];
+  rider.on('console', (m) => {
+    if (m.type() === 'error' && /worker/i.test(m.text())) mapErrors.push(m.text());
+  });
+  const mapWorker = rider.waitForResponse((r) => r.url().endsWith('/maplibre-gl-worker.mjs'));
   await rider.goto(`/viajes/${trip.id}`);
+  expect((await mapWorker).headers()['content-type']).toContain('javascript');
   await rider.getByRole('button', { name: 'Solicitar cupo' }).click();
   await expect(rider.getByText('Solicitada').first()).toBeVisible();
+  expect(mapErrors).toEqual([]);
 
   // --- Conductor: acepta, inicia, marca el abordaje y finaliza ---------------------------
   const driverContext = await browserFor(browser, driver, info, {
