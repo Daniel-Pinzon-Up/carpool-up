@@ -1,8 +1,801 @@
 # Diagrama entidad-relación
 
-Generado a partir de los modelos de SQLAlchemy (35 tablas). `PK` es llave primaria y `FK` llave foránea.
-Notación de Mermaid: `||` exactamente uno, `|o` cero o uno, `o{` cero o muchos, `o|` cero o uno del lado hijo.
-Las columnas `route` y `point` son geometrías de PostGIS (SRID 4326); los tipos con nombre propio son enums de PostgreSQL.
+Modelo de datos de Carpool UP: 35 tablas en PostgreSQL 16 con PostGIS, definidas con SQLAlchemy y versionadas con Alembic.
+
+## Cómo leerlo
+
+| Símbolo | Significado |
+|---------|-------------|
+| `PK` | Llave primaria |
+| `FK` | Llave foránea |
+| `UK` | Valor único |
+| `\|\|--o{` | Uno a muchos (cero o más) |
+| `\|\|--o\|` | Uno a cero o uno |
+| `\|o--o{` | Opcional: la llave foránea puede ser nula |
+| `\|\|--\|{` | Uno a uno o más |
+
+- Las llaves primarias son UUID, salvo `system_settings` (clave de texto) y las tablas puente con llave compuesta (`conversation_members`, `rating_scores`).
+- `geometry` son columnas de PostGIS: la ruta del viaje (`trips.route`) y la ubicación de cada lugar (`places.point`).
+- Los tipos con mayúscula (`TripStatus`, `BookingStatus`...) son enums de PostgreSQL.
+- Las relaciones marcadas como admin, conductor o superadmin son la persona que tomó la decisión: quién revisó un documento, quién atendió una emergencia, quién decidió una cancelación.
+- Cada tabla muestra sus columnas clave. Todas las columnas están en el anexo del final.
+
+## Diagrama general
+
+Las 35 tablas agrupadas por módulo y todas sus relaciones. `users` es el centro: casi todo pertenece a una persona o lo decide una persona.
+
+```mermaid
+erDiagram
+  %% ===== 1. Usuarios y acceso =====
+  users {
+    uuid id PK
+    citext email UK "correo institucional"
+    text full_name
+    Sex sex "verificado por un admin"
+    UserRole role "pasajero, conductor, admin, superadmin"
+    UserStatus status
+    Language preferred_language
+    timestamptz deleted_at "cuenta eliminada"
+  }
+  auth_codes {
+    uuid id PK
+    uuid user_id FK
+    AuthPurpose purpose "verificacion, 2FA, recuperacion"
+    text code_hash
+    int attempts
+    timestamptz expires_at
+  }
+  user_sessions {
+    uuid id PK
+    uuid user_id FK
+    text refresh_token_hash
+    text device_label
+    timestamptz expires_at
+    timestamptz revoked_at
+  }
+  user_stats {
+    uuid user_id PK, FK
+    float rating_avg
+    int rating_count
+    int trips_as_driver
+    int trips_as_passenger
+    int passenger_no_shows
+  }
+  suspensions {
+    uuid id PK
+    uuid user_id FK
+    uuid created_by FK
+    SuspensionKind kind "cuenta o reservas"
+    text reason
+    timestamptz ends_at
+  }
+  trusted_contacts {
+    uuid id PK
+    uuid user_id FK
+    text name
+    text phone
+  }
+  notifications {
+    uuid id PK
+    uuid user_id FK
+    text kind
+    jsonb payload
+    timestamptz read_at
+  }
+
+  %% ===== 2. Documentos y legal =====
+  semesters {
+    uuid id PK
+    text name UK "2026-2"
+    date starts_on
+    date ends_on
+    date revalidation_deadline
+  }
+  identity_documents {
+    uuid id PK
+    uuid user_id FK
+    uuid semester_id FK
+    uuid reviewed_by FK
+    DocKind kind "carnet o constancia"
+    ReviewStatus status
+  }
+  driver_licenses {
+    uuid id PK
+    uuid user_id FK, UK "una por conductor"
+    uuid reviewed_by FK
+    date expires_on
+    ReviewStatus status
+  }
+  legal_documents {
+    uuid id PK
+    LegalKind kind "terminos o politica de datos"
+    Language language
+    text version
+    bool is_current
+  }
+  terms_acceptances {
+    uuid id PK
+    uuid user_id FK
+    uuid legal_document_id FK
+    timestamptz accepted_at
+  }
+
+  %% ===== 3. Vehiculos, lugares y viajes =====
+  vehicles {
+    uuid id PK
+    uuid owner_id FK
+    VehicleType type "carro o moto"
+    text plate UK "entre vehiculos vigentes"
+    text brand
+    int capacity
+    bool is_active
+  }
+  places {
+    uuid id PK
+    uuid created_by FK
+    text name
+    PlaceKind kind "sede, barrio, referencia"
+    geometry point "PostGIS"
+  }
+  trip_series {
+    uuid id PK
+    uuid driver_id FK
+    uuid vehicle_id FK
+    uuid semester_id FK
+    array weekdays
+    time departure_time
+    date window_end
+    SeriesStatus status
+  }
+  series_stops {
+    uuid id PK
+    uuid series_id FK
+    uuid place_id FK
+    int position
+  }
+  trips {
+    uuid id PK
+    uuid driver_id FK
+    uuid vehicle_id FK
+    uuid series_id FK "si sale de una serie"
+    timestamptz departs_at
+    int seats_total
+    int price_per_seat "aporte en COP"
+    geometry route "PostGIS"
+    TripStatus status
+  }
+  trip_stops {
+    uuid id PK
+    uuid trip_id FK
+    uuid place_id FK
+    int position
+    timestamptz eta
+  }
+  trip_rules {
+    uuid id PK
+    uuid trip_id FK
+    RuleKind kind "mascotas, fumar, solo mujeres..."
+    text value
+  }
+  pico_placa_rules {
+    uuid id PK
+    VehicleType vehicle_type
+    int weekday
+    array restricted_digits
+    date valid_from
+  }
+  traffic_factors {
+    uuid id PK
+    text weekday_group
+    int hour
+    float factor
+  }
+
+  %% ===== 4. Reservas =====
+  series_subscriptions {
+    uuid id PK
+    uuid series_id FK
+    uuid passenger_id FK
+    uuid pickup_place_id FK
+    uuid dropoff_place_id FK
+    date from_date
+    date to_date
+    SubscriptionStatus status
+  }
+  bookings {
+    uuid id PK
+    uuid trip_id FK
+    uuid passenger_id FK
+    uuid subscription_id FK "si viene de una serie"
+    uuid pickup_place_id FK
+    uuid dropoff_place_id FK
+    int seats
+    BookingStatus status
+  }
+  waitlist_entries {
+    uuid id PK
+    uuid trip_id FK
+    uuid passenger_id FK
+    uuid booking_id FK "al aceptar la oferta"
+    int position
+    WaitlistStatus status
+  }
+  cancellation_requests {
+    uuid id PK
+    uuid booking_id FK
+    uuid requested_by FK
+    uuid resolved_by FK
+    text reason
+    CancelRequestStatus status
+  }
+  tickets {
+    uuid id PK
+    uuid booking_id FK, UK
+    text code UK "CP-XXXX-XXXX"
+    int amount
+    bool paid_confirmed
+  }
+
+  %% ===== 5. Calificaciones =====
+  ratings {
+    uuid id PK
+    uuid trip_id FK
+    uuid author_id FK
+    uuid target_id FK
+    text target_role
+    text comment
+    bool hidden "moderacion"
+  }
+  rating_scores {
+    uuid rating_id PK, FK
+    text criterion PK "puntualidad, amabilidad..."
+    int stars "1 a 5"
+  }
+
+  %% ===== 6. Chat y seguridad =====
+  conversations {
+    uuid id PK
+    ConversationKind kind "grupal o directo"
+    uuid trip_id FK
+    uuid series_id FK
+    uuid driver_id FK
+    uuid passenger_id FK
+    timestamptz closed_at
+  }
+  conversation_members {
+    uuid conversation_id PK, FK
+    uuid user_id PK, FK
+    timestamptz last_read_at
+  }
+  messages {
+    uuid id PK
+    uuid conversation_id FK
+    uuid sender_id FK
+    text body
+    bool hidden
+  }
+  share_links {
+    uuid id PK
+    uuid trip_id FK
+    uuid created_by FK
+    text token_hash UK
+    timestamptz expires_at
+  }
+  emergency_events {
+    uuid id PK
+    uuid trip_id FK
+    uuid user_id FK
+    uuid handled_by FK
+    float lat
+    float lon
+    text resolution
+  }
+
+  %% ===== 7. Administracion =====
+  system_settings {
+    text key PK
+    jsonb value
+    uuid updated_by FK
+  }
+  audit_log {
+    uuid id PK
+    uuid actor_id FK
+    text action
+    text entity
+    jsonb before
+    jsonb after
+  }
+
+  %% ===== Relaciones: usuarios y acceso =====
+  users ||--o{ auth_codes : "recibe"
+  users ||--o{ user_sessions : "abre"
+  users ||--o| user_stats : "resume"
+  users ||--o{ suspensions : "recibe"
+  users |o--o{ suspensions : "impone (admin)"
+  users ||--o{ trusted_contacts : "registra"
+  users ||--o{ notifications : "recibe"
+
+  %% ===== Relaciones: documentos y legal =====
+  users ||--o{ identity_documents : "sube"
+  users |o--o{ identity_documents : "revisa (admin)"
+  semesters |o--o{ identity_documents : "valida para"
+  users ||--o| driver_licenses : "sube"
+  users |o--o{ driver_licenses : "revisa (admin)"
+  users ||--o{ terms_acceptances : "acepta"
+  legal_documents ||--o{ terms_acceptances : "aceptado en"
+
+  %% ===== Relaciones: vehiculos, lugares y viajes =====
+  users ||--o{ vehicles : "posee"
+  users |o--o{ places : "crea (admin)"
+  users ||--o{ trip_series : "publica"
+  vehicles ||--o{ trip_series : "usado en"
+  semesters ||--o{ trip_series : "enmarca"
+  trip_series ||--o{ series_stops : "tiene"
+  places ||--o{ series_stops : "ubica"
+  users ||--o{ trips : "conduce"
+  vehicles ||--o{ trips : "usado en"
+  trip_series |o--o{ trips : "genera"
+  trips ||--o{ trip_stops : "tiene"
+  places ||--o{ trip_stops : "ubica"
+  trips ||--o{ trip_rules : "define"
+
+  %% ===== Relaciones: reservas =====
+  trip_series ||--o{ series_subscriptions : "recibe"
+  users ||--o{ series_subscriptions : "se suscribe"
+  places ||--o{ series_subscriptions : "recogida o bajada"
+  trips ||--o{ bookings : "recibe"
+  users ||--o{ bookings : "reserva"
+  series_subscriptions |o--o{ bookings : "genera"
+  places ||--o{ bookings : "recogida o bajada"
+  trips ||--o{ waitlist_entries : "tiene en espera"
+  users ||--o{ waitlist_entries : "espera"
+  places ||--o{ waitlist_entries : "recogida o bajada"
+  bookings |o--o{ waitlist_entries : "se crea desde"
+  bookings ||--o{ cancellation_requests : "pide cancelar"
+  users ||--o{ cancellation_requests : "solicita"
+  users |o--o{ cancellation_requests : "decide (conductor)"
+  bookings ||--o| tickets : "emite"
+
+  %% ===== Relaciones: calificaciones =====
+  trips ||--o{ ratings : "se califica en"
+  users ||--o{ ratings : "escribe"
+  users ||--o{ ratings : "recibe"
+  ratings ||--|{ rating_scores : "por criterio"
+
+  %% ===== Relaciones: chat y seguridad =====
+  trips |o--o{ conversations : "chat grupal o directo"
+  trip_series |o--o{ conversations : "chat directo"
+  users ||--o{ conversations : "conductor"
+  users |o--o{ conversations : "pasajero"
+  conversations ||--o{ conversation_members : "incluye"
+  users ||--o{ conversation_members : "participa"
+  conversations ||--o{ messages : "contiene"
+  users ||--o{ messages : "envia"
+  trips ||--o{ share_links : "se comparte"
+  users ||--o{ share_links : "genera"
+  trips ||--o{ emergency_events : "registra"
+  users ||--o{ emergency_events : "reporta"
+  users |o--o{ emergency_events : "atiende (admin)"
+
+  %% ===== Relaciones: administracion =====
+  users |o--o{ system_settings : "modifica (superadmin)"
+  users |o--o{ audit_log : "realiza"
+```
+
+## Vistas por módulo
+
+Para explicar por partes. En cada vista, las tablas de otros módulos aparecen solo con su llave y el dato que las identifica.
+
+### 1. Usuarios, acceso y administración
+
+Cuenta, sesiones con token de refresco, códigos por correo, estadísticas, sanciones, contactos de confianza, avisos, parámetros del sistema y auditoría.
+
+```mermaid
+erDiagram
+  users {
+    uuid id PK
+    citext email UK "correo institucional"
+    text full_name
+    Sex sex "verificado por un admin"
+    UserRole role "pasajero, conductor, admin, superadmin"
+    UserStatus status
+    Language preferred_language
+    timestamptz deleted_at "cuenta eliminada"
+  }
+  auth_codes {
+    uuid id PK
+    uuid user_id FK
+    AuthPurpose purpose "verificacion, 2FA, recuperacion"
+    text code_hash
+    int attempts
+    timestamptz expires_at
+  }
+  user_sessions {
+    uuid id PK
+    uuid user_id FK
+    text refresh_token_hash
+    text device_label
+    timestamptz expires_at
+    timestamptz revoked_at
+  }
+  user_stats {
+    uuid user_id PK, FK
+    float rating_avg
+    int rating_count
+    int trips_as_driver
+    int trips_as_passenger
+    int passenger_no_shows
+  }
+  suspensions {
+    uuid id PK
+    uuid user_id FK
+    uuid created_by FK
+    SuspensionKind kind "cuenta o reservas"
+    text reason
+    timestamptz ends_at
+  }
+  trusted_contacts {
+    uuid id PK
+    uuid user_id FK
+    text name
+    text phone
+  }
+  notifications {
+    uuid id PK
+    uuid user_id FK
+    text kind
+    jsonb payload
+    timestamptz read_at
+  }
+  system_settings {
+    text key PK
+    jsonb value
+    uuid updated_by FK
+  }
+  audit_log {
+    uuid id PK
+    uuid actor_id FK
+    text action
+    text entity
+    jsonb before
+    jsonb after
+  }
+  users ||--o{ auth_codes : "recibe"
+  users ||--o{ user_sessions : "abre"
+  users ||--o| user_stats : "resume"
+  users ||--o{ suspensions : "recibe"
+  users |o--o{ suspensions : "impone (admin)"
+  users ||--o{ trusted_contacts : "registra"
+  users ||--o{ notifications : "recibe"
+  users |o--o{ system_settings : "modifica (superadmin)"
+  users |o--o{ audit_log : "realiza"
+```
+
+### 2. Documentos y legal
+
+Carnet o constancia por semestre, licencia de conducción, versiones de términos y política de datos, y su aceptación.
+
+```mermaid
+erDiagram
+  users {
+    uuid id PK
+    text full_name
+  }
+  semesters {
+    uuid id PK
+    text name UK "2026-2"
+    date starts_on
+    date ends_on
+    date revalidation_deadline
+  }
+  identity_documents {
+    uuid id PK
+    uuid user_id FK
+    uuid semester_id FK
+    uuid reviewed_by FK
+    DocKind kind "carnet o constancia"
+    ReviewStatus status
+  }
+  driver_licenses {
+    uuid id PK
+    uuid user_id FK, UK "una por conductor"
+    uuid reviewed_by FK
+    date expires_on
+    ReviewStatus status
+  }
+  legal_documents {
+    uuid id PK
+    LegalKind kind "terminos o politica de datos"
+    Language language
+    text version
+    bool is_current
+  }
+  terms_acceptances {
+    uuid id PK
+    uuid user_id FK
+    uuid legal_document_id FK
+    timestamptz accepted_at
+  }
+  users ||--o{ identity_documents : "sube"
+  users |o--o{ identity_documents : "revisa (admin)"
+  semesters |o--o{ identity_documents : "valida para"
+  users ||--o| driver_licenses : "sube"
+  users |o--o{ driver_licenses : "revisa (admin)"
+  users ||--o{ terms_acceptances : "acepta"
+  legal_documents ||--o{ terms_acceptances : "aceptado en"
+```
+
+### 3. Vehículos, lugares y viajes
+
+Vehículos del conductor, lugares del buscador, viajes puntuales y series semanales con sus paradas y reglas. Pico y placa y factores de tráfico son catálogos sin llaves foráneas.
+
+```mermaid
+erDiagram
+  users {
+    uuid id PK
+    text full_name
+  }
+  semesters {
+    uuid id PK
+    text name
+  }
+  vehicles {
+    uuid id PK
+    uuid owner_id FK
+    VehicleType type "carro o moto"
+    text plate UK "entre vehiculos vigentes"
+    text brand
+    int capacity
+    bool is_active
+  }
+  places {
+    uuid id PK
+    uuid created_by FK
+    text name
+    PlaceKind kind "sede, barrio, referencia"
+    geometry point "PostGIS"
+  }
+  trip_series {
+    uuid id PK
+    uuid driver_id FK
+    uuid vehicle_id FK
+    uuid semester_id FK
+    array weekdays
+    time departure_time
+    date window_end
+    SeriesStatus status
+  }
+  series_stops {
+    uuid id PK
+    uuid series_id FK
+    uuid place_id FK
+    int position
+  }
+  trips {
+    uuid id PK
+    uuid driver_id FK
+    uuid vehicle_id FK
+    uuid series_id FK "si sale de una serie"
+    timestamptz departs_at
+    int seats_total
+    int price_per_seat "aporte en COP"
+    geometry route "PostGIS"
+    TripStatus status
+  }
+  trip_stops {
+    uuid id PK
+    uuid trip_id FK
+    uuid place_id FK
+    int position
+    timestamptz eta
+  }
+  trip_rules {
+    uuid id PK
+    uuid trip_id FK
+    RuleKind kind "mascotas, fumar, solo mujeres..."
+    text value
+  }
+  pico_placa_rules {
+    uuid id PK
+    VehicleType vehicle_type
+    int weekday
+    array restricted_digits
+    date valid_from
+  }
+  traffic_factors {
+    uuid id PK
+    text weekday_group
+    int hour
+    float factor
+  }
+  users ||--o{ vehicles : "posee"
+  users |o--o{ places : "crea (admin)"
+  users ||--o{ trip_series : "publica"
+  vehicles ||--o{ trip_series : "usado en"
+  semesters ||--o{ trip_series : "enmarca"
+  trip_series ||--o{ series_stops : "tiene"
+  places ||--o{ series_stops : "ubica"
+  users ||--o{ trips : "conduce"
+  vehicles ||--o{ trips : "usado en"
+  trip_series |o--o{ trips : "genera"
+  trips ||--o{ trip_stops : "tiene"
+  places ||--o{ trip_stops : "ubica"
+  trips ||--o{ trip_rules : "define"
+```
+
+### 4. Reservas
+
+Reservas de cupo, suscripciones a series, lista de espera, cancelaciones tardías y tickets.
+
+```mermaid
+erDiagram
+  users {
+    uuid id PK
+    text full_name
+  }
+  trips {
+    uuid id PK
+    timestamptz departs_at
+  }
+  trip_series {
+    uuid id PK
+    array weekdays
+  }
+  places {
+    uuid id PK
+    text name
+  }
+  series_subscriptions {
+    uuid id PK
+    uuid series_id FK
+    uuid passenger_id FK
+    uuid pickup_place_id FK
+    uuid dropoff_place_id FK
+    date from_date
+    date to_date
+    SubscriptionStatus status
+  }
+  bookings {
+    uuid id PK
+    uuid trip_id FK
+    uuid passenger_id FK
+    uuid subscription_id FK "si viene de una serie"
+    uuid pickup_place_id FK
+    uuid dropoff_place_id FK
+    int seats
+    BookingStatus status
+  }
+  waitlist_entries {
+    uuid id PK
+    uuid trip_id FK
+    uuid passenger_id FK
+    uuid booking_id FK "al aceptar la oferta"
+    int position
+    WaitlistStatus status
+  }
+  cancellation_requests {
+    uuid id PK
+    uuid booking_id FK
+    uuid requested_by FK
+    uuid resolved_by FK
+    text reason
+    CancelRequestStatus status
+  }
+  tickets {
+    uuid id PK
+    uuid booking_id FK, UK
+    text code UK "CP-XXXX-XXXX"
+    int amount
+    bool paid_confirmed
+  }
+  trip_series ||--o{ series_subscriptions : "recibe"
+  users ||--o{ series_subscriptions : "se suscribe"
+  places ||--o{ series_subscriptions : "recogida o bajada"
+  trips ||--o{ bookings : "recibe"
+  users ||--o{ bookings : "reserva"
+  series_subscriptions |o--o{ bookings : "genera"
+  places ||--o{ bookings : "recogida o bajada"
+  trips ||--o{ waitlist_entries : "tiene en espera"
+  users ||--o{ waitlist_entries : "espera"
+  places ||--o{ waitlist_entries : "recogida o bajada"
+  bookings |o--o{ waitlist_entries : "se crea desde"
+  bookings ||--o{ cancellation_requests : "pide cancelar"
+  users ||--o{ cancellation_requests : "solicita"
+  users |o--o{ cancellation_requests : "decide (conductor)"
+  bookings ||--o| tickets : "emite"
+```
+
+### 5. Calificaciones, chat y seguridad
+
+Calificaciones por criterio, chats del viaje, enlaces para compartir el viaje y emergencias.
+
+```mermaid
+erDiagram
+  users {
+    uuid id PK
+    text full_name
+  }
+  trips {
+    uuid id PK
+    timestamptz departs_at
+  }
+  trip_series {
+    uuid id PK
+    array weekdays
+  }
+  ratings {
+    uuid id PK
+    uuid trip_id FK
+    uuid author_id FK
+    uuid target_id FK
+    text target_role
+    text comment
+    bool hidden "moderacion"
+  }
+  rating_scores {
+    uuid rating_id PK, FK
+    text criterion PK "puntualidad, amabilidad..."
+    int stars "1 a 5"
+  }
+  conversations {
+    uuid id PK
+    ConversationKind kind "grupal o directo"
+    uuid trip_id FK
+    uuid series_id FK
+    uuid driver_id FK
+    uuid passenger_id FK
+    timestamptz closed_at
+  }
+  conversation_members {
+    uuid conversation_id PK, FK
+    uuid user_id PK, FK
+    timestamptz last_read_at
+  }
+  messages {
+    uuid id PK
+    uuid conversation_id FK
+    uuid sender_id FK
+    text body
+    bool hidden
+  }
+  share_links {
+    uuid id PK
+    uuid trip_id FK
+    uuid created_by FK
+    text token_hash UK
+    timestamptz expires_at
+  }
+  emergency_events {
+    uuid id PK
+    uuid trip_id FK
+    uuid user_id FK
+    uuid handled_by FK
+    float lat
+    float lon
+    text resolution
+  }
+  trips ||--o{ ratings : "se califica en"
+  users ||--o{ ratings : "escribe"
+  users ||--o{ ratings : "recibe"
+  ratings ||--|{ rating_scores : "por criterio"
+  trips |o--o{ conversations : "chat grupal o directo"
+  trip_series |o--o{ conversations : "chat directo"
+  users ||--o{ conversations : "conductor"
+  users |o--o{ conversations : "pasajero"
+  conversations ||--o{ conversation_members : "incluye"
+  users ||--o{ conversation_members : "participa"
+  conversations ||--o{ messages : "contiene"
+  users ||--o{ messages : "envia"
+  trips ||--o{ share_links : "se comparte"
+  users ||--o{ share_links : "genera"
+  trips ||--o{ emergency_events : "registra"
+  users ||--o{ emergency_events : "reporta"
+  users |o--o{ emergency_events : "atiende (admin)"
+```
+
+## Anexo: todas las columnas
+
+Generado a partir de los modelos de SQLAlchemy.
 
 ```mermaid
 erDiagram
