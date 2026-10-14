@@ -6,10 +6,10 @@ from sqlalchemy import DateTime, ForeignKey, Index, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, UUIDPrimaryKey
+from app.core.db import Authorship, Base, UUIDPrimaryKey
 
 
-class Notification(UUIDPrimaryKey, Base):
+class Notification(UUIDPrimaryKey, Authorship, Base):
     """Bandeja interna. kind es estable y la interfaz lo traduce; payload trae ids y datos."""
 
     __tablename__ = "notifications"

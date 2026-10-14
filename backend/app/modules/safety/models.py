@@ -5,12 +5,12 @@ from sqlalchemy import CheckConstraint, DateTime, Float, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
 
-class TrustedContact(UUIDPrimaryKey, Timestamps, Base):
+class TrustedContact(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Contacto de confianza del usuario (maximo trusted_contacts_max). Solo lo ve su dueno."""
 
     __tablename__ = "trusted_contacts"
@@ -25,7 +25,7 @@ class TrustedContact(UUIDPrimaryKey, Timestamps, Base):
     relation: Mapped[str | None] = mapped_column("relationship", Text)
 
 
-class EmergencyEvent(UUIDPrimaryKey, Base):
+class EmergencyEvent(UUIDPrimaryKey, Authorship, Base):
     """Boton de emergencia: alerta en vivo a los administradores con la ultima ubicacion."""
 
     __tablename__ = "emergency_events"

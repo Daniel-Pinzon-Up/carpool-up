@@ -3,10 +3,10 @@ from datetime import date
 from sqlalchemy import CheckConstraint, Date, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey
 
 
-class Semester(UUIDPrimaryKey, Timestamps, Base):
+class Semester(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Calendario academico. La migracion agrega una restriccion de exclusion contra solapes."""
 
     __tablename__ = "semesters"

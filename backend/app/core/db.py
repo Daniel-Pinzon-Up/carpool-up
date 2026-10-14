@@ -2,12 +2,20 @@ import uuid
 from collections.abc import AsyncIterator
 from datetime import datetime
 from enum import Enum as PyEnum
+from typing import Any
 
-from sqlalchemy import DateTime, Enum, MetaData, func
+from sqlalchemy import DateTime, Enum, ForeignKey, MetaData, Update, event, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    ORMExecuteState,
+    Session,
+    declared_attr,
+    mapped_column,
+)
 
 from app.core.config import get_settings
 
@@ -40,6 +48,53 @@ class Timestamps:
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
+
+
+ACTOR_KEY = "actor_id"
+
+
+class Authorship:
+    """Quien creo la fila y quien la cambio por ultima vez. Se llenan solos con el usuario de
+    la sesion (`set_actor`); quedan nulos cuando el cambio lo hace el sistema (worker, seed,
+    CLI) o una persona que aun no tiene cuenta (registro, intento de ingreso)."""
+
+    @declared_attr
+    def created_by(cls) -> Mapped[uuid.UUID | None]:  # noqa: N805
+        return mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"))
+
+    @declared_attr
+    def updated_by(cls) -> Mapped[uuid.UUID | None]:  # noqa: N805
+        return mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"))
+
+
+def set_actor(session: AsyncSession | Session, user_id: uuid.UUID | None) -> None:
+    """Registra quien hace los cambios de esta sesion."""
+    session.info[ACTOR_KEY] = user_id
+
+
+@event.listens_for(Session, "before_flush")
+def _stamp_authorship(session: Session, _context: Any, _instances: Any) -> None:
+    actor = session.info.get(ACTOR_KEY)
+    if actor is None:
+        return
+    for row in session.new:
+        if isinstance(row, Authorship):
+            row.created_by = row.created_by or actor
+            row.updated_by = row.updated_by or actor
+    for row in session.dirty:
+        if isinstance(row, Authorship) and session.is_modified(row, include_collections=False):
+            row.updated_by = actor
+
+
+@event.listens_for(Session, "do_orm_execute")
+def _stamp_bulk_update(state: ORMExecuteState) -> None:
+    """Los UPDATE masivos (revocar sesiones, marcar avisos leidos) no pasan por el flush."""
+    actor = state.session.info.get(ACTOR_KEY)
+    mapper = state.bind_mapper
+    if actor is None or not state.is_update or mapper is None:
+        return
+    if issubclass(mapper.class_, Authorship) and isinstance(state.statement, Update):
+        state.statement = state.statement.values(updated_by=actor)
 
 
 engine = create_async_engine(get_settings().database_url, pool_pre_ping=True)

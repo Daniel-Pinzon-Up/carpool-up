@@ -17,7 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import BookingStatus
 from app.modules.places.models import Place
 from app.modules.trips.models import Trip
@@ -28,7 +28,7 @@ HOLDING_STATUSES = (BookingStatus.ACCEPTED, BookingStatus.CANCEL_REQUESTED)
 ACTIVE_STATUSES = (BookingStatus.REQUESTED, *HOLDING_STATUSES)
 
 
-class Booking(UUIDPrimaryKey, Timestamps, Base):
+class Booking(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Reserva de un pasajero en un viaje concreto.
 
     Guarda los lugares que eligio el pasajero y el punto de encuentro calculado sobre el
@@ -99,6 +99,6 @@ class Booking(UUIDPrimaryKey, Timestamps, Base):
     paid_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     trip: Mapped[Trip] = relationship(lazy="selectin")
-    passenger: Mapped[User] = relationship(lazy="selectin")
+    passenger: Mapped[User] = relationship(foreign_keys=[passenger_id], lazy="selectin")
     pickup_place: Mapped[Place] = relationship(foreign_keys=[pickup_place_id], lazy="selectin")
     dropoff_place: Mapped[Place] = relationship(foreign_keys=[dropoff_place_id], lazy="selectin")

@@ -18,8 +18,13 @@ class AuditLog(UUIDPrimaryKey, Base):
         Index("ix_audit_log_entity", "entity", "entity_id"),
     )
 
+    # Autor de la entrada. En la base se llama created_by, como en las demas tablas.
     actor_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
+        "created_by", UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), index=True
+    )
+    # Siempre nulo: la tabla es inmutable (el trigger rechaza UPDATE y DELETE).
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )
     action: Mapped[str] = mapped_column(Text, nullable=False)
     entity: Mapped[str] = mapped_column(Text, nullable=False)

@@ -5,11 +5,11 @@ from sqlalchemy import DateTime, ForeignKey, Index, Integer, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import AuthPurpose
 
 
-class UserSession(UUIDPrimaryKey, Timestamps, Base):
+class UserSession(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Una fila por dispositivo con sesion abierta.
 
     El refresh token es "<id de la sesion>.<secreto>" y solo se guarda el hash del secreto,
@@ -31,7 +31,7 @@ class UserSession(UUIDPrimaryKey, Timestamps, Base):
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
-class AuthCode(UUIDPrimaryKey, Timestamps, Base):
+class AuthCode(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Codigo de un solo uso enviado por correo. Nunca se guarda en claro."""
 
     __tablename__ = "auth_codes"

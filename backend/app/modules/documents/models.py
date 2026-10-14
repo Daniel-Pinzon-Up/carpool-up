@@ -5,11 +5,11 @@ from sqlalchemy import Date, DateTime, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import DocKind, ReviewStatus
 
 
-class Document(UUIDPrimaryKey, Timestamps, Base):
+class Document(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Documento que revisa un administrador: carnet o constancia (por semestre) y licencia de
     conduccion (con fecha de vencimiento). Subir uno nuevo crea otra fila; vale el ultimo."""
 

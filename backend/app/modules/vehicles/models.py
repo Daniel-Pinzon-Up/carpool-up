@@ -14,11 +14,11 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import VehicleType
 
 
-class Vehicle(UUIDPrimaryKey, Timestamps, Base):
+class Vehicle(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Vehiculo de un conductor. El borrado es logico: viajes pasados lo siguen referenciando."""
 
     __tablename__ = "vehicles"

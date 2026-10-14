@@ -4,11 +4,11 @@ from sqlalchemy import Boolean, DateTime, Integer, Text
 from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import Sex, UserRole, UserStatus
 
 
-class User(UUIDPrimaryKey, Timestamps, Base):
+class User(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Persona registrada. Un solo rol por usuario.
 
     Las sanciones viven en la misma fila: suspended_until (cuenta suspendida, nulo = hasta que

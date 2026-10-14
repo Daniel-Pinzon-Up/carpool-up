@@ -4,11 +4,11 @@ from sqlalchemy import Boolean, CheckConstraint, Date, Index, SmallInteger
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import VehicleType
 
 
-class PicoPlacaRule(UUIDPrimaryKey, Timestamps, Base):
+class PicoPlacaRule(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Restriccion por dia de la semana (0 = lunes) segun el ultimo digito numerico de la placa."""
 
     __tablename__ = "pico_placa_rules"

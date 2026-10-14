@@ -5,14 +5,14 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Te
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, UUIDPrimaryKey
+from app.core.db import Authorship, Base, UUIDPrimaryKey
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
 MAX_MESSAGE_LENGTH = 1000
 
 
-class Message(UUIDPrimaryKey, Base):
+class Message(UUIDPrimaryKey, Authorship, Base):
     """Mensaje del chat de un viaje: lo leen y escriben el conductor y los pasajeros aceptados.
 
     El chat se cierra (solo lectura) cuando el viaje termina o se cancela, y se borra
@@ -40,4 +40,4 @@ class Message(UUIDPrimaryKey, Base):
     hidden: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     trip: Mapped[Trip] = relationship(lazy="selectin")
-    sender: Mapped[User] = relationship(lazy="selectin")
+    sender: Mapped[User] = relationship(foreign_keys=[sender_id], lazy="selectin")
