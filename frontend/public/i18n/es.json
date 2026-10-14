@@ -8,24 +8,11 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar"
   },
-  "languages": {
-    "es": "Español",
-    "en": "English",
-    "pt": "Português",
-    "fr": "Français"
-  },
   "layout": {
     "skipToContent": "Saltar al contenido",
     "mainNav": "Navegación principal",
-    "language": "Idioma",
     "expandNav": "Expandir menú",
     "collapseNav": "Contraer menú",
-    "theme": {
-      "label": "Tema",
-      "system": "Según el sistema",
-      "light": "Claro",
-      "dark": "Oscuro"
-    },
     "unread": "sin leer",
     "reconnecting": "Reconectando...",
     "notificationsUnread": "Notificaciones: {{count}} sin leer"
@@ -44,7 +31,6 @@
     "trips": "Viajes",
     "emergencies": "Emergencias",
     "settings": "Configuración",
-    "catalog": "Catálogo de componentes",
     "moderation": "Moderación"
   },
   "navShort": {
@@ -114,7 +100,6 @@
     "PLACE_OUT_OF_AREA": "Ese punto está fuera de Pamplona. Elige un lugar dentro del área de servicio.",
     "PLACE_NAME_TAKEN": "Ya existe un lugar con ese nombre.",
     "PICO_PLACA_INVALID_DATES": "La fecha final de la regla no puede ser anterior a la inicial.",
-    "LEGAL_VERSION_EXISTS": "Esa versión ya está publicada. Usa un número de versión nuevo.",
     "INVALID_CREDENTIALS": "El correo o la contraseña no son correctos.",
     "ACCOUNT_LOCKED": "Hiciste demasiados intentos. Por seguridad espera {{minutes}} minutos e inténtalo de nuevo.",
     "ACCOUNT_BLOCKED": "Esta cuenta está bloqueada. Escribe a la administración si crees que es un error.",
@@ -126,7 +111,6 @@
     "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos {{min_length}} caracteres.",
     "PASSWORD_TOO_WEAK": "La contraseña no puede ser igual a tu correo.",
     "TERMS_NOT_ACCEPTED": "Debes aceptar los términos y la autorización de datos.",
-    "LEGAL_DOCUMENTS_UNAVAILABLE": "El registro aún no está disponible. Inténtalo más tarde.",
     "FILE_TOO_LARGE": "El archivo pesa más de {{max_mb}} MB. Usa uno más liviano.",
     "FILE_TYPE_NOT_ALLOWED": "Solo se aceptan archivos JPG, PNG, WebP o PDF.",
     "FILE_EMPTY": "El archivo está vacío. Elige otro.",
@@ -134,7 +118,6 @@
     "REFRESH_INVALID": "Tu sesión terminó. Inicia sesión de nuevo.",
     "REFRESH_REUSED": "Por seguridad cerramos tus sesiones. Inicia sesión de nuevo.",
     "PAYMENT_NOTE_DRIVERS_ONLY": "Solo los conductores pueden guardar datos para transferencias.",
-    "LEGAL_VERSION_NOT_CURRENT": "Esa versión ya no está vigente. Recarga la página.",
     "APPROVAL_NOT_PENDING": "Otro administrador ya revisó este documento. Actualiza la lista.",
     "LICENSE_EXPIRED": "La licencia está vencida. Revisa la fecha de vencimiento.",
     "LICENSE_DRIVERS_ONLY": "Solo los conductores suben licencia.",
@@ -156,11 +139,6 @@
     "PICO_PLACA_RESTRICTED": "Tu vehículo tiene pico y placa ese día.",
     "TRIP_OVERLAP": "Ya tienes un viaje a esa hora. Revisa tus viajes o cambia la hora.",
     "TRIP_NOT_EDITABLE": "Este viaje ya no se puede cambiar.",
-    "SERIES_OUTSIDE_SEMESTER": "La fecha de inicio no está dentro de un semestre académico.",
-    "SERIES_WINDOW_INVALID": "Esa duración de serie no está disponible.",
-    "SERIES_START_IN_PAST": "La serie no puede empezar en el pasado.",
-    "SERIES_EMPTY": "La serie no tiene ningún viaje que se pueda reservar. Revisa los días y el pico y placa.",
-    "SERIES_NOT_ACTIVE": "La serie ya no está activa.",
     "VEHICLE_HAS_TRIPS": "El vehículo tiene viajes programados. Cancélalos o cámbiales el vehículo primero.",
     "INVALID_RANGE": "El rango de fechas no es válido.",
     "SEARCH_IN_PAST": "Esa hora ya pasó. Elige una hora futura.",
@@ -171,25 +149,14 @@
     "BOOKING_OWN_TRIP": "No puedes reservar tu propio viaje.",
     "WOMEN_ONLY_TRIP": "Este viaje es solo para mujeres.",
     "BOOKING_SUSPENDED": "Tus reservas están suspendidas por ahora.",
-    "PREFERENCES_CONFLICT": "Las reglas del viaje no permiten algunas de tus preferencias.",
     "POINTS_OFF_ROUTE": "La recogida y la bajada deben quedar sobre la ruta y en ese orden.",
     "BOOKING_NOT_PENDING": "Esta solicitud ya fue respondida.",
     "BOOKING_NOT_CANCELLABLE": "Esta reserva ya no se puede cancelar.",
     "CANCELLATION_PENDING": "Ya pediste cancelar esta reserva.",
     "CANCEL_REASON_REQUIRED": "Cuéntale al conductor el motivo de la cancelación.",
     "CANCELLATION_NOT_PENDING": "Esta cancelación ya fue decidida.",
-    "SUBSCRIPTION_OPTION_INVALID": "Elige uno de los rangos disponibles.",
-    "SUBSCRIPTION_OUT_OF_RANGE": "La fecha de inicio está fuera de la serie.",
-    "SUBSCRIPTION_EMPTY": "No hay viajes disponibles en ese rango.",
-    "SUBSCRIPTION_EXISTS": "Ya tienes una solicitud en esta serie.",
-    "SUBSCRIPTION_NOT_PENDING": "Esta solicitud ya fue respondida o venció.",
-    "SUBSCRIPTION_NOT_ACTIVE": "Esta suscripción ya no está activa.",
-    "WAITLIST_NOT_NEEDED": "Aún hay cupo: solicita tu reserva directamente.",
-    "WAITLIST_EXISTS": "Ya estás en la lista de espera.",
-    "WAITLIST_OFFER_EXPIRED": "La oferta de cupo ya no está disponible.",
     "SEATS_BELOW_BOOKED": "Ya hay {{booked}} puestos aceptados; no puedes ofrecer menos.",
     "WOMEN_ONLY_CONFLICT": "El viaje tiene pasajeros que no son mujeres; no puede ser solo para mujeres.",
-    "SERIES_HAS_BOOKINGS": "Algunos viajes de la serie tienen reservas. Confirma el cambio.",
     "CONVERSATION_CLOSED": "Este chat ya está cerrado.",
     "MESSAGE_EMPTY": "Escribe un mensaje antes de enviarlo.",
     "TRIP_NOT_STARTABLE": "Este viaje ya no se puede iniciar.",
@@ -214,125 +181,10 @@
     "ACCOUNT_DELETE_NOT_ALLOWED": "Esta cuenta no se puede eliminar desde la app.",
     "ACCOUNT_DELETE_TRIP_IN_PROGRESS": "Tienes un viaje en curso. Termínalo antes de eliminar tu cuenta."
   },
-  "catalog": {
-    "title": "Catálogo de componentes",
-    "subtitle": "Todos los componentes del sistema de diseño liquid glass en un solo lugar. Cambia el tema, el idioma y la transparencia para revisarlos.",
-    "controls": {
-      "title": "Apariencia",
-      "reduceTransparency": "Reducir transparencia"
-    },
-    "themes": {
-      "title": "Comparación de temas",
-      "description": "La misma tarjeta en tema claro y oscuro, con vidrio y con superficies sólidas.",
-      "light": "Claro con vidrio",
-      "dark": "Oscuro con vidrio",
-      "lightSolid": "Claro con transparencia reducida",
-      "darkSolid": "Oscuro con transparencia reducida"
-    },
-    "sample": {
-      "route": "Campus principal hacia Barrio El Carmen, salida 7:30 a. m."
-    },
-    "buttons": {
-      "title": "Botones",
-      "primary": "Solicitar cupo",
-      "secondary": "Ver detalle",
-      "danger": "Cancelar viaje",
-      "ghost": "Más tarde",
-      "disabled": "No disponible",
-      "loading": "Guardar",
-      "block": "Publicar viaje"
-    },
-    "fields": {
-      "title": "Campos de formulario",
-      "email": "Correo institucional",
-      "emailPlaceholder": "nombre@unipamplona.edu.co",
-      "emailHint": "Usa tu correo que termina en .edu.co",
-      "emailError": "El correo debe terminar en .edu.co"
-    },
-    "select": {
-      "label": "Tipo de vehículo",
-      "car": "Carro",
-      "motorcycle": "Moto"
-    },
-    "chips": {
-      "title": "Preferencias",
-      "pets": "Mascotas",
-      "luggage": "Equipaje",
-      "noSmoking": "No fumar",
-      "music": "Música",
-      "womenOnly": "Solo mujeres"
-    },
-    "tabs": {
-      "title": "Pestañas",
-      "upcoming": "Próximos",
-      "inProgress": "En curso",
-      "history": "Historial",
-      "panel": "Contenido de la pestaña {{tab}}"
-    },
-    "badges": {
-      "title": "Estados",
-      "requested": "Solicitada",
-      "accepted": "Aceptada",
-      "rejected": "Rechazada",
-      "picoPlaca": "Pico y placa",
-      "inProgress": "En curso",
-      "completed": "Completado"
-    },
-    "rating": {
-      "title": "Avatares y calificación",
-      "punctuality": "Puntualidad",
-      "value": "Seleccionaste {{value}} de 5"
-    },
-    "stepper": {
-      "title": "Asistente y puestos",
-      "route": "Ruta",
-      "schedule": "Horario",
-      "vehicle": "Vehículo",
-      "summary": "Resumen",
-      "back": "Atrás",
-      "next": "Siguiente"
-    },
-    "seats": {
-      "label": "Puestos"
-    },
-    "loading": {
-      "title": "Carga y estado vacío"
-    },
-    "empty": {
-      "title": "No encontramos viajes",
-      "description": "Prueba con otra hora o amplía la zona de búsqueda.",
-      "action": "Cambiar búsqueda"
-    },
-    "dialogs": {
-      "title": "Diálogos",
-      "modal": "Abrir modal",
-      "sheet": "Abrir hoja inferior",
-      "confirm": "Confirmar eliminación",
-      "sampleTitle": "Elige tus puestos",
-      "sampleBody": "Indica cuántos puestos necesitas para este viaje.",
-      "confirmTitle": "Cancelar este viaje",
-      "confirmMessage": "Se avisará a los pasajeros con reserva. Esta acción no se puede deshacer.",
-      "confirmAction": "Sí, cancelar viaje",
-      "confirmed": "Viaje cancelado",
-      "cancelled": "No se hizo ningún cambio"
-    },
-    "toasts": {
-      "title": "Avisos",
-      "info": "Informativo",
-      "success": "Éxito",
-      "warning": "Advertencia",
-      "danger": "Error",
-      "infoMessage": "Tu solicitud fue enviada al conductor.",
-      "successMessage": "Reserva aceptada. Ya puedes ver la placa del vehículo.",
-      "warningMessage": "El conductor lleva 15 minutos de retraso.",
-      "dangerMessage": "No hay cupos disponibles en este viaje."
-    }
-  },
   "legal": {
     "terms": "Términos y condiciones",
     "dataPolicy": "Tratamiento de datos personales",
     "back": "Volver",
-    "version": "Versión {{version}}, publicada el {{date}}.",
     "unavailable": "Este documento todavía no está publicado.",
     "pageTitle": "Documentos legales"
   },
@@ -525,13 +377,6 @@
     "sent": "Documento enviado. Lo revisaremos pronto.",
     "check": "Revisar estado"
   },
-  "acceptTerms": {
-    "title": "Actualizamos nuestros documentos",
-    "body": "Para seguir usando la app lee y acepta las nuevas versiones.",
-    "version": "versión {{version}}",
-    "checkbox": "Leí y acepto las nuevas versiones.",
-    "submit": "Aceptar y continuar"
-  },
   "profile": {
     "details": "Tus datos",
     "paymentNote": "Datos para transferencias",
@@ -539,7 +384,6 @@
     "verifiedFields": "Tu nombre, correo, sexo y rol los valida la administración y no se pueden cambiar aquí.",
     "save": "Guardar cambios",
     "saved": "Cambios guardados.",
-    "preferences": "Preferencias",
     "document": "Tu documento",
     "noDocument": "Todavía no has subido un documento.",
     "updateDocument": "Subir o reemplazar documento",
@@ -643,8 +487,6 @@
       "booking_withdrawn": "Un pasajero retiró su solicitud.",
       "booking_cancelled_by_passenger": "Un pasajero canceló su reserva; se liberó el cupo.",
       "cancellation_requested": "Un pasajero pide cancelar su reserva.",
-      "subscription_requested": "Un pasajero quiere unirse a tu serie.",
-      "subscription_cancelled": "Un pasajero salió de tu serie.",
       "booking_accepted": "¡Tu reserva fue aceptada!",
       "booking_rejected": "Tu solicitud de cupo fue rechazada.",
       "booking_expired": "Tu solicitud venció sin respuesta.",
@@ -654,12 +496,6 @@
       "cancellation_accepted": "El conductor aceptó tu cancelación.",
       "cancellation_rejected": "Tu reserva se mantiene: la cancelación no fue aprobada.",
       "trip_changed": "El conductor cambió tu viaje. Revisa la nueva hora.",
-      "subscription_accepted": "Te aceptaron en la serie: {{booked}} viajes reservados.",
-      "subscription_rejected": "Tu solicitud para unirte a la serie fue rechazada.",
-      "subscription_expired": "Tu solicitud para unirte a la serie venció.",
-      "subscription_ended": "Tu suscripción a la serie terminó.",
-      "waitlist_offer": "Se liberó un cupo en un viaje lleno. Confírmalo pronto.",
-      "waitlist_offer_expired": "La oferta de cupo venció.",
       "message_new": "{{sender_name}} te escribió en el chat.",
       "trip_reminder": "Tu viaje sale en {{minutes}} minutos.",
       "trip_reminder_driver": "Tu viaje sale en {{minutes}} minutos. Recuerda iniciarlo.",
@@ -743,7 +579,7 @@
     "title": "Tu panel de conductor",
     "ready": {
       "title": "Todo listo para publicar",
-      "body": "Publica un viaje puntual o una serie para tus trayectos de cada semana."
+      "body": "Publica un viaje con tu ruta, fecha, hora y aporte sugerido."
     },
     "setup": {
       "title": "Completa estos pasos para publicar",
@@ -824,16 +660,13 @@
     "stop": "Parada",
     "pin": "Punto en el mapa",
     "etaNote": "Los tiempos son estimados y pueden variar con el tráfico.",
-    "factor": "Incluye un ajuste de tráfico de x{{factor}} para esa hora.",
     "contribution": "Es un aporte para compartir gastos de combustible, no una tarifa."
   },
   "publish": {
     "title": "Publicar viaje",
     "editTripTitle": "Editar viaje",
-    "editSeriesTitle": "Editar serie",
     "subtitle": "Comparte tu trayecto con la comunidad. Revisa cada paso antes de publicar.",
     "steps": {
-      "type": "Tipo",
       "route": "Ruta",
       "when": "Fecha y hora",
       "vehicle": "Vehículo y puestos",
@@ -841,27 +674,10 @@
       "rules": "Reglas",
       "summary": "Resumen"
     },
-    "type": {
-      "legend": "Tipo de viaje",
-      "single": "Viaje puntual",
-      "singleHint": "Un solo viaje en una fecha y hora.",
-      "series": "Serie recurrente",
-      "seriesHint": "El mismo trayecto varios días de la semana durante 15 días, 4 semanas o el semestre.",
-      "noSemester": "No hay un semestre vigente, así que por ahora solo puedes publicar viajes puntuales."
-    },
     "when": {
       "date": "Fecha",
       "time": "Hora de salida",
       "timeHint": "Hora de Pamplona.",
-      "weekdays": "Días de la semana",
-      "startDate": "Fecha de inicio",
-      "window": "Duración de la serie",
-      "windowDays": "{{days}} días",
-      "windowSemester": "Hasta el fin del semestre",
-      "windowFixed": "La serie sigue hasta el {{end}}. Los cambios aplican a los viajes futuros.",
-      "datesTitle": "Viajes que se publicarán: {{count}} de {{total}}",
-      "picoPlacaDay": "pico y placa",
-      "picoPlacaSeries": "{{count}} fechas caen en pico y placa: se crean canceladas y no se pueden reservar.",
       "picoPlacaSingle": "Tu vehículo tiene pico y placa ese día. Elige otra fecha u otro vehículo."
     },
     "vehicle": {
@@ -890,9 +706,7 @@
       "customHint": "Por ejemplo: espero máximo 5 minutos."
     },
     "summary": {
-      "type": "Tipo",
       "when": "Cuándo",
-      "seriesWhen": "{{count}} viajes a las {{time}}",
       "seats": "Puestos: {{count}}",
       "noRules": "Sin reglas especiales"
     },
@@ -903,20 +717,11 @@
       "date": "Elige una fecha dentro del rango permitido.",
       "past": "La salida debe ser en el futuro.",
       "picoPlaca": "Tu vehículo tiene pico y placa ese día.",
-      "weekdays": "Elige al menos un día de la semana.",
-      "startDate": "La fecha de inicio no puede estar en el pasado.",
-      "noDates": "La serie no tendría ningún viaje que se pueda reservar.",
-      "noSemester": "No hay un semestre vigente para publicar series.",
       "vehicle": "Elige un vehículo activo.",
       "seats": "Puedes ofrecer entre 1 y {{seats}} puestos.",
       "price": "Escribe un aporte en pesos, sin decimales (puede ser 0).",
       "priceMax": "El aporte no puede pasar de {{max}} pesos.",
       "custom": "La regla adicional admite hasta 200 caracteres."
-    },
-    "confirmSeriesEdit": {
-      "title": "¿Guardar cambios en la serie?",
-      "message": "Se actualizan todos los viajes futuros de la serie. Los pasajeros con reserva reciben un aviso y, si una fecha sale de la serie, su reserva se cancela.",
-      "confirm": "Guardar cambios"
     },
     "back": "Atrás",
     "next": "Siguiente",
@@ -927,12 +732,10 @@
   },
   "trips": {
     "title": "Mis viajes",
-    "subtitle": "Tus viajes publicados, tus series y el historial.",
+    "subtitle": "Tus viajes publicados y el historial.",
     "detailTitle": "Detalle del viaje",
-    "seriesTitle": "Detalle de la serie",
     "tabs": {
       "upcoming": "Próximos",
-      "series": "Series",
       "history": "Historial"
     },
     "status": {
@@ -943,25 +746,14 @@
       "cancelled_pico_placa": "Pico y placa",
       "not_held": "No realizado"
     },
-    "seriesStatus": {
-      "active": "Activa",
-      "cancelled": "Cancelada",
-      "finished": "Terminada"
-    },
     "to": "hacia",
     "seats": "Puestos: {{count}}",
     "stops": "Paradas: {{count}}",
-    "fromSeries": "Serie",
-    "seriesCounts": "{{scheduled}} programados de {{total}}",
-    "next": "próximo: {{when}}",
     "window": "del {{start}} al {{end}}",
-    "picoPlacaAlert": "{{count}} viajes cancelados por pico y placa.",
     "picoPlacaCancelled": "Este viaje cayó en pico y placa y se canceló automáticamente. No se puede reservar.",
     "cancelReason": "Motivo de la cancelación",
-    "viewSeries": "Ver la serie",
     "mapLabel": "Mapa con la ruta del viaje",
     "driver": "Conductor",
-    "occurrences": "Viajes de la serie",
     "counts": {
       "scheduled": "Programados",
       "picoPlaca": "Pico y placa"
@@ -970,32 +762,25 @@
     "empty": {
       "upcoming": "No tienes viajes próximos",
       "history": "Aún no tienes historial",
-      "hint": "Publica un viaje para compartir tu trayecto.",
-      "series": "No tienes series",
-      "seriesHint": "Las series repiten tu trayecto varios días de la semana."
+      "hint": "Publica un viaje para compartir tu trayecto."
     },
     "actions": {
       "edit": "Editar",
       "cancel": "Cancelar viaje",
-      "cancelSeries": "Cancelar serie",
       "duplicate": "Duplicar"
     },
     "cancel": {
       "title": "Cancelar viaje",
       "message": "Los pasajeros con reserva recibirán el aviso con tu motivo. Cancelar cuenta en tu reputación.",
-      "seriesTitle": "Cancelar serie",
-      "seriesMessage": "Se cancelan todos los viajes futuros de la serie. Los pasajeros recibirán el aviso con tu motivo.",
       "reason": "Motivo",
       "hint": "Entre 5 y 500 caracteres. Lo verán los pasajeros.",
       "keep": "No cancelar",
       "confirm": "Cancelar",
-      "done": "Viaje cancelado.",
-      "seriesDone": "Serie cancelada."
+      "done": "Viaje cancelado."
     },
     "duplicate": {
       "title": "Duplicar",
       "tripHint": "Se publica un viaje nuevo con la misma ruta, vehículo, puestos, aporte y reglas.",
-      "seriesHint": "Se publica una serie nueva con la misma plantilla desde la fecha que elijas.",
       "invalid": "Elige una fecha de hoy en adelante.",
       "confirm": "Duplicar",
       "done": "Publicamos la copia."
@@ -1039,8 +824,7 @@
       "seats": "Cupos: {{count}}",
       "rating": "{{rating}}",
       "newDriver": "Conductor nuevo",
-      "trips": "Viajes: {{count}}",
-      "series": "Serie"
+      "trips": "Viajes: {{count}}"
     }
   },
   "bookings": {
@@ -1057,28 +841,14 @@
       "no_show": "No se presentó",
       "completed": "Completada"
     },
-    "subscriptionStatus": {
-      "requested": "Solicitada",
-      "active": "Activa",
-      "rejected": "Rechazada",
-      "cancelled": "Cancelada",
-      "finished": "Terminada",
-      "expired": "Vencida"
-    },
     "tabs": {
       "upcoming": "Próximos",
-      "history": "Historial",
-      "series": "Series",
-      "waitlist": "Lista de espera"
+      "history": "Historial"
     },
     "empty": {
       "upcoming": "No tienes viajes próximos",
       "history": "Aún no tienes historial",
-      "hint": "Busca un viaje y solicita tu cupo.",
-      "series": "No te has unido a ninguna serie",
-      "seriesHint": "En el detalle de un viaje recurrente puedes unirte por varios días.",
-      "waitlist": "No estás en ninguna lista de espera",
-      "waitlistHint": "Si un viaje está lleno, anótate y te avisamos cuando se libere un cupo."
+      "hint": "Busca un viaje y solicita tu cupo."
     },
     "reason": {
       "label": "Motivo",
@@ -1106,30 +876,17 @@
       "closed": "Este viaje ya no recibe solicitudes.",
       "womenOnly": "Este viaje es solo para mujeres.",
       "myPoint": "Mi punto: {{name}}",
-      "joinSeries": "Unirme a la serie",
       "companions": "Viajan contigo",
       "onlyYou": "Por ahora solo tú",
       "hint": {
         "requested": "Esperando la respuesta del conductor.",
         "accepted": "Tienes cupo. La placa y los datos de pago ya están visibles.",
         "cancel_requested": "El conductor está revisando tu solicitud de cancelación."
-      }
-    },
-    "waitlist": {
-      "full": "No quedan cupos para esos puestos.",
-      "join": "Anotarme en la lista de espera",
-      "joined": "Estás en la lista de espera. Te avisamos si se libera un cupo.",
-      "waiting": "Estás en la lista de espera de este viaje.",
-      "leave": "Salir de la lista",
-      "left": "Listo, saliste de la lista.",
-      "offer": "Se liberó un cupo. Confírmalo antes de las {{time}}.",
-      "confirm": "Quiero el cupo",
-      "decline": "Ya no lo necesito",
-      "position": "Personas antes que tú: {{ahead}}"
+      },
+      "full": "No quedan puestos suficientes en este viaje."
     },
     "card": {
       "trips": "Viajes: {{count}}",
-      "fromSubscription": "Serie",
       "paymentNote": "Datos para el aporte",
       "cancelReason": "Motivo de la cancelación",
       "tripChanged": "El conductor cambió el viaje: puedes cancelar sin penalización.",
@@ -1144,61 +901,29 @@
     },
     "inbox": {
       "title": "Solicitudes",
-      "subtitle": "Reservas, cancelaciones y series que esperan tu respuesta.",
+      "subtitle": "Reservas y cancelaciones que esperan tu respuesta.",
       "refresh": "Actualizar",
       "empty": "No tienes solicitudes pendientes",
       "emptyHint": "Cuando un pasajero pida cupo aparecerá aquí.",
       "requests": "Reservas por aprobar ({{count}})",
       "cancellations": "Cancelaciones por decidir ({{count}})",
       "cancellationsHint": "Faltan menos de 2 horas: si aceptas, el cupo se libera.",
-      "subscriptions": "Suscripciones a series ({{count}})",
       "accept": "Aceptar",
       "reject": "Rechazar",
       "accepted": "Reserva aceptada.",
       "rejected": "Solicitud rechazada.",
       "rejectTitle": "¿Rechazar la solicitud?",
-      "rejectSubscriptionTitle": "¿Rechazar la suscripción?",
       "rejectMessage": "Le avisamos al pasajero. Puedes contarle el motivo.",
       "acceptCancellation": "Aceptar cancelación",
       "rejectCancellation": "Mantener la reserva",
       "cancellationAccepted": "Cancelación aceptada; el cupo quedó libre.",
-      "cancellationRejected": "La reserva se mantiene.",
-      "subscriptionAccepted": "Suscripción aceptada; se reservaron las fechas con cupo."
-    },
-    "subscription": {
-      "title": "Unirme a la serie",
-      "option": "¿Por cuánto tiempo?",
-      "start": "Desde",
-      "wholeSeries": "Toda la serie",
-      "days_count": "{{count}} días",
-      "days": "Fechas del rango",
-      "noDays": "No hay viajes en ese rango.",
-      "legend": "Las fechas tachadas están en pico y placa y las grises están llenas: no se reservan.",
-      "dayFree": "con cupo",
-      "dayFull": "llena",
-      "dayPicoPlaca": "pico y placa",
-      "submit": "Solicitar {{count}} viajes",
-      "approvalHint": "El conductor aprueba una sola vez y reservamos cada fecha con cupo.",
-      "sent": "Solicitud enviada al conductor.",
-      "range": "Del {{start}} al {{end}}",
-      "summary": "Reservados: {{booked}} · Sin cupo o bloqueados: {{skipped}}",
-      "closed": "Esta serie ya no recibe pasajeros.",
-      "cancel": "Salir de la serie",
-      "cancelTitle": "¿Salir de la serie?",
-      "cancelMessage": "Se cancelan tus reservas futuras de la serie.",
-      "cancelled": "Saliste de la serie.",
-      "lateMessage": "Algún viaje sale en menos de 2 horas: el conductor debe aprobar esa cancelación. Cuéntale el motivo.",
-      "hint": {
-        "requested": "Esperando la aprobación del conductor.",
-        "active": "Tus viajes de la serie están en Mis viajes."
-      }
+      "cancellationRejected": "La reserva se mantiene."
     }
   },
   "chat": {
     "list": "Conversaciones",
     "back": "Volver a mensajes",
     "viewTrip": "Ver viaje",
-    "viewSeries": "Ver serie",
     "older": "Ver mensajes anteriores",
     "empty": "Aún no hay mensajes. Saluda para coordinar el encuentro.",
     "you": "Tú",
@@ -1217,8 +942,6 @@
     "noneHint": "Cuando te acepten en un viaje (o aceptes a un pasajero) se abre el chat del viaje.",
     "pick": "Elige una conversación",
     "pickHint": "Aquí verás los mensajes del viaje y con tu conductor o pasajero.",
-    "directSeries": "Chat directo de la serie {{route}}",
-    "directTrip": "Chat directo del viaje {{route}}",
     "groupOn": "Chat del viaje · {{when}}",
     "noMessages": "Sin mensajes todavía",
     "openTrip": "Abrir el chat del viaje"
@@ -1450,9 +1173,8 @@
       "changeRoleMessage": "{{name}} pasará a tener el rol {{role}}. Recibirá un aviso.",
       "saveRole": "Guardar rol",
       "roleChanged": "Rol actualizado.",
-      "suspensions": "Historial de sanciones",
-      "noSuspensions": "Sin sanciones.",
-      "automatic": "automática",
+      "suspensions": "Sanciones vigentes",
+      "noSuspensions": "Sin sanciones vigentes.",
       "rating": "Calificación",
       "ratingCount": "{{count}} calificaciones",
       "tripsDriver": "Viajes como conductor",
@@ -1524,7 +1246,6 @@
         "semesters": "Semestres",
         "places": "Lugares",
         "picoPlaca": "Pico y placa",
-        "legal": "Legal",
         "admins": "Administradores",
         "audit": "Auditoría"
       },
@@ -1570,23 +1291,6 @@
       "toHint": "Opcional. Vacío si no tiene fin.",
       "open": "sin fecha de fin",
       "add": "Agregar regla"
-    },
-    "legal": {
-      "kind": "Documento",
-      "kinds": {
-        "terms": "Términos y condiciones",
-        "data_policy": "Política de datos"
-      },
-      "language": "Idioma",
-      "version": "Versión",
-      "versionInvalid": "Usa el formato número.número, por ejemplo 1.1.",
-      "body": "Texto (Markdown)",
-      "bodyHint": "Mínimo 50 caracteres.",
-      "bodyInvalid": "Escribe al menos 50 caracteres.",
-      "publish": "Publicar versión",
-      "publishMessage": "La versión nueva queda vigente de inmediato y todos deberán aceptarla en su próximo ingreso.",
-      "published": "Versión publicada.",
-      "current": "Vigente"
     },
     "admins": {
       "password": "Contraseña inicial",
@@ -1639,17 +1343,9 @@
         "q": "¿Qué pasa si no me presento?",
         "a": "El conductor te espera {{wait}} minutos y luego puede marcarte como ausente. Si acumulas {{limit}} ausencias en {{windowDays}} días, no podrás reservar durante {{ban}} días."
       },
-      "waitlist": {
-        "q": "El viaje está lleno, ¿qué hago?",
-        "a": "Únete a la lista de espera. Si se libera un puesto te avisamos y tienes {{offer}} minutos para aceptarlo antes de que pase a la siguiente persona."
-      },
       "become": {
         "q": "¿Cómo empiezo a conducir?",
         "a": "Sube tu licencia de conducción vigente y registra al menos un vehículo. Cuando un administrador apruebe la licencia podrás publicar viajes."
-      },
-      "series": {
-        "q": "¿Qué es una serie?",
-        "a": "Es un trayecto que repites ciertos días de la semana durante el semestre. Los pasajeros pueden suscribirse a algunos días o a toda la serie y tienen un chat directo contigo."
       },
       "picoPlaca": {
         "q": "¿Qué pasa con el pico y placa?",
