@@ -5,11 +5,15 @@ from sqlalchemy.dialects.postgresql import CITEXT
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
-from app.core.enums import Language, Sex, ThemePreference, UserRole, UserStatus
+from app.core.enums import Sex, UserRole, UserStatus
 
 
 class User(UUIDPrimaryKey, Timestamps, Base):
-    """Persona registrada (seccion 5.3). Un solo rol por usuario."""
+    """Persona registrada. Un solo rol por usuario.
+
+    Las sanciones viven en la misma fila: suspended_until (cuenta suspendida, nulo = hasta que
+    un administrador la reactive) y booking_ban_until (reservas suspendidas por ausencias).
+    """
 
     __tablename__ = "users"
 
@@ -25,12 +29,10 @@ class User(UUIDPrimaryKey, Timestamps, Base):
     avatar_path: Mapped[str | None] = mapped_column(Text)
     payment_note: Mapped[str | None] = mapped_column(Text)
     two_factor_required: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    preferred_language: Mapped[Language] = mapped_column(
-        pg_enum(Language, "language"), nullable=False, default=Language.ES
-    )
-    theme_preference: Mapped[ThemePreference] = mapped_column(
-        pg_enum(ThemePreference, "theme_preference"), nullable=False, default=ThemePreference.SYSTEM
-    )
+    terms_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    suspended_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    suspension_reason: Mapped[str | None] = mapped_column(Text)
+    booking_ban_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     failed_login_attempts: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default="0"
     )

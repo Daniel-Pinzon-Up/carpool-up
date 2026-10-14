@@ -35,30 +35,17 @@ class PlaceKind(StrEnum):
     CUSTOM = "custom"
 
 
-class LegalKind(StrEnum):
-    TERMS = "terms"
-    DATA_POLICY = "data_policy"
-
-
-class Language(StrEnum):
-    ES = "es"
-    EN = "en"
-    PT = "pt"
-    FR = "fr"
-
-
-class ThemePreference(StrEnum):
-    SYSTEM = "system"
-    LIGHT = "light"
-    DARK = "dark"
-
-
 ADMIN_ROLES = frozenset({UserRole.ADMIN, UserRole.SUPERADMIN})
 
 
 class DocKind(StrEnum):
     STUDENT_CARD = "student_card"
     INSTITUTIONAL_PROOF = "institutional_proof"
+    DRIVER_LICENSE = "driver_license"
+
+
+# Documentos que acreditan a la persona ante la universidad (no la licencia).
+IDENTITY_KINDS = (DocKind.STUDENT_CARD, DocKind.INSTITUTIONAL_PROOF)
 
 
 class ReviewStatus(StrEnum):
@@ -72,12 +59,6 @@ class AuthPurpose(StrEnum):
     EMAIL_VERIFICATION = "email_verification"
     TWO_FACTOR = "two_factor"
     PASSWORD_RESET = "password_reset"  # noqa: S105 - proposito del codigo, no un secreto
-
-
-class SeriesStatus(StrEnum):
-    ACTIVE = "active"
-    CANCELLED = "cancelled"
-    FINISHED = "finished"
 
 
 class TripStatus(StrEnum):
@@ -96,6 +77,8 @@ class StopKind(StrEnum):
 
 
 class RuleKind(StrEnum):
+    """Reglas del viaje. Se guardan en trips.rules (JSONB) como {"kind", "value"}."""
+
     WOMEN_ONLY = "women_only"
     PETS = "pets"
     LUGGAGE = "luggage"
@@ -116,36 +99,3 @@ class BookingStatus(StrEnum):
     EXPIRED = "expired"
     NO_SHOW = "no_show"
     COMPLETED = "completed"
-
-
-class SubscriptionStatus(StrEnum):
-    REQUESTED = "requested"
-    ACTIVE = "active"
-    REJECTED = "rejected"
-    CANCELLED = "cancelled"
-    FINISHED = "finished"
-    EXPIRED = "expired"
-
-
-class WaitlistStatus(StrEnum):
-    WAITING = "waiting"
-    OFFERED = "offered"
-    CONVERTED = "converted"
-    EXPIRED = "expired"
-    LEFT = "left"
-
-
-class CancelRequestStatus(StrEnum):
-    PENDING = "pending"
-    ACCEPTED = "accepted"
-    REJECTED = "rejected"
-
-
-class SuspensionKind(StrEnum):
-    BOOKING_BAN = "booking_ban"
-    ACCOUNT = "account"
-
-
-class ConversationKind(StrEnum):
-    TRIP_GROUP = "trip_group"
-    DIRECT = "direct"

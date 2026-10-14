@@ -25,27 +25,6 @@ class TrustedContact(UUIDPrimaryKey, Timestamps, Base):
     relation: Mapped[str | None] = mapped_column("relationship", Text)
 
 
-class ShareLink(UUIDPrimaryKey, Base):
-    """Enlace publico de solo lectura del viaje. Se guarda el hash del token, nunca el token:
-    quien lo tiene ve ubicacion en vivo, vehiculo, placa y ruta, sin datos personales."""
-
-    __tablename__ = "share_links"
-
-    trip_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("trips.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    created_by: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
-    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-
-    trip: Mapped[Trip] = relationship(lazy="selectin")
-
-
 class EmergencyEvent(UUIDPrimaryKey, Base):
     """Boton de emergencia: alerta en vivo a los administradores con la ultima ubicacion."""
 

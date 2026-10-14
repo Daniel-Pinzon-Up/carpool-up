@@ -13,21 +13,22 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
-from app.core.enums import RuleKind, StopKind, TripStatus
+from app.core.enums import StopKind, TripStatus
 from app.modules.places.models import Place
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 
 
 class Trip(UUIDPrimaryKey, Timestamps, Base):
-    """Un viaje concreto: ocurrencia de una serie (series_id) o viaje puntual (series_id nulo).
+    """Un viaje publicado por un conductor, con su ruta (PostGIS) y sus paradas.
 
-    Asientos y precio son copia de la serie al generarse; el conductor puede ajustar una
-    ocurrencia sin tocar la serie.
+    rules guarda las reglas del viaje como lista de {"kind", "value"} (por ejemplo
+    {"kind": "pets", "value": "not_allowed"}). share_token_hash es el enlace publico para
+    seguir el viaje: se guarda el hash del token, nunca el token.
     """
 
     __tablename__ = "trips"
@@ -59,9 +60,6 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     vehicle_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("vehicles.id", ondelete="RESTRICT"), nullable=False
     )
-    series_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("trip_series.id", ondelete="CASCADE"), index=True
-    )
     departs_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     seats_total: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     price_per_seat: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -70,8 +68,6 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     )
     distance_m: Mapped[int] = mapped_column(Integer, nullable=False)
     est_duration_s: Mapped[int] = mapped_column(Integer, nullable=False)
-    # Duracion de OSRM sin factor de trafico: el job semanal compara la real contra esta.
-    osrm_duration_s: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[TripStatus] = mapped_column(
         pg_enum(TripStatus, "trip_status"), nullable=False, default=TripStatus.SCHEDULED
     )
@@ -82,15 +78,15 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Ultimo aviso para calificar antes de que cierre el plazo.
     rating_reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rules: Mapped[list[dict[str, str]]] = mapped_column(JSONB, nullable=False, default=list)
+    share_token_hash: Mapped[str | None] = mapped_column(Text, unique=True)
+    share_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     driver: Mapped[User] = relationship(lazy="selectin")
     vehicle: Mapped[Vehicle] = relationship(lazy="selectin")
     stops: Mapped[list["TripStop"]] = relationship(
         order_by="TripStop.position", cascade="all, delete-orphan", lazy="selectin"
-    )
-    rules: Mapped[list["TripRule"]] = relationship(
-        order_by="TripRule.kind", cascade="all, delete-orphan", lazy="selectin"
     )
 
 
@@ -111,16 +107,3 @@ class TripStop(UUIDPrimaryKey, Timestamps, Base):
     eta: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     place: Mapped[Place] = relationship(lazy="selectin")
-
-
-class TripRule(UUIDPrimaryKey, Timestamps, Base):
-    """Regla del viaje: allowed/not_allowed, o texto libre para custom."""
-
-    __tablename__ = "trip_rules"
-    __table_args__ = (UniqueConstraint("trip_id", "kind", name="uq_trip_rules_kind"),)
-
-    trip_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("trips.id", ondelete="CASCADE"), nullable=False
-    )
-    kind: Mapped[RuleKind] = mapped_column(pg_enum(RuleKind, "rule_kind"), nullable=False)
-    value: Mapped[str] = mapped_column(Text, nullable=False)

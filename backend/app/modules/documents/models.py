@@ -9,11 +9,12 @@ from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import DocKind, ReviewStatus
 
 
-class IdentityDocument(UUIDPrimaryKey, Timestamps, Base):
-    """Carnet estudiantil o constancia institucional. Uno por semestre a lo largo del tiempo."""
+class Document(UUIDPrimaryKey, Timestamps, Base):
+    """Documento que revisa un administrador: carnet o constancia (por semestre) y licencia de
+    conduccion (con fecha de vencimiento). Subir uno nuevo crea otra fila; vale el ultimo."""
 
-    __tablename__ = "identity_documents"
-    __table_args__ = (Index("ix_identity_documents_user_created", "user_id", "created_at"),)
+    __tablename__ = "documents"
+    __table_args__ = (Index("ix_documents_user_kind_created", "user_id", "kind", "created_at"),)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
@@ -24,37 +25,26 @@ class IdentityDocument(UUIDPrimaryKey, Timestamps, Base):
     status: Mapped[ReviewStatus] = mapped_column(
         pg_enum(ReviewStatus, "review_status"), nullable=False, default=ReviewStatus.PENDING
     )
+    # Carnet o constancia: semestre al que pertenece. Licencia: nulo.
     semester_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("semesters.id", ondelete="RESTRICT"), index=True
     )
+    # Licencia: vencimiento. Carnet o constancia: nulo.
+    expires_on: Mapped[date | None] = mapped_column(Date)
     reviewed_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     rejection_reason: Mapped[str | None] = mapped_column(Text)
-    valid_until: Mapped[date | None] = mapped_column(Date)
 
-
-class DriverLicense(UUIDPrimaryKey, Timestamps, Base):
-    """Licencia de conduccion (una por conductor). Subir otra la reemplaza y vuelve a revision."""
-
-    __tablename__ = "driver_licenses"
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True
-    )
-    file_path: Mapped[str] = mapped_column(Text, nullable=False)
-    content_type: Mapped[str] = mapped_column(Text, nullable=False)
-    expires_on: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[ReviewStatus] = mapped_column(
-        pg_enum(ReviewStatus, "review_status"), nullable=False, default=ReviewStatus.PENDING
-    )
-    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
-    )
-    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    rejection_reason: Mapped[str | None] = mapped_column(Text)
+    @property
+    def is_license(self) -> bool:
+        return self.kind == DocKind.DRIVER_LICENSE
 
     def is_valid_on(self, day: date) -> bool:
-        """Aprobada y no vencida: requisito para publicar viajes."""
-        return self.status == ReviewStatus.APPROVED and self.expires_on >= day
+        """Licencia aprobada y no vencida: requisito para publicar viajes."""
+        return (
+            self.status == ReviewStatus.APPROVED
+            and self.expires_on is not None
+            and self.expires_on >= day
+        )
