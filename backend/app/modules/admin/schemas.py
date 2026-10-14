@@ -9,7 +9,6 @@ from app.core.enums import (
     DocKind,
     ReviewStatus,
     Sex,
-    SuspensionKind,
     TripStatus,
     UserRole,
     UserStatus,
@@ -93,15 +92,6 @@ class AdminUserRow(BaseModel):
     last_login_at: datetime | None
 
 
-class SuspensionOut(BaseModel):
-    id: uuid.UUID
-    kind: SuspensionKind
-    reason: str
-    starts_at: datetime
-    ends_at: datetime | None
-    automatic: bool
-
-
 class AdminUserDetail(AdminUserRow):
     sex: Sex
     document_status: ReviewStatus | None
@@ -115,8 +105,13 @@ class AdminUserDetail(AdminUserRow):
     passenger_no_shows: int
     active_bookings: int
     upcoming_trips: int
-    suspensions: list[SuspensionOut]
-    active_ban: SuspensionOut | None
+    suspended_until: datetime | None = Field(
+        description="Fin de la suspension de la cuenta (nulo: hasta que la reactiven)"
+    )
+    suspension_reason: str | None
+    booking_ban_until: datetime | None = Field(
+        description="Reservas suspendidas por ausencias hasta esta fecha"
+    )
 
 
 class SuspendRequest(BaseModel):
@@ -139,7 +134,7 @@ class OptionalReason(BaseModel):
 
 class AdminTripRow(BaseModel):
     id: uuid.UUID
-    series_id: uuid.UUID | None
+
     status: TripStatus
     departs_at: datetime
     origin: str

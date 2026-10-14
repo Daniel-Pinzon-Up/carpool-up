@@ -13,15 +13,15 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from geoalchemy2 import Geography
-from sqlalchemy import Select, and_, cast, exists, func, literal, select
+from sqlalchemy import ColumnElement, Select, cast, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.expression import Exists
 
 from app.core.clock import LOCAL_TZ, utcnow
 from app.core.enums import RuleKind, Sex, StopKind, TripStatus
 from app.core.errors import AppError
 from app.core.geo import SRID
 from app.modules.bookings.queries import booked_seats_subquery
+from app.modules.ratings.models import Rating
 from app.modules.routing.schemas import RoutePoint
 from app.modules.routing.service import resolve_points
 from app.modules.search.schemas import (
@@ -32,9 +32,8 @@ from app.modules.search.schemas import (
     VehicleCard,
 )
 from app.modules.settings.service import SettingsService
-from app.modules.stats.models import UserStats
-from app.modules.stats.summary import stats_for
-from app.modules.trips.models import Trip, TripRule, TripStop
+from app.modules.stats.summary import UserSummary, stats_for
+from app.modules.trips.models import Trip, TripStop
 from app.modules.trips.schemas import ALLOWED, NOT_ALLOWED, RuleOut
 from app.modules.users.models import User
 
@@ -56,11 +55,10 @@ def walk_m(a: Point, b: Point) -> float:
     return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(h))
 
 
-def _rule(kind: RuleKind, value: str | None = None) -> Exists:
-    condition = and_(TripRule.trip_id == Trip.id, TripRule.kind == kind)
-    if value is not None:
-        condition = and_(condition, TripRule.value == value)
-    return exists().where(condition)
+def _rule(kind: RuleKind, value: str | None = None) -> ColumnElement[bool]:
+    """El viaje tiene esa regla (con ese valor, si se indica): contencion JSONB (@>)."""
+    rule = {"kind": kind.value} if value is None else {"kind": kind.value, "value": value}
+    return Trip.rules.contains([rule])
 
 
 def rules_filter(query: Select[Any], prefs: SearchQuery, viewer: User) -> Select[Any]:
@@ -118,6 +116,12 @@ class SearchService:
         time_gap = func.abs(func.extract("epoch", Trip.departs_at - literal(target)))
         # Cupo: puestos menos los aceptados y con cancelacion pendiente.
         free_seats = Trip.seats_total - booked_seats_subquery()
+        driver_rating = (
+            select(func.avg(Rating.average))
+            .where(Rating.target_id == Trip.driver_id)
+            .correlate(Trip)
+            .scalar_subquery()
+        )
 
         query = (
             select(
@@ -145,11 +149,10 @@ class SearchService:
                 func.ST_DWithin(route_geo, cast(dropoff_geom, Geography), radius),
                 pickup_fraction < dropoff_fraction,
             )
-            .outerjoin(UserStats, UserStats.user_id == Trip.driver_id)
             .order_by(
                 pickup_distance,
                 time_gap,
-                UserStats.rating_avg.desc().nulls_last(),
+                driver_rating.desc().nulls_last(),
                 Trip.departs_at,
                 Trip.id,
             )
@@ -176,7 +179,7 @@ class SearchService:
             if board.eta >= alight.eta and board.kind == alight.kind == "stop":
                 continue  # Misma parada para subir y bajar: no hay trayecto.
             results.append(
-                self.result(trip, board, alight, target, stats.get(trip.driver_id), row.free_seats)
+                self.result(trip, board, alight, target, stats[trip.driver_id], row.free_seats)
             )
         return results
 
@@ -221,13 +224,12 @@ class SearchService:
         board: MatchPoint,
         alight: MatchPoint,
         target: datetime,
-        driver_stats: UserStats | None,
+        driver_stats: UserSummary,
         free_seats: int,
     ) -> SearchResult:
         stops: list[TripStop] = trip.stops
         return SearchResult(
             trip_id=trip.id,
-            series_id=trip.series_id,
             status=trip.status,
             departs_at=trip.departs_at,
             arrives_at=trip.departs_at + timedelta(seconds=trip.est_duration_s),
@@ -241,8 +243,8 @@ class SearchService:
             driver=DriverCard(
                 id=trip.driver.id,
                 full_name=trip.driver.full_name,
-                rating=driver_stats.rating_avg if driver_stats else None,
-                trips_as_driver=driver_stats.trips_as_driver if driver_stats else 0,
+                rating=driver_stats.rating_avg,
+                trips_as_driver=driver_stats.trips_as_driver,
             ),
             vehicle=VehicleCard(
                 vehicle_id=trip.vehicle.id,
@@ -252,5 +254,5 @@ class SearchService:
                 color=trip.vehicle.color,
                 has_photo=trip.vehicle.photo_path is not None,
             ),
-            rules=[RuleOut(kind=rule.kind, value=rule.value) for rule in trip.rules],
+            rules=[RuleOut(kind=rule["kind"], value=rule["value"]) for rule in trip.rules],
         )

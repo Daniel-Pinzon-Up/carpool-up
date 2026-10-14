@@ -4,16 +4,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
-from app.core.enums import (
-    DocKind,
-    Language,
-    LegalKind,
-    ReviewStatus,
-    Sex,
-    ThemePreference,
-    UserRole,
-    UserStatus,
-)
+from app.core.enums import DocKind, ReviewStatus, Sex, UserRole, UserStatus
 
 
 class DocumentSummary(BaseModel):
@@ -32,17 +23,10 @@ class LicenseSummary(BaseModel):
 
     id: uuid.UUID
     status: ReviewStatus
-    expires_on: date
+    expires_on: date | None
     rejection_reason: str | None
     created_at: datetime
     reviewed_at: datetime | None
-
-
-class PendingLegal(BaseModel):
-    id: uuid.UUID
-    kind: LegalKind
-    version: str
-    language: Language
 
 
 class MeOut(BaseModel):
@@ -56,15 +40,14 @@ class MeOut(BaseModel):
     role: UserRole
     status: UserStatus
     payment_note: str | None
-    preferred_language: Language
-    theme_preference: ThemePreference
     last_login_at: datetime | None
     document: DocumentSummary | None
     license: LicenseSummary | None
     can_publish: bool
     # Motivos por los que un conductor aun no puede publicar (vacio si puede).
     publish_blockers: list[str]
-    pending_legal: list[PendingLegal]
+    # Reservas suspendidas por ausencias hasta esta fecha (nulo si puede reservar).
+    booking_ban_until: datetime | None
 
 
 Program = Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=120)]
@@ -81,6 +64,4 @@ class MeUpdate(BaseModel):
     """Lo que el usuario puede cambiar. Nombre, sexo y rol los valida un administrador."""
 
     program: Program | None = None
-    preferred_language: Language | None = None
-    theme_preference: ThemePreference | None = None
     payment_note: PaymentNote | None = None

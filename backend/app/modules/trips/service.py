@@ -17,19 +17,17 @@ from app.core.pagination import Page, decode_cursor, encode_cursor
 from app.modules.bookings.lifecycle import end_trip_bookings, trip_changed
 from app.modules.bookings.models import ACTIVE_STATUSES, HOLDING_STATUSES, Booking
 from app.modules.bookings.queries import active_bookings, booked_seats, pending_requests
-from app.modules.chat.service import ChatService
+from app.modules.chat.membership import can_chat
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.pico_placa.service import PicoPlacaService
 from app.modules.routing.osrm import RouteProvider
 from app.modules.settings.service import SettingsService
-from app.modules.stats.summary import refresh_user_stats
 from app.modules.trips.models import Trip, TripStop
 from app.modules.trips.planning import TripPlanner, local_date
 from app.modules.trips.schemas import (
     CoPassenger,
     DriverOut,
     MyBooking,
-    MyWaitlist,
     RuleIn,
     RuleOut,
     StopOut,
@@ -42,9 +40,6 @@ from app.modules.trips.schemas import (
 from app.modules.users.models import User
 from app.modules.vehicles.eligibility import require_can_publish
 from app.modules.vehicles.models import Vehicle
-from app.modules.waitlist.models import OPEN_STATUSES as WAITLIST_OPEN
-from app.modules.waitlist.models import WaitlistEntry
-from app.modules.waitlist.offers import offer_next
 
 logger = structlog.get_logger("trips")
 
@@ -95,7 +90,6 @@ def trip_summary(
     own = trip.driver_id == viewer.id
     return TripSummary(
         id=trip.id,
-        series_id=trip.series_id,
         status=trip.status,
         departs_at=trip.departs_at,
         arrives_at=trip.departs_at + timedelta(seconds=trip.est_duration_s),
@@ -121,7 +115,7 @@ def trip_out(
         distance_m=trip.distance_m,
         est_duration_s=trip.est_duration_s,
         stops=[stop_out(stop) for stop in trip.stops],
-        rules=[RuleOut(kind=rule.kind, value=rule.value) for rule in trip.rules],
+        rules=[RuleOut(kind=rule["kind"], value=rule["value"]) for rule in trip.rules],
         driver=DriverOut(id=trip.driver.id, full_name=trip.driver.full_name),
         cancel_reason=trip.cancel_reason,
         cancelled_at=trip.cancelled_at,
@@ -129,7 +123,7 @@ def trip_out(
 
 
 def rules_in(trip: Trip) -> list[RuleIn]:
-    return [RuleIn(kind=rule.kind, value=rule.value) for rule in trip.rules]
+    return [RuleIn(kind=rule["kind"], value=rule["value"]) for rule in trip.rules]
 
 
 # --- Servicio -------------------------------------------------------------------------
@@ -150,7 +144,7 @@ class TripService:
         self.planner.check_seats(vehicle, data.seats)
         await self.planner.check_price(data.price_per_seat)
         rules = self.planner.check_rules(driver, data.rules)
-        await self.planner.check_departure(data.departs_at, single=True)
+        await self.planner.check_departure(data.departs_at)
         await self.planner.check_pico_placa(vehicle, data.departs_at)
         planned = await self.planner.plan_route(driver, data.place_ids)
 
@@ -248,21 +242,7 @@ class TripService:
                 dropoff_name=mine.dropoff_name,
                 dropoff_eta=mine.dropoff_eta,
             )
-        entry = await self.session.scalar(
-            select(WaitlistEntry).where(
-                WaitlistEntry.trip_id == trip.id,
-                WaitlistEntry.passenger_id == viewer.id,
-                WaitlistEntry.status.in_(WAITLIST_OPEN),
-            )
-        )
-        out.chat_id = await ChatService(self.session).for_trip(viewer, trip.id)
-        if entry is not None:
-            out.my_waitlist = MyWaitlist(
-                id=entry.id,
-                status=entry.status,
-                seats=entry.seats,
-                offer_expires_at=entry.offer_expires_at,
-            )
+        out.chat_id = trip.id if await can_chat(self.session, viewer, trip) else None
         return out
 
     async def get_own(self, driver: User, trip_id: uuid.UUID) -> Trip:
@@ -328,7 +308,7 @@ class TripService:
 
         Los puestos no bajan de los ya aceptados. Si cambian hora, ruta, vehiculo o aporte se
         recalcula el punto de encuentro de cada reserva y los pasajeros pueden cancelar sin
-        penalizacion. Si suben los puestos se ofrece el cupo a la lista de espera.
+        penalizacion.
         """
         trip = await self.get_own(driver, trip_id)
         await self.require_editable(trip)
@@ -349,7 +329,7 @@ class TripService:
         )
         departs_at = data.departs_at or trip.departs_at
         if data.departs_at is not None:
-            await self.planner.check_departure(departs_at, single=trip.series_id is None)
+            await self.planner.check_departure(departs_at)
         await self.planner.check_pico_placa(vehicle, departs_at)
         place_ids = data.place_ids or [stop.place_id for stop in trip.stops]
         await check_bookings_fit(self.session, trip, seats, rules)
@@ -361,7 +341,6 @@ class TripService:
             trip.vehicle_id,
             trip.price_per_seat,
         )
-        more_seats = seats > trip.seats_total
         trip.vehicle_id = vehicle.id
         trip.vehicle = vehicle
         trip.seats_total = seats
@@ -372,14 +351,12 @@ class TripService:
         )
         if before != (trip.departs_at, planned.place_ids, trip.vehicle_id, trip.price_per_seat):
             await trip_changed(self.session, trip)
-        if more_seats:
-            await offer_next(self.session, trip)
         await self.session.commit()
         return await self.reload(trip.id)
 
     async def cancel(self, driver: User, trip_id: uuid.UUID, reason: str) -> Trip:
-        """Siempre con motivo; cuenta en la reputacion del conductor (paso 11). Las reservas
-        pasan a cancelled_by_driver con el mismo motivo y se avisa a los pasajeros."""
+        """Siempre con motivo; cuenta en la reputacion del conductor. Las reservas pasan a
+        cancelled_by_driver con el mismo motivo y se avisa a los pasajeros."""
         trip = await self.get_own(driver, trip_id)
         if trip.status != TripStatus.SCHEDULED:
             raise AppError(
@@ -390,8 +367,6 @@ class TripService:
             )
         mark_cancelled(trip, reason)
         await end_trip_bookings(self.session, trip, BookingStatus.CANCELLED_BY_DRIVER, reason)
-        await self.session.flush()
-        await refresh_user_stats(self.session, [driver.id])
         await self.session.commit()
         return await self.reload(trip.id)
 

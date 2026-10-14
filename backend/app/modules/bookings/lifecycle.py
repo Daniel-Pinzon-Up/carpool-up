@@ -1,25 +1,19 @@
 """Efectos de los cambios de un viaje sobre sus reservas (seccion 7.2 y 7.5.1).
 
-Lo usan viajes, series, pico y placa y los jobs. Ninguna funcion hace commit.
+Lo usan viajes, pico y placa, la administracion y los jobs. Ninguna funcion hace commit.
 """
 
-import uuid
-
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
-from app.core.enums import BookingStatus, CancelRequestStatus
+from app.core.enums import BookingStatus
 from app.modules.bookings.matching import apply_meeting, meeting_points
-from app.modules.bookings.models import HOLDING_STATUSES, Booking
+from app.modules.bookings.models import HOLDING_STATUSES
 from app.modules.bookings.queries import active_bookings
-from app.modules.cancellations.models import CancellationRequest
-from app.modules.chat.membership import close_trip_chats
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.search.service import Point
 from app.modules.settings.service import SettingsService
 from app.modules.trips.models import Trip
-from app.modules.waitlist.offers import close_waitlist
 
 # Estado final de las reservas activas segun el motivo, con el aviso al pasajero.
 END_KINDS = {
@@ -31,39 +25,16 @@ END_KINDS = {
 }
 
 
-async def settle_pending_cancellation(
-    session: AsyncSession,
-    booking: Booking,
-    status: CancelRequestStatus,
-    by: uuid.UUID | None = None,
-) -> CancellationRequest | None:
-    request = await session.scalar(
-        select(CancellationRequest).where(
-            CancellationRequest.booking_id == booking.id,
-            CancellationRequest.status == CancelRequestStatus.PENDING,
-        )
-    )
-    if request is not None:
-        request.status = status
-        request.resolved_at = utcnow()
-        request.resolved_by = by
-    return request
-
-
 async def end_trip_bookings(
     session: AsyncSession, trip: Trip, status: BookingStatus, reason: str | None = None
 ) -> int:
-    """Termina las reservas activas del viaje y cierra su lista de espera.
-
-    Las solicitudes sin aceptar tambien terminan con el mismo estado, y una cancelacion
-    tardia pendiente se da por aceptada (el pasajero ya no viaja).
-    """
+    """Termina las reservas activas del viaje (las solicitudes sin aceptar tambien, y una
+    cancelacion tardia pendiente queda resuelta: el pasajero ya no viaja). El chat del viaje
+    queda cerrado porque el viaje ya no esta programado ni en curso."""
     now = utcnow()
     notifications = NotificationService(session)
     bookings = await active_bookings(session, trip.id)
     for booking in bookings:
-        if booking.status == BookingStatus.CANCEL_REQUESTED:
-            await settle_pending_cancellation(session, booking, CancelRequestStatus.ACCEPTED)
         booking.status = status
         booking.cancelled_at = now
         booking.cancel_reason = reason
@@ -72,8 +43,6 @@ async def end_trip_bookings(
             END_KINDS[status],
             {"trip_id": str(trip.id), "booking_id": str(booking.id), "reason": reason},
         )
-    await close_waitlist(session, trip.id)
-    await close_trip_chats(session, trip)
     return len(bookings)
 
 

@@ -11,17 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
 from app.core.db import add_unique
-from app.core.enums import (
-    BookingStatus,
-    CancelRequestStatus,
-    RuleKind,
-    Sex,
-    SuspensionKind,
-    TripStatus,
-)
+from app.core.enums import BookingStatus, RuleKind, Sex, TripStatus
 from app.core.errors import AppError, NotFoundError
 from app.core.pagination import Page, decode_cursor, encode_cursor
-from app.modules.bookings.lifecycle import settle_pending_cancellation
 from app.modules.bookings.matching import Meeting, apply_meeting, meeting_points
 from app.modules.bookings.models import ACTIVE_STATUSES, HOLDING_STATUSES, Booking
 from app.modules.bookings.queries import lock_trip, seats_left
@@ -34,21 +26,17 @@ from app.modules.bookings.schemas import (
     Preferences,
     TripBrief,
 )
-from app.modules.cancellations.models import CancellationRequest
-from app.modules.chat.membership import join_trip_chats, leave_trip_chat
+from app.modules.chat.membership import announce_joined
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.places.models import Place
 from app.modules.routing.schemas import RoutePoint
 from app.modules.routing.service import resolve_points
 from app.modules.search.service import Point
 from app.modules.settings.service import SettingsService
-from app.modules.stats.models import UserStats
-from app.modules.stats.summary import stats_for
-from app.modules.suspensions.service import active_suspension
+from app.modules.stats.summary import UserSummary, stats_for
 from app.modules.trips.models import Trip
 from app.modules.trips.schemas import ALLOWED, NOT_ALLOWED, DriverOut, VehicleSummary
 from app.modules.users.models import User
-from app.modules.waitlist.offers import offer_next
 
 # Preferencia del pasajero -> (regla del viaje, valor que la contradice).
 PREFERENCE_CONFLICTS = {
@@ -82,17 +70,18 @@ def check_compatibility(
 
 
 def trip_rules(trip: Trip) -> list[tuple[str, str]]:
-    return [(rule.kind, rule.value) for rule in trip.rules]
+    return [(rule["kind"], rule["value"]) for rule in trip.rules]
 
 
-async def require_can_book(session: AsyncSession, passenger: User) -> None:
-    ban = await active_suspension(session, passenger.id, SuspensionKind.BOOKING_BAN)
-    if ban is not None:
+def require_can_book(passenger: User) -> None:
+    """Las ausencias repetidas suspenden las reservas unos dias (booking_ban_until)."""
+    ban = passenger.booking_ban_until
+    if ban is not None and ban > utcnow():
         raise AppError(
             "BOOKING_SUSPENDED",
             "Bookings are suspended for this account",
             403,
-            {"ends_at": ban.ends_at.isoformat() if ban.ends_at else None},
+            {"ends_at": ban.isoformat()},
         )
 
 
@@ -191,7 +180,6 @@ def vehicle_for(trip: Trip, viewer: User, booking: Booking | None) -> VehicleSum
 def trip_brief(trip: Trip, viewer: User, booking: Booking | None = None) -> TripBrief:
     return TripBrief(
         id=trip.id,
-        series_id=trip.series_id,
         status=trip.status,
         departs_at=trip.departs_at,
         arrives_at=trip.departs_at + timedelta(seconds=trip.est_duration_s),
@@ -203,19 +191,13 @@ def trip_brief(trip: Trip, viewer: User, booking: Booking | None = None) -> Trip
     )
 
 
-async def passenger_stats(
-    session: AsyncSession, passenger_ids: set[uuid.UUID]
-) -> dict[uuid.UUID, UserStats]:
-    return await stats_for(session, passenger_ids)
-
-
-def passenger_card(user: User, stats: UserStats | None) -> PassengerCard:
+def passenger_card(user: User, stats: UserSummary) -> PassengerCard:
     return PassengerCard(
         id=user.id,
         full_name=user.full_name,
         program=user.program,
-        rating=stats.rating_avg if stats else None,
-        trips_as_passenger=stats.trips_as_passenger if stats else 0,
+        rating=stats.rating_avg,
+        trips_as_passenger=stats.trips_as_passenger,
     )
 
 
@@ -240,28 +222,18 @@ async def booking_outs(
 ) -> list[BookingOut]:
     if not bookings:
         return []
-    counts = await passenger_stats(session, {b.passenger_id for b in bookings})
-    requests = (
-        await session.scalars(
-            select(CancellationRequest)
-            .where(CancellationRequest.booking_id.in_([b.id for b in bookings]))
-            .order_by(CancellationRequest.created_at)
-        )
-    ).all()
-    latest = {request.booking_id: request for request in requests}
+    counts = await stats_for(session, {b.passenger_id for b in bookings})
     rules = await cancel_rules(session)
     now = utcnow()
     outs = []
     for booking in bookings:
         trip = booking.trip
-        request = latest.get(booking.id)
         accepted = booking.status in HOLDING_STATUSES
         outs.append(
             BookingOut(
                 id=booking.id,
                 trip=trip_brief(trip, viewer, booking),
-                passenger=passenger_card(booking.passenger, counts.get(booking.passenger_id)),
-                subscription_id=booking.subscription_id,
+                passenger=passenger_card(booking.passenger, counts[booking.passenger_id]),
                 seats=booking.seats,
                 amount=booking.seats * trip.price_per_seat,
                 status=booking.status,
@@ -278,14 +250,8 @@ async def booking_outs(
                 cancelled_at=booking.cancelled_at,
                 cancel_reason=booking.cancel_reason,
                 cancellation=(
-                    CancellationOut(
-                        id=request.id,
-                        reason=request.reason,
-                        status=request.status,
-                        created_at=request.created_at,
-                        resolved_at=request.resolved_at,
-                    )
-                    if request is not None
+                    CancellationOut(reason=booking.cancel_reason)
+                    if booking.status == BookingStatus.CANCEL_REQUESTED
                     else None
                 ),
                 payment_note=trip.driver.payment_note
@@ -362,7 +328,6 @@ class BookingService:
         meeting: Meeting,
         *,
         status: BookingStatus = BookingStatus.REQUESTED,
-        subscription_id: uuid.UUID | None = None,
     ) -> Booking:
         """Reserva lista para agregar; comprueba que no se cruce con otra del pasajero."""
         clash = await overlapping_booking(
@@ -380,7 +345,6 @@ class BookingService:
         booking = Booking(
             trip_id=trip.id,
             passenger_id=passenger.id,
-            subscription_id=subscription_id,
             seats=data.seats,
             pickup_place_id=places[0].id,
             dropoff_place_id=places[1].id,
@@ -406,7 +370,7 @@ class BookingService:
         """Queda en requested y no aparta cupo hasta que el conductor acepte."""
         trip = self.require_bookable(await self.session.get(Trip, trip_id), passenger)
         check_compatibility(passenger, trip_rules(trip), data.preferences)
-        await require_can_book(self.session, passenger)
+        require_can_book(passenger)
         if await self.has_active(passenger.id, trip.id):
             raise AppError("BOOKING_EXISTS", "You already have a booking on this trip", 409)
         free = await seats_left(self.session, trip)
@@ -455,7 +419,7 @@ class BookingService:
             raise AppError("TRIP_FULL", "Not enough seats left", 409, {"seats_available": free})
         booking.status = BookingStatus.ACCEPTED
         booking.decided_at = utcnow()
-        await join_trip_chats(self.session, booking)
+        announce_joined(self.session, booking)
         self.notifications.notify(
             booking.passenger_id,
             Kind.BOOKING_ACCEPTED,
@@ -531,9 +495,6 @@ class BookingService:
                     Kind.BOOKING_CANCELLED_BY_PASSENGER if was_holding else Kind.BOOKING_WITHDRAWN
                 )
                 self.notifications.notify(booking.trip.driver_id, kind, payload)
-            if was_holding:
-                await leave_trip_chat(self.session, booking)
-                await offer_next(self.session, booking.trip)
             return booking.status
         if not reason:
             raise AppError(
@@ -543,39 +504,25 @@ class BookingService:
                 {"cancel_free_hours": rules.free_hours},
             )
         booking.status = BookingStatus.CANCEL_REQUESTED
-        self.session.add(
-            CancellationRequest(
-                booking_id=booking.id, requested_by=booking.passenger_id, reason=reason.strip()
-            )
-        )
+        booking.cancel_reason = reason.strip()
         self.notifications.notify(booking.trip.driver_id, Kind.CANCELLATION_REQUESTED, payload)
         return booking.status
 
     async def resolve_cancellation(
-        self, driver: User, request_id: uuid.UUID, accept: bool
+        self, driver: User, booking_id: uuid.UUID, accept: bool
     ) -> Booking:
-        request = await self.session.get(CancellationRequest, request_id)
-        if request is None or request.booking.trip.driver_id != driver.id:
-            raise NotFoundError("cancellation_request")
-        if request.status != CancelRequestStatus.PENDING:
+        """El conductor decide la cancelacion tardia que pidio el pasajero."""
+        booking = await self.get_for_driver(driver, booking_id)
+        if booking.status != BookingStatus.CANCEL_REQUESTED:
             raise AppError("CANCELLATION_NOT_PENDING", "The cancellation was already decided", 409)
-        booking = request.booking
-        await settle_pending_cancellation(
-            self.session,
-            booking,
-            CancelRequestStatus.ACCEPTED if accept else CancelRequestStatus.REJECTED,
-            driver.id,
-        )
         payload = {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)}
         if accept:
             booking.status = BookingStatus.CANCELLED_BY_PASSENGER
             booking.cancelled_at = utcnow()
-            booking.cancel_reason = request.reason
             self.notifications.notify(booking.passenger_id, Kind.CANCELLATION_ACCEPTED, payload)
-            await leave_trip_chat(self.session, booking)
-            await offer_next(self.session, booking.trip)
         else:
             booking.status = BookingStatus.ACCEPTED
+            booking.cancel_reason = None
             self.notifications.notify(booking.passenger_id, Kind.CANCELLATION_REJECTED, payload)
         await self.session.commit()
         return await self.reload(booking.id)

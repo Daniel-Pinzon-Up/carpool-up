@@ -1,19 +1,10 @@
 import uuid
-from datetime import date, datetime, time
-from typing import Annotated, Literal
+from datetime import datetime
+from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, Field, field_validator, model_validator
 
-from app.core.enums import (
-    BookingStatus,
-    RuleKind,
-    SeriesStatus,
-    StopKind,
-    SubscriptionStatus,
-    TripStatus,
-    VehicleType,
-    WaitlistStatus,
-)
+from app.core.enums import BookingStatus, RuleKind, StopKind, TripStatus, VehicleType
 
 ALLOWED = "allowed"
 NOT_ALLOWED = "not_allowed"
@@ -25,14 +16,6 @@ PlaceIds = Annotated[
     Field(min_length=2, description="Origen, paradas intermedias en orden y destino"),
 ]
 Reason = Annotated[str, Field(min_length=5, max_length=500)]
-Weekdays = Annotated[
-    list[Annotated[int, Field(ge=0, le=6)]],
-    Field(min_length=1, max_length=7, description="0 = lunes ... 6 = domingo"),
-]
-Window = Annotated[
-    int | Literal["semester"],
-    Field(description="Dias de la ventana (segun series_window_options_days) o 'semester'"),
-]
 
 
 class RuleIn(BaseModel):
@@ -60,12 +43,6 @@ def _unique_kinds(rules: list[RuleIn]) -> list[RuleIn]:
     if len(set(kinds)) != len(kinds):
         raise ValueError("each rule kind can appear only once")
     return rules
-
-
-def _unique_weekdays(weekdays: list[int]) -> list[int]:
-    if len(set(weekdays)) != len(weekdays):
-        raise ValueError("weekdays must not repeat")
-    return sorted(weekdays)
 
 
 class TripCreate(BaseModel):
@@ -103,53 +80,6 @@ class CancelRequest(BaseModel):
     reason: Reason
 
 
-class SeriesCreate(BaseModel):
-    place_ids: PlaceIds
-    weekdays: Weekdays
-    departure_time: time = Field(description="Hora local de Pamplona, sin zona")
-    start_date: date
-    window: Window
-    vehicle_id: uuid.UUID
-    seats: Seats
-    price_per_seat: Price
-    rules: Rules = []
-
-    _rules = field_validator("rules")(_unique_kinds)
-    _weekdays = field_validator("weekdays")(_unique_weekdays)
-
-
-class SeriesUpdate(BaseModel):
-    """Cambia la plantilla y las ocurrencias futuras. La ventana no se edita."""
-
-    confirm: bool = Field(
-        default=False,
-        description="Confirma el cambio cuando hay reservas afectadas (SERIES_HAS_BOOKINGS)",
-    )
-
-    place_ids: PlaceIds | None = None
-    weekdays: Weekdays | None = None
-    departure_time: time | None = None
-    vehicle_id: uuid.UUID | None = None
-    seats: Seats | None = None
-    price_per_seat: Price | None = None
-    rules: Rules | None = None
-
-    @field_validator("rules")
-    @classmethod
-    def unique_rules(cls, rules: list[RuleIn] | None) -> list[RuleIn] | None:
-        return _unique_kinds(rules) if rules is not None else None
-
-    @field_validator("weekdays")
-    @classmethod
-    def unique_weekdays(cls, weekdays: list[int] | None) -> list[int] | None:
-        return _unique_weekdays(weekdays) if weekdays is not None else None
-
-
-class SeriesDuplicate(BaseModel):
-    start_date: date
-    window: Window
-
-
 # --- Respuestas -----------------------------------------------------------------------
 
 
@@ -165,7 +95,7 @@ class StopOut(BaseModel):
     name: str
     lat: float
     lon: float
-    eta: datetime | None = Field(description="Nulo en la plantilla de una serie")
+    eta: datetime
 
 
 class DriverOut(BaseModel):
@@ -189,7 +119,6 @@ class VehicleSummary(BaseModel):
 
 class TripSummary(BaseModel):
     id: uuid.UUID
-    series_id: uuid.UUID | None
     status: TripStatus
     departs_at: datetime
     arrives_at: datetime
@@ -226,13 +155,6 @@ class MyBooking(BaseModel):
     dropoff_eta: datetime
 
 
-class MyWaitlist(BaseModel):
-    id: uuid.UUID
-    status: WaitlistStatus
-    seats: int
-    offer_expires_at: datetime | None
-
-
 class TripOut(TripSummary):
     geometry: list[list[float]] = Field(description="LineString GeoJSON: [[lon, lat], ...]")
     distance_m: int
@@ -249,48 +171,6 @@ class TripOut(TripSummary):
         default=None, description="Datos de pago del conductor, para pasajeros aceptados"
     )
     my_booking: MyBooking | None = Field(default=None, description="Reserva del que consulta")
-    my_waitlist: MyWaitlist | None = None
     chat_id: uuid.UUID | None = Field(
-        default=None, description="Chat grupal del viaje, si quien consulta participa"
-    )
-
-
-class OccurrenceCounts(BaseModel):
-    total: int
-    scheduled: int
-    pico_placa: int
-    cancelled: int
-
-
-class SeriesSummary(BaseModel):
-    id: uuid.UUID
-    status: SeriesStatus
-    weekdays: list[int]
-    departure_time: time
-    window_start: date
-    window_end: date
-    seats: int
-    price_per_seat: int
-    origin: str
-    destination: str
-    vehicle: VehicleSummary
-    next_departure: datetime | None
-    counts: OccurrenceCounts
-
-
-class MySubscription(BaseModel):
-    id: uuid.UUID
-    status: SubscriptionStatus
-    from_date: date
-    to_date: date
-
-
-class SeriesOut(SeriesSummary):
-    stops: list[StopOut]
-    rules: list[RuleOut]
-    driver: DriverOut
-    cancel_reason: str | None
-    occurrences: list[TripSummary]
-    my_subscription: MySubscription | None = Field(
-        default=None, description="Suscripcion abierta o mas reciente del que consulta"
+        default=None, description="Chat del viaje (su id es el del viaje) si quien consulta esta"
     )

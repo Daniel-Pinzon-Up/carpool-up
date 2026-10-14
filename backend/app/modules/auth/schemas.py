@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field, StringConstraints
 
-from app.core.enums import DocKind, Language, Sex, UserRole
+from app.core.enums import DocKind, Sex, UserRole
 from app.modules.users.schemas import MeOut
 
 Code = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^\d{6}$")]
@@ -23,8 +23,7 @@ class RegisterForm(BaseModel):
     sex: Sex
     program: Program | None = None
     role: Literal[UserRole.PASSENGER, UserRole.DRIVER]
-    doc_kind: DocKind
-    preferred_language: Language = Language.ES
+    doc_kind: Literal[DocKind.STUDENT_CARD, DocKind.INSTITUTIONAL_PROOF]
     accept_terms: bool
     accept_data_policy: bool
 

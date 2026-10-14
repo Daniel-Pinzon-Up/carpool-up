@@ -1,17 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.enums import UserRole
 from app.core.errors import AppError
 from app.modules.documents.service import DocumentService, LicenseService
-from app.modules.legal.service import LegalService
 from app.modules.users.models import User
-from app.modules.users.schemas import (
-    DocumentSummary,
-    LicenseSummary,
-    MeOut,
-    MeUpdate,
-    PendingLegal,
-)
+from app.modules.users.schemas import DocumentSummary, LicenseSummary, MeOut, MeUpdate
 from app.modules.vehicles.eligibility import publishing_blockers
 
 
@@ -21,7 +15,6 @@ class UserService:
 
     async def me(self, user: User) -> MeOut:
         document = await DocumentService(self.session).latest(user)
-        pending = await LegalService(self.session).pending_for(user)
         license_ = (
             await LicenseService(self.session).get(user) if user.role == UserRole.DRIVER else None
         )
@@ -37,17 +30,16 @@ class UserService:
             role=user.role,
             status=user.status,
             payment_note=user.payment_note if user.role == UserRole.DRIVER else None,
-            preferred_language=user.preferred_language,
-            theme_preference=user.theme_preference,
             last_login_at=user.last_login_at,
             document=DocumentSummary.model_validate(document) if document else None,
             license=LicenseSummary.model_validate(license_) if license_ else None,
             can_publish=user.role == UserRole.DRIVER and not blockers,
             publish_blockers=blockers,
-            pending_legal=[
-                PendingLegal(id=d.id, kind=d.kind, version=d.version, language=d.language)
-                for d in pending
-            ],
+            booking_ban_until=(
+                user.booking_ban_until
+                if user.booking_ban_until and user.booking_ban_until > utcnow()
+                else None
+            ),
         )
 
     async def update_me(self, user: User, data: MeUpdate) -> MeOut:

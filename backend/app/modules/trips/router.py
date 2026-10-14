@@ -58,7 +58,7 @@ async def my_trips(
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = DEFAULT_LIMIT,
     cursor: str | None = None,
 ) -> Page[TripSummary]:
-    """Viajes del conductor: puntuales y ocurrencias de sus series."""
+    """Viajes publicados por el conductor."""
     return await TripService(session, provider).list_mine(user, scope, limit, cursor)
 
 

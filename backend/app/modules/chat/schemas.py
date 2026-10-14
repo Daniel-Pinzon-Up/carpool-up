@@ -4,7 +4,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.core.enums import ConversationKind
 from app.modules.chat.models import MAX_MESSAGE_LENGTH
 
 Body = Annotated[str, Field(min_length=1, max_length=MAX_MESSAGE_LENGTH)]
@@ -40,17 +39,16 @@ class MemberOut(BaseModel):
 
 
 class ConversationOut(BaseModel):
+    """Chat de un viaje: su id es el id del viaje."""
+
     id: uuid.UUID
-    kind: ConversationKind
-    trip_id: uuid.UUID | None
-    series_id: uuid.UUID | None
-    title: str = Field(description="Trayecto del viaje o de la serie")
-    departs_at: datetime | None = Field(description="Salida del viaje (chat grupal y puntual)")
-    counterpart: str | None = Field(description="Con quien es el chat directo")
+    trip_id: uuid.UUID
+    title: str = Field(description="Trayecto del viaje")
+    departs_at: datetime
     members: list[MemberOut]
     last_message: MessageOut | None
     unread: int
-    closed: bool
+    closed: bool = Field(description="El viaje termino o se cancelo: solo lectura")
 
 
 class UnreadMessages(BaseModel):

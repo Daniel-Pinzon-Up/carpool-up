@@ -72,7 +72,7 @@ class PassengerHistoryEntry(BaseModel):
 
 class DriverHistoryEntry(BaseModel):
     trip_id: uuid.UUID
-    series_id: uuid.UUID | None
+
     departs_at: datetime
     origin: str
     destination: str

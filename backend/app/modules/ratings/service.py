@@ -14,10 +14,9 @@ from app.core.errors import AppError, NotFoundError
 from app.core.pagination import Page, decode_cursor, encode_cursor
 from app.modules.bookings.models import Booking
 from app.modules.notifications.service import Kind, NotificationService
-from app.modules.ratings.models import DRIVER_CRITERIA, PASSENGER_CRITERIA, Rating, RatingScore
+from app.modules.ratings.models import DRIVER_CRITERIA, PASSENGER_CRITERIA, Rating
 from app.modules.ratings.schemas import PendingRating, RatingIn, RatingOut
 from app.modules.settings.service import SettingsService
-from app.modules.stats.summary import refresh_user_stats
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
@@ -55,8 +54,8 @@ def rating_out(rating: Rating) -> RatingOut:
         id=rating.id,
         trip_id=rating.trip_id,
         target_role=rating.target_role,
-        scores={s.criterion: s.stars for s in rating.scores},
-        average=round(sum(s.stars for s in rating.scores) / len(rating.scores), 2),
+        scores=rating.scores,
+        average=round(rating.average, 2),
         comment=None if rating.hidden else rating.comment,
         hidden=rating.hidden,
         created_at=rating.created_at,
@@ -115,11 +114,10 @@ class RatingService:
             target_role=target.role,
             comment=data.comment,
             created_at=utcnow(),
-            scores=[RatingScore(criterion=c, stars=s) for c, s in sorted(data.scores.items())],
+            scores=dict(sorted(data.scores.items())),
+            average=sum(data.scores.values()) / len(data.scores),
         )
         self.session.add(rating)
-        await self.session.flush()
-        await refresh_user_stats(self.session, [target.user.id])
         NotificationService(self.session).notify(
             target.user.id, Kind.RATING_RECEIVED, {"trip_id": str(trip.id)}
         )

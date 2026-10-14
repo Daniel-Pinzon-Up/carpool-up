@@ -1,4 +1,4 @@
-"""Consultas de cupo y reservas que usan otros modulos (viajes, busqueda, series)."""
+"""Consultas de cupo y reservas que usan otros modulos (viajes, busqueda)."""
 
 import uuid
 from collections.abc import Iterable

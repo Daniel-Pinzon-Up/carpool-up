@@ -27,7 +27,7 @@ from app.core.redis import redis_client
 from app.core.security import decode_access_token
 from app.modules.auth.models import UserSession
 from app.modules.bookings.models import HOLDING_STATUSES, Booking
-from app.modules.chat.service import ChatService
+from app.modules.chat.membership import chat_trip_ids
 from app.modules.live.connection import LiveConnection
 from app.modules.safety.location import location_channel
 from app.modules.safety.service import ADMIN_CHANNEL
@@ -79,8 +79,9 @@ async def authenticate(
 
 
 async def conversation_ids(user_id: uuid.UUID) -> set[uuid.UUID]:
+    """Chats abiertos del usuario (el id de cada chat es el del viaje)."""
     async with SessionLocal() as session:
-        return set(await ChatService(session).active_ids(user_id))
+        return set(await chat_trip_ids(session, user_id))
 
 
 async def live_trip_ids(user_id: uuid.UUID) -> set[uuid.UUID]:

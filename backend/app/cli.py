@@ -28,15 +28,15 @@ import sys
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.config import get_settings
 from app.core.db import SessionLocal, engine
 from app.core.email import OutgoingEmail, send_smtp
-from app.core.enums import Language, Sex, UserRole, UserStatus
+from app.core.enums import Sex, UserRole, UserStatus
 from app.core.security import create_access_token, hash_password
 from app.core.storage import delete_private_file
 from app.models_registry import import_all_models
-from app.modules.documents.models import DriverLicense, IdentityDocument
-from app.modules.legal.service import LegalService
+from app.modules.documents.models import Document
 from app.modules.users.models import User
 
 E2E_USERS: list[tuple[UserRole, str, str, Sex]] = [
@@ -82,15 +82,8 @@ async def forget_unverified(session: AsyncSession, email: str) -> None:
             f"{email} ya verifico su correo ({user.status.value}): no se borra. "
             "Para quitarla, que la persona elimine su cuenta desde el perfil."
         )
-    paths = list(
-        await session.scalars(
-            select(IdentityDocument.file_path).where(IdentityDocument.user_id == user.id)
-        )
-    )
-    paths += await session.scalars(
-        select(DriverLicense.file_path).where(DriverLicense.user_id == user.id)
-    )
-    for path in paths:
+    paths = await session.scalars(select(Document.file_path).where(Document.user_id == user.id))
+    for path in paths.all():
         delete_private_file(path)
     await session.delete(user)
     await session.flush()
@@ -123,7 +116,6 @@ async def e2e_users() -> int:
     password = secrets.token_urlsafe(18)
     accounts: dict[str, str] = {}
     async with SessionLocal() as session:
-        legal = LegalService(session)
         for role, email, name, sex in E2E_USERS:
             user = await session.scalar(select(User).where(User.email == email))
             if user is None:
@@ -135,9 +127,10 @@ async def e2e_users() -> int:
             user.two_factor_required = False
             user.failed_login_attempts = 0
             user.locked_until = None
-            user.preferred_language = Language.ES
-            await session.flush()
-            legal.record_acceptance(user.id, await legal.pending_for(user), None)
+            user.booking_ban_until = None
+            user.suspended_until = None
+            user.suspension_reason = None
+            user.terms_accepted_at = user.terms_accepted_at or utcnow()
             accounts[role.value] = email
         await session.commit()
     await engine.dispose()

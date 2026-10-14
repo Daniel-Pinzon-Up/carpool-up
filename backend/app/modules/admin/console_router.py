@@ -96,14 +96,12 @@ async def block_user(
     return await AdminUserService(session).block(actor, user_id, body.reason)
 
 
-@router.post(
-    "/suspensions/{suspension_id}/end", responses={409: {"description": "SUSPENSION_ENDED"}}
-)
-async def end_suspension(
-    suspension_id: uuid.UUID, body: OptionalReason, session: DbSession, actor: AdminActor
+@router.post("/users/{user_id}/lift-ban", responses={409: {"description": "SUSPENSION_ENDED"}})
+async def lift_booking_ban(
+    user_id: uuid.UUID, body: OptionalReason, session: DbSession, actor: AdminActor
 ) -> AdminUserDetail:
-    """Levanta una suspension de reservas antes de tiempo."""
-    return await AdminUserService(session).end_suspension(actor, suspension_id, body.reason)
+    """Levanta antes de tiempo la suspension de reservas por ausencias."""
+    return await AdminUserService(session).lift_booking_ban(actor, user_id, body.reason)
 
 
 # --- Viajes --------------------------------------------------------------------------------

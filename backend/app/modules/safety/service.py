@@ -19,7 +19,7 @@ from app.modules.audit.service import AuditService
 from app.modules.bookings.models import HOLDING_STATUSES, Booking
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.safety.location import last_location
-from app.modules.safety.models import EmergencyEvent, ShareLink, TrustedContact
+from app.modules.safety.models import EmergencyEvent, TrustedContact
 from app.modules.safety.schemas import (
     ContactIn,
     ContactUpdate,
@@ -142,7 +142,10 @@ class SafetyService:
     # --- Enlace compartido -----------------------------------------------------------------
 
     async def create_share_link(self, user: User, trip_id: uuid.UUID) -> ShareLinkOut:
-        """Vence al terminar el viaje (llegada estimada) mas share_link_extra_minutes."""
+        """Vence al terminar el viaje (llegada estimada) mas share_link_extra_minutes.
+
+        El viaje guarda un solo enlace: generar otro invalida el anterior.
+        """
         trip = await participant_trip(self.session, user, trip_id)
         if trip.status not in LIVE_STATUSES:
             raise AppError("TRIP_NOT_SHAREABLE", "Only upcoming or ongoing trips are shared", 409)
@@ -150,26 +153,24 @@ class SafetyService:
         start = max(trip.departs_at, trip.started_at or trip.departs_at)
         expires_at = start + timedelta(seconds=trip.est_duration_s, minutes=extra)
         token = secrets.token_urlsafe(32)
-        self.session.add(
-            ShareLink(
-                trip_id=trip.id,
-                created_by=user.id,
-                token_hash=hash_token(token),
-                expires_at=expires_at,
-            )
-        )
+        trip.share_token_hash = hash_token(token)
+        trip.share_expires_at = expires_at
         await self.session.commit()
         return ShareLinkOut(token=token, path=f"/compartido/{token}", expires_at=expires_at)
 
     async def public_trip(self, token: str) -> PublicTrip:
         """Lo que ve quien recibe el enlace: ruta, vehiculo con placa y ubicacion en vivo.
         Sin nombres, correos ni telefonos."""
-        link = await self.session.scalar(
-            select(ShareLink).where(ShareLink.token_hash == hash_token(token))
+        trip = await self.session.scalar(
+            select(Trip).where(Trip.share_token_hash == hash_token(token))
         )
-        if link is None or link.expires_at <= utcnow() or link.trip.deleted_at is not None:
+        if (
+            trip is None
+            or trip.share_expires_at is None
+            or trip.share_expires_at <= utcnow()
+            or trip.deleted_at is not None
+        ):
             raise NotFoundError("share_link")
-        trip = link.trip
         vehicle = trip.vehicle
         located = await last_location(trip.id) if trip.status == TripStatus.IN_PROGRESS else None
         line = to_shape(trip.route)
@@ -193,7 +194,7 @@ class SafetyService:
                 plate=vehicle.plate,
             ),
             location=LiveLocation(**located) if located else None,
-            expires_at=link.expires_at,
+            expires_at=trip.share_expires_at,
         )
 
     # --- Ubicacion --------------------------------------------------------------------------

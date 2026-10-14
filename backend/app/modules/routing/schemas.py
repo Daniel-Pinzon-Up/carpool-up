@@ -48,9 +48,7 @@ class ResolvedPoint(BaseModel):
 class RoutePreview(BaseModel):
     geometry: list[list[float]] = Field(description="LineString GeoJSON: [[lon, lat], ...]")
     distance_m: int
-    osrm_duration_s: int
-    traffic_factor: float
-    duration_s: int = Field(description="Duracion ajustada por el factor de trafico")
+    duration_s: int = Field(description="Duracion estimada por OSRM")
     points: list[ResolvedPoint]
     pricing_configured: bool
     suggested_price: int | None

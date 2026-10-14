@@ -2,7 +2,8 @@
 
 Un administrador gestiona pasajeros y conductores; el superadmin ademas a los
 administradores. Nadie actua sobre el superadmin ni sobre si mismo. Todo queda en la
-auditoria.
+auditoria. Las sanciones se guardan en la fila del usuario (suspended_until y
+booking_ban_until).
 """
 
 import uuid
@@ -14,36 +15,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Actor
 from app.core.clock import utcnow
-from app.core.enums import (
-    BookingStatus,
-    SubscriptionStatus,
-    SuspensionKind,
-    TripStatus,
-    UserRole,
-    UserStatus,
-    WaitlistStatus,
-)
+from app.core.enums import IDENTITY_KINDS, BookingStatus, DocKind, TripStatus, UserRole, UserStatus
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.pagination import Page, decode_cursor, encode_cursor
-from app.modules.admin.schemas import (
-    AdminUserDetail,
-    AdminUserRow,
-    SuspensionOut,
-)
+from app.modules.admin.schemas import AdminUserDetail, AdminUserRow
 from app.modules.audit.service import AuditService
 from app.modules.auth.repository import SessionRepository
 from app.modules.bookings.lifecycle import end_trip_bookings
-from app.modules.bookings.models import ACTIVE_STATUSES, Booking, SeriesSubscription
-from app.modules.chat.membership import leave_trip_chat
-from app.modules.documents.models import DriverLicense, IdentityDocument
+from app.modules.bookings.models import ACTIVE_STATUSES, Booking
+from app.modules.documents.repository import latest_document
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.stats.summary import stats_for
-from app.modules.suspensions.models import Suspension
 from app.modules.trips.models import Trip
 from app.modules.trips.service import mark_cancelled
 from app.modules.users.models import User
-from app.modules.waitlist.models import OPEN_STATUSES, WaitlistEntry
-from app.modules.waitlist.offers import offer_next
 
 logger = structlog.get_logger("admin")
 
@@ -63,20 +48,9 @@ def row(user: User) -> AdminUserRow:
     )
 
 
-def suspension_out(s: Suspension) -> SuspensionOut:
-    return SuspensionOut(
-        id=s.id,
-        kind=s.kind,
-        reason=s.reason,
-        starts_at=s.starts_at,
-        ends_at=s.ends_at,
-        automatic=s.created_by is None,
-    )
-
-
 async def withdraw_from_trips(session: AsyncSession, user: User, reason: str) -> dict[str, int]:
     """Una cuenta suspendida o bloqueada deja de viajar: se cancelan sus viajes programados
-    (con aviso a los pasajeros), sus reservas y suscripciones vigentes y su lista de espera."""
+    (con aviso a los pasajeros) y sus reservas vigentes (con aviso al conductor)."""
     now = utcnow()
     trips = (
         await session.scalars(
@@ -113,33 +87,7 @@ async def withdraw_from_trips(session: AsyncSession, user: User, reason: str) ->
             Kind.BOOKING_CANCELLED_BY_PASSENGER if held else Kind.BOOKING_WITHDRAWN,
             {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)},
         )
-        if held:
-            await leave_trip_chat(session, booking)
-            await session.flush()
-            await offer_next(session, booking.trip)
-    subscriptions = (
-        await session.scalars(
-            select(SeriesSubscription).where(
-                SeriesSubscription.passenger_id == user.id,
-                SeriesSubscription.status.in_(
-                    (SubscriptionStatus.REQUESTED, SubscriptionStatus.ACTIVE)
-                ),
-            )
-        )
-    ).all()
-    for sub in subscriptions:
-        sub.status = SubscriptionStatus.CANCELLED
-        sub.cancelled_at = now
-    entries = (
-        await session.scalars(
-            select(WaitlistEntry).where(
-                WaitlistEntry.passenger_id == user.id, WaitlistEntry.status.in_(OPEN_STATUSES)
-            )
-        )
-    ).all()
-    for entry in entries:
-        entry.status = WaitlistStatus.LEFT
-    return {"trips": len(trips), "bookings": len(bookings), "subscriptions": len(subscriptions)}
+    return {"trips": len(trips), "bookings": len(bookings)}
 
 
 class AdminUserService:
@@ -191,24 +139,9 @@ class AdminUserService:
 
     async def detail(self, user_id: uuid.UUID) -> AdminUserDetail:
         user = await self.get(user_id)
-        stats = (await stats_for(self.session, [user.id])).get(user.id)
-        suspensions = (
-            await self.session.scalars(
-                select(Suspension)
-                .where(Suspension.user_id == user.id)
-                .order_by(Suspension.starts_at.desc())
-                .limit(20)
-            )
-        ).all()
-        document = await self.session.scalar(
-            select(IdentityDocument)
-            .where(IdentityDocument.user_id == user.id)
-            .order_by(IdentityDocument.created_at.desc())
-            .limit(1)
-        )
-        license_ = await self.session.scalar(
-            select(DriverLicense).where(DriverLicense.user_id == user.id)
-        )
+        stats = (await stats_for(self.session, [user.id]))[user.id]
+        document = await latest_document(self.session, user.id, IDENTITY_KINDS)
+        license_ = await latest_document(self.session, user.id, (DocKind.DRIVER_LICENSE,))
         active_bookings = await self.session.scalar(
             select(func.count()).where(
                 Booking.passenger_id == user.id, Booking.status.in_(ACTIVE_STATUSES)
@@ -222,32 +155,24 @@ class AdminUserService:
                 Trip.deleted_at.is_(None),
             )
         )
-        now = utcnow()
+        banned = user.booking_ban_until is not None and user.booking_ban_until > utcnow()
         return AdminUserDetail(
             **row(user).model_dump(),
             sex=user.sex,
             document_status=document.status if document else None,
             license_status=license_.status if license_ else None,
             license_expires_on=license_.expires_on if license_ else None,
-            rating=stats.rating_avg if stats else None,
-            rating_count=stats.rating_count if stats else 0,
-            trips_as_driver=stats.trips_as_driver if stats else 0,
-            trips_as_passenger=stats.trips_as_passenger if stats else 0,
-            driver_cancellations=stats.driver_cancellations if stats else 0,
-            passenger_no_shows=stats.passenger_no_shows if stats else 0,
+            rating=stats.rating_avg,
+            rating_count=stats.rating_count,
+            trips_as_driver=stats.trips_as_driver,
+            trips_as_passenger=stats.trips_as_passenger,
+            driver_cancellations=stats.driver_cancellations,
+            passenger_no_shows=stats.passenger_no_shows,
             active_bookings=int(active_bookings or 0),
             upcoming_trips=int(upcoming_trips or 0),
-            suspensions=[suspension_out(s) for s in suspensions],
-            active_ban=next(
-                (
-                    suspension_out(s)
-                    for s in suspensions
-                    if s.kind == SuspensionKind.BOOKING_BAN
-                    and s.starts_at <= now
-                    and (s.ends_at is None or s.ends_at > now)
-                ),
-                None,
-            ),
+            suspended_until=user.suspended_until,
+            suspension_reason=user.suspension_reason,
+            booking_ban_until=user.booking_ban_until if banned else None,
         )
 
     async def manageable(self, actor: Actor, user_id: uuid.UUID) -> User:
@@ -273,20 +198,11 @@ class AdminUserService:
                 409,
                 {"status": user.status},
             )
-        now = utcnow()
         before = {"status": user.status.value}
+        ends_at = utcnow() + timedelta(days=days) if days else None
         user.status = UserStatus.SUSPENDED
-        ends_at = now + timedelta(days=days) if days else None
-        self.session.add(
-            Suspension(
-                user_id=user.id,
-                kind=SuspensionKind.ACCOUNT,
-                reason=reason,
-                starts_at=now,
-                ends_at=ends_at,
-                created_by=actor.user.id,
-            )
-        )
+        user.suspended_until = ends_at
+        user.suspension_reason = reason
         withdrawn = await withdraw_from_trips(self.session, user, reason)
         self.audit.record(
             actor,
@@ -316,20 +232,10 @@ class AdminUserService:
                 409,
                 {"status": user.status},
             )
-        now = utcnow()
         before = {"status": user.status.value}
         user.status = UserStatus.ACTIVE
-        open_ = (
-            await self.session.scalars(
-                select(Suspension).where(
-                    Suspension.user_id == user.id,
-                    Suspension.kind == SuspensionKind.ACCOUNT,
-                    or_(Suspension.ends_at.is_(None), Suspension.ends_at > now),
-                )
-            )
-        ).all()
-        for suspension in open_:
-            suspension.ends_at = max(now, suspension.starts_at + timedelta(seconds=1))
+        user.suspended_until = None
+        user.suspension_reason = None
         self.audit.record(
             actor,
             "user.reinstate",
@@ -362,58 +268,47 @@ class AdminUserService:
         await self.session.commit()
         return await self.detail(user.id)
 
-    async def end_suspension(
-        self, actor: Actor, suspension_id: uuid.UUID, reason: str | None
+    async def lift_booking_ban(
+        self, actor: Actor, user_id: uuid.UUID, reason: str | None
     ) -> AdminUserDetail:
-        """Levanta una sancion de reservas (por ejemplo, un no-show mal marcado)."""
-        suspension = await self.session.get(Suspension, suspension_id)
-        if suspension is None or suspension.kind != SuspensionKind.BOOKING_BAN:
-            raise NotFoundError("suspension")
-        user = await self.manageable(actor, suspension.user_id)
-        now = utcnow()
-        if suspension.ends_at is not None and suspension.ends_at <= now:
-            raise AppError("SUSPENSION_ENDED", "The suspension already ended", 409)
-        before = {"ends_at": suspension.ends_at.isoformat() if suspension.ends_at else None}
-        suspension.ends_at = max(now, suspension.starts_at + timedelta(seconds=1))
-        self.audit.record(
-            actor,
-            "suspension.end",
-            "suspension",
-            suspension.id,
-            before,
-            {"ends_at": suspension.ends_at.isoformat(), "reason": reason},
-        )
+        """Levanta antes de tiempo la suspension de reservas (por ejemplo, un no-show mal
+        marcado)."""
+        user = await self.manageable(actor, user_id)
+        if user.booking_ban_until is None or user.booking_ban_until <= utcnow():
+            raise AppError("SUSPENSION_ENDED", "The account has no booking suspension", 409)
+        before = {"booking_ban_until": user.booking_ban_until.isoformat()}
+        user.booking_ban_until = None
+        self.audit.record(actor, "suspension.end", "user", user.id, before, {"reason": reason})
         self.notifications.notify(user.id, Kind.BOOKING_BAN_LIFTED, {})
         await self.session.commit()
         return await self.detail(user.id)
 
 
 async def end_expired_account_suspensions(session: AsyncSession) -> int:
-    """Cada 15 minutos: las cuentas suspendidas con todas sus suspensiones vencidas vuelven
-    a activa (las indefinidas esperan a un administrador)."""
-    now = utcnow()
-    users = (await session.scalars(select(User).where(User.status == UserStatus.SUSPENDED))).all()
-    restored = 0
-    notifications = NotificationService(session)
-    for user in users:
-        pending = await session.scalar(
-            select(func.count()).where(
-                Suspension.user_id == user.id,
-                Suspension.kind == SuspensionKind.ACCOUNT,
-                or_(Suspension.ends_at.is_(None), Suspension.ends_at > now),
+    """Cada 15 minutos: las cuentas cuya suspension ya vencio vuelven a activa (las
+    indefinidas, sin fecha de fin, esperan a que un administrador las reactive)."""
+    users = (
+        await session.scalars(
+            select(User).where(
+                User.status == UserStatus.SUSPENDED,
+                User.suspended_until.is_not(None),
+                User.suspended_until <= utcnow(),
             )
         )
-        if int(pending or 0) == 0:
-            user.status = UserStatus.ACTIVE
-            notifications.notify(user.id, Kind.ACCOUNT_REINSTATED, {})
-            AuditService(session).record(
-                None,
-                "user.reinstate_auto",
-                "user",
-                user.id,
-                {"status": "suspended"},
-                {"status": "active"},
-            )
-            restored += 1
+    ).all()
+    notifications = NotificationService(session)
+    for user in users:
+        user.status = UserStatus.ACTIVE
+        user.suspended_until = None
+        user.suspension_reason = None
+        notifications.notify(user.id, Kind.ACCOUNT_REINSTATED, {})
+        AuditService(session).record(
+            None,
+            "user.reinstate_auto",
+            "user",
+            user.id,
+            {"status": "suspended"},
+            {"status": "active"},
+        )
     await session.commit()
-    return restored
+    return len(users)

@@ -1,12 +1,11 @@
-"""Reglas compartidas al publicar o editar viajes y series (seccion 7.2).
+"""Reglas compartidas al publicar, editar y duplicar viajes (seccion 7.2).
 
-Un solo lugar decide vehiculo, puestos, precio, reglas, ruta, ETA y solapes, para que el
-viaje puntual, la serie, la edicion y el duplicado se comporten igual.
+Un solo lugar decide vehiculo, puestos, precio, reglas, ruta, ETA y solapes.
 """
 
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from geoalchemy2 import WKTElement
@@ -22,7 +21,7 @@ from app.modules.routing.osrm import RouteProvider, RouteResult
 from app.modules.routing.schemas import RoutePoint
 from app.modules.routing.service import RoutingService, Stop
 from app.modules.settings.service import SettingsService
-from app.modules.trips.models import Trip, TripRule, TripStop
+from app.modules.trips.models import Trip, TripStop
 from app.modules.trips.schemas import ALLOWED, RuleIn
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
@@ -39,10 +38,6 @@ class PlannedRoute:
     @property
     def place_ids(self) -> list[uuid.UUID]:
         return [stop.place_id for stop in self.stops if stop.place_id is not None]
-
-
-def local_departure(day: date, at: time) -> datetime:
-    return datetime.combine(day, at, tzinfo=LOCAL_TZ)
 
 
 def local_date(moment: datetime) -> date:
@@ -115,7 +110,7 @@ class TripPlanner:
             )
         return normalized
 
-    async def check_departure(self, departs_at: datetime, *, single: bool) -> None:
+    async def check_departure(self, departs_at: datetime) -> None:
         now = utcnow()
         lead = int(await self.settings.get("trip_publish_min_lead_minutes"))
         if departs_at < now + timedelta(minutes=lead):
@@ -125,12 +120,11 @@ class TripPlanner:
                 422,
                 {"min_lead_minutes": lead},
             )
-        if single:
-            days = int(await self.settings.get("trip_max_days_ahead"))
-            if departs_at > now + timedelta(days=days):
-                raise AppError(
-                    "DEPARTURE_TOO_FAR", "Departure is too far ahead", 422, {"max_days": days}
-                )
+        days = int(await self.settings.get("trip_max_days_ahead"))
+        if departs_at > now + timedelta(days=days):
+            raise AppError(
+                "DEPARTURE_TOO_FAR", "Departure is too far ahead", 422, {"max_days": days}
+            )
 
     async def restricted_dates(self, vehicle: Vehicle, start: date, end: date) -> set[date]:
         return await PicoPlacaService(self.session).restricted_dates(
@@ -193,11 +187,12 @@ class TripPlanner:
         route = await self.provider.route([(stop.lat, stop.lon) for stop in stops])
         return PlannedRoute(stops, route)
 
-    async def stop_rows(self, planned: PlannedRoute, departs_at: datetime) -> list[TripStop]:
-        factor = await self.routing.traffic_factor(departs_at)
+    @staticmethod
+    def stop_rows(planned: PlannedRoute, departs_at: datetime) -> list[TripStop]:
+        """Hora estimada de cada parada: la salida mas la duracion acumulada de OSRM."""
         offsets = [0.0]
         for leg in planned.route.legs:
-            offsets.append(offsets[-1] + leg.duration_s * factor)
+            offsets.append(offsets[-1] + leg.duration_s)
         count = len(planned.stops)
         return [
             TripStop(
@@ -209,10 +204,6 @@ class TripPlanner:
             for position, (stop, offset) in enumerate(zip(planned.stops, offsets, strict=True))
         ]
 
-    async def duration(self, planned: PlannedRoute, departs_at: datetime) -> int:
-        factor = await self.routing.traffic_factor(departs_at)
-        return round(planned.route.duration_s * factor)
-
     async def apply(
         self,
         trip: Trip,
@@ -221,15 +212,13 @@ class TripPlanner:
         rules: list[dict[str, Any]],
     ) -> None:
         """Copia ruta, ETA y reglas al viaje (nuevo o editado)."""
-        if trip.stops or trip.rules:
-            # Las posiciones y tipos son unicos: se borran las filas viejas antes de insertar.
+        if trip.stops:
+            # Las posiciones son unicas: se borran las paradas viejas antes de insertar.
             trip.stops.clear()
-            trip.rules.clear()
             await self.session.flush()
         trip.departs_at = departs_at
         trip.route = linestring(planned.route.coordinates)
         trip.distance_m = round(planned.route.distance_m)
-        trip.est_duration_s = await self.duration(planned, departs_at)
-        trip.osrm_duration_s = round(planned.route.duration_s)
-        trip.stops = await self.stop_rows(planned, departs_at)
-        trip.rules = [TripRule(kind=RuleKind(rule["kind"]), value=rule["value"]) for rule in rules]
+        trip.est_duration_s = round(planned.route.duration_s)
+        trip.stops = self.stop_rows(planned, departs_at)
+        trip.rules = rules

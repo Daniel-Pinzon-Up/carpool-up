@@ -53,13 +53,13 @@ async def rating_summary(user_id: uuid.UUID, user: ActiveUser, session: DbSessio
     target = await session.get(User, user_id)
     if target is None or target.deleted_at is not None:
         raise NotFoundError("user")
-    stats = (await stats_for(session, [user_id])).get(user_id)
+    stats = (await stats_for(session, [user_id]))[user_id]
     return RatingSummary(
         user_id=target.id,
         full_name=target.full_name,
-        average=stats.rating_avg if stats else None,
-        count=stats.rating_count if stats else 0,
-        criteria=stats.criteria if stats else {},
-        trips_as_driver=stats.trips_as_driver if stats else 0,
-        trips_as_passenger=stats.trips_as_passenger if stats else 0,
+        average=stats.rating_avg,
+        count=stats.rating_count,
+        criteria=stats.criteria,
+        trips_as_driver=stats.trips_as_driver,
+        trips_as_passenger=stats.trips_as_passenger,
     )

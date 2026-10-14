@@ -71,7 +71,7 @@ class VehicleCard(BaseModel):
 
 class SearchResult(BaseModel):
     trip_id: uuid.UUID
-    series_id: uuid.UUID | None
+
     status: TripStatus
     departs_at: datetime
     arrives_at: datetime

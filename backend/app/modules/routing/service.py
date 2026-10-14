@@ -4,25 +4,17 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.clock import LOCAL_TZ
 from app.core.enums import PlaceKind, VehicleType
 from app.core.errors import AppError
 from app.modules.places.models import Place
-from app.modules.routing.models import TrafficFactor
 from app.modules.routing.osrm import RouteProvider, RouteResult
 from app.modules.routing.schemas import ResolvedPoint, RoutePoint, RoutePreview
 from app.modules.settings.service import SettingsService
 from app.modules.users.models import User
 
 COST_KEYS = {VehicleType.CAR: "cost_per_km_car", VehicleType.MOTORCYCLE: "cost_per_km_motorcycle"}
-
-
-def weekday_group(moment: datetime) -> str:
-    weekday = moment.astimezone(LOCAL_TZ).weekday()
-    return "saturday" if weekday == 5 else "sunday" if weekday == 6 else "weekday"
 
 
 def round_to_hundred(value: float) -> int:
@@ -85,18 +77,6 @@ class RoutingService:
     async def resolve(self, points: list[RoutePoint], user: User) -> list[Stop]:
         return await resolve_points(self.session, points, user)
 
-    async def traffic_factor(self, departs_at: datetime | None) -> float:
-        if departs_at is None:
-            return 1.0
-        local = departs_at.astimezone(LOCAL_TZ)
-        factor = await self.session.scalar(
-            select(TrafficFactor.factor).where(
-                TrafficFactor.weekday_group == weekday_group(local),
-                TrafficFactor.hour == local.hour,
-            )
-        )
-        return float(factor) if factor is not None else 1.0
-
     async def suggested_price(
         self, distance_m: float, vehicle_type: VehicleType | None, seats: int | None
     ) -> tuple[bool, int | None, int | None]:
@@ -120,14 +100,13 @@ class RoutingService:
     ) -> RoutePreview:
         stops = await self.resolve(points, user)
         route: RouteResult = await self.provider.route([(s.lat, s.lon) for s in stops])
-        factor = await self.traffic_factor(departs_at)
         configured, price, max_price = await self.suggested_price(
             route.distance_m, vehicle_type, seats
         )
 
         offsets = [0.0]
         for leg in route.legs:
-            offsets.append(offsets[-1] + leg.duration_s * factor)
+            offsets.append(offsets[-1] + leg.duration_s)
         resolved = [
             ResolvedPoint(
                 place_id=stop.place_id,
@@ -142,9 +121,7 @@ class RoutingService:
         return RoutePreview(
             geometry=route.coordinates,
             distance_m=round(route.distance_m),
-            osrm_duration_s=round(route.duration_s),
-            traffic_factor=factor,
-            duration_s=round(route.duration_s * factor),
+            duration_s=round(route.duration_s),
             points=resolved,
             pricing_configured=configured,
             suggested_price=price,

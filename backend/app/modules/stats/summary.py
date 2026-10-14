@@ -1,82 +1,92 @@
-"""Recalculo de user_stats desde las tablas de origen (viajes, reservas y calificaciones).
+"""Resumen de cada usuario (viajes, cancelaciones, ausencias y calificacion).
 
-Se recalcula todo el resumen del usuario en vez de sumar y restar: es una consulta por
-usuario afectado y nunca se desajusta. Ninguna funcion hace commit.
+Se calcula al consultar con unas pocas consultas agrupadas por lote de usuarios, en vez de
+guardarlo en una tabla aparte: siempre esta al dia y no hay que mantenerlo.
 """
 
 import uuid
 from collections.abc import Iterable
-from typing import Any
+from dataclasses import dataclass, field
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Integer, cast, func, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import BookingStatus, TripStatus
 from app.modules.bookings.models import Booking
-from app.modules.ratings.models import Rating, RatingScore
-from app.modules.stats.models import UserStats
+from app.modules.ratings.models import Rating
 from app.modules.trips.models import Trip
 
 
-async def _count(session: AsyncSession, query: Select[Any]) -> int:
-    return int(await session.scalar(query) or 0)
-
-
-async def refresh_user_stats(session: AsyncSession, user_ids: Iterable[uuid.UUID]) -> None:
-    for user_id in set(user_ids):
-        stats = await session.get(UserStats, user_id)
-        if stats is None:
-            stats = UserStats(user_id=user_id)
-            session.add(stats)
-        stats.trips_as_driver = await _count(
-            session,
-            select(func.count()).where(
-                Trip.driver_id == user_id, Trip.status == TripStatus.COMPLETED
-            ),
-        )
-        stats.driver_cancellations = await _count(
-            session,
-            select(func.count()).where(
-                Trip.driver_id == user_id,
-                Trip.status == TripStatus.CANCELLED_BY_DRIVER,
-                Trip.deleted_at.is_(None),
-            ),
-        )
-        stats.trips_as_passenger = await _count(
-            session,
-            select(func.count()).where(
-                Booking.passenger_id == user_id, Booking.status == BookingStatus.COMPLETED
-            ),
-        )
-        stats.passenger_no_shows = await _count(
-            session,
-            select(func.count()).where(
-                Booking.passenger_id == user_id, Booking.status == BookingStatus.NO_SHOW
-            ),
-        )
-        rows = (
-            await session.execute(
-                select(RatingScore.criterion, func.avg(RatingScore.stars))
-                .join(Rating, Rating.id == RatingScore.rating_id)
-                .where(Rating.target_id == user_id)
-                .group_by(RatingScore.criterion)
-            )
-        ).all()
-        stats.criteria = {criterion: round(float(avg), 2) for criterion, avg in rows}
-        stats.rating_count = await _count(
-            session, select(func.count()).where(Rating.target_id == user_id)
-        )
-        # Promedio general = promedio de los criterios (todos pesan igual).
-        stats.rating_avg = (
-            round(sum(stats.criteria.values()) / len(stats.criteria), 2) if stats.criteria else None
-        )
+@dataclass
+class UserSummary:
+    rating_avg: float | None = None
+    rating_count: int = 0
+    trips_as_driver: int = 0
+    trips_as_passenger: int = 0
+    driver_cancellations: int = 0
+    passenger_no_shows: int = 0
+    # Promedio por criterio: {"punctuality": 4.5, ...}
+    criteria: dict[str, float] = field(default_factory=dict)
 
 
 async def stats_for(
     session: AsyncSession, user_ids: Iterable[uuid.UUID]
-) -> dict[uuid.UUID, UserStats]:
+) -> dict[uuid.UUID, UserSummary]:
+    """Resumen de cada usuario pedido (los que no tienen actividad quedan en cero)."""
     ids = list(set(user_ids))
+    summaries = {user_id: UserSummary() for user_id in ids}
     if not ids:
-        return {}
-    rows = await session.scalars(select(UserStats).where(UserStats.user_id.in_(ids)))
-    return {row.user_id: row for row in rows.all()}
+        return summaries
+
+    trips = await session.execute(
+        select(Trip.driver_id, Trip.status, func.count())
+        .where(
+            Trip.driver_id.in_(ids),
+            Trip.deleted_at.is_(None),
+            Trip.status.in_((TripStatus.COMPLETED, TripStatus.CANCELLED_BY_DRIVER)),
+        )
+        .group_by(Trip.driver_id, Trip.status)
+    )
+    for user_id, trip_status, count in trips:
+        if trip_status == TripStatus.COMPLETED:
+            summaries[user_id].trips_as_driver = count
+        else:
+            summaries[user_id].driver_cancellations = count
+
+    bookings = await session.execute(
+        select(Booking.passenger_id, Booking.status, func.count())
+        .where(
+            Booking.passenger_id.in_(ids),
+            Booking.status.in_((BookingStatus.COMPLETED, BookingStatus.NO_SHOW)),
+        )
+        .group_by(Booking.passenger_id, Booking.status)
+    )
+    for user_id, booking_status, count in bookings:
+        if booking_status == BookingStatus.COMPLETED:
+            summaries[user_id].trips_as_passenger = count
+        else:
+            summaries[user_id].passenger_no_shows = count
+
+    # Promedio por criterio desde el JSON de estrellas; el general es el promedio de los
+    # criterios (todos pesan igual).
+    scores = func.jsonb_each_text(Rating.scores).table_valued("key", "value")
+    criteria = await session.execute(
+        select(Rating.target_id, scores.c.key, func.avg(cast(scores.c.value, Integer)))
+        .select_from(Rating)
+        .join(scores, true())
+        .where(Rating.target_id.in_(ids))
+        .group_by(Rating.target_id, scores.c.key)
+    )
+    for user_id, criterion, avg in criteria:
+        summaries[user_id].criteria[criterion] = round(float(avg), 2)
+    counts = await session.execute(
+        select(Rating.target_id, func.count())
+        .where(Rating.target_id.in_(ids))
+        .group_by(Rating.target_id)
+    )
+    for user_id, count in counts:
+        summary = summaries[user_id]
+        summary.rating_count = count
+        values = summary.criteria.values()
+        summary.rating_avg = round(sum(values) / len(values), 2) if values else None
+    return summaries

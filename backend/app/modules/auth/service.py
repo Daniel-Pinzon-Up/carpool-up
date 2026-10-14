@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.clock import utcnow
 from app.core.config import get_settings
 from app.core.email import EmailQueue, code_email
-from app.core.enums import AuthPurpose, LegalKind, UserStatus
+from app.core.enums import AuthPurpose, UserStatus
 from app.core.errors import AppError
 from app.core.security import (
     DUMMY_PASSWORD_HASH,
@@ -32,7 +32,6 @@ from app.modules.auth.models import UserSession
 from app.modules.auth.repository import SessionRepository
 from app.modules.auth.schemas import AuthResult, LoginRequest, RegisterForm, SessionOut
 from app.modules.documents.service import DocumentService
-from app.modules.legal.service import LegalService
 from app.modules.settings.service import SettingsService
 from app.modules.users.models import User
 from app.modules.users.repository import UserRepository
@@ -134,9 +133,7 @@ class AuthService:
         minutes = await self.codes.minutes()
         try:
             await self.emails.enqueue(
-                code_email(
-                    user.email, user.full_name, purpose, code, minutes, user.preferred_language
-                )
+                code_email(user.email, user.full_name, purpose, code, minutes)
             )
         except Exception:  # el usuario puede pedir reenvio; no se pierde el registro
             logger.exception("email_enqueue_failed", purpose=purpose.value)
@@ -212,11 +209,6 @@ class AuthService:
         if await self.users.email_exists(email):
             raise AppError("EMAIL_TAKEN", "There is already an account with this email", 409)
 
-        legal = LegalService(self.session)
-        current_docs = await legal.current(form.preferred_language)
-        if {doc.kind for doc in current_docs} != set(LegalKind):
-            raise AppError("LEGAL_DOCUMENTS_UNAVAILABLE", "Terms are not published yet", 503)
-
         documents = DocumentService(self.session)
         stored = await documents.store_file(document)
         try:
@@ -229,12 +221,11 @@ class AuthService:
                 role=form.role,
                 status=UserStatus.PENDING_EMAIL,
                 two_factor_required=True,
-                preferred_language=form.preferred_language,
+                terms_accepted_at=utcnow(),
             )
             self.users.add(user)
             await self.session.flush()
             await documents.attach(user, form.doc_kind, stored)
-            legal.record_acceptance(user.id, current_docs, self.client.ip)
             result = await self._challenge(user, AuthPurpose.EMAIL_VERIFICATION)
         except Exception:
             await self.session.rollback()

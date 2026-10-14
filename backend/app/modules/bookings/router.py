@@ -7,17 +7,8 @@ from app.core.auth import ActiveUser, Driver, Passenger
 from app.core.deps import DbSession
 from app.core.pagination import DEFAULT_LIMIT, MAX_LIMIT, Page
 from app.core.rate_limit import limiter
-from app.modules.bookings.schemas import (
-    BookingCreate,
-    BookingOut,
-    InboxOut,
-    ReasonIn,
-    SeriesAvailability,
-    SubscriptionCreate,
-    SubscriptionOut,
-)
+from app.modules.bookings.schemas import BookingCreate, BookingOut, InboxOut, ReasonIn
 from app.modules.bookings.service import BookingService
-from app.modules.bookings.subscriptions import SubscriptionService, subscription_outs
 from app.modules.trips.lifecycle import TripLifecycle
 
 router = APIRouter(tags=["bookings"])
@@ -69,10 +60,9 @@ async def my_bookings(
 
 @router.get("/bookings/inbox")
 async def driver_inbox(user: Driver, session: DbSession) -> InboxOut:
-    """Solicitudes, cancelaciones tardias y suscripciones que esperan al conductor."""
+    """Solicitudes y cancelaciones tardias que esperan al conductor."""
     requests, cancellations = await BookingService(session).pending_for_driver(user)
-    subscriptions = await SubscriptionService(session).pending_for_driver(user)
-    return InboxOut(bookings=requests, cancellations=cancellations, subscriptions=subscriptions)
+    return InboxOut(bookings=requests, cancellations=cancellations)
 
 
 @router.get("/bookings/{booking_id}")
@@ -114,25 +104,27 @@ async def cancel_booking(
 
 
 @router.post(
-    "/cancellation-requests/{request_id}/accept",
+    "/bookings/{booking_id}/cancellation/accept",
     responses={409: {"description": "CANCELLATION_NOT_PENDING"}},
 )
 async def accept_cancellation(
-    request_id: uuid.UUID, user: Driver, session: DbSession
+    booking_id: uuid.UUID, user: Driver, session: DbSession
 ) -> BookingOut:
+    """El conductor acepta la cancelacion tardia: el cupo se libera."""
     service = BookingService(session)
-    return await service.out(await service.resolve_cancellation(user, request_id, True), user)
+    return await service.out(await service.resolve_cancellation(user, booking_id, True), user)
 
 
 @router.post(
-    "/cancellation-requests/{request_id}/reject",
+    "/bookings/{booking_id}/cancellation/reject",
     responses={409: {"description": "CANCELLATION_NOT_PENDING"}},
 )
 async def reject_cancellation(
-    request_id: uuid.UUID, user: Driver, session: DbSession
+    booking_id: uuid.UUID, user: Driver, session: DbSession
 ) -> BookingOut:
+    """El conductor rechaza la cancelacion tardia: la reserva sigue aceptada."""
     service = BookingService(session)
-    return await service.out(await service.resolve_cancellation(user, request_id, False), user)
+    return await service.out(await service.resolve_cancellation(user, booking_id, False), user)
 
 
 BOARDING_ERRORS: dict[int | str, dict[str, str]] = {
@@ -154,103 +146,3 @@ async def mark_no_show(booking_id: uuid.UUID, user: Driver, session: DbSession) 
     booking = await TripLifecycle(session).no_show(user, booking_id)
     service = BookingService(session)
     return await service.out(await service.reload(booking.id), user)
-
-
-# --- Suscripciones a series -----------------------------------------------------------
-
-
-async def _subscription(service: SubscriptionService, sub_id: uuid.UUID) -> SubscriptionOut:
-    sub = await service.reload(sub_id)
-    return (await subscription_outs(service.session, [sub]))[0]
-
-
-@router.get("/series/{series_id}/availability")
-async def series_availability(
-    series_id: uuid.UUID,
-    user: ActiveUser,
-    session: DbSession,
-    seats: Annotated[int, Query(ge=1, le=7)] = 1,
-) -> SeriesAvailability:
-    """Fechas futuras de la serie con su cupo; las de pico y placa aparecen bloqueadas."""
-    return await SubscriptionService(session).availability(user, series_id, seats)
-
-
-@router.post(
-    "/series/{series_id}/subscriptions",
-    status_code=status.HTTP_201_CREATED,
-    responses={
-        403: {"description": "WOMEN_ONLY_TRIP, BOOKING_SUSPENDED"},
-        409: {"description": "SUBSCRIPTION_EXISTS, BOOKING_OWN_TRIP"},
-        422: {
-            "description": "SUBSCRIPTION_OPTION_INVALID, SUBSCRIPTION_OUT_OF_RANGE, "
-            "SUBSCRIPTION_EMPTY, POINTS_OFF_ROUTE, PREFERENCES_CONFLICT"
-        },
-    },
-)
-@limiter.limit("10/minute")
-async def request_subscription(
-    request: Request,
-    series_id: uuid.UUID,
-    body: SubscriptionCreate,
-    user: Passenger,
-    session: DbSession,
-) -> SubscriptionOut:
-    """Pide unirse a la serie por 8 dias, 15 dias o toda la serie."""
-    service = SubscriptionService(session)
-    sub = await service.request(user, series_id, body)
-    return await _subscription(service, sub.id)
-
-
-@router.get("/subscriptions/mine")
-async def my_subscriptions(user: Passenger, session: DbSession) -> list[SubscriptionOut]:
-    return await SubscriptionService(session).list_mine(user)
-
-
-@router.get("/subscriptions/{subscription_id}")
-async def get_subscription(
-    subscription_id: uuid.UUID, user: ActiveUser, session: DbSession
-) -> SubscriptionOut:
-    service = SubscriptionService(session)
-    sub = await service.get_visible(user, subscription_id)
-    return await _subscription(service, sub.id)
-
-
-@router.post(
-    "/subscriptions/{subscription_id}/accept",
-    responses={409: {"description": "SUBSCRIPTION_NOT_PENDING"}},
-)
-async def accept_subscription(
-    subscription_id: uuid.UUID, user: Driver, session: DbSession
-) -> SubscriptionOut:
-    """Aprobacion unica: crea las reservas de las fechas con cupo."""
-    service = SubscriptionService(session)
-    sub = await service.accept(user, subscription_id)
-    return await _subscription(service, sub.id)
-
-
-@router.post(
-    "/subscriptions/{subscription_id}/reject",
-    responses={409: {"description": "SUBSCRIPTION_NOT_PENDING"}},
-)
-async def reject_subscription(
-    subscription_id: uuid.UUID, body: ReasonIn, user: Driver, session: DbSession
-) -> SubscriptionOut:
-    service = SubscriptionService(session)
-    sub = await service.reject(user, subscription_id, body.reason)
-    return await _subscription(service, sub.id)
-
-
-@router.post(
-    "/subscriptions/{subscription_id}/cancel",
-    responses={
-        409: {"description": "SUBSCRIPTION_NOT_ACTIVE"},
-        422: {"description": "CANCEL_REASON_REQUIRED"},
-    },
-)
-async def cancel_subscription(
-    subscription_id: uuid.UUID, body: ReasonIn, user: Passenger, session: DbSession
-) -> SubscriptionOut:
-    """Cancela las reservas futuras con las reglas de cancelacion, fecha por fecha."""
-    service = SubscriptionService(session)
-    sub = await service.cancel(user, subscription_id, body.reason)
-    return await _subscription(service, sub.id)

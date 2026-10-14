@@ -6,11 +6,10 @@ import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.clock import local_today, utcnow
-from app.core.enums import BookingStatus, CancelRequestStatus, SubscriptionStatus, TripStatus
+from app.core.clock import utcnow
+from app.core.enums import BookingStatus, TripStatus
 from app.modules.bookings.lifecycle import end_trip_bookings
-from app.modules.bookings.models import Booking, SeriesSubscription
-from app.modules.cancellations.models import CancellationRequest
+from app.modules.bookings.models import Booking
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.settings.service import SettingsService
 from app.modules.trips.models import Trip
@@ -21,10 +20,9 @@ logger = structlog.get_logger("bookings")
 async def expire_pending(session: AsyncSession) -> dict[str, int]:
     """Cada 5 minutos.
 
-    - Solicitudes y suscripciones sin respuesta a tiempo pasan a expired.
-    - Suscripciones activas cuyo rango termino pasan a finished.
+    - Solicitudes sin respuesta a tiempo pasan a expired.
     - Cancelaciones tardias que el conductor no decidio antes de salir se rechazan: la
-      reserva sigue aceptada (el abordaje o no-show lo decide el paso 10).
+      reserva sigue aceptada (el abordaje o no-show lo decide el conductor en el viaje).
     """
     now = utcnow()
     notifications = NotificationService(session)
@@ -44,66 +42,24 @@ async def expire_pending(session: AsyncSession) -> dict[str, int]:
             {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)},
         )
 
-    subscriptions = (
-        await session.scalars(
-            select(SeriesSubscription).where(
-                SeriesSubscription.status == SubscriptionStatus.REQUESTED,
-                SeriesSubscription.expires_at <= now,
-            )
-        )
-    ).all()
-    for sub in subscriptions:
-        sub.status = SubscriptionStatus.EXPIRED
-        notifications.notify(
-            sub.passenger_id,
-            Kind.SUBSCRIPTION_EXPIRED,
-            {"series_id": str(sub.series_id), "subscription_id": str(sub.id)},
-        )
-
-    finished = (
-        await session.scalars(
-            select(SeriesSubscription).where(
-                SeriesSubscription.status == SubscriptionStatus.ACTIVE,
-                SeriesSubscription.to_date < local_today(),
-            )
-        )
-    ).all()
-    for sub in finished:
-        sub.status = SubscriptionStatus.FINISHED
-        notifications.notify(
-            sub.passenger_id,
-            Kind.SUBSCRIPTION_ENDED,
-            {"series_id": str(sub.series_id), "subscription_id": str(sub.id)},
-        )
-
     stale = (
         await session.scalars(
-            select(CancellationRequest)
-            .join(Booking, Booking.id == CancellationRequest.booking_id)
+            select(Booking)
             .join(Trip, Trip.id == Booking.trip_id)
-            .where(
-                CancellationRequest.status == CancelRequestStatus.PENDING,
-                Trip.departs_at <= now,
-            )
+            .where(Booking.status == BookingStatus.CANCEL_REQUESTED, Trip.departs_at <= now)
         )
     ).all()
-    for request in stale:
-        request.status = CancelRequestStatus.REJECTED
-        request.resolved_at = now
-        request.booking.status = BookingStatus.ACCEPTED
+    for booking in stale:
+        booking.status = BookingStatus.ACCEPTED
+        booking.cancel_reason = None
         notifications.notify(
-            request.booking.passenger_id,
+            booking.passenger_id,
             Kind.CANCELLATION_REJECTED,
-            {"trip_id": str(request.booking.trip_id), "booking_id": str(request.booking_id)},
+            {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)},
         )
 
     await session.commit()
-    result = {
-        "bookings": len(bookings),
-        "subscriptions": len(subscriptions),
-        "finished": len(finished),
-        "cancellations": len(stale),
-    }
+    result = {"bookings": len(bookings), "cancellations": len(stale)}
     logger.info("pending_expired", **result)
     return result
 

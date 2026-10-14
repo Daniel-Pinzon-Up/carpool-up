@@ -31,8 +31,6 @@ class Kind:
     BOOKING_WITHDRAWN = "booking_withdrawn"
     BOOKING_CANCELLED_BY_PASSENGER = "booking_cancelled_by_passenger"
     CANCELLATION_REQUESTED = "cancellation_requested"
-    SUBSCRIPTION_REQUESTED = "subscription_requested"
-    SUBSCRIPTION_CANCELLED = "subscription_cancelled"
     # Al pasajero:
     BOOKING_ACCEPTED = "booking_accepted"
     BOOKING_REJECTED = "booking_rejected"
@@ -43,13 +41,7 @@ class Kind:
     CANCELLATION_ACCEPTED = "cancellation_accepted"
     CANCELLATION_REJECTED = "cancellation_rejected"
     TRIP_CHANGED = "trip_changed"
-    SUBSCRIPTION_ACCEPTED = "subscription_accepted"
-    SUBSCRIPTION_REJECTED = "subscription_rejected"
-    SUBSCRIPTION_EXPIRED = "subscription_expired"
-    SUBSCRIPTION_ENDED = "subscription_ended"
-    WAITLIST_OFFER = "waitlist_offer"
-    WAITLIST_OFFER_EXPIRED = "waitlist_offer_expired"
-    # Chat (paso 9): uno por conversacion mientras haya mensajes sin leer.
+    # Chat: uno por viaje mientras haya mensajes sin leer.
     MESSAGE_NEW = "message_new"
     # Ciclo del viaje y seguridad (paso 10).
     TRIP_REMINDER = "trip_reminder"

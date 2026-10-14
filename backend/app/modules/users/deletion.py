@@ -29,7 +29,7 @@ from app.modules.admin.users import withdraw_from_trips
 from app.modules.audit.service import AuditService
 from app.modules.auth.repository import SessionRepository
 from app.modules.bookings.models import Booking
-from app.modules.documents.models import DriverLicense, IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.notifications.models import Notification
 from app.modules.safety.models import TrustedContact
 from app.modules.trips.models import Trip
@@ -85,16 +85,10 @@ class AccountDeletion:
 
         paths: list[str] = list(
             await self.session.scalars(
-                select(IdentityDocument.file_path).where(IdentityDocument.user_id == user.id)
+                select(Document.file_path).where(Document.user_id == user.id)
             )
         )
-        paths += await self.session.scalars(
-            select(DriverLicense.file_path).where(DriverLicense.user_id == user.id)
-        )
-        await self.session.execute(
-            delete(IdentityDocument).where(IdentityDocument.user_id == user.id)
-        )
-        await self.session.execute(delete(DriverLicense).where(DriverLicense.user_id == user.id))
+        await self.session.execute(delete(Document).where(Document.user_id == user.id))
         await self.session.execute(delete(TrustedContact).where(TrustedContact.user_id == user.id))
         await self.session.execute(delete(Notification).where(Notification.user_id == user.id))
 

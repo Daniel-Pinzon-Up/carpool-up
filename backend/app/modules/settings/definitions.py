@@ -5,7 +5,7 @@ siempre se lee de la tabla system_settings y lo cambia el superadmin.
 """
 
 from dataclasses import dataclass
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt, TypeAdapter, model_validator
 
@@ -42,8 +42,6 @@ def _define(key: str, type_: Any, default: Any, description: str) -> SettingDefi
     return SettingDefinition(key, TypeAdapter(type_), default, description)
 
 
-_SERIES_OPTIONS = Annotated[list[DayCount | Literal["semester"]], Field(min_length=1)]
-_SUBSCRIPTION_OPTIONS = Annotated[list[DayCount | Literal["series"]], Field(min_length=1)]
 _OPTIONAL_PESOS = NonNegativeInt | None
 
 DEFINITIONS: dict[str, SettingDefinition] = {
@@ -70,18 +68,6 @@ DEFINITIONS: dict[str, SettingDefinition] = {
         _define("no_show_limit", PositiveInt, 3, "No-shows que generan suspension de reservas."),
         _define("no_show_window_days", PositiveInt, 30, "Ventana de conteo de no-shows."),
         _define("no_show_ban_days", PositiveInt, 7, "Dias de suspension de reservas."),
-        _define(
-            "series_window_options_days",
-            _SERIES_OPTIONS,
-            [15, 28, "semester"],
-            "Ventanas disponibles al publicar una serie.",
-        ),
-        _define(
-            "subscription_options_days",
-            _SUBSCRIPTION_OPTIONS,
-            [8, 15, "series"],
-            "Rangos que puede elegir el pasajero al unirse a una serie.",
-        ),
         _define(
             "search_radius_meters",
             Annotated[int, Field(ge=50, le=5000)],
@@ -112,7 +98,6 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             None,
             "Tope de precio por puesto (COP). Lo define el superadmin.",
         ),
-        _define("waitlist_offer_minutes", PositiveInt, 15, "Vigencia de la oferta de cupo."),
         _define("rating_window_days", PositiveInt, 7, "Plazo para calificar tras el viaje."),
         _define("chat_retention_days", PositiveInt, 30, "Retencion del chat tras el viaje."),
         _define(
@@ -222,12 +207,6 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             Annotated[int, Field(ge=30, le=900)],
             120,
             "Segundos que se conserva la ultima ubicacion del conductor.",
-        ),
-        _define(
-            "traffic_factor_min_samples",
-            Annotated[int, Field(ge=1, le=100)],
-            5,
-            "Viajes completados minimos en una franja para recalcular su factor de trafico.",
         ),
         _define(
             "trusted_contacts_max",

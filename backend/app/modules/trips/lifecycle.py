@@ -1,7 +1,7 @@
 """Ciclo del viaje (seccion 7.6): iniciar, abordaje, no-show y finalizar.
 
 Iniciar habilita la ubicacion en vivo y el enlace compartido; finalizar emite los tickets
-de quienes abordaron, cierra los chats del viaje y deja lista la calificacion (paso 11).
+de quienes abordaron, cierra el chat del viaje y abre la calificacion.
 """
 
 import uuid
@@ -12,20 +12,14 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
-from app.core.enums import BookingStatus, CancelRequestStatus, SuspensionKind, TripStatus
+from app.core.enums import BookingStatus, TripStatus
 from app.core.errors import AppError, NotFoundError
 from app.core.realtime import emit, user_channel
-from app.modules.bookings.lifecycle import settle_pending_cancellation
 from app.modules.bookings.models import HOLDING_STATUSES, Booking
-from app.modules.chat.membership import close_trip_chats, leave_trip_chat
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.pico_placa.service import PicoPlacaService
 from app.modules.safety.location import forget_location, location_channel
-from app.modules.safety.models import ShareLink
 from app.modules.settings.service import SettingsService
-from app.modules.stats.summary import refresh_user_stats
-from app.modules.suspensions.models import Suspension
-from app.modules.suspensions.service import active_suspension
 from app.modules.tickets.service import issue_ticket
 from app.modules.trips.models import Trip
 from app.modules.trips.planning import local_date
@@ -136,10 +130,8 @@ class TripLifecycle:
         booking.boarded_at = utcnow()
         if booking.status == BookingStatus.CANCEL_REQUESTED:
             # Si viaja, la cancelacion tardia que habia pedido queda sin efecto.
-            await settle_pending_cancellation(
-                self.session, booking, CancelRequestStatus.REJECTED, driver.id
-            )
             booking.status = BookingStatus.ACCEPTED
+            booking.cancel_reason = None
         await self.session.commit()
         return booking
 
@@ -156,59 +148,43 @@ class TripLifecycle:
                 409,
                 {"wait_minutes": wait},
             )
-        if booking.status == BookingStatus.CANCEL_REQUESTED:
-            await settle_pending_cancellation(
-                self.session, booking, CancelRequestStatus.REJECTED, driver.id
-            )
         booking.status = BookingStatus.NO_SHOW
         booking.no_show_at = now
-        await leave_trip_chat(self.session, booking)
         self.notifications.notify(
             booking.passenger_id,
             Kind.PASSENGER_NO_SHOW,
             {"trip_id": str(booking.trip_id), "booking_id": str(booking.id)},
         )
         await self.session.flush()
-        await refresh_user_stats(self.session, [booking.passenger_id])
-        await self.sanction(booking.passenger_id)
+        await self.sanction(booking.passenger)
         await self.session.commit()
         return booking
 
-    async def sanction(self, passenger_id: uuid.UUID) -> Suspension | None:
+    async def sanction(self, passenger: User) -> None:
+        """Con no_show_limit ausencias en no_show_window_days se suspenden las reservas del
+        pasajero no_show_ban_days dias (booking_ban_until)."""
         limit = int(await self.settings.get("no_show_limit"))
         days = int(await self.settings.get("no_show_window_days"))
         ban_days = int(await self.settings.get("no_show_ban_days"))
         moment = utcnow()
         count = await self.session.scalar(
             select(func.count()).where(
-                Booking.passenger_id == passenger_id,
+                Booking.passenger_id == passenger.id,
                 Booking.status == BookingStatus.NO_SHOW,
                 Booking.no_show_at >= moment - timedelta(days=days),
             )
         )
         if int(count or 0) < limit:
-            return None
-        if await active_suspension(self.session, passenger_id, SuspensionKind.BOOKING_BAN):
-            return None
-        suspension = Suspension(
-            user_id=passenger_id,
-            kind=SuspensionKind.BOOKING_BAN,
-            reason="no_show_limit",
-            starts_at=moment,
-            ends_at=moment + timedelta(days=ban_days),
-            created_by=None,
-        )
-        self.session.add(suspension)
+            return
+        if passenger.booking_ban_until is not None and passenger.booking_ban_until > moment:
+            return
+        passenger.booking_ban_until = moment + timedelta(days=ban_days)
         self.notifications.notify(
-            passenger_id,
+            passenger.id,
             Kind.BOOKING_SUSPENDED,
-            {
-                "ends_at": suspension.ends_at.isoformat() if suspension.ends_at else None,
-                "days": ban_days,
-            },
+            {"ends_at": passenger.booking_ban_until.isoformat(), "days": ban_days},
         )
         logger.info("booking_ban_applied", days=ban_days)
-        return suspension
 
     # --- Finalizar --------------------------------------------------------------------------
 
@@ -231,27 +207,21 @@ class TripLifecycle:
         trip.finished_at = now
         for booking in bookings:
             booking.status = BookingStatus.COMPLETED
-            ticket = await issue_ticket(self.session, booking)
+            code = await issue_ticket(self.session, booking)
             self.notifications.notify(
                 booking.passenger_id,
                 Kind.TRIP_FINISHED,
-                {"trip_id": str(trip.id), "ticket_code": ticket.code},
+                {"trip_id": str(trip.id), "ticket_code": code},
             )
-        await close_trip_chats(self.session, trip)
-        await self.session.flush()
-        await refresh_user_stats(
-            self.session, [trip.driver_id, *(b.passenger_id for b in bookings)]
-        )
         # Se abren las calificaciones: el conductor califica a cada pasajero y viceversa.
         if bookings:
             payload = {"trip_id": str(trip.id)}
             self.notifications.notify(trip.driver_id, Kind.RATING_PENDING, payload)
             for booking in bookings:
                 self.notifications.notify(booking.passenger_id, Kind.RATING_PENDING, payload)
-        extra = int(await self.settings.get("share_link_extra_minutes"))
-        links = await self.session.scalars(select(ShareLink).where(ShareLink.trip_id == trip.id))
-        for link in links.all():
-            link.expires_at = min(link.expires_at, now + timedelta(minutes=extra))
+        if trip.share_expires_at is not None:
+            extra = int(await self.settings.get("share_link_extra_minutes"))
+            trip.share_expires_at = min(trip.share_expires_at, now + timedelta(minutes=extra))
         announce(self.session, trip, [b.passenger_id for b in bookings], "trip.finished")
         emit(
             self.session,

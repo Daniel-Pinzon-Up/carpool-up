@@ -1,16 +1,10 @@
 import uuid
-from datetime import date, datetime, time
+from datetime import datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from app.core.enums import (
-    BookingStatus,
-    CancelRequestStatus,
-    SubscriptionStatus,
-    TripStatus,
-    WaitlistStatus,
-)
+from app.core.enums import BookingStatus, TripStatus
 from app.modules.trips.schemas import DriverOut, VehicleSummary
 
 Seats = Annotated[int, Field(ge=1, le=7)]
@@ -41,17 +35,6 @@ class ReasonIn(BaseModel):
     reason: OptionalReason = None
 
 
-class SubscriptionCreate(PointsIn):
-    option: int | Literal["series"] = Field(
-        description="Dias del rango segun subscription_options_days, o 'series' (toda la serie)"
-    )
-    start_date: date
-
-
-class WaitlistJoin(PointsIn):
-    pass
-
-
 # --- Respuestas -----------------------------------------------------------------------
 
 
@@ -78,7 +61,6 @@ class MeetingPoint(BaseModel):
 
 class TripBrief(BaseModel):
     id: uuid.UUID
-    series_id: uuid.UUID | None
     status: TripStatus
     departs_at: datetime
     arrives_at: datetime
@@ -90,18 +72,15 @@ class TripBrief(BaseModel):
 
 
 class CancellationOut(BaseModel):
-    id: uuid.UUID
-    reason: str
-    status: CancelRequestStatus
-    created_at: datetime
-    resolved_at: datetime | None
+    """Cancelacion tardia pendiente: el conductor la acepta o la rechaza."""
+
+    reason: str | None
 
 
 class BookingOut(BaseModel):
     id: uuid.UUID
     trip: TripBrief
     passenger: PassengerCard
-    subscription_id: uuid.UUID | None
     seats: int
     amount: int = Field(description="Aporte total: puestos por aporte por puesto")
     status: BookingStatus
@@ -119,67 +98,10 @@ class BookingOut(BaseModel):
     no_show_at: datetime | None
     cancelled_at: datetime | None
     cancel_reason: str | None
-    cancellation: CancellationOut | None
-    payment_note: str | None = Field(description="Datos de pago del conductor, al ser aceptado")
-
-
-class SeriesBrief(BaseModel):
-    id: uuid.UUID
-    origin: str
-    destination: str
-    weekdays: list[int]
-    departure_time: time
-    window_end: date
-    price_per_seat: int
-    driver: DriverOut
-
-
-class SubscriptionOut(BaseModel):
-    id: uuid.UUID
-    series: SeriesBrief
-    passenger: PassengerCard
-    from_date: date
-    to_date: date
-    seats: int
-    pickup_place: str
-    dropoff_place: str
-    preferences: Preferences
-    status: SubscriptionStatus
-    expires_at: datetime
-    created_at: datetime
-    decided_at: datetime | None
-    reject_reason: str | None
-    booked_dates: list[date] = Field(description="Fechas con reserva activa de la suscripcion")
-    skipped_dates: list[date] = Field(
-        description="Fechas del rango sin reserva (llenas, pico y placa o solapadas)"
+    cancellation: CancellationOut | None = Field(
+        description="Presente mientras la cancelacion tardia espera al conductor"
     )
-
-
-class AvailabilityDay(BaseModel):
-    trip_id: uuid.UUID
-    date: date
-    departs_at: datetime
-    status: TripStatus
-    seats_available: int
-    bookable: bool = Field(description="Programado, con cupo para los puestos pedidos")
-
-
-class SeriesAvailability(BaseModel):
-    series_id: uuid.UUID
-    options: list[int | Literal["series"]]
-    days: list[AvailabilityDay]
-
-
-class WaitlistOut(BaseModel):
-    id: uuid.UUID
-    trip: TripBrief
-    seats: int
-    status: WaitlistStatus
-    ahead: int = Field(description="Personas antes en la fila")
-    offered_at: datetime | None
-    offer_expires_at: datetime | None
-    booking_id: uuid.UUID | None
-    created_at: datetime
+    payment_note: str | None = Field(description="Datos de pago del conductor, al ser aceptado")
 
 
 class InboxOut(BaseModel):
@@ -187,4 +109,3 @@ class InboxOut(BaseModel):
 
     bookings: list[BookingOut]
     cancellations: list[BookingOut]
-    subscriptions: list[SubscriptionOut]

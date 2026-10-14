@@ -3,7 +3,7 @@
 from datetime import timedelta
 from typing import Any
 
-from sqlalchemy import Select, func, literal_column, select
+from sqlalchemy import Numeric, Select, cast, func, literal_column, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import ColumnClause
@@ -12,9 +12,9 @@ from app.core.clock import local_today, utcnow
 from app.core.enums import BookingStatus, ReviewStatus, TripStatus
 from app.modules.admin.schemas import AdminOverview, CountItem, DayCount, RouteCount
 from app.modules.bookings.models import Booking
-from app.modules.documents.models import DriverLicense, IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.places.models import Place
-from app.modules.ratings.models import Rating, RatingScore
+from app.modules.ratings.models import Rating
 from app.modules.safety.models import EmergencyEvent
 from app.modules.trips.models import Trip, TripStop
 from app.modules.users.models import User
@@ -101,10 +101,8 @@ async def overview(session: AsyncSession, days: int) -> AdminOverview:
     ).all()
 
     averages = (
-        select(func.round(func.avg(RatingScore.stars)).label("stars"))
-        .join(Rating, Rating.id == RatingScore.rating_id)
+        select(func.round(cast(Rating.average, Numeric)).label("stars"))
         .where(Rating.created_at >= since)
-        .group_by(Rating.id)
         .subquery()
     )
     distribution: dict[int, int] = {
@@ -151,11 +149,7 @@ async def overview(session: AsyncSession, days: int) -> AdminOverview:
         ],
         rating_distribution=[int(distribution.get(stars, 0)) for stars in range(1, 6)],
         pending_approvals=await _scalar(
-            session,
-            select(func.count()).where(IdentityDocument.status == ReviewStatus.PENDING),
-        )
-        + await _scalar(
-            session, select(func.count()).where(DriverLicense.status == ReviewStatus.PENDING)
+            session, select(func.count()).where(Document.status == ReviewStatus.PENDING)
         ),
         open_emergencies=await _scalar(
             session, select(func.count()).where(EmergencyEvent.handled_at.is_(None))

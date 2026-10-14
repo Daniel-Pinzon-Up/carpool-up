@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import Actor
 from app.core.clock import LOCAL_TZ
-from app.core.enums import BookingStatus, ConversationKind, TripStatus
+from app.core.enums import BookingStatus, TripStatus
 from app.core.errors import AppError, NotFoundError
 from app.core.pagination import Page, decode_cursor, encode_cursor
 from app.modules.admin.schemas import (
@@ -25,7 +25,7 @@ from app.modules.admin.schemas import (
 from app.modules.audit.service import AuditService
 from app.modules.bookings.lifecycle import end_trip_bookings
 from app.modules.bookings.models import HOLDING_STATUSES, Booking
-from app.modules.chat.models import Conversation, Message
+from app.modules.chat.models import Message
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.ratings.models import Rating
 from app.modules.safety.models import EmergencyEvent
@@ -77,7 +77,6 @@ class AdminTripService:
         return [
             AdminTripRow(
                 id=t.id,
-                series_id=t.series_id,
                 status=t.status,
                 departs_at=t.departs_at,
                 origin=t.stops[0].place.name,
@@ -144,9 +143,7 @@ class AdminTripService:
             )
         ).all()
         chat = await self.session.scalar(
-            select(Conversation.id).where(
-                Conversation.trip_id == trip.id, Conversation.kind == ConversationKind.TRIP_GROUP
-            )
+            select(Message.id).where(Message.trip_id == trip.id).limit(1)
         )
         vehicle = trip.vehicle
         return AdminTripDetail(
@@ -205,21 +202,14 @@ class AdminTripService:
 
     async def messages(self, actor: Actor, trip_id: uuid.UUID) -> list[AdminMessage]:
         trip = await self.get(trip_id)
-        conversation = await self.session.scalar(
-            select(Conversation).where(
-                Conversation.trip_id == trip.id, Conversation.kind == ConversationKind.TRIP_GROUP
-            )
-        )
-        if conversation is None:
-            return []
         rows = (
             await self.session.scalars(
                 select(Message)
-                .where(Message.conversation_id == conversation.id)
+                .where(Message.trip_id == trip.id)
                 .order_by(Message.sent_at, Message.id)
             )
         ).all()
-        self.audit.record(actor, "chat.view", "conversation", conversation.id)
+        self.audit.record(actor, "chat.view", "trip", trip.id)
         await self.session.commit()
         return [
             AdminMessage(
@@ -304,7 +294,7 @@ class AdminTripService:
             author_name=names.get(rating.author_id, ""),
             target_name=names.get(rating.target_id, ""),
             target_role=rating.target_role,
-            average=round(sum(s.stars for s in rating.scores) / len(rating.scores), 2),
+            average=round(rating.average, 2),
             comment=rating.comment,
             hidden=rating.hidden,
             created_at=rating.created_at,

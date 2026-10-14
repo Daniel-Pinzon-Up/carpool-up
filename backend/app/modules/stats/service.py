@@ -27,7 +27,6 @@ from app.modules.stats.schemas import (
     RatingBlock,
 )
 from app.modules.stats.summary import stats_for
-from app.modules.tickets.models import Ticket
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
@@ -73,11 +72,11 @@ class StatsService:
         return timedelta(days=int(await SettingsService(self.session).get("rating_window_days")))
 
     async def rating_block(self, user: User) -> RatingBlock:
-        stats = (await stats_for(self.session, [user.id])).get(user.id)
+        stats = (await stats_for(self.session, [user.id]))[user.id]
         return RatingBlock(
-            average=stats.rating_avg if stats else None,
-            count=stats.rating_count if stats else 0,
-            criteria=stats.criteria if stats else {},
+            average=stats.rating_avg,
+            count=stats.rating_count,
+            criteria=stats.criteria,
         )
 
     # --- Pasajero -----------------------------------------------------------------------
@@ -87,9 +86,9 @@ class StatsService:
         trips = int(await self.session.scalar(select(func.count()).where(completed)) or 0)
         spent = int(
             await self.session.scalar(
-                select(func.coalesce(func.sum(Ticket.amount), 0))
-                .join(Booking, Booking.id == Ticket.booking_id)
-                .where(Booking.passenger_id == user.id)
+                select(func.coalesce(func.sum(Booking.ticket_amount), 0)).where(
+                    Booking.passenger_id == user.id
+                )
             )
             or 0
         )
@@ -120,10 +119,9 @@ class StatsService:
                     select(
                         local_month(Trip.departs_at),
                         func.count(Booking.id),
-                        func.sum(Ticket.amount),
+                        func.sum(Booking.ticket_amount),
                     )
                     .join(Trip, Trip.id == Booking.trip_id)
-                    .outerjoin(Ticket, Ticket.booking_id == Booking.id)
                     .where(completed, local_month(Trip.departs_at).in_(keys))
                     .group_by(local_month(Trip.departs_at))
                 )
@@ -170,12 +168,12 @@ class StatsService:
         contributions = (
             await self.session.execute(
                 select(
-                    func.coalesce(func.sum(Ticket.amount), 0),
+                    func.coalesce(func.sum(Booking.ticket_amount), 0),
                     func.coalesce(
-                        func.sum(Ticket.amount).filter(Ticket.paid_confirmed.is_(True)), 0
+                        func.sum(Booking.ticket_amount).filter(Booking.paid_confirmed.is_(True)),
+                        0,
                     ),
                 )
-                .join(Booking, Booking.id == Ticket.booking_id)
                 .join(Trip, Trip.id == Booking.trip_id)
                 .where(Trip.driver_id == user.id)
             )
@@ -205,8 +203,8 @@ class StatsService:
             trips=trips,
             passengers=passengers,
             occupancy=round(float(occupancy), 3) if occupancy is not None else None,
-            contributions=int(contributions[0]),
-            confirmed_contributions=int(contributions[1]),
+            contributions=int(contributions[0] or 0),
+            confirmed_contributions=int(contributions[1] or 0),
             cancellations=cancellations,
             rating=await self.rating_block(user),
             by_month=[
@@ -246,14 +244,7 @@ class StatsService:
         ).all()
         has_more = len(rows) > limit
         rows = rows[:limit]
-        tickets = {
-            t.booking_id: t
-            for t in (
-                await self.session.scalars(
-                    select(Ticket).where(Ticket.booking_id.in_([b.id for b, _ in rows]))
-                )
-            ).all()
-        }
+
         rated = set(
             (
                 await self.session.scalars(
@@ -266,7 +257,6 @@ class StatsService:
         window = await self.window()
         items = []
         for booking, trip in rows:
-            ticket = tickets.get(booking.id)
             can_rate = booking.status == BookingStatus.COMPLETED
             closes = trip.finished_at + window if trip.finished_at and can_rate else None
             items.append(
@@ -280,9 +270,9 @@ class StatsService:
                     trip_status=trip.status,
                     booking_status=booking.status,
                     seats=booking.seats,
-                    amount=ticket.amount if ticket else None,
-                    ticket_code=ticket.code if ticket else None,
-                    paid_confirmed=ticket.paid_confirmed if ticket else None,
+                    amount=booking.ticket_amount,
+                    ticket_code=booking.ticket_code,
+                    paid_confirmed=booking.paid_confirmed if booking.ticket_code else None,
                     rating=rating_state(
                         closes,
                         int(can_rate and trip.id not in rated),
@@ -340,9 +330,9 @@ class StatsService:
             )
             contributions = int(
                 await self.session.scalar(
-                    select(func.coalesce(func.sum(Ticket.amount), 0))
-                    .join(Booking, Booking.id == Ticket.booking_id)
-                    .where(Booking.trip_id == trip.id)
+                    select(func.coalesce(func.sum(Booking.ticket_amount), 0)).where(
+                        Booking.trip_id == trip.id
+                    )
                 )
                 or 0
             )
@@ -351,7 +341,6 @@ class StatsService:
             items.append(
                 DriverHistoryEntry(
                     trip_id=trip.id,
-                    series_id=trip.series_id,
                     departs_at=trip.departs_at,
                     origin=trip.stops[0].place.name,
                     destination=trip.stops[-1].place.name,

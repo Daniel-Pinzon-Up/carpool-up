@@ -15,9 +15,9 @@ import structlog
 from sqlalchemy import exists, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.enums import ReviewStatus, UserRole, UserStatus
+from app.core.enums import IDENTITY_KINDS, ReviewStatus, UserRole, UserStatus
 from app.modules.audit.service import AuditService
-from app.modules.documents.models import IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.notifications.service import Kind, NotificationService
 from app.modules.semesters.repository import SemesterRepository
 from app.modules.users.models import User
@@ -42,16 +42,14 @@ async def run_revalidation(session: AsyncSession, today: date) -> RevalidationRe
     notifications = NotificationService(session)
 
     expired_rows = await session.execute(
-        update(IdentityDocument)
+        update(Document)
         .where(
-            IdentityDocument.status == ReviewStatus.APPROVED,
-            or_(
-                IdentityDocument.semester_id.is_(None),
-                IdentityDocument.semester_id != semester.id,
-            ),
+            Document.kind.in_(IDENTITY_KINDS),
+            Document.status == ReviewStatus.APPROVED,
+            or_(Document.semester_id.is_(None), Document.semester_id != semester.id),
         )
         .values(status=ReviewStatus.EXPIRED)
-        .returning(IdentityDocument.user_id, IdentityDocument.id)
+        .returning(Document.user_id, Document.id)
     )
     expired = [(row.user_id, row.id) for row in expired_rows.all()]
     for user_id, document_id in expired:
@@ -68,9 +66,10 @@ async def run_revalidation(session: AsyncSession, today: date) -> RevalidationRe
     downgraded: list[User] = []
     if today > semester.revalidation_deadline:
         has_current_document = exists().where(
-            IdentityDocument.user_id == User.id,
-            IdentityDocument.status == ReviewStatus.APPROVED,
-            IdentityDocument.semester_id == semester.id,
+            Document.user_id == User.id,
+            Document.kind.in_(IDENTITY_KINDS),
+            Document.status == ReviewStatus.APPROVED,
+            Document.semester_id == semester.id,
         )
         query = select(User).where(
             User.status == UserStatus.ACTIVE,

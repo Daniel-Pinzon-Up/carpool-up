@@ -1,4 +1,6 @@
-"""Tickets informativos: se emiten al finalizar el viaje para quien abordo (seccion 7.6)."""
+"""Tickets informativos (sin pago en la app): al finalizar el viaje, cada reserva que abordo
+recibe un codigo y el monto del aporte. Se guardan en la misma reserva; el id del ticket es
+el id de la reserva."""
 
 import secrets
 import uuid
@@ -12,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.clock import utcnow
 from app.core.errors import NotFoundError
 from app.modules.bookings.models import Booking
-from app.modules.tickets.models import Ticket
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 
@@ -26,7 +27,7 @@ def new_code() -> str:
 
 
 class TicketOut(BaseModel):
-    id: uuid.UUID
+    id: uuid.UUID = Field(description="Id de la reserva")
     booking_id: uuid.UUID
     code: str
     amount: int
@@ -46,18 +47,19 @@ class PaidIn(BaseModel):
     paid: bool = True
 
 
-def ticket_out(ticket: Ticket) -> TicketOut:
-    booking = ticket.booking
+def ticket_out(booking: Booking) -> TicketOut:
     trip = booking.trip
+    assert booking.ticket_code is not None  # noqa: S101 - solo reservas con ticket
+    assert booking.ticket_issued_at is not None  # noqa: S101
     return TicketOut(
-        id=ticket.id,
+        id=booking.id,
         booking_id=booking.id,
-        code=ticket.code,
-        amount=ticket.amount,
+        code=booking.ticket_code,
+        amount=booking.ticket_amount or 0,
         seats=booking.seats,
-        issued_at=ticket.issued_at,
-        paid_confirmed=ticket.paid_confirmed,
-        paid_confirmed_at=ticket.paid_confirmed_at,
+        issued_at=booking.ticket_issued_at,
+        paid_confirmed=booking.paid_confirmed,
+        paid_confirmed_at=booking.paid_confirmed_at,
         trip_id=trip.id,
         departs_at=trip.departs_at,
         origin=trip.stops[0].place.name,
@@ -67,23 +69,17 @@ def ticket_out(ticket: Ticket) -> TicketOut:
     )
 
 
-async def issue_ticket(session: AsyncSession, booking: Booking) -> Ticket:
-    """Un ticket por reserva; el codigo se repite muy rara vez y se reintenta."""
-    existing = await session.scalar(select(Ticket).where(Ticket.booking_id == booking.id))
-    if existing is not None:
-        return existing
+async def issue_ticket(session: AsyncSession, booking: Booking) -> str:
+    """Asigna el codigo y el monto una sola vez; si el codigo ya existe, se genera otro."""
+    if booking.ticket_code is not None:
+        return booking.ticket_code
     code = new_code()
-    while await session.scalar(select(Ticket.id).where(Ticket.code == code)) is not None:
+    while await session.scalar(select(Booking.id).where(Booking.ticket_code == code)) is not None:
         code = new_code()
-    ticket = Ticket(
-        booking_id=booking.id,
-        code=code,
-        amount=booking.seats * booking.trip.price_per_seat,
-        issued_at=utcnow(),
-    )
-    ticket.booking = booking
-    session.add(ticket)
-    return ticket
+    booking.ticket_code = code
+    booking.ticket_amount = booking.seats * booking.trip.price_per_seat
+    booking.ticket_issued_at = utcnow()
+    return code
 
 
 class TicketService:
@@ -94,9 +90,9 @@ class TicketService:
         self, user: User, role: Literal["passenger", "driver"], trip_id: uuid.UUID | None
     ) -> list[TicketOut]:
         query = (
-            select(Ticket)
-            .join(Booking, Booking.id == Ticket.booking_id)
+            select(Booking)
             .join(Trip, Trip.id == Booking.trip_id)
+            .where(Booking.ticket_code.is_not(None))
         )
         if role == "passenger":
             query = query.where(Booking.passenger_id == user.id)
@@ -104,15 +100,15 @@ class TicketService:
             query = query.where(Trip.driver_id == user.id)
         if trip_id is not None:
             query = query.where(Trip.id == trip_id)
-        rows = await self.session.scalars(query.order_by(Ticket.issued_at.desc()))
-        return [ticket_out(t) for t in rows.all()]
+        rows = await self.session.scalars(query.order_by(Booking.ticket_issued_at.desc()))
+        return [ticket_out(b) for b in rows.all()]
 
     async def set_paid(self, driver: User, ticket_id: uuid.UUID, paid: bool) -> TicketOut:
         """Solo el conductor del viaje confirma que recibio el aporte."""
-        ticket = await self.session.get(Ticket, ticket_id)
-        if ticket is None or ticket.booking.trip.driver_id != driver.id:
+        booking = await self.session.get(Booking, ticket_id)
+        if booking is None or booking.ticket_code is None or booking.trip.driver_id != driver.id:
             raise NotFoundError("ticket")
-        ticket.paid_confirmed = paid
-        ticket.paid_confirmed_at = utcnow() if paid else None
+        booking.paid_confirmed = paid
+        booking.paid_confirmed_at = utcnow() if paid else None
         await self.session.commit()
-        return ticket_out(ticket)
+        return ticket_out(booking)

@@ -11,7 +11,7 @@ from app.core.auth import Claims, CurrentUser, client_ip
 from app.core.config import get_settings
 from app.core.deps import DbSession
 from app.core.email import ArqEmailQueue, EmailQueue
-from app.core.enums import DocKind, Language, Sex, UserRole
+from app.core.enums import DocKind, Sex, UserRole
 from app.core.rate_limit import limiter
 from app.core.security import parse_refresh_token
 from app.modules.auth.schemas import (
@@ -100,7 +100,6 @@ async def register(
     accept_data_policy: Annotated[bool, Form()],
     document: Annotated[UploadFile, File(description="Carnet o constancia: JPG, PNG, WebP o PDF")],
     program: Annotated[str | None, Form()] = None,
-    preferred_language: Annotated[Language, Form()] = Language.ES,
 ) -> AuthResult:
     """Crea la cuenta en pending_email y envia el codigo de verificacion al correo."""
     try:
@@ -114,7 +113,6 @@ async def register(
             accept_terms=accept_terms,
             accept_data_policy=accept_data_policy,
             program=program or None,
-            preferred_language=preferred_language,
         )
     except ValidationError as exc:
         # Mismo formato que los errores de validacion del resto de la API.

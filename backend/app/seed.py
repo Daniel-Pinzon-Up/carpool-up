@@ -1,37 +1,32 @@
 """Datos semilla. Idempotente: crea lo que falte y nunca sobrescribe datos existentes.
 
 Carga parametros por defecto, superadmin inicial, semestre actual, puntos de ejemplo de
-Pamplona, reglas de ejemplo de pico y placa y la version inicial de los documentos legales.
+Pamplona y reglas de ejemplo de pico y placa. Los terminos y la politica de datos son
+archivos estaticos del frontend (public/legal).
 """
 
 import asyncio
 from datetime import date, timedelta
-from pathlib import Path
 
 import structlog
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.clock import local_today
+from app.core.clock import local_today, utcnow
 from app.core.config import get_settings
 from app.core.db import SessionLocal, engine
-from app.core.enums import Language, LegalKind, PlaceKind, UserRole, UserStatus, VehicleType
+from app.core.enums import PlaceKind, UserRole, UserStatus, VehicleType
 from app.core.geo import point
 from app.core.logging import configure_logging
 from app.core.security import hash_password
-from app.modules.legal.models import LegalDocument
-from app.modules.legal.schemas import LegalPublish
-from app.modules.legal.service import LegalService
 from app.modules.pico_placa.models import PicoPlacaRule
 from app.modules.places.models import Place
-from app.modules.routing.models import TrafficFactor
 from app.modules.semesters.models import Semester
 from app.modules.semesters.repository import SemesterRepository
 from app.modules.settings.service import SettingsService
 from app.modules.users.models import User
 
 logger = structlog.get_logger("seed")
-SEED_DATA = Path(__file__).parent / "seed_data"
 
 # Coordenadas APROXIMADAS alrededor del centro de Pamplona (7.3756 N, -72.6475 O).
 # El equipo debe reemplazarlas por las reales desde el panel del superadmin.
@@ -88,6 +83,7 @@ async def seed_superadmin(session: AsyncSession) -> None:
             role=UserRole.SUPERADMIN,
             status=UserStatus.ACTIVE,
             two_factor_required=True,
+            terms_accepted_at=utcnow(),
         )
     )
     await session.commit()
@@ -145,48 +141,6 @@ async def seed_pico_placa(session: AsyncSession, valid_from: date) -> None:
     logger.info("seed_pico_placa", created=len(VehicleType) * len(SAMPLE_PICO_PLACA))
 
 
-async def seed_traffic_factors(session: AsyncSession) -> None:
-    """Factor 1.0 en cada franja: la ETA es la de OSRM hasta que haya viajes reales."""
-    existing = {
-        (group, hour)
-        for group, hour in (
-            await session.execute(select(TrafficFactor.weekday_group, TrafficFactor.hour))
-        ).all()
-    }
-    created = 0
-    for group in ("weekday", "saturday", "sunday"):
-        for hour in range(24):
-            if (group, hour) not in existing:
-                session.add(TrafficFactor(weekday_group=group, hour=hour, factor=1.0, samples=0))
-                created += 1
-    await session.commit()
-    logger.info("seed_traffic_factors", created=created)
-
-
-LEGAL_FILES = {LegalKind.TERMS: "terms", LegalKind.DATA_POLICY: "data_policy"}
-
-
-async def seed_legal(session: AsyncSession) -> None:
-    """Version 1.0 de terminos y politica de datos en los cuatro idiomas (la espanola manda)."""
-    for kind, stem in LEGAL_FILES.items():
-        for language in Language:
-            current = await session.scalar(
-                select(LegalDocument).where(
-                    LegalDocument.kind == kind,
-                    LegalDocument.language == language,
-                    LegalDocument.is_current.is_(True),
-                )
-            )
-            if current is not None:
-                continue
-            body = (SEED_DATA / f"{stem}_{language.value}.md").read_text(encoding="utf-8")
-            await LegalService(session).publish(
-                LegalPublish(kind=kind, version="1.0", language=language, body_markdown=body),
-                actor=None,
-            )
-            logger.info("seed_legal", kind=kind, language=language, version="1.0")
-
-
 async def run() -> None:
     async with SessionLocal() as session:
         await seed_settings(session)
@@ -194,8 +148,6 @@ async def run() -> None:
         semester_start = await seed_semester(session)
         await seed_places(session)
         await seed_pico_placa(session, semester_start)
-        await seed_legal(session)
-        await seed_traffic_factors(session)
 
 
 async def main() -> None:
