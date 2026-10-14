@@ -5,15 +5,13 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LucideArrowLeft } from '@icons';
 import { marked } from 'marked';
-import { LegalDocument, LegalKind } from '../../core/auth/auth.models';
-import { LanguageService } from '../../core/i18n/language.service';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 
-const KIND_BY_SLUG: Record<string, LegalKind> = { terminos: 'terms', datos: 'data_policy' };
+const SLUGS = ['terminos', 'datos'];
 
-/** Version vigente de los terminos o de la politica de datos, en el idioma activo. */
+/** Terminos o politica de datos: archivos Markdown estaticos en /legal. */
 @Component({
   selector: 'cp-legal-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,9 +64,6 @@ const KIND_BY_SLUG: Record<string, LegalKind> = { terminos: 'terms', datos: 'dat
           <cp-error-state (retry)="documents.reload()" />
         } @else if (html(); as body) {
           <article class="legal" [innerHTML]="body"></article>
-          <p class="mt-8 text-sm text-muted">
-            {{ 'legal.version' | transloco: { version: doc()?.version, date: publishedOn() } }}
-          </p>
         } @else {
           <p class="text-muted">{{ 'legal.unavailable' | transloco }}</p>
         }
@@ -81,26 +76,14 @@ export default class LegalPage {
   readonly kind = input.required<string>();
 
   private readonly http = inject(HttpClient);
-  private readonly language = inject(LanguageService);
 
   protected readonly documents = rxResource({
-    params: () => ({ language: this.language.current() }),
-    stream: ({ params }) => this.http.get<LegalDocument[]>('/api/v1/legal/current', { params }),
+    params: () => (SLUGS.includes(this.kind()) ? this.kind() : undefined),
+    stream: ({ params }) => this.http.get(`/legal/${params}.md`, { responseType: 'text' }),
   });
-  protected readonly doc = computed(() =>
-    this.documents.value()?.find((d) => d.kind === KIND_BY_SLUG[this.kind()]),
-  );
   /** Angular sanea el HTML al asignarlo con [innerHTML]. */
   protected readonly html = computed(() => {
-    const doc = this.doc();
-    return doc ? (marked.parse(doc.body_markdown, { async: false }) as string) : null;
-  });
-  protected readonly publishedOn = computed(() => {
-    const doc = this.doc();
-    return doc
-      ? new Date(doc.published_at).toLocaleDateString(this.language.current(), {
-          dateStyle: 'long',
-        })
-      : '';
+    const body = this.documents.value();
+    return body ? (marked.parse(body, { async: false }) as string) : null;
   });
 }

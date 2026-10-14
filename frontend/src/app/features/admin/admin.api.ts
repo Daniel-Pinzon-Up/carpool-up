@@ -33,15 +33,6 @@ export interface AdminUserRow {
   last_login_at: string | null;
 }
 
-export interface Suspension {
-  id: string;
-  kind: 'booking_ban' | 'account';
-  reason: string;
-  starts_at: string;
-  ends_at: string | null;
-  automatic: boolean;
-}
-
 export interface AdminUserDetail extends AdminUserRow {
   sex: 'female' | 'male';
   document_status: ReviewStatus | null;
@@ -55,13 +46,15 @@ export interface AdminUserDetail extends AdminUserRow {
   passenger_no_shows: number;
   active_bookings: number;
   upcoming_trips: number;
-  suspensions: Suspension[];
-  active_ban: Suspension | null;
+  /** Fin de la suspension de la cuenta (nulo con la cuenta suspendida: indefinida). */
+  suspended_until: string | null;
+  suspension_reason: string | null;
+  /** Reservas suspendidas por ausencias hasta esta fecha. */
+  booking_ban_until: string | null;
 }
 
 export interface AdminTripRow {
   id: string;
-  series_id: string | null;
   status: TripStatus;
   departs_at: string;
   origin: string;
@@ -169,16 +162,6 @@ export interface PicoPlacaRule {
   is_active: boolean;
 }
 
-export interface LegalDocument {
-  id: string;
-  kind: 'terms' | 'data_policy';
-  version: string;
-  language: 'es' | 'en' | 'pt' | 'fr';
-  body_markdown: string;
-  published_at: string;
-  is_current: boolean;
-}
-
 export interface AuditEntry {
   id: string;
   actor_id: string | null;
@@ -252,8 +235,8 @@ export class AdminApi {
   block(id: string, reason: string): Promise<AdminUserDetail> {
     return this.post(`/users/${id}/block`, { reason });
   }
-  endSuspension(id: string, reason: string | null): Promise<AdminUserDetail> {
-    return this.post(`/suspensions/${id}/end`, { reason });
+  liftBan(id: string, reason: string | null): Promise<AdminUserDetail> {
+    return this.post(`/users/${id}/lift-ban`, { reason });
   }
   changeRole(id: string, role: UserRole): Promise<unknown> {
     return this.patch(`/users/${id}/role`, { role });
@@ -334,14 +317,6 @@ export class AdminApi {
   }
   deletePicoPlaca(id: string): Promise<void> {
     return this.remove(`/pico-placa/${id}`);
-  }
-  legal(): Promise<LegalDocument[]> {
-    return this.get('/legal');
-  }
-  publishLegal(
-    body: Pick<LegalDocument, 'kind' | 'version' | 'language' | 'body_markdown'>,
-  ): Promise<LegalDocument> {
-    return this.post('/legal', body);
   }
   audit(filters: {
     action?: string;

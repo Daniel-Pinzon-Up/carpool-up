@@ -10,14 +10,12 @@ export const ME: Me = {
   role: 'passenger',
   status: 'active',
   payment_note: null,
-  preferred_language: 'es',
-  theme_preference: 'system',
   last_login_at: null,
   document: null,
   license: null,
   can_publish: false,
   publish_blockers: [],
-  pending_legal: [],
+  booking_ban_until: null,
 };
 
 export function authenticated(user: Partial<Me> = {}): AuthResult {

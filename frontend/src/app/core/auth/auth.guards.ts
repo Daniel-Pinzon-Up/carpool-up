@@ -19,7 +19,6 @@ export function homeFor(auth: AuthService, router: Router): UrlTree {
   if (!user) {
     return router.parseUrl(readPref(ONBOARDED_KEY) === 'true' ? '/ingresar' : '/bienvenida');
   }
-  if (user.pending_legal.length > 0) return router.parseUrl('/cuenta/terminos');
   if (user.status !== 'active') return router.parseUrl('/cuenta/estado');
   return router.parseUrl(HOME_BY_ROLE[user.role]);
 }
@@ -34,14 +33,14 @@ export const homeRedirect: CanActivateFn = () => homeFor(inject(AuthService), in
  */
 export const guestGuard: CanMatchFn = () => !inject(AuthService).isAuthenticated();
 
-/** Cualquier sesion, incluso pendiente o suspendida (estado de cuenta, terminos). */
+/** Cualquier sesion, incluso pendiente o suspendida (estado de cuenta). */
 export const signedInGuard: CanMatchFn = () =>
   inject(AuthService).isAuthenticated() || inject(Router).parseUrl('/ingresar');
 
-/** App completa: cuenta activa y terminos vigentes aceptados. */
+/** App completa: cuenta activa. */
 export const activeGuard: CanMatchFn = () => {
   const auth = inject(AuthService);
-  return (auth.isActive() && !auth.needsLegal()) || homeFor(auth, inject(Router));
+  return auth.isActive() || homeFor(auth, inject(Router));
 };
 
 /** Publicar exige licencia aprobada y vigente y un vehiculo activo; si no, al inicio. */

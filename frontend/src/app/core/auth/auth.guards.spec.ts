@@ -37,11 +37,6 @@ describe('homeFor', () => {
     }
   });
 
-  it('terminos pendientes tienen prioridad', () => {
-    as({ pending_legal: [{ id: 'd1', kind: 'terms', version: '2.0', language: 'es' }] });
-    expect(path()).toBe('/cuenta/terminos');
-  });
-
   it('cada rol activo va a su inicio', () => {
     const homes = {
       passenger: '/buscar',

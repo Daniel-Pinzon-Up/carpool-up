@@ -2,9 +2,6 @@ export type UserRole = 'passenger' | 'driver' | 'admin' | 'superadmin';
 export type UserStatus = 'pending_email' | 'pending_approval' | 'active' | 'suspended' | 'blocked';
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'expired';
 export type DocKind = 'student_card' | 'institutional_proof';
-export type LegalKind = 'terms' | 'data_policy';
-export type ThemeValue = 'system' | 'light' | 'dark';
-export type LanguageValue = 'es' | 'en' | 'pt' | 'fr';
 
 export interface DocumentSummary {
   id: string;
@@ -33,13 +30,6 @@ export type PublishBlocker =
   | 'license_expired'
   | 'no_active_vehicle';
 
-export interface PendingLegal {
-  id: string;
-  kind: LegalKind;
-  version: string;
-  language: LanguageValue;
-}
-
 export interface Me {
   id: string;
   email: string;
@@ -49,14 +39,12 @@ export interface Me {
   role: UserRole;
   status: UserStatus;
   payment_note: string | null;
-  preferred_language: LanguageValue;
-  theme_preference: ThemeValue;
   last_login_at: string | null;
   document: DocumentSummary | null;
   license: LicenseSummary | null;
   can_publish: boolean;
   publish_blockers: PublishBlocker[];
-  pending_legal: PendingLegal[];
+  booking_ban_until: string | null;
 }
 
 export type AuthResultKind =
@@ -92,16 +80,6 @@ export interface SessionInfo {
   created_at: string;
   last_seen_at: string;
   current: boolean;
-}
-
-export interface LegalDocument {
-  id: string;
-  kind: LegalKind;
-  version: string;
-  language: LanguageValue;
-  body_markdown: string;
-  published_at: string;
-  is_current: boolean;
 }
 
 export const PURPOSE_BY_RESULT: Partial<Record<AuthResultKind, ChallengePurpose>> = {

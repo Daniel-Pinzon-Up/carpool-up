@@ -16,7 +16,6 @@ import {
   LucideUsers,
 } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
-import { LanguageService } from '../../core/i18n/language.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { MetaService } from '../../core/meta/meta.service';
 import {
@@ -63,7 +62,6 @@ export default class Register {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   protected readonly meta = inject(MetaService);
   private readonly fb = inject(FormBuilder).nonNullable;
 
@@ -220,7 +218,6 @@ export default class Register {
     form.append('role', this.role.getRawValue().role);
     form.append('doc_kind', this.document.getRawValue().doc_kind);
     form.append('document', this.document.getRawValue().file as File);
-    form.append('preferred_language', this.language.current());
     form.append('accept_terms', String(this.terms.getRawValue().accept_terms));
     form.append('accept_data_policy', String(this.terms.getRawValue().accept_data_policy));
     try {

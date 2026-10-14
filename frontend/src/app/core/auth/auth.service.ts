@@ -75,7 +75,6 @@ export class AuthService {
   readonly challenge = signal<PendingChallenge | null>(readChallenge());
   readonly isAuthenticated = computed(() => this.user() !== null);
   readonly isActive = computed(() => this.user()?.status === 'active');
-  readonly needsLegal = computed(() => (this.user()?.pending_legal.length ?? 0) > 0);
 
   accessToken(): string | null {
     return this.token;
@@ -197,11 +196,7 @@ export class AuthService {
     return me;
   }
 
-  async updateMe(
-    changes: Partial<
-      Pick<Me, 'program' | 'payment_note' | 'preferred_language' | 'theme_preference'>
-    >,
-  ): Promise<Me> {
+  async updateMe(changes: Partial<Pick<Me, 'program' | 'payment_note'>>): Promise<Me> {
     const me = await firstValueFrom(this.http.patch<Me>(`${API}/users/me`, changes));
     this.user.set(me);
     return me;
@@ -216,13 +211,6 @@ export class AuthService {
     );
     await this.reloadMe();
     return document;
-  }
-
-  async acceptLegal(documentIds: string[]): Promise<void> {
-    await firstValueFrom(
-      this.http.post<void>(`${API}/legal/accept`, { document_ids: documentIds }),
-    );
-    await this.reloadMe();
   }
 
   clearSession(): void {

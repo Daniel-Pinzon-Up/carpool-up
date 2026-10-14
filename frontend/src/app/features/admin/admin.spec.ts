@@ -40,8 +40,9 @@ function detail(role: AdminUserDetail['role'], id = 'target'): AdminUserDetail {
     passenger_no_shows: 1,
     active_bookings: 1,
     upcoming_trips: 0,
-    suspensions: [],
-    active_ban: null,
+    suspended_until: null,
+    suspension_reason: null,
+    booking_ban_until: null,
   };
 }
 

@@ -16,7 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserRole } from '../../core/auth/auth.models';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { ErrorState } from '../../shared/ui/error-state';
@@ -142,7 +142,6 @@ function shortDate(iso: string | null, lang: string): string {
 export default class AdminUsers {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly filters = new FormGroup({
@@ -154,7 +153,6 @@ export default class AdminUsers {
   protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly roleOptions = computed(() => {
-    this.language.current();
     return [
       { value: '', label: this.transloco.translate('admin.users.any') },
       ...['passenger', 'driver', 'admin', 'superadmin'].map((value) => ({
@@ -164,7 +162,6 @@ export default class AdminUsers {
     ];
   });
   protected readonly statusOptions = computed(() => {
-    this.language.current();
     return [
       { value: '', label: this.transloco.translate('admin.users.any') },
       ...Object.keys(USER_STATUS_TONE).map((value) => ({
@@ -297,8 +294,8 @@ export default class AdminUsers {
                   {{ 'admin.users.block' | transloco }}
                 </button>
               }
-              @if (u.active_ban; as ban) {
-                <button cp-button variant="secondary" type="button" (click)="liftBan(ban.id)">
+              @if (banned()) {
+                <button cp-button variant="secondary" type="button" (click)="liftBan()">
                   {{ 'admin.users.liftBan' | transloco }}
                 </button>
               }
@@ -331,17 +328,25 @@ export default class AdminUsers {
         <cp-glass-card>
           <h2 class="mb-2 font-semibold">{{ 'admin.users.suspensions' | transloco }}</h2>
           <ul class="flex flex-col gap-2 text-sm">
-            @for (s of u.suspensions; track s.id) {
+            @if (u.status === 'suspended') {
               <li class="rounded-xl bg-glass p-3">
-                <span class="font-semibold">{{ 'admin.users.kinds.' + s.kind | transloco }}</span>
-                · {{ date(s.starts_at) }} →
-                {{ s.ends_at ? date(s.ends_at) : ('admin.users.untilReinstated' | transloco) }}
-                @if (s.automatic) {
-                  · {{ 'admin.users.automatic' | transloco }}
-                }
-                <span class="block text-muted">{{ s.reason }}</span>
+                <span class="font-semibold">{{ 'admin.users.kinds.account' | transloco }}</span>
+                →
+                {{
+                  u.suspended_until
+                    ? date(u.suspended_until)
+                    : ('admin.users.untilReinstated' | transloco)
+                }}
+                <span class="block text-muted">{{ u.suspension_reason }}</span>
               </li>
-            } @empty {
+            }
+            @if (banned()) {
+              <li class="rounded-xl bg-glass p-3">
+                <span class="font-semibold">{{ 'admin.users.kinds.booking_ban' | transloco }}</span>
+                → {{ date(u.booking_ban_until) }}
+              </li>
+            }
+            @if (u.status !== 'suspended' && !banned()) {
               <li class="text-muted">{{ 'admin.users.noSuspensions' | transloco }}</li>
             }
           </ul>
@@ -361,13 +366,17 @@ export class AdminUserDetailPage {
   private readonly auth = inject(AuthService);
   private readonly dialogs = inject(DialogService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly user = signal<AdminUserDetail | null>(null);
   protected readonly loadError = signal<string | null>(null);
   protected readonly role = new FormControl<string>('', { nonNullable: true });
   protected readonly isSuperadmin = computed(() => this.auth.user()?.role === 'superadmin');
+  /** Reservas suspendidas por ausencias todavia vigentes. */
+  protected readonly banned = computed(() => {
+    const until = this.user()?.booking_ban_until;
+    return !!until && new Date(until).getTime() > Date.now();
+  });
   protected readonly canManage = computed(() => {
     const target = this.user();
     const me = this.auth.user();
@@ -387,7 +396,7 @@ export class AdminUserDetailPage {
     return [
       {
         label: t('admin.users.rating'),
-        value: u.rating !== null ? `${u.rating.toLocaleString(this.language.current())} / 5` : '-',
+        value: u.rating !== null ? `${u.rating.toLocaleString(LOCALE)} / 5` : '-',
         hint: this.transloco.translate('admin.users.ratingCount', { count: u.rating_count }),
       },
       {
@@ -426,7 +435,7 @@ export class AdminUserDetailPage {
   private async run(action: () => Promise<AdminUserDetail | unknown>, done: string): Promise<void> {
     try {
       const result = await action();
-      if (result && typeof result === 'object' && 'suspensions' in result) {
+      if (result && typeof result === 'object' && 'booking_ban_until' in result) {
         this.user.set(result as AdminUserDetail);
       } else {
         await this.load(this.id());
@@ -476,10 +485,10 @@ export class AdminUserDetailPage {
       await this.run(() => this.api.block(this.id(), answer.reason!), 'admin.users.blocked');
   }
 
-  protected async liftBan(banId: string): Promise<void> {
+  protected async liftBan(): Promise<void> {
     const answer = await this.reason('admin.users.liftBanTitle', false, false);
     if (answer)
-      await this.run(() => this.api.endSuspension(banId, answer.reason), 'admin.users.banLifted');
+      await this.run(() => this.api.liftBan(this.id(), answer.reason), 'admin.users.banLifted');
   }
 
   protected async changeRole(): Promise<void> {
@@ -501,6 +510,6 @@ export class AdminUserDetailPage {
   }
 
   protected date(iso: string | null): string {
-    return shortDate(iso, this.language.current());
+    return shortDate(iso, LOCALE);
   }
 }

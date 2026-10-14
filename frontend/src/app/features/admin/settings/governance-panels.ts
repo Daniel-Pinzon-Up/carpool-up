@@ -2,20 +2,17 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideSearch, LucideSend, LucideUserPlus } from '@icons';
+import { LucideSearch, LucideUserPlus } from '@icons';
 import { apiErrorMessage } from '../../../core/http/api-error-message';
-import { LanguageService } from '../../../core/i18n/language.service';
-import { DialogService } from '../../../shared/ui/dialog.service';
+import { LOCALE } from '../../../core/i18n/locale';
 import { EmptyState } from '../../../shared/ui/empty-state';
 import { ErrorState } from '../../../shared/ui/error-state';
 import { GlassButton } from '../../../shared/ui/glass-button';
 import { GlassCard } from '../../../shared/ui/glass-card';
 import { GlassInput } from '../../../shared/ui/glass-input';
 import { GlassSelect } from '../../../shared/ui/glass-select';
-import { GlassTextarea } from '../../../shared/ui/glass-textarea';
-import { StatusBadge } from '../../../shared/ui/status-badge';
 import { ToastService } from '../../../shared/ui/toast.service';
-import { AdminApi, AdminUserRow, AuditEntry, LegalDocument } from '../admin.api';
+import { AdminApi, AdminUserRow, AuditEntry } from '../admin.api';
 
 function dateTime(iso: string, lang: string): string {
   return new Date(iso).toLocaleString(lang, {
@@ -23,167 +20,6 @@ function dateTime(iso: string, lang: string): string {
     timeStyle: 'short',
     timeZone: 'America/Bogota',
   });
-}
-
-/**
- * Documentos legales: publicar una version nueva la vuelve vigente y obliga a todos a
- * aceptarla de nuevo en su proximo ingreso.
- */
-@Component({
-  selector: 'cp-legal-panel',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    ReactiveFormsModule,
-    TranslocoPipe,
-    GlassButton,
-    GlassCard,
-    GlassInput,
-    GlassSelect,
-    GlassTextarea,
-    StatusBadge,
-    LucideSend,
-  ],
-  template: `
-    <div class="flex flex-col gap-3">
-      <cp-glass-card>
-        <form
-          [formGroup]="form"
-          class="grid gap-3 sm:grid-cols-3"
-          (ngSubmit)="publish()"
-          novalidate
-        >
-          <cp-glass-select
-            formControlName="kind"
-            [label]="'admin.legal.kind' | transloco"
-            [options]="kinds()"
-          />
-          <cp-glass-select
-            formControlName="language"
-            [label]="'admin.legal.language' | transloco"
-            [options]="languages()"
-          />
-          <cp-glass-input
-            formControlName="version"
-            [label]="'admin.legal.version' | transloco"
-            hint="1.1"
-            [error]="error('version')"
-          />
-          <cp-glass-textarea
-            class="sm:col-span-3"
-            formControlName="body_markdown"
-            [rows]="12"
-            [maxlength]="60000"
-            [label]="'admin.legal.body' | transloco"
-            [hint]="'admin.legal.bodyHint' | transloco"
-            [error]="error('body_markdown')"
-          />
-          <div class="sm:col-span-3">
-            <button cp-button type="submit">
-              <svg lucideSend class="size-4" aria-hidden="true"></svg>
-              {{ 'admin.legal.publish' | transloco }}
-            </button>
-          </div>
-        </form>
-      </cp-glass-card>
-      @for (doc of items(); track doc.id) {
-        <cp-glass-card class="flex flex-wrap items-center gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="font-semibold">
-              {{ 'admin.legal.kinds.' + doc.kind | transloco }} · v{{ doc.version }} ·
-              {{ doc.language.toUpperCase() }}
-            </p>
-            <p class="text-sm text-muted">{{ when(doc.published_at) }}</p>
-          </div>
-          @if (doc.is_current) {
-            <cp-status-badge variant="success">{{
-              'admin.legal.current' | transloco
-            }}</cp-status-badge>
-          }
-        </cp-glass-card>
-      }
-    </div>
-  `,
-})
-export class LegalPanel {
-  private readonly api = inject(AdminApi);
-  private readonly dialogs = inject(DialogService);
-  private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
-  private readonly toast = inject(ToastService);
-
-  protected readonly items = signal<LegalDocument[]>([]);
-  private readonly submitted = signal(false);
-  protected readonly form = new FormGroup({
-    kind: new FormControl<LegalDocument['kind']>('terms', { nonNullable: true }),
-    language: new FormControl<LegalDocument['language']>('es', { nonNullable: true }),
-    version: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(/^\d+\.\d+$/)],
-    }),
-    body_markdown: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.minLength(50)],
-    }),
-  });
-  protected readonly kinds = computed(() => {
-    this.language.current();
-    return (['terms', 'data_policy'] as const).map((value) => ({
-      value,
-      label: this.transloco.translate(`admin.legal.kinds.${value}`),
-    }));
-  });
-  protected readonly languages = computed(() => {
-    this.language.current();
-    return (['es', 'en', 'pt', 'fr'] as const).map((value) => ({
-      value,
-      label: this.transloco.translate(`languages.${value}`),
-    }));
-  });
-
-  constructor() {
-    void this.load();
-  }
-
-  private async load(): Promise<void> {
-    try {
-      this.items.set(await this.api.legal());
-    } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
-    }
-  }
-
-  protected error(name: keyof typeof this.form.controls): string | null {
-    return this.submitted() && this.form.controls[name].invalid
-      ? this.transloco.translate(
-          name === 'version' ? 'admin.legal.versionInvalid' : 'admin.legal.bodyInvalid',
-        )
-      : null;
-  }
-
-  protected async publish(): Promise<void> {
-    this.submitted.set(true);
-    if (this.form.invalid) return;
-    const ok = await this.dialogs.confirm({
-      title: this.transloco.translate('admin.legal.publish'),
-      message: this.transloco.translate('admin.legal.publishMessage'),
-      confirmLabel: this.transloco.translate('admin.legal.publish'),
-      cancelLabel: this.transloco.translate('common.cancel'),
-    });
-    if (!ok) return;
-    try {
-      await this.api.publishLegal(this.form.getRawValue());
-      this.toast.show(this.transloco.translate('admin.legal.published'), 'success');
-      this.submitted.set(false);
-      this.form.reset();
-      await this.load();
-    } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
-    }
-  }
-
-  protected when(iso: string): string {
-    return dateTime(iso, this.language.current());
-  }
 }
 
 /** Administradores: alta de cuentas nuevas. El cambio de rol se hace en la ficha del usuario. */
@@ -258,7 +94,6 @@ export class LegalPanel {
 export class AdminsPanel {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly admins = signal<AdminUserRow[]>([]);
@@ -276,7 +111,6 @@ export class AdminsPanel {
     password: new FormControl('', { nonNullable: true, validators: Validators.required }),
   });
   protected readonly sexes = computed(() => {
-    this.language.current();
     return (['female', 'male'] as const).map((value) => ({
       value,
       label: this.transloco.translate(`fields.sexOptions.${value}`),
@@ -417,7 +251,6 @@ export class AdminsPanel {
 export class AuditPanel {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly filters = new FormGroup({
@@ -457,6 +290,6 @@ export class AuditPanel {
   }
 
   protected when(iso: string): string {
-    return dateTime(iso, this.language.current());
+    return dateTime(iso, LOCALE);
   }
 }

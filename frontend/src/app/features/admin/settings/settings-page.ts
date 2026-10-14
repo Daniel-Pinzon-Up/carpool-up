@@ -1,20 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LanguageService } from '../../../core/i18n/language.service';
 import { GlassTabs } from '../../../shared/ui/glass-tabs';
 import { PicoPlacaPanel, PlacesPanel, SemestersPanel } from './catalog-panels';
-import { AdminsPanel, AuditPanel, LegalPanel } from './governance-panels';
+import { AdminsPanel, AuditPanel } from './governance-panels';
 import { ParametersPanel } from './parameters-panel';
 
-const SECTIONS = [
-  'parameters',
-  'semesters',
-  'places',
-  'picoPlaca',
-  'legal',
-  'admins',
-  'audit',
-] as const;
+const SECTIONS = ['parameters', 'semesters', 'places', 'picoPlaca', 'admins', 'audit'] as const;
 type Section = (typeof SECTIONS)[number];
 
 /** Configuracion completa del superadmin; cada pestana carga sus datos al abrirse. */
@@ -26,7 +17,6 @@ type Section = (typeof SECTIONS)[number];
     GlassTabs,
     AdminsPanel,
     AuditPanel,
-    LegalPanel,
     ParametersPanel,
     PicoPlacaPanel,
     PlacesPanel,
@@ -62,9 +52,6 @@ type Section = (typeof SECTIONS)[number];
           @case ('picoPlaca') {
             <cp-pico-placa-panel />
           }
-          @case ('legal') {
-            <cp-legal-panel />
-          }
           @case ('admins') {
             <cp-admins-panel />
           }
@@ -78,11 +65,9 @@ type Section = (typeof SECTIONS)[number];
 })
 export default class AdminSettings {
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly section = signal<Section>('parameters');
   protected readonly tabs = computed(() => {
-    this.language.current();
     return SECTIONS.map((id) => ({
       id,
       label: this.transloco.translate(`admin.settings.tabs.${id}`),
