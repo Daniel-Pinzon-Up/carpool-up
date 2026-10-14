@@ -1,6 +1,6 @@
 # Diagrama entidad-relación
 
-Modelo de datos de Carpool UP: **18 tablas** en PostgreSQL 16 con PostGIS, definidas con SQLAlchemy y creadas por una única migración de Alembic (`backend/alembic/versions/20261014_0001_esquema_inicial.py`).
+Modelo de datos de Carpool UP: **18 tablas** en PostgreSQL 16 con PostGIS, definidas con SQLAlchemy y creadas con Alembic: la migración inicial (`20261014_0001_esquema_inicial.py`) y la de autoría (`20261015_0002_autoria_created_by_updated_by.py`).
 
 ## Cómo leerlo
 
@@ -15,6 +15,7 @@ Modelo de datos de Carpool UP: **18 tablas** en PostgreSQL 16 con PostGIS, defin
 
 - Las llaves primarias son UUID, salvo `system_settings` (clave de texto) y `audit_log` (entero autoincremental).
 - `geometry` son columnas de PostGIS: la ruta del viaje (`trips.route`) y la ubicación de cada lugar (`places.point`).
+- **Autoría:** las 18 tablas tienen `created_by` (quién creó la fila) y `updated_by` (quién la cambió por última vez), llaves foráneas a `users` que se llenan solas con el usuario de la petición. Quedan nulas cuando el cambio lo hace el sistema (tareas programadas, seed) o alguien sin sesión (registro). Para no llenar el diagrama de flechas hacia `users`, estas dos llaves se muestran como columnas pero no como relaciones. Junto con `created_at` y `updated_at`, y el historial de `audit_log`, forman la auditoría del modelo.
 - `jsonb` guarda datos que antes eran tablas aparte: las reglas del viaje (`trips.rules`) y los criterios de cada calificación (`ratings.scores`).
 - Los tipos `enum` son enums de PostgreSQL (estado del viaje, de la reserva, rol, etc.).
 
@@ -46,6 +47,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   user_sessions {
     uuid id PK
@@ -59,6 +62,8 @@ erDiagram
     timestamptz last_seen_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   auth_codes {
     uuid id PK
@@ -70,6 +75,8 @@ erDiagram
     timestamptz used_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   notifications {
     uuid id PK
@@ -78,6 +85,8 @@ erDiagram
     jsonb payload
     timestamptz read_at
     timestamptz created_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trusted_contacts {
     uuid id PK
@@ -87,6 +96,8 @@ erDiagram
     text relationship
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   semesters {
     uuid id PK
@@ -96,6 +107,8 @@ erDiagram
     date revalidation_deadline
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   documents {
     uuid id PK
@@ -111,6 +124,8 @@ erDiagram
     text rejection_reason
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   vehicles {
     uuid id PK
@@ -129,6 +144,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   pico_placa_rules {
     uuid id PK
@@ -140,6 +157,8 @@ erDiagram
     boolean is_active
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   places {
     uuid id PK
@@ -150,6 +169,7 @@ erDiagram
     uuid created_by FK
     timestamptz created_at
     timestamptz updated_at
+    uuid updated_by FK
   }
   trips {
     uuid id PK
@@ -174,6 +194,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trip_stops {
     uuid id PK
@@ -184,6 +206,8 @@ erDiagram
     timestamptz eta
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   bookings {
     uuid id PK
@@ -218,6 +242,8 @@ erDiagram
     timestamptz paid_confirmed_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   ratings {
     uuid id PK
@@ -230,6 +256,8 @@ erDiagram
     text comment
     boolean hidden
     timestamptz created_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   messages {
     uuid id PK
@@ -238,6 +266,8 @@ erDiagram
     text body
     timestamptz sent_at
     boolean hidden
+    uuid created_by FK
+    uuid updated_by FK
   }
   emergency_events {
     uuid id PK
@@ -250,6 +280,8 @@ erDiagram
     uuid handled_by FK
     timestamptz handled_at
     text resolution
+    uuid created_by FK
+    uuid updated_by FK
   }
   system_settings {
     text key PK
@@ -257,10 +289,11 @@ erDiagram
     uuid updated_by FK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
   }
   audit_log {
     uuid id PK
-    uuid actor_id FK
+    uuid created_by FK "quien hizo la accion"
     text action
     text entity
     text entity_id
@@ -268,8 +301,8 @@ erDiagram
     jsonb after
     text ip
     timestamptz created_at
+    uuid updated_by FK "siempre nulo: inmutable"
   }
-  users |o--o{ audit_log : "realiza"
   users ||--o{ auth_codes : "recibe"
   places ||--o{ bookings : "punto de bajada"
   users ||--o{ bookings : "reserva"
@@ -284,11 +317,9 @@ erDiagram
   users ||--o{ messages : "escribe"
   trips ||--o{ messages : "tiene chat"
   users ||--o{ notifications : "recibe"
-  users |o--o{ places : "crea (admin)"
   users ||--o{ ratings : "califica"
   users ||--o{ ratings : "es calificado"
   trips ||--o{ ratings : "se califica en"
-  users |o--o{ system_settings : "ajusta (superadmin)"
   places ||--o{ trip_stops : "es parada de"
   trips ||--o{ trip_stops : "tiene"
   users ||--o{ trips : "conduce"
@@ -326,6 +357,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   user_sessions {
     uuid id PK
@@ -339,6 +372,8 @@ erDiagram
     timestamptz last_seen_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   auth_codes {
     uuid id PK
@@ -350,6 +385,8 @@ erDiagram
     timestamptz used_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   notifications {
     uuid id PK
@@ -358,6 +395,8 @@ erDiagram
     jsonb payload
     timestamptz read_at
     timestamptz created_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trusted_contacts {
     uuid id PK
@@ -367,6 +406,8 @@ erDiagram
     text relationship
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   users ||--o{ auth_codes : "recibe"
   users ||--o{ notifications : "recibe"
@@ -388,6 +429,8 @@ erDiagram
     date revalidation_deadline
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   documents {
     uuid id PK
@@ -403,6 +446,8 @@ erDiagram
     text rejection_reason
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   vehicles {
     uuid id PK
@@ -421,6 +466,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   pico_placa_rules {
     uuid id PK
@@ -432,6 +479,8 @@ erDiagram
     boolean is_active
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   users {
     uuid id PK
@@ -457,6 +506,7 @@ erDiagram
     uuid created_by FK
     timestamptz created_at
     timestamptz updated_at
+    uuid updated_by FK
   }
   trips {
     uuid id PK
@@ -481,6 +531,8 @@ erDiagram
     timestamptz deleted_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trip_stops {
     uuid id PK
@@ -491,6 +543,8 @@ erDiagram
     timestamptz eta
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   bookings {
     uuid id PK
@@ -525,6 +579,8 @@ erDiagram
     timestamptz paid_confirmed_at
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   users {
     uuid id PK
@@ -536,7 +592,6 @@ erDiagram
   users ||--o{ bookings : "reserva"
   places ||--o{ bookings : "punto de recogida"
   trips ||--o{ bookings : "recibe"
-  users |o--o{ places : "crea (admin)"
   places ||--o{ trip_stops : "es parada de"
   trips ||--o{ trip_stops : "tiene"
   users ||--o{ trips : "conduce"
@@ -561,6 +616,8 @@ erDiagram
     text comment
     boolean hidden
     timestamptz created_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   messages {
     uuid id PK
@@ -569,6 +626,8 @@ erDiagram
     text body
     timestamptz sent_at
     boolean hidden
+    uuid created_by FK
+    uuid updated_by FK
   }
   emergency_events {
     uuid id PK
@@ -581,6 +640,8 @@ erDiagram
     uuid handled_by FK
     timestamptz handled_at
     text resolution
+    uuid created_by FK
+    uuid updated_by FK
   }
   system_settings {
     text key PK
@@ -588,10 +649,11 @@ erDiagram
     uuid updated_by FK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
   }
   audit_log {
     uuid id PK
-    uuid actor_id FK
+    uuid created_by FK "quien hizo la accion"
     text action
     text entity
     text entity_id
@@ -599,6 +661,7 @@ erDiagram
     jsonb after
     text ip
     timestamptz created_at
+    uuid updated_by FK "siempre nulo: inmutable"
   }
   users {
     uuid id PK
@@ -606,7 +669,6 @@ erDiagram
   trips {
     uuid id PK
   }
-  users |o--o{ audit_log : "realiza"
   users |o--o{ emergency_events : "atiende (admin)"
   trips ||--o{ emergency_events : "ocurre en"
   users ||--o{ emergency_events : "activa"
@@ -615,15 +677,15 @@ erDiagram
   users ||--o{ ratings : "califica"
   users ||--o{ ratings : "es calificado"
   trips ||--o{ ratings : "se califica en"
-  users |o--o{ system_settings : "ajusta (superadmin)"
   users ||--o{ trips : "conduce"
 ```
 
 ## Relaciones
 
+Además de estas, cada tabla tiene `created_by` y `updated_by` hacia `users` (autoría).
+
 | Desde | Hacia | Llave foránea | Significado |
 |-------|-------|---------------|-------------|
-| `users` | `audit_log` | `audit_log.actor_id` | realiza |
 | `users` | `auth_codes` | `auth_codes.user_id` | recibe |
 | `places` | `bookings` | `bookings.dropoff_place_id` | punto de bajada |
 | `users` | `bookings` | `bookings.passenger_id` | reserva |
@@ -638,11 +700,9 @@ erDiagram
 | `users` | `messages` | `messages.sender_id` | escribe |
 | `trips` | `messages` | `messages.trip_id` | tiene chat |
 | `users` | `notifications` | `notifications.user_id` | recibe |
-| `users` | `places` | `places.created_by` | crea (admin) |
 | `users` | `ratings` | `ratings.author_id` | califica |
 | `users` | `ratings` | `ratings.target_id` | es calificado |
 | `trips` | `ratings` | `ratings.trip_id` | se califica en |
-| `users` | `system_settings` | `system_settings.updated_by` | ajusta (superadmin) |
 | `places` | `trip_stops` | `trip_stops.place_id` | es parada de |
 | `trips` | `trip_stops` | `trip_stops.trip_id` | tiene |
 | `users` | `trips` | `trips.driver_id` | conduce |
@@ -694,6 +754,8 @@ erDiagram
 | `deleted_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `user_sessions`
 
@@ -710,6 +772,8 @@ erDiagram
 | `last_seen_at` | timestamptz | no |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `auth_codes`
 
@@ -724,6 +788,8 @@ erDiagram
 | `used_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `notifications`
 
@@ -735,6 +801,8 @@ erDiagram
 | `payload` | jsonb | no |  |
 | `read_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `trusted_contacts`
 
@@ -747,6 +815,8 @@ erDiagram
 | `relationship` | text | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `semesters`
 
@@ -759,6 +829,8 @@ erDiagram
 | `revalidation_deadline` | date | no |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `documents`
 
@@ -777,6 +849,8 @@ erDiagram
 | `rejection_reason` | text | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `vehicles`
 
@@ -798,6 +872,8 @@ erDiagram
 | `deleted_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `pico_placa_rules`
 
@@ -812,6 +888,8 @@ erDiagram
 | `is_active` | boolean | no |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `places`
 
@@ -825,6 +903,7 @@ erDiagram
 | `created_by` | uuid | sí | FK → `users` |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `trips`
 
@@ -852,6 +931,8 @@ erDiagram
 | `deleted_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `trip_stops`
 
@@ -865,6 +946,8 @@ erDiagram
 | `eta` | timestamptz | no |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `bookings`
 
@@ -902,6 +985,8 @@ erDiagram
 | `paid_confirmed_at` | timestamptz | sí |  |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `ratings`
 
@@ -917,6 +1002,8 @@ erDiagram
 | `comment` | text | sí |  |
 | `hidden` | boolean | no |  |
 | `created_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `messages`
 
@@ -928,6 +1015,8 @@ erDiagram
 | `body` | text | no |  |
 | `sent_at` | timestamptz | no |  |
 | `hidden` | boolean | no |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `emergency_events`
 
@@ -943,6 +1032,8 @@ erDiagram
 | `handled_by` | uuid | sí | FK → `users` |
 | `handled_at` | timestamptz | sí |  |
 | `resolution` | text | sí |  |
+| `created_by` | uuid | sí | FK → `users` |
+| `updated_by` | uuid | sí | FK → `users` |
 
 ### `system_settings`
 
@@ -953,13 +1044,14 @@ erDiagram
 | `updated_by` | uuid | sí | FK → `users` |
 | `created_at` | timestamptz | no |  |
 | `updated_at` | timestamptz | no |  |
+| `created_by` | uuid | sí | FK → `users` |
 
 ### `audit_log`
 
 | Columna | Tipo | Nula | Llave |
 |---------|------|------|-------|
 | `id` | uuid | no | PK |
-| `actor_id` | uuid | sí | FK → `users` |
+| `created_by` | uuid | sí | FK → `users` |
 | `action` | text | no |  |
 | `entity` | text | no |  |
 | `entity_id` | text | sí |  |
@@ -967,3 +1059,4 @@ erDiagram
 | `after` | jsonb | sí |  |
 | `ip` | text | sí |  |
 | `created_at` | timestamptz | no |  |
+| `updated_by` | uuid | sí | FK → `users` |
