@@ -18,7 +18,7 @@ Se usa para tres cosas (`AuthPurpose`): verificar el correo al registrarse, el s
    - la API solo encola el trabajo `send_email` en Redis;
    - el worker ARQ lo envía por SMTP con `aiosmtplib`;
    - así la petición responde rápido y un fallo del correo no tumba el registro.
-6. **El correo va en el idioma de la persona**: la plantilla usa `user.preferred_language` y tiene textos en es, en, pt y fr.
+6. **El correo está en español** (`code_email` en `backend/app/core/email.py`): asunto y cuerpo según el propósito del código.
 7. **Por dónde sale el correo** lo decide `.env` (`SMTP_*`): con Mailpit (`infra/docker-compose.dev.yml`) los correos quedan en una bandeja de prueba local; con un servidor real, como Gmail con una contraseña de aplicación, llegan al buzón de la persona. Si el servidor falla un momento, el worker reintenta a los 30, 60, 90 y 120 segundos.
 8. **El navegador nunca recibe el correo ni el id del usuario**:
    - recibe un `challenge_id` (un token firmado de corta vida);
@@ -40,50 +40,23 @@ Se usa para tres cosas (`AuthPurpose`): verificar el correo al registrarse, el s
 
 Todos los números se pueden cambiar desde Configuración, porque viven en `system_settings`.
 
-## 2. Cambio de idioma
+## 2. Textos centralizados en español
 
-La interfaz usa **Transloco** y tiene cuatro idiomas: español, inglés, portugués y francés.
+La app está solo en español, pero los textos no están escritos dentro de los componentes: siguen en un único archivo con **Transloco**.
 
-1. **Los textos no están en el código:** viven en `frontend/public/i18n/{es,en,pt,fr}.json`, organizados por claves, por ejemplo `search.submit`. Las plantillas usan `{{ 'search.submit' | transloco }}`.
-2. **Los archivos se cargan bajo demanda** (`core/i18n/transloco-loader.ts`): solo se descarga el idioma activo, desde `/i18n/<idioma>.json`.
-3. **Idioma inicial** (`core/i18n/language.service.ts`, `initialLanguage`):
-   - primero el que la persona guardó;
-   - si no hay ninguno, el del navegador;
-   - si no es uno de los cuatro, español.
-4. **Al cambiar de idioma** (`LanguageService.set`):
-   - se activa el idioma en Transloco;
-   - se actualiza la señal `current`, para que se redibuje solo lo necesario;
-   - se pone `<html lang="…">` para los lectores de pantalla;
-   - se guarda en `localStorage` (`cp.lang`).
-5. **El idioma se sincroniza con la cuenta** (`core/auth/preferences-sync.service.ts`):
-   - al iniciar sesión se aplica el idioma guardado en el perfil (`preferred_language`);
-   - cada cambio posterior se guarda en el perfil;
-   - así sigue a la persona en cualquier dispositivo, y los correos también le llegan en ese idioma.
-6. **Los errores del servidor también se traducen:** el backend responde un código (por ejemplo `TRIP_FULL`) y el frontend lo busca en `errors.*`.
-7. **Fechas y números** usan el idioma activo con `toLocaleString`.
-8. **Una prueba automática garantiza que no falten textos** (`core/i18n/translations.spec.ts`): los cuatro archivos deben tener exactamente las mismas claves y ningún texto vacío.
+1. **Un solo archivo de textos:** `frontend/public/i18n/es.json`, organizado por claves (por ejemplo `search.submit`). Las plantillas usan `{{ 'search.submit' | transloco }}`. Cambiar una frase es editar ese archivo, sin tocar el código.
+2. **Se carga al abrir la app** (`core/i18n/transloco-loader.ts`) y la configuración (`app.config.ts`) declara `es` como único idioma.
+3. **Los errores del servidor también tienen texto:** el backend responde un código (por ejemplo `TRIP_FULL`) y el frontend lo busca en `errors.*`.
+4. **Fechas y números** se formatean con la constante `LOCALE = 'es'` (`core/i18n/locale.ts`) y la zona horaria de Bogotá.
+5. **Una prueba automática** (`core/i18n/translations.spec.ts`) revisa que ningún texto quede vacío.
 
-## 3. Cambio entre tema claro y oscuro
+## 3. Apariencia
 
-Hay tres opciones: **sistema** (sigue al teléfono o al computador), **claro** y **oscuro**. Además, se puede **reducir la transparencia** del vidrio.
+Hay un solo tema, claro, con el estilo de vidrio de la marca.
 
-1. **Los colores son variables CSS** (`frontend/src/styles.css`):
-   - cada color de la interfaz es un token como `--bg`, `--text` o `--primary`;
-   - la clase `.dark` en `<html>` redefine esos tokens con la paleta oscura;
-   - los componentes nunca escriben un color fijo, así que todo cambia con una sola clase.
-2. **No hay parpadeo al abrir la app** (`frontend/public/theme-init.js`):
-   - un script pequeño corre antes de Angular;
-   - lee la preferencia guardada (`cp.theme`) y la del sistema (`prefers-color-scheme`);
-   - pone la clase `dark` de inmediato, para que la página nunca se vea en el tema equivocado.
-3. **El servicio de tema** (`core/theme/theme.service.ts`):
-   - guarda la preferencia en una señal;
-   - calcula `isDark`;
-   - escucha si el sistema cambia de tema (por ejemplo, de noche) y se ajusta solo cuando la opción es "sistema";
-   - un `effect` pone o quita las clases `dark` y `reduce-transparency` en `<html>`.
-4. **Se recuerda en el dispositivo y en la cuenta:** igual que el idioma, se guarda en `localStorage` y en el perfil (`theme_preference`) mediante `PreferencesSyncService`.
-5. **Accesibilidad:**
-   - los dos temas tienen contraste medido (WCAG AA);
-   - "reducir transparencia" cambia el vidrio por superficies sólidas, para quien lo necesite.
+1. **Los colores son variables CSS** (`frontend/src/styles.css`): cada color es un token como `--bg`, `--text` o `--primary`, y los componentes nunca escriben un color fijo.
+2. **El mapa** usa un único estilo claro (`shared/map/map-style.ts`) con la ruta en el azul de la marca.
+3. **Accesibilidad:** el contraste está medido (WCAG AA) y las pruebas E2E pasan axe en las pantallas principales.
 
 ## 4. Avisos y chat en tiempo real
 
@@ -150,7 +123,7 @@ Cuando un conductor acepta una reserva, el pasajero se entera sin recargar la p�
    - fechas de vigencia;
    - el superadmin las edita desde Configuración.
 2. **El dígito que cuenta** es el último dígito numérico de la placa (`last_digit`). En las motos, la placa termina en letra, así que se toma el número anterior: ABC12D → 2.
-3. **Al publicar:** si ese día el vehículo tiene pico y placa, no deja publicar (`PICO_PLACA_RESTRICTED`). En una serie, se saltan los días restringidos.
+3. **Al publicar:** si ese día el vehículo tiene pico y placa, no deja publicar (`PICO_PLACA_RESTRICTED`). 
 4. **Revisión diaria** (`recheck_pico_placa`): el worker revisa todos los viajes futuros, y también lo hace cuando cambian las reglas.
    - Si un viaje cae en pico y placa, pasa a `cancelled_pico_placa`.
    - Sus reservas se cancelan con aviso a cada pasajero.

@@ -57,12 +57,12 @@ En PowerShell, desde la carpeta del proyecto (con `make` en Git Bash los comando
 | 3 | Publicar un viaje con parada, pico y placa y cruce de horarios | Conductor |
 | 4 | Búsqueda geográfica: radio, dirección, horario y preferencias | Pasajeros, conductores |
 | 5 | Tres personas compiten por los dos últimos puestos | Pasajeros, conductor |
-| 6 | Lista de espera con oferta que vence y oferta aceptada | Pasajeros, conductor |
+| 6 | Viaje lleno: se libera un cupo y gana quien lo pide primero | Pasajeros, conductor |
 | 7 | Cancelación libre, cancelación tardía y su decisión | Pasajeros, conductor |
 | 8 | El conductor no llega: cancelación automática por retraso | Conductor, pasajeros |
 | 9 | Editar un viaje con reservas: avisos, límites y corte de edición | Conductor, pasajeros |
-| 10 | Serie semanal con pico y placa y suscripción por 15 días | Conductora, pasajera |
-| 11 | Editar y cancelar una serie con suscriptores | Conductora, pasajera |
+| 10 | Repetir un viaje en la semana con duplicar y pico y placa | Conductora, pasajera |
+| 11 | La conductora cancela uno de sus viajes repetidos | Conductora, pasajera |
 | 12 | El viaje en vivo: iniciar, abordar, ausencia, finalizar y tickets | Conductor, pasajeros |
 | 13 | Ausencias repetidas suspenden las reservas | Pasajero, conductor, administradora |
 | 14 | Compartir el viaje y atender una emergencia | Pasajera, administradora |
@@ -70,7 +70,7 @@ En PowerShell, desde la carpeta del proyecto (con `make` en Git Bash los comando
 | 16 | Calificaciones anónimas, reputación y moderación | Pasajeros, conductor, administradora |
 | 17 | Viaje solo para mujeres | Conductora, conductor, pasajeros, administradora |
 | 18 | El superadmin cambia una regla de pico y placa | Superadmin, conductores, pasajera |
-| 19 | Nuevo semestre y nueva versión de los términos | Superadmin, pasajeros |
+| 19 | Nuevo semestre, revalidación del carnet y términos | Superadmin, pasajeros |
 | 20 | Seguridad de la cuenta: bloqueo, recuperación, sanción y eliminación | Pasajero (Jhonatan), administradora |
 
 El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
@@ -181,7 +181,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 1. Laura y Jhonatan piden 1 puesto cada uno y Lucía pide 2. Las tres solicitudes quedan "Solicitada" y la búsqueda sigue mostrando 2 puestos libres.
 2. Andrés abre Solicitudes y ve las 3, con la calificación de cada pasajero y dónde lo recoge, sin correos ni teléfonos.
 3. Acepta a Lucía (2 puestos): quedan 0 libres.
-4. Intenta aceptar a Laura: `TRIP_FULL`. Laura ve el viaje lleno con la opción de unirse a la lista de espera.
+4. Intenta aceptar a Laura: `TRIP_FULL`. Laura ve "No quedan puestos suficientes en este viaje" y ya no puede pedir cupo.
 5. Laura intenta pedir el viaje B de Linda, que se cruza en horario con su solicitud del viaje A: `BOOKING_OVERLAP`.
 
 **Verificación adicional:** una prueba de backend acepta 6 solicitudes en paralelo sobre 2 puestos y solo 2 quedan aceptadas. Si Andrés no responde en 24 horas (o antes de la salida), la solicitud vence con aviso.
@@ -190,24 +190,24 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 ---
 
-## Caso 6. Lista de espera con oferta que vence y oferta aceptada
+## Caso 6. Viaje lleno: se libera un cupo y gana quien lo pide primero
 
-**Objetivo:** el cupo liberado se ofrece en orden de llegada, la oferta dura 15 minutos y confirmar crea una solicitud normal.
+**Objetivo:** con el viaje lleno nadie puede pedir cupo; cuando alguien cancela, el puesto vuelve a la búsqueda y la aprobación sigue bloqueando el cupo.
 
-**Precondiciones:** viaje A lleno (caso 5).
+**Precondiciones:** viaje A lleno (caso 5): Valentina y Lucía aceptadas; las solicitudes de Laura y Jhonatan vencidas o rechazadas.
 
 **Pasos y resultados esperados**
 
-1. Laura se anota en la lista de espera (posición 1) y después Jhonatan (posición 2). Si el viaje tuviera cupo, anotarse respondería `WAITLIST_NOT_NEEDED`.
-2. Valentina cancela su reserva con más de 2 horas de antelación: se libera 1 puesto.
-3. En menos de un minuto Laura recibe "Se liberó un cupo" con 15 minutos para responder. Jhonatan no recibe oferta todavía.
-4. Laura no responde. A los 15 minutos su oferta vence y pasa a Jhonatan.
-5. Jhonatan confirma: se crea una solicitud y Andrés la ve en su bandeja.
-6. Andrés la acepta: Jhonatan queda aceptado y la lista de espera de Laura sigue abierta por si se libera otro cupo.
+1. Laura y Jhonatan abren el viaje A: ven "No quedan puestos suficientes en este viaje" y no aparece el botón "Solicitar cupo". En la búsqueda el viaje no sale porque no tiene cupo.
+2. Valentina cancela su reserva con más de 2 horas de antelación: queda "Cancelada por ti" al instante y se libera 1 puesto.
+3. Andrés recibe el aviso de la cancelación; la búsqueda vuelve a mostrar el viaje A con 1 puesto libre.
+4. Laura y Jhonatan piden el puesto casi al mismo tiempo: las dos solicitudes quedan "Solicitada" (pedir no aparta el cupo).
+5. Andrés acepta primero a Jhonatan: el viaje vuelve a quedar en 0 puestos. Al intentar aceptar a Laura responde `TRIP_FULL` y la rechaza con el motivo "Ya no hay cupo".
+6. Laura recibe "Tu solicitud fue rechazada" con el motivo y puede buscar otro viaje.
 
-**Verificación adicional:** las ofertas vigentes nunca suman más que el cupo libre. Si el viaje se cancela, la lista de espera vence.
+**Verificación adicional:** pedir más puestos de los libres responde `TRIP_FULL` aunque el viaje tenga algún cupo. Las solicitudes sin respuesta vencen solas en 24 horas o al llegar la salida.
 
-**Prueba automatizada relacionada:** `backend/tests/test_bookings.py` (`test_waitlist_offers_freed_seats_in_order`).
+**Prueba automatizada relacionada:** `backend/tests/test_booking_concurrency.py`, `backend/tests/test_bookings.py`.
 
 ---
 
@@ -222,7 +222,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 1. Miércoles 14 a las 20:00, Laura cancela: queda "Cancelada por ti" de inmediato y se libera el puesto.
 2. Jueves 15 a las 5:00 (faltan 90 minutos), Jhonatan cancela sin motivo: `CANCEL_REASON_REQUIRED`. Con el motivo "Me enfermé", la reserva pasa a "Cancelación pendiente" y conserva el puesto.
 3. Andrés ve la solicitud en Cancelaciones por decidir, con la nota "Faltan menos de 2 horas: si aceptas, el cupo se libera".
-   - Si acepta: Jhonatan queda cancelado y el cupo pasa a la lista de espera.
+   - Si acepta: Jhonatan queda cancelado y el cupo vuelve a estar libre en la búsqueda.
    - Si rechaza: Jhonatan vuelve a "Aceptada".
    - Si no responde y el viaje sale: la solicitud se rechaza sola.
 4. Si Andrés marca a Jhonatan "A bordo" con la cancelación pendiente, la solicitud se rechaza; si lo marca "No se presentó", cuenta como ausencia.
@@ -272,44 +272,44 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 ---
 
-## Caso 10. Serie semanal con pico y placa y suscripción por 15 días
+## Caso 10. Repetir un viaje en la semana con duplicar y pico y placa
 
-**Objetivo:** una serie genera viajes repetidos dentro del semestre, salta los días de pico y placa, y una suscripción reserva varias fechas con una sola aprobación.
+**Objetivo:** la conductora repite su trayecto varios días con "Duplicar", la app respeta el pico y placa de su vehículo y cada viaje tiene sus propias reservas y su propio chat.
 
 **Precondiciones:** Linda puede publicar. Su Renault 9 `ABC123` termina en 3: tiene pico y placa los martes.
 
 **Pasos y resultados esperados**
 
-1. Linda publica una serie: lunes, martes y miércoles a las 6:30, Barrio Cariongo → Sede Casona, desde el lunes 19 de octubre, ventana de 28 días, 4 puestos, aporte 1.500.
-2. En el detalle de la serie, los martes aparecen como "Pico y placa" (cancelados) y los lunes y miércoles como "Programado".
-3. Laura abre la serie y elige "15 días" desde el lunes 19: el calendario marca los martes tachados y las fechas reservables.
-4. Linda aprueba la suscripción una sola vez. Laura recibe un aviso con cuántos viajes se reservaron y las fechas omitidas (los martes).
-5. Mis viajes > Series de Laura muestra la suscripción "Activa"; Próximos muestra cada fecha como reserva aceptada.
-6. Se crea un chat directo Linda-Laura para toda la serie, además del grupal de cada viaje.
+1. Linda publica el lunes 19 de octubre a las 6:30, Barrio Cariongo → Sede Casona, 4 puestos, aporte 1.500.
+2. En el detalle del viaje usa "Duplicar" con fecha martes 20 a las 6:30: responde `PICO_PLACA_RESTRICTED` ("Tu vehículo tiene pico y placa ese día").
+3. Duplica para el miércoles 21 a las 6:30: se publica una copia con la misma ruta, vehículo, puestos, aporte y reglas. Mis viajes muestra los dos en Próximos.
+4. En el asistente de publicar, si elige el martes 20, el paso "Fecha y hora" marca el aviso de pico y placa y no deja avanzar.
+5. Laura reserva el lunes y el miércoles; Linda las aprueba por separado desde Solicitudes.
+6. Cada viaje tiene su propio chat grupal: Laura ve dos conversaciones en Mensajes, una por fecha.
 
-**Verificación adicional:** una serie que empieza fuera de un semestre responde `SERIES_OUTSIDE_SEMESTER`; una solo de martes (todas las fechas en pico y placa), `SERIES_EMPTY`. Si Linda no responde en 24 horas, la suscripción vence.
+**Verificación adicional:** duplicar a una fecha pasada muestra "Elige una fecha de hoy en adelante"; duplicar a una hora que se cruza con otro viaje de Linda responde `TRIP_OVERLAP`.
 
-**Prueba automatizada relacionada:** `backend/tests/test_trips.py` (series), `backend/tests/test_subscriptions.py`.
+**Prueba automatizada relacionada:** `backend/tests/test_trips.py`, `backend/tests/test_pico_placa.py`, `frontend/src/app/features/publish/publish-wizard.spec.ts`.
 
 ---
 
-## Caso 11. Editar y cancelar una serie con suscriptores
+## Caso 11. La conductora cancela uno de sus viajes repetidos
 
-**Objetivo:** editar una serie con reservas exige confirmación; las fechas que desaparecen cancelan sus reservas con aviso.
+**Objetivo:** cancelar un viaje solo afecta a ese viaje: sus reservas se cancelan con aviso y motivo, su chat queda de solo lectura y los demás viajes siguen igual.
 
-**Precondiciones:** la serie y la suscripción del caso 10.
+**Precondiciones:** los viajes del lunes 19 y del miércoles 21 del caso 10, con Laura aceptada en los dos.
 
 **Pasos y resultados esperados**
 
-1. Linda quita el miércoles de la serie: el asistente avisa que hay reservas afectadas y pide confirmar (la API responde `SERIES_HAS_BOOKINGS` hasta recibir `confirm: true`).
-2. Confirma: los miércoles futuros desaparecen y las reservas de Laura en esos días quedan canceladas por la conductora, con aviso. Los lunes siguen reservados.
-3. Cambia la hora a 6:15: Laura recibe el aviso de cambio en sus viajes de los lunes.
-4. Laura cancela la suscripción: sus reservas futuras se cancelan con las reglas de cancelación de cada fecha.
-5. Linda cancela la serie con el motivo "Fin de mis clases presenciales": todas las ocurrencias futuras se cancelan y los chats se cierran.
+1. El domingo 18 Linda cambia la salida del miércoles a las 6:15: Laura recibe "El conductor cambió el viaje" y su hora de recogida se recalcula. El viaje del lunes no cambia.
+2. Linda cancela el viaje del miércoles con el motivo "Fin de mis clases presenciales": la reserva de Laura pasa a "Cancelada por el conductor" y Laura recibe el motivo.
+3. El chat del miércoles queda cerrado (solo lectura, con candado); el del lunes sigue abierto.
+4. Laura sigue teniendo la reserva del lunes en Próximos.
+5. En Estadísticas de Linda la cancelación cuenta como cancelación del conductor.
 
-**Verificación adicional:** las fechas pasadas o en curso nunca cambian al editar la serie.
+**Verificación adicional:** un viaje que ya empezó o terminó no se puede cancelar (`TRIP_NOT_EDITABLE`).
 
-**Prueba automatizada relacionada:** `backend/tests/test_subscriptions.py`, `backend/tests/test_trips.py`.
+**Prueba automatizada relacionada:** `backend/tests/test_trips.py`, `backend/tests/test_chat.py`.
 
 ---
 
@@ -347,7 +347,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 1. En otro viaje Jhonatan vuelve a no presentarse y el conductor lo marca: es su tercera ausencia en 30 días.
 2. Jhonatan recibe "Tus reservas quedaron suspendidas por 7 días por ausencias repetidas". Las reservas que ya tenía se mantienen.
 3. Intenta reservar otro viaje: `BOOKING_SUSPENDED`.
-4. Sofía abre Usuarios > Jhonatan: ve la suspensión automática en el historial de sanciones y usa "Levantar suspensión de reservas" con un motivo.
+4. Sofía abre Usuarios > Jhonatan: ve la suspensión de reservas en Sanciones vigentes, con su fecha de fin, y usa "Levantar suspensión de reservas" con un motivo.
 5. Jhonatan recibe "Ya puedes volver a reservar viajes" y puede reservar de nuevo.
 
 **Verificación adicional:** la auditoría registra `suspension.end` con Sofía como autora.
@@ -458,22 +458,22 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 ---
 
-## Caso 19. Nuevo semestre y nueva versión de los términos
+## Caso 19. Nuevo semestre, revalidación del carnet y términos
 
-**Objetivo:** la revalidación semestral del carnet y la aceptación obligatoria de términos nuevos.
+**Objetivo:** la revalidación semestral del carnet y la aceptación de los términos al registrarse.
 
 **Pasos y resultados esperados**
 
 1. El superadmin crea el semestre 2027-1 (1 de febrero a 30 de junio). Si se cruza con otro semestre: `SEMESTER_OVERLAP`.
 2. Al empezar 2027-1, el carnet de Laura (aprobado en 2026-2) vence y recibe el aviso de revalidación. Tiene hasta el plazo del semestre (30 días desde el inicio, por defecto) para subir el nuevo.
 3. Jhonatan no lo sube a tiempo: al pasar el plazo su cuenta vuelve a "En revisión" y solo ve su estado hasta que se apruebe un carnet nuevo. Administradores y superadmin no revalidan.
-4. El superadmin publica los términos versión 1.1 en español. Publicar otra vez la versión 1.1 en español responde `LEGAL_VERSION_EXISTS`.
-5. En su siguiente ingreso, cada persona con la app en español ve la pantalla de términos y no puede seguir sin aceptarlos. Quien la usa en inglés (por ejemplo Daniel, si cambia el idioma antes) sigue con la versión inglesa vigente hasta que se publique la suya.
-6. Laura acepta y continúa; la aceptación queda guardada con la versión exacta.
+4. Laura sube el carnet nuevo; Sofía lo aprueba y queda ligado al semestre 2027-1.
+5. En el registro (caso 1), sin marcar "Acepto los términos" y "Acepto la política de datos" no se puede enviar; al registrarse queda guardada la fecha de aceptación (`terms_accepted_at`).
+6. Los textos se leen en `/legal/terminos` y `/legal/datos` (archivos `frontend/public/legal/*.md`).
 
 **Verificación adicional:** borrar un semestre con documentos ligados responde `SEMESTER_IN_USE`.
 
-**Prueba automatizada relacionada:** `backend/tests/test_semesters.py`, `backend/tests/test_legal.py`, `backend/tests/test_approvals.py`.
+**Prueba automatizada relacionada:** `backend/tests/test_semesters.py`, `backend/tests/test_auth.py`, `backend/tests/test_approvals.py`.
 
 ---
 
@@ -503,8 +503,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 En cualquiera de los casos anteriores conviene verificar además:
 
-- **Idiomas:** cambiar a English, Português o Français traduce la pantalla al instante, sin recargar, incluidos los mensajes de error. Los correos de código llegan en el idioma de la persona.
-- **Tema:** claro, oscuro y "según el sistema" se aplican al instante; "Reducir transparencia" quita el vidrio.
+- **Textos:** toda la interfaz, los mensajes de error y los correos de código están en español.
 - **Celular:** en un teléfono la barra inferior muestra cinco destinos (el administrador tiene además "Más").
 - **Errores de red:** con el servidor detenido, las listas muestran "No pudimos cargar esta información" con Reintentar, nunca una lista vacía.
 - **Privacidad:** en ninguna pantalla aparecen el correo, el teléfono ni el documento de otra persona.

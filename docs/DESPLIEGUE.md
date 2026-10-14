@@ -32,7 +32,7 @@ git clone <repositorio> carpool_U && cd carpool_U
 make osrm     # una vez: descarga Colombia, la recorta a Pamplona y prepara el grafo de rutas (unos minutos)
 make tiles    # una vez: teselas del mapa base de Pamplona (cerca de 1 MB)
 make up       # crea .env desde .env.example si no existe, construye y levanta todo
-make seed     # parámetros, superadmin, semestre, lugares, pico y placa, términos y política (4 idiomas)
+make seed     # parámetros, superadmin, semestre, lugares, pico y placa
 ```
 
 Queda disponible en:

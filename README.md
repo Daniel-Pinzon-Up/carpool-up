@@ -4,23 +4,25 @@ Plataforma web para que la comunidad de la Universidad de Pamplona comparta tray
 
 ## Estado
 
+> **Rama `simplificacion`:** la base de datos pasó de 35 a 18 tablas (una sola migración inicial) y se quitaron los viajes recurrentes (series), la lista de espera, las suscripciones, los textos legales versionados, los factores de tráfico, el cambio de idioma (solo español) y el cambio de tema claro/oscuro. Ver [DECISIONES.md](docs/DECISIONES.md) y [DIAGRAMA_ER.md](docs/DIAGRAMA_ER.md).
+
 | Paso | Contenido | Estado |
 |------|-----------|--------|
 | 0 | Cimientos: monorepo, Docker Compose, FastAPI modular, Angular con sistema de diseño glass | Hecho |
-| 1 | Configuración y catálogos: parámetros, semestres, lugares, pico y placa, documentos legales y auditoría | Hecho |
+| 1 | Configuración y catálogos: parámetros, semestres, lugares, pico y placa y auditoría | Hecho |
 | 2 | Autenticación y cuentas: registro con documento, verificación de correo, 2FA, sesiones, recuperación, términos y pantallas | Hecho |
 | 3 | Aprobaciones y revalidación: cola de carnets y licencias, visor seguro, revalidación semestral, administradores, roles y notificaciones | Hecho |
 | 4 | Vehículos: CRUD con foto, reglas de placa y capacidad, requisitos para publicar e inicio del conductor | Hecho |
-| 5 | Rutas y mapas: OSRM con el mapa de Pamplona, ETA con factor de tráfico, aporte sugerido, mapa base propio y planificador de rutas | Hecho |
-| 6 | Publicación de viajes y series: asistente, ocurrencias, pico y placa, edición, cancelación, duplicado y Mis viajes del conductor | Hecho |
+| 5 | Rutas y mapas: OSRM con el mapa de Pamplona, ETA de OSRM, aporte sugerido, mapa base propio y planificador de rutas | Hecho |
+| 6 | Publicación de viajes: asistente, pico y placa, edición, cancelación, duplicado y Mis viajes del conductor | Hecho |
 | 7 | Búsqueda de viajes: coincidencia geográfica con la ruta, ventana horaria, preferencias, solo mujeres y punto de recogida | Hecho |
-| 8 | Reservas y suscripciones: aprobación con bloqueo, cancelaciones libres y tardías, retraso del conductor, lista de espera, suscripción a series y bandeja del conductor | Hecho |
-| 9 | Tiempo real, chat y notificaciones: WebSocket con Redis, chat grupal por viaje y directo por serie, retención, avisos en vivo y bandeja de mensajes | Hecho |
-| 10 | Ciclo del viaje y seguridad: iniciar, abordaje, no-show con sanción, tickets, ubicación en vivo, enlace público, contactos de confianza, emergencias y factores de tráfico | Hecho |
+| 8 | Reservas: aprobación con bloqueo, cancelaciones libres y tardías, retraso del conductor y bandeja del conductor | Hecho |
+| 9 | Tiempo real, chat y notificaciones: WebSocket con Redis, un chat por viaje, retención, avisos en vivo y bandeja de mensajes | Hecho |
+| 10 | Ciclo del viaje y seguridad: iniciar, abordaje, no-show con sanción, tickets, ubicación en vivo, enlace público, contactos de confianza y emergencias | Hecho |
 | 11 | Calificaciones, historial y estadísticas: calificación por criterio con plazo, reputación en búsqueda, historial con tickets y métricas por rol | Hecho |
 | 12 | Panel de administración: indicadores, usuarios con suspensión y bloqueo, monitoreo de viajes, emergencias en vivo, moderación y configuración completa del superadmin, todo auditado | Hecho |
-| 13 | Internacionalización y pulido: cuatro idiomas revisados, pantalla de ayuda, estados de error con reintento, contraste AA en ambos temas, sesión estable ante fallos pasajeros y axe sin errores graves en 24 pantallas | Hecho |
-| 14 | Calidad final y entrega: eliminación de cuenta (Ley 1581), términos en cuatro idiomas, carga inicial de 745 a 436 kB, revisión de seguridad (propiedad, límites, cabeceras, dependencias), respaldos verificados, E2E de punta a punta, CI y guías de despliegue y administración | Hecho |
+| 13 | Textos y pulido: textos en español centralizados, pantalla de ayuda, estados de error con reintento, contraste AA, sesión estable ante fallos pasajeros y axe sin errores graves en 24 pantallas | Hecho |
+| 14 | Calidad final y entrega: eliminación de cuenta (Ley 1581), términos y política de datos, carga inicial de 745 a 436 kB, revisión de seguridad (propiedad, límites, cabeceras, dependencias), respaldos verificados, E2E de punta a punta, CI y guías de despliegue y administración | Hecho |
 
 ## Documentación
 
@@ -52,7 +54,6 @@ make up          # Windows: .\make.ps1 up
 | PostgreSQL con PostGIS | localhost:5432 |
 | Redis | localhost:6379 |
 
-El catálogo de componentes del sistema de diseño está en `/catalogo` en modo desarrollo.
 
 ### Mapa y rutas
 
@@ -104,7 +105,7 @@ Corren con Playwright contra la app levantada (`make up`) y usan el Chrome insta
 docker compose --env-file .env -f infra/docker-compose.yml -f infra/docker-compose.dev.yml \
   exec -T api python -m app.cli e2e-users > frontend/e2e/.auth/credentials.json
 
-# 2. Pruebas: axe en 24 pantallas, ambos temas, escritorio y telefono; idioma y tema sin recargar.
+# 2. Pruebas: axe en 24 pantallas en escritorio y telefono, registro de cuenta y recorrido completo.
 cd frontend && npm run e2e
 ```
 

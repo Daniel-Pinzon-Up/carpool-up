@@ -30,7 +30,7 @@ Cada semestre las personas revalidan su carnet dentro del plazo del semestre (Co
 
 ## 4. Usuarios
 
-Búsqueda por nombre o correo, con filtros de rol y estado. La ficha muestra documentos, métricas, calificación e historial de sanciones.
+Búsqueda por nombre o correo, con filtros de rol y estado. La ficha muestra documentos, métricas, calificación y las sanciones vigentes (suspensión de la cuenta y de reservas).
 
 | Acción | Efecto |
 |--------|--------|
@@ -66,10 +66,9 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 | Pestaña | Para qué |
 |---------|----------|
 | **Parámetros** | Reglas del negocio (tabla de abajo). El servidor valida cada valor antes de guardarlo. |
-| **Semestres** | Inicio, fin y plazo de revalidación. Las series y la vigencia de los carnets dependen de ellos. |
+| **Semestres** | Inicio, fin y plazo de revalidación. La vigencia de los carnets depende de ellos. |
 | **Lugares** | Sedes, barrios y puntos de referencia del buscador. Desactivar en vez de borrar: los viajes antiguos los siguen usando. Las coordenadas del seed son aproximadas: revísalas. |
 | **Pico y placa** | Tipo de vehículo, día, dígitos restringidos y vigencia. Al guardar, los viajes futuros afectados se cancelan solos con aviso; si una regla deja de aplicar, vuelven. Las reglas del seed son de ejemplo: ajústalas al decreto vigente. |
-| **Legal** | Publica una versión nueva de los términos o de la política de datos por idioma. Queda vigente de inmediato y todos deben aceptarla en su próximo ingreso. Los textos del seed son un borrador pendiente de revisión jurídica. |
 | **Administradores** | Crear cuentas de administrador. La contraseña inicial debe compartirse por un canal seguro. |
 | **Auditoría** | Filtra por acción o entidad; cada entrada muestra el antes y el después. |
 
@@ -85,7 +84,6 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 | `search_time_window_minutes` | 60 | Tolerancia de horario en la búsqueda |
 | `cost_per_km_car` / `cost_per_km_motorcycle` | vacío | Si se definen, la app sugiere el aporte según la distancia |
 | `max_price_per_seat` | vacío | Tope de aporte por puesto |
-| `waitlist_offer_minutes` | 15 | Tiempo para aceptar un cupo de la lista de espera |
 | `rating_window_days` | 7 | Días para calificar después del viaje |
 | `chat_retention_days` | 30 | Días que se conserva el chat después del viaje |
 | `pending_request_hours` | 24 | Horas tras las que vence una solicitud sin respuesta |
@@ -113,3 +111,7 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 ## 10. Mantenimiento
 
 Ver la [guía de despliegue](DESPLIEGUE.md): correo real, respaldos diarios (`make backup-check` para comprobarlos), restauración, actualizaciones y problemas frecuentes.
+
+## Términos y política de datos
+
+Son los archivos `frontend/public/legal/terminos.md` y `frontend/public/legal/datos.md`. Para cambiarlos se edita el archivo y se vuelve a construir el frontend (`make up`). Son un borrador pendiente de revisión jurídica.
