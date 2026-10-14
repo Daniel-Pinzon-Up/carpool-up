@@ -14,7 +14,7 @@ router = APIRouter(prefix="/conversations", tags=["chat"])
 
 @router.get("")
 async def list_conversations(user: ActiveUser, session: DbSession) -> list[ConversationOut]:
-    """Chats del usuario: grupales de cada viaje y directos con el conductor o pasajero."""
+    """Chats del usuario: uno por cada viaje en el que participa."""
     return await ChatService(session).list_for(user)
 
 
