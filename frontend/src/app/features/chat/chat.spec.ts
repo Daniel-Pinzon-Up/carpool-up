@@ -53,12 +53,9 @@ function message(
 
 const GROUP: Conversation = {
   id: 'c1',
-  kind: 'trip_group',
   trip_id: 't1',
-  series_id: null,
   title: 'Ciudad Universitaria - Terminal',
   departs_at: '2026-10-06T12:00:00Z',
-  counterpart: null,
   members: [
     { id: 'd1', full_name: 'Carlos Ruiz', is_driver: true },
     { id: ME.id, full_name: ME.full_name, is_driver: false },

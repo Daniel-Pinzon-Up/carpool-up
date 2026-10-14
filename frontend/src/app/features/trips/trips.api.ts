@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import type { BookingStatus, SubscriptionStatus, WaitlistStatus } from '../bookings/bookings.api';
+import type { BookingStatus } from '../bookings/bookings.api';
 import { VehicleType } from '../vehicles/vehicles.api';
 
 export type TripStatus =
@@ -11,9 +11,7 @@ export type TripStatus =
   | 'cancelled_by_driver'
   | 'cancelled_pico_placa'
   | 'not_held';
-export type SeriesStatus = 'active' | 'cancelled' | 'finished';
 export type RuleKind = 'women_only' | 'pets' | 'luggage' | 'smoking' | 'music' | 'custom';
-export type SeriesWindow = number | 'semester';
 
 export interface TripRule {
   kind: RuleKind;
@@ -42,7 +40,6 @@ export interface VehicleSummary {
 
 export interface TripSummary {
   id: string;
-  series_id: string | null;
   status: TripStatus;
   departs_at: string;
   arrives_at: string;
@@ -76,13 +73,6 @@ export interface MyBooking {
   dropoff_eta: string;
 }
 
-export interface MyWaitlist {
-  id: string;
-  status: WaitlistStatus;
-  seats: number;
-  offer_expires_at: string | null;
-}
-
 export interface Trip extends TripSummary {
   geometry: number[][];
   distance_m: number;
@@ -95,46 +85,8 @@ export interface Trip extends TripSummary {
   passengers: CoPassenger[];
   payment_note: string | null;
   my_booking: MyBooking | null;
-  my_waitlist: MyWaitlist | null;
   /** Chat grupal del viaje si quien consulta participa. */
   chat_id: string | null;
-}
-
-export interface OccurrenceCounts {
-  total: number;
-  scheduled: number;
-  pico_placa: number;
-  cancelled: number;
-}
-
-export interface SeriesSummary {
-  id: string;
-  status: SeriesStatus;
-  weekdays: number[];
-  departure_time: string;
-  window_start: string;
-  window_end: string;
-  seats: number;
-  price_per_seat: number;
-  origin: string;
-  destination: string;
-  vehicle: VehicleSummary;
-  next_departure: string | null;
-  counts: OccurrenceCounts;
-}
-
-export interface Series extends SeriesSummary {
-  stops: TripStop[];
-  rules: TripRule[];
-  driver: { id: string; full_name: string };
-  cancel_reason: string | null;
-  occurrences: TripSummary[];
-  my_subscription: {
-    id: string;
-    status: SubscriptionStatus;
-    from_date: string;
-    to_date: string;
-  } | null;
 }
 
 export interface Page<T> {
@@ -142,7 +94,8 @@ export interface Page<T> {
   next_cursor: string | null;
 }
 
-interface TripTemplate {
+export interface TripCreate {
+  departs_at: string;
   place_ids: string[];
   vehicle_id: string;
   seats: number;
@@ -150,22 +103,7 @@ interface TripTemplate {
   rules: TripRule[];
 }
 
-export interface TripCreate extends TripTemplate {
-  departs_at: string;
-}
-
-export interface SeriesCreate extends TripTemplate {
-  weekdays: number[];
-  departure_time: string;
-  start_date: string;
-  window: SeriesWindow;
-}
-
 export type TripUpdate = Partial<TripCreate>;
-export type SeriesUpdate = Partial<Omit<SeriesCreate, 'start_date' | 'window'>> & {
-  /** Confirma el cambio cuando hay reservas afectadas. */
-  confirm?: boolean;
-};
 
 export interface Semester {
   id: string;
@@ -196,50 +134,26 @@ export class TripsApi {
     return this.post('/trips', body);
   }
 
-  publishSeries(body: SeriesCreate): Promise<Series> {
-    return this.post('/series', body);
-  }
-
   myTrips(scope: 'upcoming' | 'history', cursor?: string | null): Promise<Page<TripSummary>> {
     let params = new HttpParams().set('scope', scope).set('limit', 20);
     if (cursor) params = params.set('cursor', cursor);
     return this.get('/trips/mine', params);
   }
 
-  mySeries(): Promise<SeriesSummary[]> {
-    return this.get('/series/mine');
-  }
-
   trip(id: string): Promise<Trip> {
     return this.get(`/trips/${id}`);
-  }
-
-  series(id: string): Promise<Series> {
-    return this.get(`/series/${id}`);
   }
 
   updateTrip(id: string, body: TripUpdate): Promise<Trip> {
     return this.patch(`/trips/${id}`, body);
   }
 
-  updateSeries(id: string, body: SeriesUpdate): Promise<Series> {
-    return this.patch(`/series/${id}`, body);
-  }
-
   cancelTrip(id: string, reason: string): Promise<Trip> {
     return this.post(`/trips/${id}/cancel`, { reason });
   }
 
-  cancelSeries(id: string, reason: string): Promise<Series> {
-    return this.post(`/series/${id}/cancel`, { reason });
-  }
-
   duplicateTrip(id: string, departsAt: string): Promise<Trip> {
     return this.post(`/trips/${id}/duplicate`, { departs_at: departsAt });
-  }
-
-  duplicateSeries(id: string, startDate: string, window: SeriesWindow): Promise<Series> {
-    return this.post(`/series/${id}/duplicate`, { start_date: startDate, window });
   }
 
   picoPlacaDates(vehicleId: string, from: string, to: string): Promise<string[]> {
@@ -282,30 +196,4 @@ export function addDays(date: string, days: number): string {
   const [y, m, d] = date.split('-').map(Number);
   const result = new Date(Date.UTC(y, m - 1, d + days));
   return result.toISOString().slice(0, 10);
-}
-
-/** Dia de la semana de una fecha YYYY-MM-DD con 0 = lunes, como el backend. */
-export function weekdayOf(date: string): number {
-  const [y, m, d] = date.split('-').map(Number);
-  return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
-}
-
-/**
- * Fechas que generaria una serie: dias elegidos dentro de la ventana, sin pasar del
- * fin del semestre. Es una vista previa; el servidor decide.
- */
-export function seriesDates(
-  start: string,
-  window: SeriesWindow,
-  weekdays: number[],
-  semesterEnd: string | null,
-): string[] {
-  let end = window === 'semester' ? semesterEnd : addDays(start, window - 1);
-  if (!end) return [];
-  if (semesterEnd && end > semesterEnd) end = semesterEnd;
-  const dates: string[] = [];
-  for (let day = start; day <= end; day = addDays(day, 1)) {
-    if (weekdays.includes(weekdayOf(day))) dates.push(day);
-  }
-  return dates;
 }

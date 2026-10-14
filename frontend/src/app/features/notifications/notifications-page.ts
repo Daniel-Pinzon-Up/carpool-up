@@ -44,19 +44,15 @@ const ICONS: Record<string, LucideIcon> = {
   role_changed: LucideUserCog,
   booking_requested: LucideInbox,
   cancellation_requested: LucideInbox,
-  subscription_requested: LucideInbox,
   booking_accepted: LucideTicket,
-  subscription_accepted: LucideTicket,
   cancellation_accepted: LucideCircleCheck,
   booking_rejected: LucideCircleX,
-  subscription_rejected: LucideCircleX,
   cancellation_rejected: LucideCircleX,
   booking_cancelled_by_driver: LucideCalendarX,
   booking_auto_cancelled_late: LucideCalendarX,
   booking_pico_placa_cancelled: LucideCalendarX,
   trip_pico_placa_cancelled: LucideCalendarX,
   trip_changed: LucideRoute,
-  waitlist_offer: LucideHourglass,
   message_new: LucideMessageCircle,
   trip_reminder: LucideHourglass,
   trip_reminder_driver: LucideHourglass,
@@ -84,13 +80,6 @@ const LINKS: Record<string, string> = {
   role_changed: '/perfil',
   booking_requested: '/solicitudes',
   cancellation_requested: '/solicitudes',
-  subscription_requested: '/solicitudes',
-  waitlist_offer: '/mis-viajes',
-  waitlist_offer_expired: '/mis-viajes',
-  subscription_accepted: '/mis-viajes',
-  subscription_rejected: '/mis-viajes',
-  subscription_expired: '/mis-viajes',
-  subscription_ended: '/mis-viajes',
   booking_suspended: '/mis-viajes',
   emergency_alert: '/admin/emergencias',
   account_suspended: '/perfil',
@@ -228,11 +217,11 @@ export default class NotificationsPage {
     return ICONS[item.kind] ?? LucideBell;
   }
 
-  /** Destino fijo del tipo o, si el aviso trae un viaje o una serie, su detalle. */
+  /** Destino fijo del tipo o, si el aviso trae un viaje, su detalle. */
   protected link(item: AppNotification): string {
     const fixed = LINKS[item.kind];
     if (fixed) return fixed;
-    const { trip_id: trip, series_id: series, conversation_id: chat } = item.payload;
+    const { trip_id: trip, conversation_id: chat } = item.payload;
     if (typeof chat === 'string') return `/mensajes/${chat}`;
     if (
       (item.kind === 'rating_pending' || item.kind === 'rating_reminder') &&
@@ -242,7 +231,6 @@ export default class NotificationsPage {
     }
     if (item.kind === 'rating_received') return '/perfil';
     if (typeof trip === 'string') return `/viajes/${trip}`;
-    if (typeof series === 'string') return `/series/${series}`;
     return '/notificaciones';
   }
 

@@ -18,7 +18,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideArrowLeft, LucideLock, LucideRotateCw, LucideSendHorizontal, LucideX } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { LiveEvent, RealtimeService } from '../../core/ws/realtime.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { Skeleton } from '../../shared/ui/skeleton';
@@ -85,15 +85,9 @@ const TYPING_SHOW_MS = 4000;
           <h2 class="truncate font-bold">{{ heading() }}</h2>
           <p class="truncate text-sm text-muted">{{ subtitle() }}</p>
         </div>
-        @if (c.trip_id) {
-          <a [routerLink]="['/viajes', c.trip_id]" class="text-sm font-semibold text-primary">
-            {{ 'chat.viewTrip' | transloco }}
-          </a>
-        } @else if (c.series_id) {
-          <a [routerLink]="['/series', c.series_id]" class="text-sm font-semibold text-primary">
-            {{ 'chat.viewSeries' | transloco }}
-          </a>
-        }
+        <a [routerLink]="['/viajes', c.trip_id]" class="text-sm font-semibold text-primary">
+          {{ 'chat.viewTrip' | transloco }}
+        </a>
       </header>
 
       <div #scroller class="min-h-0 flex-1 overflow-y-auto px-4 py-3" (scroll)="onScroll()">
@@ -116,7 +110,7 @@ const TYPING_SHOW_MS = 4000;
                 class="max-w-[85%] rounded-2xl px-3 py-2 sm:max-w-[70%]"
                 [class]="mine(m) ? 'bg-accent text-on-accent' : 'glass-1'"
               >
-                @if (!mine(m) && c.kind === 'trip_group') {
+                @if (!mine(m)) {
                   <p class="text-xs font-semibold">{{ m.sender_name }}</p>
                 }
                 <p class="break-words whitespace-pre-wrap">{{ m.body }}</p>
@@ -218,7 +212,6 @@ export class ConversationView {
   private readonly realtime = inject(RealtimeService);
   private readonly auth = inject(AuthService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
 
   protected readonly max = MAX_MESSAGE_LENGTH;
@@ -238,15 +231,13 @@ export class ConversationView {
   protected readonly canSend = computed(() => this.draftText().trim().length > 0);
   protected readonly heading = computed(() => {
     const c = this.conversation();
-    if (!c) return '';
-    return c.kind === 'direct' && c.counterpart ? c.counterpart : c.title;
+    return c ? c.title : '';
   });
   protected readonly subtitle = computed(() => {
     const c = this.conversation();
     if (!c) return '';
-    if (c.kind === 'direct') return c.title;
     const names = c.members.map((m) => m.full_name).join(', ');
-    return c.departs_at ? `${this.day(c.departs_at)} · ${names}` : names;
+    return `${this.day(c.departs_at)} · ${names}`;
   });
 
   constructor() {
@@ -449,7 +440,7 @@ export class ConversationView {
   }
 
   protected day(iso: string): string {
-    return new Date(iso).toLocaleDateString(this.language.current(), {
+    return new Date(iso).toLocaleDateString(LOCALE, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -458,7 +449,7 @@ export class ConversationView {
   }
 
   protected time(iso: string): string {
-    return new Date(iso).toLocaleTimeString(this.language.current(), {
+    return new Date(iso).toLocaleTimeString(LOCALE, {
       hour: 'numeric',
       minute: '2-digit',
       timeZone: 'America/Bogota',

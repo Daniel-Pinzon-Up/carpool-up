@@ -8,8 +8,8 @@ import { GlassCard } from '../../shared/ui/glass-card';
 /** Preguntas por grupo; los textos viven en help.q.<id>.q y help.q.<id>.a. */
 export const HELP_GROUPS: { id: string; questions: string[] }[] = [
   { id: 'account', questions: ['who', 'code', 'revalidate'] },
-  { id: 'passenger', questions: ['search', 'cancel', 'noShow', 'waitlist'] },
-  { id: 'driver', questions: ['become', 'series', 'picoPlaca', 'price'] },
+  { id: 'passenger', questions: ['search', 'cancel', 'noShow'] },
+  { id: 'driver', questions: ['become', 'picoPlaca', 'price'] },
   { id: 'safety', questions: ['share', 'emergency'] },
   { id: 'privacy', questions: ['data', 'ratings'] },
 ];
@@ -27,7 +27,6 @@ const DEFAULTS: Record<string, unknown> = {
   no_show_limit: 3,
   no_show_window_days: 30,
   no_show_ban_days: 7,
-  waitlist_offer_minutes: 15,
   emergency_phone: '123',
   rating_window_days: 7,
 };
@@ -126,7 +125,6 @@ export default class HelpPage {
       limit: s['no_show_limit'],
       windowDays: s['no_show_window_days'],
       ban: s['no_show_ban_days'],
-      offer: s['waitlist_offer_minutes'],
       phone: s['emergency_phone'],
       ratingDays: s['rating_window_days'],
     };

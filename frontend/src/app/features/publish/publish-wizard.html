@@ -1,14 +1,7 @@
 <div class="mx-auto flex max-w-6xl flex-col gap-5 py-2">
   <header>
     <h1 class="text-2xl font-bold sm:text-3xl">
-      {{
-        (mode() === 'create'
-          ? 'publish.title'
-          : mode() === 'edit-trip'
-            ? 'publish.editTripTitle'
-            : 'publish.editSeriesTitle'
-        ) | transloco
-      }}
+      {{ (mode() === 'create' ? 'publish.title' : 'publish.editTripTitle') | transloco }}
     </h1>
     <p class="text-muted">{{ 'publish.subtitle' | transloco }}</p>
   </header>
@@ -27,43 +20,6 @@
       </h2>
 
       @switch (step()) {
-        @case ('type') {
-          <fieldset class="flex flex-col gap-3">
-            <legend class="sr-only">{{ 'publish.type.legend' | transloco }}</legend>
-            @for (option of ['single', 'series']; track option) {
-              <label
-                class="glass-1 !rounded-2xl flex cursor-pointer items-start gap-3 p-4 has-[:checked]:ring-2 has-[:checked]:ring-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
-              >
-                <input
-                  type="radio"
-                  formControlName="kind"
-                  [value]="option"
-                  class="mt-1 size-4 accent-[var(--accent)]"
-                />
-                <span class="flex flex-col gap-1">
-                  <span class="flex items-center gap-2 font-semibold">
-                    @if (option === 'single') {
-                      <svg lucideCalendarDays class="size-5 text-accent" aria-hidden="true"></svg>
-                    } @else {
-                      <svg lucideRepeat class="size-5 text-accent" aria-hidden="true"></svg>
-                    }
-                    {{ 'publish.type.' + option | transloco }}
-                  </span>
-                  <span class="text-sm text-muted">{{
-                    'publish.type.' + option + 'Hint' | transloco
-                  }}</span>
-                </span>
-              </label>
-            }
-            @if (semesterMissing()) {
-              <p class="flex gap-2 text-sm text-muted">
-                <svg lucideCircleAlert class="size-4 shrink-0" aria-hidden="true"></svg>
-                {{ 'publish.type.noSemester' | transloco }}
-              </p>
-            }
-          </fieldset>
-        }
-
         @case ('route') {
           <div class="flex flex-col gap-4">
             <cp-place-picker formControlName="origin" [label]="'planner.origin' | transloco" />
@@ -106,102 +62,22 @@
 
         @case ('when') {
           <div class="flex flex-col gap-4">
-            @if (isSeries()) {
-              <fieldset>
-                <legend class="mb-2 text-sm font-medium">
-                  {{ 'publish.when.weekdays' | transloco }}
-                </legend>
-                <div class="flex flex-wrap gap-2">
-                  @for (day of weekdays; track day) {
-                    <cp-glass-chip
-                      [selected]="selectedWeekdays().includes(day)"
-                      (selectedChange)="toggleWeekday(day, $event)"
-                    >
-                      <span aria-hidden="true">{{ weekdayName(day, 'short') }}</span>
-                      <span class="sr-only">{{ weekdayName(day) }}</span>
-                    </cp-glass-chip>
-                  }
-                </div>
-              </fieldset>
-              <cp-glass-input
-                formControlName="time"
-                type="time"
-                [label]="'publish.when.time' | transloco"
-                [hint]="'publish.when.timeHint' | transloco"
-              />
-              @if (mode() === 'create') {
-                <cp-glass-input
-                  formControlName="start_date"
-                  type="date"
-                  [label]="'publish.when.startDate' | transloco"
-                />
-                <cp-glass-select
-                  formControlName="window"
-                  [label]="'publish.when.window' | transloco"
-                  [options]="windowOptions()"
-                />
-              } @else {
-                <p class="text-sm text-muted">
-                  {{
-                    'publish.when.windowFixed'
-                      | transloco: { end: formatDate(editingSeries()?.window_end ?? today()) }
-                  }}
-                </p>
-              }
-
-              <section aria-labelledby="series-dates-title" class="flex flex-col gap-2">
-                <h3 id="series-dates-title" class="flex items-center gap-2 text-sm font-semibold">
-                  <svg lucideCalendarRange class="size-4" aria-hidden="true"></svg>
-                  {{
-                    'publish.when.datesTitle'
-                      | transloco: { count: bookableCount(), total: seriesPlan().length }
-                  }}
-                </h3>
-                <ul class="flex max-h-48 flex-wrap gap-1.5 overflow-y-auto">
-                  @for (day of seriesPlan(); track day.date) {
-                    <li
-                      class="rounded-full px-2.5 py-1 text-xs font-medium"
-                      [class]="day.blocked ? 'bg-warning/15 text-text line-through' : 'bg-glass'"
-                    >
-                      {{ formatDate(day.date) }}
-                      @if (day.blocked) {
-                        <span class="sr-only">({{ 'publish.when.picoPlacaDay' | transloco }})</span>
-                      }
-                    </li>
-                  }
-                </ul>
-                @if (seriesPlan().length > bookableCount()) {
-                  <p class="flex gap-2 text-sm text-muted">
-                    <svg
-                      lucideTriangleAlert
-                      class="size-4 shrink-0 text-warning"
-                      aria-hidden="true"
-                    ></svg>
-                    {{
-                      'publish.when.picoPlacaSeries'
-                        | transloco: { count: seriesPlan().length - bookableCount() }
-                    }}
-                  </p>
-                }
-              </section>
-            } @else {
-              <cp-glass-input
-                formControlName="date"
-                type="date"
-                [label]="'publish.when.date' | transloco"
-              />
-              <cp-glass-input
-                formControlName="time"
-                type="time"
-                [label]="'publish.when.time' | transloco"
-                [hint]="'publish.when.timeHint' | transloco"
-              />
-              @if (singleBlocked()) {
-                <p role="alert" class="flex gap-2 text-sm text-danger">
-                  <svg lucideTriangleAlert class="size-4 shrink-0" aria-hidden="true"></svg>
-                  {{ 'publish.when.picoPlacaSingle' | transloco }}
-                </p>
-              }
+            <cp-glass-input
+              formControlName="date"
+              type="date"
+              [label]="'publish.when.date' | transloco"
+            />
+            <cp-glass-input
+              formControlName="time"
+              type="time"
+              [label]="'publish.when.time' | transloco"
+              [hint]="'publish.when.timeHint' | transloco"
+            />
+            @if (singleBlocked()) {
+              <p role="alert" class="flex gap-2 text-sm text-danger">
+                <svg lucideTriangleAlert class="size-4 shrink-0" aria-hidden="true"></svg>
+                {{ 'publish.when.picoPlacaSingle' | transloco }}
+              </p>
             }
           </div>
         }
@@ -312,22 +188,9 @@
         @case ('summary') {
           <dl class="flex flex-col gap-3 text-sm">
             <div>
-              <dt class="text-muted">{{ 'publish.summary.type' | transloco }}</dt>
-              <dd class="font-semibold">
-                {{ 'publish.type.' + (isSeries() ? 'series' : 'single') | transloco }}
-              </dd>
-            </div>
-            <div>
               <dt class="text-muted">{{ 'publish.summary.when' | transloco }}</dt>
               <dd class="font-semibold">
-                @if (isSeries()) {
-                  {{
-                    'publish.summary.seriesWhen'
-                      | transloco: { count: bookableCount(), time: form.controls.time.value }
-                  }}
-                } @else {
-                  {{ formatDate(form.controls.date.value) }}, {{ form.controls.time.value }}
-                }
+                {{ formatDate(form.controls.date.value) }}, {{ form.controls.time.value }}
               </dd>
             </div>
             <div>

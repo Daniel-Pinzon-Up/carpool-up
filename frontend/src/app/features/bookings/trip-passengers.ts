@@ -50,11 +50,11 @@ import { Booking, BookingsApi } from './bookings.api';
                 <button cp-button variant="secondary" type="button" (click)="reject(b)">
                   {{ 'bookings.inbox.reject' | transloco }}
                 </button>
-              } @else if (b.cancellation; as c) {
-                <button cp-button type="button" (click)="resolve(c.id, true)">
+              } @else if (b.cancellation) {
+                <button cp-button type="button" (click)="resolve(b.id, true)">
                   {{ 'bookings.inbox.acceptCancellation' | transloco }}
                 </button>
-                <button cp-button variant="secondary" type="button" (click)="resolve(c.id, false)">
+                <button cp-button variant="secondary" type="button" (click)="resolve(b.id, false)">
                   {{ 'bookings.inbox.rejectCancellation' | transloco }}
                 </button>
               }
@@ -183,7 +183,7 @@ export class TripPassengers {
     }
   }
 
-  protected async resolve(requestId: string, accept: boolean): Promise<void> {
-    await this.after(await this.actions.resolveCancellation(requestId, accept));
+  protected async resolve(bookingId: string, accept: boolean): Promise<void> {
+    await this.after(await this.actions.resolveCancellation(bookingId, accept));
   }
 }

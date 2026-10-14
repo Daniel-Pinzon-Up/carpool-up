@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { LucideLock, LucideMessagesSquare, LucideUser, LucideUsers } from '@icons';
+import { LucideLock, LucideMessagesSquare, LucideUsers } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { RealtimeService } from '../../core/ws/realtime.service';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassCard } from '../../shared/ui/glass-card';
@@ -31,7 +31,6 @@ import { ConversationView } from './conversation-view';
     GlassCard,
     Skeleton,
     LucideLock,
-    LucideUser,
     LucideUsers,
   ],
   template: `
@@ -61,11 +60,7 @@ import { ConversationView } from './conversation-view';
                     <span
                       class="grid size-11 shrink-0 place-items-center rounded-full bg-primary/15"
                     >
-                      @if (c.kind === 'trip_group') {
-                        <svg lucideUsers class="size-5 text-primary" aria-hidden="true"></svg>
-                      } @else {
-                        <svg lucideUser class="size-5 text-primary" aria-hidden="true"></svg>
-                      }
+                      <svg lucideUsers class="size-5 text-primary" aria-hidden="true"></svg>
                     </span>
                     <span class="min-w-0 flex-1">
                       <span class="flex items-center gap-2">
@@ -141,7 +136,6 @@ export default class MessagesPage {
   private readonly api = inject(ChatApi);
   private readonly auth = inject(AuthService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly emptyIcon = LucideMessagesSquare;
   protected readonly conversations = signal<Conversation[] | null>(null);
@@ -197,18 +191,11 @@ export default class MessagesPage {
   }
 
   protected name(c: Conversation): string {
-    return c.kind === 'direct' && c.counterpart ? c.counterpart : c.title;
+    return c.title;
   }
 
   protected detail(c: Conversation): string {
-    if (c.kind === 'direct') {
-      return this.transloco.translate(c.series_id ? 'chat.directSeries' : 'chat.directTrip', {
-        route: c.title,
-      });
-    }
-    return c.departs_at
-      ? this.transloco.translate('chat.groupOn', { when: this.when(c.departs_at, true) })
-      : c.title;
+    return this.transloco.translate('chat.groupOn', { when: this.when(c.departs_at, true) });
   }
 
   protected preview(c: Conversation): string {
@@ -224,7 +211,7 @@ export default class MessagesPage {
   protected when(iso: string, withDate = false): string {
     const date = new Date(iso);
     const today = new Date().toDateString() === date.toDateString();
-    return date.toLocaleString(this.language.current(), {
+    return date.toLocaleString(LOCALE, {
       timeZone: 'America/Bogota',
       ...(today && !withDate
         ? { hour: 'numeric', minute: '2-digit' }

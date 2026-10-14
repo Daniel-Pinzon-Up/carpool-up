@@ -15,7 +15,6 @@ import {
   LucideMessageCircle,
   LucideFootprints,
   LucidePencil,
-  LucideRepeat,
   LucideRoute,
   LucideTriangleAlert,
   LucideUsers,
@@ -28,7 +27,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { NotificationsStore } from '../../core/notifications/notifications.store';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { MapMarker, MapView } from '../../shared/map/map-view';
 import { formatCop } from '../../shared/map/routing.api';
 import { DialogService } from '../../shared/ui/dialog.service';
@@ -38,12 +37,7 @@ import { ErrorState } from '../../shared/ui/error-state';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
-import {
-  CancelDialogData,
-  CancelTripDialog,
-  DuplicateDialog,
-  DuplicateResult,
-} from './trip-dialogs';
+import { CancelDialogData, CancelTripDialog, DuplicateDialog } from './trip-dialogs';
 import { TRIP_STATUS_TONE, formatDeparture, formatTime } from './trip-status';
 import { BookingPanel, SearchedPlaces } from '../bookings/booking-panel';
 import { TripPassengers } from '../bookings/trip-passengers';
@@ -76,7 +70,6 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
     LucideMessageCircle,
     LucideFootprints,
     LucidePencil,
-    LucideRepeat,
     LucideRoute,
     LucideTriangleAlert,
     LucideUsers,
@@ -158,15 +151,6 @@ import { Trip, TripsApi, pamplonaTime } from './trips.api';
           >
             <svg lucideMessageCircle class="size-4" aria-hidden="true"></svg>
             {{ 'chat.openTrip' | transloco }}
-          </a>
-        }
-        @if (t.series_id && isOwner()) {
-          <a
-            [routerLink]="['/series', t.series_id]"
-            class="inline-flex min-h-11 items-center gap-2 self-start font-semibold text-primary"
-          >
-            <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
-            {{ 'trips.viewSeries' | transloco }}
           </a>
         }
 
@@ -339,7 +323,6 @@ export default class TripDetail {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly trip = signal<Trip | null>(null);
   /** Recogida y bajada calculadas por la busqueda (llegan en el estado de la navegacion). */
@@ -379,19 +362,17 @@ export default class TripDetail {
   protected readonly tone = computed(() => TRIP_STATUS_TONE[this.trip()?.status ?? 'scheduled']);
   protected readonly when = computed(() => {
     const trip = this.trip();
-    return trip ? formatDeparture(trip.departs_at, this.language.current()) : '';
+    return trip ? formatDeparture(trip.departs_at, LOCALE) : '';
   });
   protected readonly km = computed(() =>
-    ((this.trip()?.distance_m ?? 0) / 1000).toLocaleString(this.language.current(), {
+    ((this.trip()?.distance_m ?? 0) / 1000).toLocaleString(LOCALE, {
       maximumFractionDigits: 1,
     }),
   );
   protected readonly minutes = computed(() =>
     Math.max(1, Math.round((this.trip()?.est_duration_s ?? 0) / 60)),
   );
-  protected readonly money = computed(() =>
-    formatCop(this.trip()?.price_per_seat ?? 0, this.language.current()),
-  );
+  protected readonly money = computed(() => formatCop(this.trip()?.price_per_seat ?? 0, LOCALE));
   protected readonly markers = computed<MapMarker[]>(() => {
     const stops: MapMarker[] = (this.trip()?.stops ?? []).map((stop) => ({
       lat: stop.lat,
@@ -488,7 +469,7 @@ export default class TripDetail {
   }
 
   protected time(iso: string): string {
-    return formatTime(iso, this.language.current());
+    return formatTime(iso, LOCALE);
   }
 
   protected stopColor(kind: string): string {
@@ -519,14 +500,13 @@ export default class TripDetail {
   protected async duplicate(): Promise<void> {
     const trip = this.trip();
     if (!trip) return;
-    const ref = this.dialogs.open<DuplicateResult, unknown, DuplicateDialog>(DuplicateDialog, {
-      kind: 'trip',
+    const ref = this.dialogs.open<string, unknown, DuplicateDialog>(DuplicateDialog, {
       time: pamplonaTime(trip.departs_at),
     });
-    const result = await firstValueFrom(ref.closed);
-    if (!result || result.kind !== 'trip') return;
+    const departsAt = await firstValueFrom(ref.closed);
+    if (!departsAt) return;
     try {
-      const copy = await this.api.duplicateTrip(trip.id, result.departsAt);
+      const copy = await this.api.duplicateTrip(trip.id, departsAt);
       this.toast.show(this.transloco.translate('trips.duplicate.done'), 'success');
       await this.router.navigate(['/viajes', copy.id]);
     } catch (error) {

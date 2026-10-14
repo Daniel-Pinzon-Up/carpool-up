@@ -17,8 +17,6 @@ import {
   pamplonaDate,
   pamplonaInstant,
   pamplonaTime,
-  seriesDates,
-  weekdayOf,
 } from './trips.api';
 import { Component, input } from '@angular/core';
 import { of } from 'rxjs';
@@ -36,7 +34,6 @@ class MapViewStub {
 
 const SUMMARY: TripSummary = {
   id: 't1',
-  series_id: null,
   status: 'scheduled',
   departs_at: '2026-10-06T12:00:00Z',
   arrives_at: '2026-10-06T12:10:00Z',
@@ -94,7 +91,6 @@ const TRIP: Trip = {
   passengers: [],
   payment_note: null,
   my_booking: null,
-  my_waitlist: null,
   chat_id: null,
 };
 
@@ -105,22 +101,8 @@ describe('fechas de Pamplona', () => {
     expect(pamplonaInstant('2026-10-06', '07:30')).toBe('2026-10-06T07:30:00-05:00');
   });
 
-  it('suma dias y calcula el dia de la semana con lunes = 0', () => {
+  it('suma dias sin pasar por zonas horarias', () => {
     expect(addDays('2026-10-30', 3)).toBe('2026-11-02');
-    expect(weekdayOf('2026-10-05')).toBe(0);
-    expect(weekdayOf('2026-10-11')).toBe(6);
-  });
-
-  it('una serie de 4 semanas L-M-V tiene 12 fechas y no pasa del semestre', () => {
-    expect(seriesDates('2026-10-05', 28, [0, 2, 4], '2026-12-15')).toHaveLength(12);
-    const short = seriesDates('2026-10-05', 28, [0, 2, 4], '2026-10-11');
-    expect(short).toEqual(['2026-10-05', '2026-10-07', '2026-10-09']);
-    expect(seriesDates('2026-10-05', 'semester', [1], '2026-10-20')).toEqual([
-      '2026-10-06',
-      '2026-10-13',
-      '2026-10-20',
-    ]);
-    expect(seriesDates('2026-10-05', 'semester', [1], null)).toEqual([]);
   });
 });
 
@@ -220,26 +202,9 @@ describe('TripDetail', () => {
 });
 
 describe('DriverTrips', () => {
-  it('lista los proximos y muestra alertas de pico y placa en las series', async () => {
+  it('lista los proximos viajes', async () => {
     const api = {
       myTrips: vi.fn().mockResolvedValue({ items: [SUMMARY], next_cursor: null }),
-      mySeries: vi.fn().mockResolvedValue([
-        {
-          id: 's1',
-          status: 'active',
-          weekdays: [0, 2, 4],
-          departure_time: '07:00:00',
-          window_start: '2026-10-05',
-          window_end: '2026-11-01',
-          seats: 3,
-          price_per_seat: 1500,
-          origin: 'Campus',
-          destination: 'Terminal',
-          vehicle: SUMMARY.vehicle,
-          next_departure: '2026-10-05T12:00:00Z',
-          counts: { total: 12, scheduled: 8, pico_placa: 4, cancelled: 0 },
-        },
-      ]),
     };
     TestBed.configureTestingModule({
       imports: [DriverTrips, getTranslocoTestingModule()],
@@ -257,14 +222,5 @@ describe('DriverTrips', () => {
     expect(api.myTrips).toHaveBeenCalledWith('upcoming');
     expect(fixture.nativeElement.textContent).toContain('Ciudad Universitaria');
     expect(fixture.nativeElement.querySelector('a[href="/viajes/t1"]')).not.toBeNull();
-
-    const seriesTab = Array.from(fixture.nativeElement.querySelectorAll('[role=tab]')).find((t) =>
-      (t as HTMLElement).textContent?.includes('Series'),
-    ) as HTMLButtonElement;
-    seriesTab.click();
-    await settle();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('8 programados de 12');
-    expect(fixture.nativeElement.textContent).toContain('4 viajes cancelados por pico y placa');
   });
 });

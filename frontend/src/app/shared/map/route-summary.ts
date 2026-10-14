@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LucideClock, LucideHandCoins, LucideInfo, LucideRoute } from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { RoutePreview, formatCop } from './routing.api';
 
 /** Distancia, duracion, ETA por parada y precio sugerido de una ruta, en texto. */
@@ -87,9 +87,6 @@ import { RoutePreview, formatCop } from './routing.api';
       <p class="mt-4 flex gap-2 text-xs text-muted">
         <svg lucideInfo class="size-4 shrink-0" aria-hidden="true"></svg>
         {{ 'routeSummary.etaNote' | transloco }}
-        @if (route.traffic_factor !== 1) {
-          {{ 'routeSummary.factor' | transloco: { factor: route.traffic_factor } }}
-        }
       </p>
       @if (route.suggested_price !== null) {
         <p class="mt-1 text-xs text-muted">{{ 'routeSummary.contribution' | transloco }}</p>
@@ -99,10 +96,9 @@ import { RoutePreview, formatCop } from './routing.api';
 })
 export class RouteSummary {
   readonly preview = input<RoutePreview | null>(null);
-  private readonly language = inject(LanguageService);
 
   protected readonly km = computed(() =>
-    ((this.preview()?.distance_m ?? 0) / 1000).toLocaleString(this.language.current(), {
+    ((this.preview()?.distance_m ?? 0) / 1000).toLocaleString(LOCALE, {
       maximumFractionDigits: 1,
     }),
   );
@@ -111,12 +107,12 @@ export class RouteSummary {
   );
 
   protected money(value: number): string {
-    return formatCop(value, this.language.current());
+    return formatCop(value, LOCALE);
   }
 
   protected when(eta: string | null, offsetSeconds: number): string {
     if (eta) {
-      return new Date(eta).toLocaleTimeString(this.language.current(), {
+      return new Date(eta).toLocaleTimeString(LOCALE, {
         hour: 'numeric',
         minute: '2-digit',
         timeZone: 'America/Bogota',

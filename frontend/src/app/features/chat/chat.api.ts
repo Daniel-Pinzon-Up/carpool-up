@@ -13,14 +13,12 @@ export interface ChatMessage {
   sent_at: string;
 }
 
+/** Chat de un viaje: su id es el id del viaje. */
 export interface Conversation {
   id: string;
-  kind: 'trip_group' | 'direct';
-  trip_id: string | null;
-  series_id: string | null;
+  trip_id: string;
   title: string;
-  departs_at: string | null;
-  counterpart: string | null;
+  departs_at: string;
   members: { id: string; full_name: string; is_driver: boolean }[];
   last_message: ChatMessage | null;
   unread: number;

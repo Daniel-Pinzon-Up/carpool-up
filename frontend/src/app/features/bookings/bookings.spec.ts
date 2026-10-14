@@ -13,7 +13,6 @@ import { BookingPanel } from './booking-panel';
 import { Booking, BookingsApi, Inbox } from './bookings.api';
 import DriverInbox from './driver-inbox';
 import PassengerTrips from './passenger-trips';
-import { subscriptionEnd } from './subscribe-panel';
 
 async function settle(): Promise<void> {
   for (let i = 0; i < 10; i++) await Promise.resolve();
@@ -31,7 +30,6 @@ const VEHICLE = {
 
 const TRIP: Trip = {
   id: 't1',
-  series_id: null,
   status: 'scheduled',
   departs_at: '2099-10-06T12:00:00Z',
   arrives_at: '2099-10-06T12:10:00Z',
@@ -74,7 +72,6 @@ const TRIP: Trip = {
   passengers: [],
   payment_note: null,
   my_booking: null,
-  my_waitlist: null,
   chat_id: null,
 };
 
@@ -82,7 +79,6 @@ const BOOKING: Booking = {
   id: 'b1',
   trip: {
     id: 't1',
-    series_id: null,
     status: 'scheduled',
     departs_at: TRIP.departs_at,
     arrives_at: TRIP.arrives_at,
@@ -99,7 +95,6 @@ const BOOKING: Booking = {
     rating: null,
     trips_as_passenger: 4,
   },
-  subscription_id: null,
   seats: 2,
   amount: 4000,
   status: 'accepted',
@@ -149,23 +144,12 @@ function button(element: HTMLElement, label: string): HTMLButtonElement {
   return found as HTMLButtonElement;
 }
 
-describe('subscriptionEnd', () => {
-  it('cubre los dias pedidos sin pasar del final de la serie', () => {
-    expect(subscriptionEnd('2026-10-05', 8, '2026-12-01')).toBe('2026-10-12');
-    expect(subscriptionEnd('2026-11-28', 15, '2026-12-01')).toBe('2026-12-01');
-    expect(subscriptionEnd('2026-10-05', 'series', '2026-12-01')).toBe('2026-12-01');
-  });
-});
-
 describe('BookingPanel', () => {
   let api: Record<string, ReturnType<typeof vi.fn>>;
 
   beforeEach(() => {
     api = {
       request: vi.fn().mockResolvedValue(BOOKING),
-      joinWaitlist: vi.fn().mockResolvedValue({}),
-      confirmOffer: vi.fn().mockResolvedValue({}),
-      declineOffer: vi.fn().mockResolvedValue({}),
     };
     TestBed.configureTestingModule({
       imports: [BookingPanel, getTranslocoTestingModule()],
@@ -209,16 +193,16 @@ describe('BookingPanel', () => {
     });
   });
 
-  it('con el viaje lleno ofrece la lista de espera', async () => {
+  it('con el viaje lleno no deja solicitar cupo', async () => {
     const fixture = await create({ ...TRIP, seats_available: 0 });
     const element = fixture.nativeElement as HTMLElement;
-    button(element, 'Anotarme en la lista de espera').click();
-    await settle();
-    expect(api['joinWaitlist']).toHaveBeenCalled();
-    expect(api['request']).not.toHaveBeenCalled();
+    expect(texts(element)).toContain('No quedan puestos suficientes');
+    expect(Array.from(element.querySelectorAll('button')).map((b) => b.textContent)).not.toContain(
+      'Solicitar cupo',
+    );
   });
 
-  it('muestra la reserva aceptada y la oferta de la lista de espera', async () => {
+  it('muestra la reserva aceptada', async () => {
     const accepted = await create({
       ...TRIP,
       my_booking: {
@@ -234,20 +218,6 @@ describe('BookingPanel', () => {
     expect(texts(accepted.nativeElement)).toContain('Aceptada');
     expect(texts(accepted.nativeElement)).toContain('Punto en la ruta');
     expect(texts(accepted.nativeElement)).toContain('Cancelar reserva');
-
-    const offered = await create({
-      ...TRIP,
-      seats_available: 1,
-      my_waitlist: {
-        id: 'w1',
-        status: 'offered',
-        seats: 1,
-        offer_expires_at: '2099-10-06T11:00:00Z',
-      },
-    });
-    button(offered.nativeElement, 'Quiero el cupo').click();
-    await settle();
-    expect(api['confirmOffer']).toHaveBeenCalledWith('w1');
   });
 
   it('un viaje solo para mujeres no se ofrece a otros pasajeros', async () => {
@@ -287,13 +257,12 @@ describe('DriverInbox', () => {
     const inbox: Inbox = {
       bookings: [{ ...BOOKING, status: 'requested', payment_note: null }],
       cancellations: [],
-      subscriptions: [],
     };
     const api = {
       inbox: vi
         .fn()
         .mockResolvedValueOnce(inbox)
-        .mockResolvedValueOnce({ bookings: [], cancellations: [], subscriptions: [] }),
+        .mockResolvedValueOnce({ bookings: [], cancellations: [] }),
       accept: vi.fn().mockResolvedValue(BOOKING),
     };
     TestBed.configureTestingModule({
@@ -323,7 +292,6 @@ describe('PassengerTrips', () => {
   it('muestra los proximos viajes con placa y datos de pago una vez aceptado', async () => {
     const api = {
       mine: vi.fn().mockResolvedValue({ items: [BOOKING], next_cursor: null }),
-      mySubscriptions: vi.fn().mockResolvedValue([]),
     };
     TestBed.configureTestingModule({
       imports: [PassengerTrips, getTranslocoTestingModule()],
@@ -338,15 +306,5 @@ describe('PassengerTrips', () => {
     expect(texts(element)).toContain('ABC123');
     expect(texts(element)).toContain('Nequi 300 000 0000');
     expect(element.querySelector('a[href="/viajes/t1"]')).not.toBeNull();
-
-    const seriesTab = Array.from(element.querySelectorAll('[role=tab]')).find((tab) =>
-      tab.textContent?.includes('Series'),
-    ) as HTMLButtonElement;
-    seriesTab.click();
-    fixture.detectChanges();
-    await settle();
-    fixture.detectChanges();
-    expect(api.mySubscriptions).toHaveBeenCalled();
-    expect(texts(element)).toContain('No te has unido a ninguna serie');
   });
 });

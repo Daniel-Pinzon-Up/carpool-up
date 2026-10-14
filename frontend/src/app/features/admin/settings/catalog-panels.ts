@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucidePencil, LucidePlus, LucideTrash2, LucideX } from '@icons';
 import { apiErrorMessage } from '../../../core/http/api-error-message';
-import { LanguageService } from '../../../core/i18n/language.service';
+import { LOCALE } from '../../../core/i18n/locale';
 import { DialogService } from '../../../shared/ui/dialog.service';
 import { GlassButton } from '../../../shared/ui/glass-button';
 import { GlassCard } from '../../../shared/ui/glass-card';
@@ -20,7 +20,6 @@ abstract class CatalogPanel<T extends { id: string }> {
   protected readonly api = inject(AdminApi);
   protected readonly dialogs = inject(DialogService);
   protected readonly transloco = inject(TranslocoService);
-  protected readonly language = inject(LanguageService);
   protected readonly toast = inject(ToastService);
 
   protected readonly items = signal<T[]>([]);
@@ -58,7 +57,7 @@ abstract class CatalogPanel<T extends { id: string }> {
   protected date(iso: string | null): string {
     if (!iso) return '-';
     const [y, m, d] = iso.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(this.language.current(), {
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(LOCALE, {
       dateStyle: 'medium',
       timeZone: 'UTC',
     });
@@ -76,7 +75,7 @@ const SHARED = [
   LucideX,
 ];
 
-/** Semestres academicos: definen la vigencia de los documentos y de las series. */
+/** Semestres academicos: definen la vigencia de los documentos. */
 @Component({
   selector: 'cp-semesters-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -318,7 +317,6 @@ export class PlacesPanel extends CatalogPanel<CatalogPlace> {
     lon: new FormControl('', { nonNullable: true, validators: Validators.required }),
   });
   protected readonly kinds = computed(() => {
-    this.language.current();
     return (['campus', 'sector', 'landmark'] as const).map((value) => ({
       value,
       label: this.transloco.translate(`places.groups.${value}`),
@@ -492,7 +490,6 @@ export class PicoPlacaPanel extends CatalogPanel<PicoPlacaRule> {
     is_active: new FormControl(true, { nonNullable: true }),
   });
   protected readonly types = computed(() => {
-    this.language.current();
     return (['car', 'motorcycle'] as const).map((value) => ({
       value,
       label: this.transloco.translate(`vehicles.types.${value}`),
@@ -513,7 +510,7 @@ export class PicoPlacaPanel extends CatalogPanel<PicoPlacaRule> {
 
   /** 0 es lunes, como en el backend (date.weekday()). 2024-01-01 fue lunes. */
   protected weekday(day: number): string {
-    return new Date(Date.UTC(2024, 0, 1 + day)).toLocaleDateString(this.language.current(), {
+    return new Date(Date.UTC(2024, 0, 1 + day)).toLocaleDateString(LOCALE, {
       weekday: 'long',
       timeZone: 'UTC',
     });

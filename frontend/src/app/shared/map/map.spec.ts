@@ -14,17 +14,12 @@ async function settle(): Promise<void> {
 
 describe('buildMapStyle', () => {
   it('usa solo recursos propios: teselas, fuentes y sprites del mismo origen', async () => {
-    const style = await buildMapStyle(false, 'es');
+    const style = await buildMapStyle();
     const origin = location.origin;
     expect(style.glyphs).toBe(`${origin}/map/fonts/{fontstack}/{range}.pbf`);
     expect(style.sprite).toBe(`${origin}/map/sprites/light`);
     expect(JSON.stringify(style.sources)).toContain(`pmtiles://${origin}/tiles/pamplona.pmtiles`);
     expect(style.layers.length).toBeGreaterThan(10);
-  });
-
-  it('cambia el sprite con el tema oscuro', async () => {
-    const style = await buildMapStyle(true, 'en');
-    expect(style.sprite).toContain('/sprites/dark');
   });
 });
 
@@ -42,8 +37,6 @@ const PREVIEW: RoutePreview = {
     [-72.6512, 7.3712],
   ],
   distance_m: 3471,
-  osrm_duration_s: 333,
-  traffic_factor: 1.2,
   duration_s: 400,
   points: [
     {
@@ -76,7 +69,6 @@ describe('RouteSummary', () => {
     expect(text).toContain('7 min');
     expect(text).toContain('1.200');
     expect(text).toContain('Máximo permitido');
-    expect(text).toContain('x1.2');
     const stops = fixture.nativeElement.querySelectorAll('li');
     expect(stops.length).toBe(3);
     expect(stops[1].textContent).toContain('Punto en el mapa');

@@ -11,18 +11,11 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import {
-  LucideCircleAlert,
-  LucideClock,
-  LucideHourglass,
-  LucideRepeat,
-  LucideTicket,
-} from '@icons';
+import { LucideCircleAlert, LucideTicket } from '@icons';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { PlaceValue } from '../../shared/map/places.api';
 import { formatCop } from '../../shared/map/routing.api';
 import { GlassButton } from '../../shared/ui/glass-button';
@@ -51,16 +44,12 @@ export interface SearchedPlaces {
   dropoff: PlaceValue;
 }
 
-/**
- * Lo que el pasajero hace con un viaje: solicitar cupo, anotarse en la lista de espera,
- * responder una oferta o ver y cancelar su reserva.
- */
+/** Lo que el pasajero hace con un viaje: solicitar cupo o ver y cancelar su reserva. */
 @Component({
   selector: 'cp-booking-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     TranslocoPipe,
     GlassButton,
     GlassCard,
@@ -69,9 +58,6 @@ export interface SearchedPlaces {
     SeatPicker,
     StatusBadge,
     LucideCircleAlert,
-    LucideClock,
-    LucideHourglass,
-    LucideRepeat,
     LucideTicket,
   ],
   host: { class: 'block' },
@@ -107,44 +93,6 @@ export interface SearchedPlaces {
           @if (b.status === 'requested' || b.status === 'accepted') {
             <button cp-button variant="danger" type="button" class="self-start" (click)="cancel()">
               {{ 'bookings.cancel.action' | transloco }}
-            </button>
-          }
-        </div>
-      } @else if (waitlist(); as w) {
-        <div class="flex flex-col gap-3">
-          @if (w.status === 'offered') {
-            <p class="flex gap-2 font-semibold" role="status">
-              <svg lucideHourglass class="size-5 shrink-0 text-accent" aria-hidden="true"></svg>
-              {{ 'bookings.waitlist.offer' | transloco: { time: time(w.offer_expires_at ?? '') } }}
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button cp-button type="button" [disabled]="busy()" (click)="confirmOffer()">
-                {{ 'bookings.waitlist.confirm' | transloco }}
-              </button>
-              <button
-                cp-button
-                variant="secondary"
-                type="button"
-                [disabled]="busy()"
-                (click)="declineOffer()"
-              >
-                {{ 'bookings.waitlist.decline' | transloco }}
-              </button>
-            </div>
-          } @else {
-            <p class="flex gap-2">
-              <svg lucideClock class="size-5 shrink-0 text-muted" aria-hidden="true"></svg>
-              {{ 'bookings.waitlist.waiting' | transloco }}
-            </p>
-            <button
-              cp-button
-              variant="secondary"
-              type="button"
-              class="self-start"
-              [disabled]="busy()"
-              (click)="leave()"
-            >
-              {{ 'bookings.waitlist.leave' | transloco }}
             </button>
           }
         </div>
@@ -194,10 +142,7 @@ export interface SearchedPlaces {
             </p>
           }
           @if (full()) {
-            <p class="text-sm text-muted">{{ 'bookings.waitlist.full' | transloco }}</p>
-            <button cp-button variant="secondary" type="submit" [disabled]="busy()">
-              {{ 'bookings.waitlist.join' | transloco }}
-            </button>
+            <p class="text-sm text-muted">{{ 'bookings.panel.full' | transloco }}</p>
           } @else {
             <button cp-button type="submit" [disabled]="busy()">
               {{ 'bookings.panel.request' | transloco }}
@@ -206,23 +151,13 @@ export interface SearchedPlaces {
           }
         </form>
       }
-
-      @if (trip().series_id) {
-        <a
-          [routerLink]="['/series', trip().series_id]"
-          class="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-primary"
-        >
-          <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
-          {{ 'bookings.panel.joinSeries' | transloco }}
-        </a>
-      }
     </cp-glass-card>
   `,
 })
 export class BookingPanel {
   readonly trip = input.required<Trip>();
   readonly searched = input<SearchedPlaces | null>(null);
-  /** El viaje cambio para quien consulta (reserva o lista de espera): hay que recargarlo. */
+  /** La reserva de quien consulta cambio: hay que recargar el viaje. */
   readonly changed = output<void>();
 
   private readonly api = inject(BookingsApi);
@@ -230,7 +165,6 @@ export class BookingPanel {
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly preferenceKeys = BOOKING_PREFERENCE_KEYS;
   protected readonly form = new FormGroup({
@@ -247,14 +181,13 @@ export class BookingPanel {
     const mine = this.trip().my_booking;
     return mine && ACTIVE_BOOKING.includes(mine.status) ? mine : null;
   });
-  protected readonly waitlist = computed(() => this.trip().my_waitlist);
   protected readonly tone = computed(
     () => BOOKING_STATUS_TONE[this.booking()?.status ?? 'requested'],
   );
   protected readonly maxSeats = computed(() => Math.max(1, Math.min(4, this.trip().seats_total)));
   protected readonly full = computed(() => this.trip().seats_available < this.seats());
   protected readonly total = computed(() =>
-    formatCop(this.seats() * this.trip().price_per_seat, this.language.current()),
+    formatCop(this.seats() * this.trip().price_per_seat, LOCALE),
   );
 
   /** Por que no se puede pedir cupo, si es el caso. */
@@ -312,7 +245,7 @@ export class BookingPanel {
   }
 
   protected time(iso: string): string {
-    return iso ? formatTime(iso, this.language.current()) : '';
+    return iso ? formatTime(iso, LOCALE) : '';
   }
 
   protected setPref(key: keyof BookingPreferences, on: boolean): void {
@@ -332,17 +265,9 @@ export class BookingPanel {
   protected async submit(): Promise<void> {
     this.error.set(null);
     this.busy.set(true);
-    const waitlist = this.full();
     try {
-      if (waitlist) {
-        await this.api.joinWaitlist(this.trip().id, this.request());
-      } else {
-        await this.api.request(this.trip().id, this.request());
-      }
-      this.toast.show(
-        this.transloco.translate(waitlist ? 'bookings.waitlist.joined' : 'bookings.panel.sent'),
-        'success',
-      );
+      await this.api.request(this.trip().id, this.request());
+      this.toast.show(this.transloco.translate('bookings.panel.sent'), 'success');
       this.changed.emit();
     } catch (error) {
       this.error.set(apiErrorMessage(this.transloco, error));
@@ -355,36 +280,5 @@ export class BookingPanel {
     const booking = this.booking();
     if (!booking) return;
     if (await this.actions.cancel(booking.id)) this.changed.emit();
-  }
-
-  private async attempt(action: () => Promise<unknown>, done: string): Promise<void> {
-    this.busy.set(true);
-    try {
-      await action();
-      this.toast.show(this.transloco.translate(done), 'success');
-      this.changed.emit();
-    } catch (error) {
-      this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
-    } finally {
-      this.busy.set(false);
-    }
-  }
-
-  protected confirmOffer(): Promise<void> {
-    const entry = this.waitlist();
-    return entry
-      ? this.attempt(() => this.api.confirmOffer(entry.id), 'bookings.panel.sent')
-      : Promise.resolve();
-  }
-
-  protected declineOffer(): Promise<void> {
-    const entry = this.waitlist();
-    return entry
-      ? this.attempt(() => this.api.declineOffer(entry.id), 'bookings.waitlist.left')
-      : Promise.resolve();
-  }
-
-  protected leave(): Promise<void> {
-    return this.attempt(() => this.api.leaveWaitlist(this.trip().id), 'bookings.waitlist.left');
   }
 }

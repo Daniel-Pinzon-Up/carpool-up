@@ -53,8 +53,6 @@ interface Wizard {
   stepError: () => string | null;
   next: () => Promise<void>;
   submit: () => Promise<void>;
-  toggleWeekday: (day: number, on: boolean) => void;
-  seriesPlan: () => { date: string; blocked: boolean }[];
 }
 
 describe('PublishWizard', () => {
@@ -63,15 +61,8 @@ describe('PublishWizard', () => {
 
   beforeEach(() => {
     trips = {
-      currentSemester: vi.fn().mockResolvedValue({
-        id: 's',
-        name: '2026-2',
-        starts_on: today,
-        ends_on: addDays(today, 90),
-      }),
       picoPlacaDates: vi.fn().mockResolvedValue([addDays(today, 3)]),
       publishTrip: vi.fn().mockResolvedValue({ id: 'trip-1' }),
-      publishSeries: vi.fn().mockResolvedValue({ id: 'series-1' }),
     };
     TestBed.configureTestingModule({
       imports: [PublishWizard, getTranslocoTestingModule()],
@@ -118,7 +109,6 @@ describe('PublishWizard', () => {
 
   it('no avanza sin ruta y explica por que', async () => {
     const { fixture, wizard } = await create();
-    await wizard.next(); // tipo
     await wizard.next(); // ruta vacia
     fixture.detectChanges();
     expect(wizard.step()).toBe('route');
@@ -136,7 +126,6 @@ describe('PublishWizard', () => {
       time: '07:30',
       pets: 'not_allowed',
     });
-    await wizard.next(); // tipo -> ruta
     await wizard.next(); // ruta -> cuando
     await wizard.next(); // cuando -> vehiculo
     await wizard.next(); // vehiculo -> precio (toma el sugerido)
@@ -161,7 +150,6 @@ describe('PublishWizard', () => {
     wizard.form.patchValue({ origin: CAMPUS, destination: TERMINAL, date: addDays(today, 3) });
     await wizard.next();
     await wizard.next();
-    await wizard.next();
     expect(wizard.step()).toBe('when');
     expect(wizard.stepError()).toContain('pico y placa');
 
@@ -174,40 +162,10 @@ describe('PublishWizard', () => {
     expect(wizard.stepError()).toContain('5000');
   });
 
-  it('la serie marca las fechas de pico y placa y se publica con sus dias', async () => {
-    const { wizard } = await create();
-    wizard.form.patchValue({
-      kind: 'series',
-      origin: CAMPUS,
-      destination: TERMINAL,
-      start_date: today,
-      window: '15',
-    });
-    wizard.toggleWeekday(0, false);
-    wizard.toggleWeekday(2, false);
-    wizard.toggleWeekday(4, false);
-    for (let day = 0; day < 7; day++) wizard.toggleWeekday(day, true);
-    const plan = wizard.seriesPlan();
-    expect(plan).toHaveLength(15);
-    expect(plan.filter((d) => d.blocked).map((d) => d.date)).toEqual([addDays(today, 3)]);
-
-    for (let i = 0; i < 6; i++) await wizard.next();
-    expect(wizard.step()).toBe('summary');
-    await wizard.submit();
-    expect(trips['publishSeries']).toHaveBeenCalledWith(
-      expect.objectContaining({
-        weekdays: [0, 1, 2, 3, 4, 5, 6],
-        start_date: today,
-        window: 15,
-        departure_time: '07:00',
-      }),
-    );
-  });
-
   it('solo las conductoras ven la opcion solo mujeres', async () => {
     const { fixture, wizard } = await create();
     wizard.form.patchValue({ origin: CAMPUS, destination: TERMINAL, women_only: true });
-    for (let i = 0; i < 5; i++) await wizard.next();
+    for (let i = 0; i < 4; i++) await wizard.next();
     fixture.detectChanges();
     expect(wizard.step()).toBe('rules');
     expect(fixture.nativeElement.textContent).not.toContain('Solo mujeres');

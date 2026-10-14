@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { apiErrorCode, apiErrorMessage } from '../../core/http/api-error-message';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { ToastService } from '../../shared/ui/toast.service';
-import { Booking, BookingsApi, Subscription } from './bookings.api';
+import { Booking, BookingsApi } from './bookings.api';
 import { ReasonDialog, ReasonDialogData, ReasonResult } from './reason-dialog';
 
 /**
@@ -90,63 +90,10 @@ export class BookingActions {
     return this.run(() => this.api.reject(bookingId, answer.reason), 'bookings.inbox.rejected');
   }
 
-  resolveCancellation(requestId: string, accept: boolean): Promise<Booking | null> {
+  resolveCancellation(bookingId: string, accept: boolean): Promise<Booking | null> {
     return this.run(
-      () => this.api.resolveCancellation(requestId, accept),
+      () => this.api.resolveCancellation(bookingId, accept),
       accept ? 'bookings.inbox.cancellationAccepted' : 'bookings.inbox.cancellationRejected',
-    );
-  }
-
-  acceptSubscription(id: string): Promise<Subscription | null> {
-    return this.run(() => this.api.acceptSubscription(id), 'bookings.inbox.subscriptionAccepted');
-  }
-
-  async rejectSubscription(id: string): Promise<Subscription | null> {
-    const answer = await this.askReason({
-      title: this.t('bookings.inbox.rejectSubscriptionTitle'),
-      message: this.t('bookings.inbox.rejectMessage'),
-      confirmLabel: this.t('bookings.inbox.reject'),
-      required: false,
-      danger: true,
-    });
-    if (!answer) return null;
-    return this.run(
-      () => this.api.rejectSubscription(id, answer.reason),
-      'bookings.inbox.rejected',
-    );
-  }
-
-  /** Igual que cancelar una reserva: si alguna fecha esta cerca, hace falta un motivo. */
-  async cancelSubscription(id: string): Promise<Subscription | null> {
-    const ok = await this.dialogs.confirm({
-      title: this.t('bookings.subscription.cancelTitle'),
-      message: this.t('bookings.subscription.cancelMessage'),
-      confirmLabel: this.t('bookings.subscription.cancel'),
-      cancelLabel: this.t('bookings.reason.back'),
-      danger: true,
-    });
-    if (!ok) return null;
-    try {
-      const sub = await this.api.cancelSubscription(id, null);
-      this.toast.show(this.t('bookings.subscription.cancelled'), 'success');
-      return sub;
-    } catch (error) {
-      if (apiErrorCode(error) !== 'CANCEL_REASON_REQUIRED') {
-        this.toast.show(apiErrorMessage(this.transloco, error), 'danger');
-        return null;
-      }
-    }
-    const answer = await this.askReason({
-      title: this.t('bookings.cancel.lateTitle'),
-      message: this.t('bookings.subscription.lateMessage'),
-      confirmLabel: this.t('bookings.subscription.cancel'),
-      required: true,
-      danger: true,
-    });
-    if (!answer?.reason) return null;
-    return this.run(
-      () => this.api.cancelSubscription(id, answer.reason),
-      'bookings.subscription.cancelled',
     );
   }
 }

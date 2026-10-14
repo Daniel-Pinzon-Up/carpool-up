@@ -16,29 +16,24 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LucideArrowLeft,
   LucideArrowRight,
-  LucideCalendarDays,
-  LucideCalendarRange,
   LucideCircleAlert,
   LucideHandCoins,
   LucidePlus,
-  LucideRepeat,
   LucideTrash2,
   LucideTriangleAlert,
 } from '@icons';
 import { debounceTime } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { MetaService } from '../../core/meta/meta.service';
 import { MapMarker, MapView } from '../../shared/map/map-view';
 import { PlacePicker } from '../../shared/map/place-picker';
 import { PlaceValue } from '../../shared/map/places.api';
 import { RouteSummary } from '../../shared/map/route-summary';
 import { RoutePreview, RoutingApi, formatCop } from '../../shared/map/routing.api';
-import { DialogService } from '../../shared/ui/dialog.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
-import { GlassChip } from '../../shared/ui/glass-chip';
 import { GlassInput } from '../../shared/ui/glass-input';
 import { GlassSelect, SelectOption } from '../../shared/ui/glass-select';
 import { GlassTextarea } from '../../shared/ui/glass-textarea';
@@ -47,8 +42,6 @@ import { Stepper } from '../../shared/ui/stepper';
 import { ToastService } from '../../shared/ui/toast.service';
 import {
   RuleKind,
-  Series,
-  SeriesWindow,
   Trip,
   TripRule,
   TripStop,
@@ -57,16 +50,14 @@ import {
   pamplonaDate,
   pamplonaInstant,
   pamplonaTime,
-  seriesDates,
 } from '../trips/trips.api';
 import { Vehicle, VehiclesApi } from '../vehicles/vehicles.api';
 
-export type WizardMode = 'create' | 'edit-trip' | 'edit-series';
-type Step = 'type' | 'route' | 'when' | 'vehicle' | 'price' | 'rules' | 'summary';
+export type WizardMode = 'create' | 'edit-trip';
+type Step = 'route' | 'when' | 'vehicle' | 'price' | 'rules' | 'summary';
 type RuleChoice = '' | 'allowed' | 'not_allowed';
 
 export const TOGGLE_RULES = ['pets', 'luggage', 'smoking', 'music'] as const;
-export const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
 function toPlace(stop: TripStop): PlaceValue {
   return {
@@ -79,9 +70,8 @@ function toPlace(stop: TripStop): PlaceValue {
 }
 
 /**
- * Asistente para publicar un viaje puntual o una serie (seccion 13): tipo, ruta con mapa,
- * fecha u horario, vehiculo y puestos, aporte sugerido con tope, reglas y resumen.
- * Tambien edita un viaje o una serie existentes (sin el paso de tipo).
+ * Asistente para publicar un viaje: ruta con mapa, fecha y hora, vehiculo y puestos,
+ * aporte sugerido con tope, reglas y resumen. Tambien edita un viaje existente.
  */
 @Component({
   selector: 'cp-publish-wizard',
@@ -91,7 +81,6 @@ function toPlace(stop: TripStop): PlaceValue {
     TranslocoPipe,
     GlassButton,
     GlassCard,
-    GlassChip,
     GlassInput,
     GlassSelect,
     GlassTextarea,
@@ -102,19 +91,16 @@ function toPlace(stop: TripStop): PlaceValue {
     Stepper,
     LucideArrowLeft,
     LucideArrowRight,
-    LucideCalendarDays,
-    LucideCalendarRange,
     LucideCircleAlert,
     LucideHandCoins,
     LucidePlus,
-    LucideRepeat,
     LucideTrash2,
     LucideTriangleAlert,
   ],
   templateUrl: './publish-wizard.html',
 })
 export default class PublishWizard {
-  /** Desde la ruta: modo (data) e id del viaje o serie a editar (parametro). */
+  /** Desde la ruta: modo (data) e id del viaje a editar (parametro). */
   readonly mode = input<WizardMode>('create');
   readonly id = input<string | null>(null);
 
@@ -122,8 +108,6 @@ export default class PublishWizard {
   private readonly trips = inject(TripsApi);
   private readonly vehiclesApi = inject(VehiclesApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
-  private readonly dialogs = inject(DialogService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
@@ -131,17 +115,13 @@ export default class PublishWizard {
   protected readonly meta = inject(MetaService);
 
   protected readonly toggleRules = TOGGLE_RULES;
-  protected readonly weekdays = WEEKDAYS;
 
   protected readonly form = this.fb.nonNullable.group({
-    kind: this.fb.nonNullable.control<'single' | 'series'>('single'),
     origin: new FormControl<PlaceValue | null>(null),
     stops: this.fb.array<FormControl<PlaceValue | null>>([]),
     destination: new FormControl<PlaceValue | null>(null),
     date: '',
     time: '07:00',
-    start_date: '',
-    window: '28',
     vehicle_id: '',
     seats: 3,
     price: '',
@@ -159,7 +139,6 @@ export default class PublishWizard {
     initialValue: this.form.getRawValue(),
   });
 
-  protected readonly selectedWeekdays = signal<number[]>([0, 2, 4]);
   protected readonly vehicles = signal<Vehicle[]>([]);
   protected readonly preview = signal<RoutePreview | null>(null);
   protected readonly loadingRoute = signal(false);
@@ -167,19 +146,17 @@ export default class PublishWizard {
   protected readonly stepError = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly loaded = signal(false);
-  protected readonly semesterEnd = signal<string | null>(null);
-  protected readonly semesterMissing = signal(false);
   protected readonly picoPlaca = signal<Set<string>>(new Set());
   private readonly stopCount = signal(0);
 
-  protected readonly isSeries = computed(
-    () => this.mode() === 'edit-series' || this.value().kind === 'series',
-  );
-  protected readonly steps = computed<Step[]>(() =>
-    this.mode() === 'create'
-      ? ['type', 'route', 'when', 'vehicle', 'price', 'rules', 'summary']
-      : ['route', 'when', 'vehicle', 'price', 'rules', 'summary'],
-  );
+  protected readonly steps = signal<Step[]>([
+    'route',
+    'when',
+    'vehicle',
+    'price',
+    'rules',
+    'summary',
+  ]);
   protected readonly stepIndex = signal(0);
   protected readonly step = computed(() => this.steps()[this.stepIndex()]);
   protected readonly stepLabels = computed(() =>
@@ -193,20 +170,6 @@ export default class PublishWizard {
     const value = this.meta.settings()['max_price_per_seat'];
     return typeof value === 'number' ? value : null;
   });
-  protected readonly windowOptions = computed<SelectOption[]>(() => {
-    const options = (this.meta.settings()['series_window_options_days'] as SeriesWindow[]) ?? [
-      15,
-      28,
-      'semester',
-    ];
-    return options.map((option) => ({
-      value: String(option),
-      label:
-        option === 'semester'
-          ? this.transloco.translate('publish.when.windowSemester')
-          : this.transloco.translate('publish.when.windowDays', { days: option }),
-    }));
-  });
   protected readonly vehicle = computed(
     () => this.vehicles().find((v) => v.id === this.value().vehicle_id) ?? null,
   );
@@ -219,38 +182,14 @@ export default class PublishWizard {
     addDays(this.today(), Number(this.meta.settings()['trip_max_days_ahead'] ?? 60)),
   );
 
-  /** Fechas que tendra la serie, con las de pico y placa marcadas. */
-  protected readonly seriesPlan = computed(() => {
-    if (!this.isSeries()) return [];
-    const v = this.value();
-    const start = this.mode() === 'edit-series' ? this.today() : (v.start_date ?? '');
-    if (!start) return [];
-    const window: SeriesWindow =
-      this.mode() === 'edit-series'
-        ? 'semester'
-        : v.window === 'semester'
-          ? 'semester'
-          : Number(v.window);
-    const end = this.mode() === 'edit-series' ? (this.editingSeries()?.window_end ?? null) : null;
-    const dates = seriesDates(start, window, this.selectedWeekdays(), end ?? this.semesterEnd());
-    const blocked = this.picoPlaca();
-    return dates.map((date) => ({ date, blocked: blocked.has(date) }));
-  });
-  protected readonly bookableCount = computed(
-    () => this.seriesPlan().filter((d) => !d.blocked).length,
-  );
   protected readonly singleBlocked = computed(() => {
     const date = this.value().date;
-    return !this.isSeries() && !!date && this.picoPlaca().has(date);
+    return !!date && this.picoPlaca().has(date);
   });
 
-  /** Fecha y hora de la primera salida, para la ETA y el precio de la vista previa. */
+  /** Fecha y hora de salida, para la ETA y el precio de la vista previa. */
   private readonly firstDeparture = computed(() => {
     const v = this.value();
-    if (this.isSeries()) {
-      const first = this.seriesPlan().find((d) => !d.blocked)?.date;
-      return first && v.time ? pamplonaInstant(first, v.time) : null;
-    }
     return v.date && v.time ? pamplonaInstant(v.date, v.time) : null;
   });
 
@@ -262,8 +201,6 @@ export default class PublishWizard {
       label: p.name ?? this.transloco.translate('routeSummary.pin'),
     })),
   );
-
-  protected readonly editingSeries = signal<Series | null>(null);
 
   constructor() {
     void this.meta.load();
@@ -293,14 +230,12 @@ export default class PublishWizard {
 
   private async init(mode: WizardMode, id: string | null): Promise<void> {
     const tomorrow = addDays(this.today(), 1);
-    this.form.patchValue({ date: tomorrow, start_date: tomorrow }, { emitEvent: false });
+    this.form.patchValue({ date: tomorrow }, { emitEvent: false });
     try {
-      const [vehicles] = await Promise.all([this.vehiclesApi.list(), this.loadSemester()]);
+      const vehicles = await this.vehiclesApi.list();
       this.vehicles.set(vehicles.filter((v) => v.is_active));
       if (mode === 'edit-trip' && id) {
         this.fillFromTrip(await this.trips.trip(id));
-      } else if (mode === 'edit-series' && id) {
-        this.fillFromSeries(await this.trips.series(id));
       } else if (this.vehicles().length) {
         this.form.controls.vehicle_id.setValue(this.vehicles()[0].id);
       }
@@ -311,24 +246,9 @@ export default class PublishWizard {
     }
   }
 
-  private async loadSemester(): Promise<void> {
-    try {
-      this.semesterEnd.set((await this.trips.currentSemester()).ends_on);
-    } catch {
-      // Sin semestre vigente solo se pueden publicar viajes puntuales.
-      this.semesterMissing.set(true);
-    }
-  }
-
   private async loadPicoPlaca(vehicleId: string): Promise<void> {
-    const from = this.today();
-    const semesterEnd = this.semesterEnd();
-    let end = this.maxSingleDate();
-    if (semesterEnd && semesterEnd > end) end = semesterEnd;
-    const limit = addDays(from, 199);
-    if (end > limit) end = limit;
     try {
-      const dates = await this.trips.picoPlacaDates(vehicleId, from, end);
+      const dates = await this.trips.picoPlacaDates(vehicleId, this.today(), this.maxSingleDate());
       this.picoPlaca.set(new Set(dates));
     } catch {
       this.picoPlaca.set(new Set());
@@ -361,7 +281,6 @@ export default class PublishWizard {
     this.fillRoute(trip.stops);
     this.fillRules(trip.rules);
     this.form.patchValue({
-      kind: 'single',
       date: pamplonaDate(trip.departs_at),
       time: pamplonaTime(trip.departs_at),
       vehicle_id: trip.vehicle.id,
@@ -370,21 +289,7 @@ export default class PublishWizard {
     });
   }
 
-  private fillFromSeries(series: Series): void {
-    this.editingSeries.set(series);
-    this.fillRoute(series.stops);
-    this.fillRules(series.rules);
-    this.selectedWeekdays.set([...series.weekdays]);
-    this.form.patchValue({
-      kind: 'series',
-      time: series.departure_time.slice(0, 5),
-      vehicle_id: series.vehicle.id,
-      seats: series.seats,
-      price: String(series.price_per_seat),
-    });
-  }
-
-  // --- Paradas y dias -----------------------------------------------------------------
+  // --- Paradas ------------------------------------------------------------------------
 
   protected addStop(): void {
     if (!this.canAddStop()) return;
@@ -397,25 +302,9 @@ export default class PublishWizard {
     this.stopCount.set(this.stops.length);
   }
 
-  protected toggleWeekday(day: number, on: boolean): void {
-    const current = new Set(this.selectedWeekdays());
-    if (on) current.add(day);
-    else current.delete(day);
-    this.selectedWeekdays.set([...current].sort());
-    void this.refreshPreview();
-  }
-
-  protected weekdayName(day: number, style: 'long' | 'short' = 'long'): string {
-    // 5 de enero de 2026 fue lunes.
-    return new Date(Date.UTC(2026, 0, 5 + day)).toLocaleDateString(this.language.current(), {
-      weekday: style,
-      timeZone: 'UTC',
-    });
-  }
-
   protected formatDate(date: string): string {
     const [y, m, d] = date.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(this.language.current(), {
+    return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(LOCALE, {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
@@ -424,7 +313,7 @@ export default class PublishWizard {
   }
 
   protected money(value: number): string {
-    return formatCop(value, this.language.current());
+    return formatCop(value, LOCALE);
   }
 
   // --- Vista previa -------------------------------------------------------------------
@@ -480,15 +369,6 @@ export default class PublishWizard {
         return null;
       case 'when':
         if (!v.time) return 'publish.errors.time';
-        if (this.isSeries()) {
-          if (this.mode() === 'create' && this.semesterMissing())
-            return 'publish.errors.noSemester';
-          if (!this.selectedWeekdays().length) return 'publish.errors.weekdays';
-          if (this.mode() === 'create' && (!v.start_date || v.start_date < this.today()))
-            return 'publish.errors.startDate';
-          if (!this.bookableCount()) return 'publish.errors.noDates';
-          return null;
-        }
         if (!v.date || v.date < this.today() || v.date > this.maxSingleDate())
           return 'publish.errors.date';
         if (new Date(pamplonaInstant(v.date, v.time)).getTime() <= Date.now())
@@ -566,58 +446,23 @@ export default class PublishWizard {
       }
     }
     const v = this.form.getRawValue();
-    const template = {
+    const body = {
       place_ids: this.placeIds(),
+      departs_at: pamplonaInstant(v.date, v.time),
       vehicle_id: v.vehicle_id,
       seats: v.seats,
       price_per_seat: Number(v.price),
       rules: this.rules(),
     };
-    if (this.mode() === 'edit-series') {
-      const ok = await this.dialogs.confirm({
-        title: this.transloco.translate('publish.confirmSeriesEdit.title'),
-        message: this.transloco.translate('publish.confirmSeriesEdit.message'),
-        confirmLabel: this.transloco.translate('publish.confirmSeriesEdit.confirm'),
-        cancelLabel: this.transloco.translate('common.cancel'),
-      });
-      if (!ok) return;
-    }
     this.submitting.set(true);
     this.stepError.set(null);
     try {
       const id = this.id();
-      let target: string;
-      if (this.mode() === 'edit-trip' && id) {
-        await this.trips.updateTrip(id, {
-          ...template,
-          departs_at: pamplonaInstant(v.date, v.time),
-        });
-        target = `/viajes/${id}`;
-      } else if (this.mode() === 'edit-series' && id) {
-        await this.trips.updateSeries(id, {
-          ...template,
-          weekdays: this.selectedWeekdays(),
-          departure_time: v.time,
-          // Ya lo confirmo en el dialogo, que avisa de las reservas afectadas.
-          confirm: true,
-        });
-        target = `/series/${id}`;
-      } else if (this.isSeries()) {
-        const series = await this.trips.publishSeries({
-          ...template,
-          weekdays: this.selectedWeekdays(),
-          departure_time: v.time,
-          start_date: v.start_date,
-          window: v.window === 'semester' ? 'semester' : Number(v.window),
-        });
-        target = `/series/${series.id}`;
-      } else {
-        const trip = await this.trips.publishTrip({
-          ...template,
-          departs_at: pamplonaInstant(v.date, v.time),
-        });
-        target = `/viajes/${trip.id}`;
-      }
+      const trip =
+        this.mode() === 'edit-trip' && id
+          ? await this.trips.updateTrip(id, body)
+          : await this.trips.publishTrip(body);
+      const target = `/viajes/${trip.id}`;
       this.toast.show(
         this.transloco.translate(this.mode() === 'create' ? 'publish.published' : 'publish.saved'),
         'success',

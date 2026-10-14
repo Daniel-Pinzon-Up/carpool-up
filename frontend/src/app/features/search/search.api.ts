@@ -39,7 +39,6 @@ export interface MatchPoint {
 
 export interface SearchResult {
   trip_id: string;
-  series_id: string | null;
   status: TripStatus;
   departs_at: string;
   arrives_at: string;

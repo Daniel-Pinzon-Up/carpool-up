@@ -1,5 +1,5 @@
 import { BadgeTone } from '../../shared/ui/status-badge';
-import { SeriesStatus, TripStatus } from './trips.api';
+import { TripStatus } from './trips.api';
 
 export const TRIP_STATUS_TONE: Record<TripStatus, BadgeTone> = {
   scheduled: 'info',
@@ -8,12 +8,6 @@ export const TRIP_STATUS_TONE: Record<TripStatus, BadgeTone> = {
   cancelled_by_driver: 'danger',
   cancelled_pico_placa: 'warning',
   not_held: 'neutral',
-};
-
-export const SERIES_STATUS_TONE: Record<SeriesStatus, BadgeTone> = {
-  active: 'success',
-  cancelled: 'danger',
-  finished: 'neutral',
 };
 
 /** Fecha y hora cortas en la zona de Pamplona e idioma activo. */

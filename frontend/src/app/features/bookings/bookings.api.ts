@@ -16,10 +16,6 @@ export type BookingStatus =
   | 'expired'
   | 'no_show'
   | 'completed';
-export type SubscriptionStatus =
-  'requested' | 'active' | 'rejected' | 'cancelled' | 'finished' | 'expired';
-export type WaitlistStatus = 'waiting' | 'offered' | 'converted' | 'expired' | 'left';
-export type SubscriptionOption = number | 'series';
 
 export const BOOKING_STATUS_TONE: Record<BookingStatus, BadgeTone> = {
   requested: 'pending',
@@ -33,15 +29,6 @@ export const BOOKING_STATUS_TONE: Record<BookingStatus, BadgeTone> = {
   expired: 'neutral',
   no_show: 'danger',
   completed: 'success',
-};
-
-export const SUBSCRIPTION_STATUS_TONE: Record<SubscriptionStatus, BadgeTone> = {
-  requested: 'pending',
-  active: 'success',
-  rejected: 'danger',
-  cancelled: 'neutral',
-  finished: 'neutral',
-  expired: 'neutral',
 };
 
 /** Estados en los que la reserva sigue viva (cuenta para el viaje). */
@@ -68,11 +55,6 @@ export interface PointsRequest {
   preferences: BookingPreferences;
 }
 
-export interface SubscriptionRequest extends PointsRequest {
-  option: SubscriptionOption;
-  start_date: string;
-}
-
 export interface PassengerCard {
   id: string;
   full_name: string;
@@ -94,7 +76,6 @@ export interface MeetingPoint {
 
 export interface TripBrief {
   id: string;
-  series_id: string | null;
   status: TripStatus;
   departs_at: string;
   arrives_at: string;
@@ -105,19 +86,15 @@ export interface TripBrief {
   vehicle: VehicleSummary;
 }
 
+/** Cancelacion tardia que espera la decision del conductor. */
 export interface Cancellation {
-  id: string;
-  reason: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  created_at: string;
-  resolved_at: string | null;
+  reason: string | null;
 }
 
 export interface Booking {
   id: string;
   trip: TripBrief;
   passenger: PassengerCard;
-  subscription_id: string | null;
   seats: number;
   amount: number;
   status: BookingStatus;
@@ -137,65 +114,9 @@ export interface Booking {
   payment_note: string | null;
 }
 
-export interface Subscription {
-  id: string;
-  series: {
-    id: string;
-    origin: string;
-    destination: string;
-    weekdays: number[];
-    departure_time: string;
-    window_end: string;
-    price_per_seat: number;
-    driver: { id: string; full_name: string };
-  };
-  passenger: PassengerCard;
-  from_date: string;
-  to_date: string;
-  seats: number;
-  pickup_place: string;
-  dropoff_place: string;
-  preferences: BookingPreferences;
-  status: SubscriptionStatus;
-  expires_at: string;
-  created_at: string;
-  decided_at: string | null;
-  reject_reason: string | null;
-  booked_dates: string[];
-  skipped_dates: string[];
-}
-
-export interface AvailabilityDay {
-  trip_id: string;
-  date: string;
-  departs_at: string;
-  status: TripStatus;
-  seats_available: number;
-  bookable: boolean;
-}
-
-export interface SeriesAvailability {
-  series_id: string;
-  options: SubscriptionOption[];
-  days: AvailabilityDay[];
-}
-
-export interface WaitlistEntry {
-  id: string;
-  trip: TripBrief;
-  seats: number;
-  status: WaitlistStatus;
-  ahead: number;
-  offered_at: string | null;
-  offer_expires_at: string | null;
-  booking_id: string | null;
-  created_at: string;
-}
-
 export interface Inbox {
   bookings: Booking[];
   cancellations: Booking[];
-  subscriptions: Subscription[];
 }
 
 const API = '/api/v1';
@@ -248,56 +169,8 @@ export class BookingsApi {
     return this.post(`/bookings/${id}/cancel`, { reason });
   }
 
-  resolveCancellation(requestId: string, accept: boolean): Promise<Booking> {
-    return this.post(`/cancellation-requests/${requestId}/${accept ? 'accept' : 'reject'}`);
-  }
-
-  // --- Suscripciones ------------------------------------------------------------------
-
-  availability(seriesId: string, seats: number): Promise<SeriesAvailability> {
-    return this.get(`/series/${seriesId}/availability`, new HttpParams().set('seats', seats));
-  }
-
-  subscribe(seriesId: string, body: SubscriptionRequest): Promise<Subscription> {
-    return this.post(`/series/${seriesId}/subscriptions`, body);
-  }
-
-  mySubscriptions(): Promise<Subscription[]> {
-    return this.get('/subscriptions/mine');
-  }
-
-  acceptSubscription(id: string): Promise<Subscription> {
-    return this.post(`/subscriptions/${id}/accept`);
-  }
-
-  rejectSubscription(id: string, reason: string | null): Promise<Subscription> {
-    return this.post(`/subscriptions/${id}/reject`, { reason });
-  }
-
-  cancelSubscription(id: string, reason: string | null): Promise<Subscription> {
-    return this.post(`/subscriptions/${id}/cancel`, { reason });
-  }
-
-  // --- Lista de espera ----------------------------------------------------------------
-
-  joinWaitlist(tripId: string, body: PointsRequest): Promise<WaitlistEntry> {
-    return this.post(`/trips/${tripId}/waitlist`, body);
-  }
-
-  leaveWaitlist(tripId: string): Promise<void> {
-    return firstValueFrom(this.http.delete<void>(`${API}/trips/${tripId}/waitlist`));
-  }
-
-  myWaitlist(): Promise<WaitlistEntry[]> {
-    return this.get('/waitlist/mine');
-  }
-
-  confirmOffer(id: string): Promise<WaitlistEntry> {
-    return this.post(`/waitlist/${id}/confirm`);
-  }
-
-  declineOffer(id: string): Promise<WaitlistEntry> {
-    return this.post(`/waitlist/${id}/decline`);
+  resolveCancellation(bookingId: string, accept: boolean): Promise<Booking> {
+    return this.post(`/bookings/${bookingId}/cancellation/${accept ? 'accept' : 'reject'}`);
   }
 }
 

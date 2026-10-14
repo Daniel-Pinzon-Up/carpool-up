@@ -18,8 +18,6 @@ export interface RoutePreviewRequest {
 export interface RoutePreview {
   geometry: number[][];
   distance_m: number;
-  osrm_duration_s: number;
-  traffic_factor: number;
   duration_s: number;
   points: {
     place_id: string | null;

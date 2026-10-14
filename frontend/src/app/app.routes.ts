@@ -7,7 +7,6 @@ import {
   roleGuard,
   signedInGuard,
 } from './core/auth/auth.guards';
-import { devOnlyGuard } from './core/guards/dev-only.guard';
 import { Shell } from './core/layout/shell';
 
 const authLayout = () => import('./features/auth/auth-layout');
@@ -91,11 +90,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/account/account-status'),
         title: 'account.pageTitle',
       },
-      {
-        path: 'terminos',
-        loadComponent: () => import('./features/account/accept-terms'),
-        title: 'acceptTerms.title',
-      },
     ],
   },
 
@@ -155,18 +149,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/publish/publish-wizard'),
         data: { mode: 'edit-trip' },
         title: 'publish.editTripTitle',
-      },
-      {
-        path: 'series/:id',
-        loadComponent: () => import('./features/trips/series-detail'),
-        title: 'trips.seriesTitle',
-      },
-      {
-        path: 'series/:id/editar',
-        canMatch: [roleGuard('driver')],
-        loadComponent: () => import('./features/publish/publish-wizard'),
-        data: { mode: 'edit-series' },
-        title: 'publish.editSeriesTitle',
       },
       {
         path: 'mensajes',
@@ -284,14 +266,6 @@ export const routes: Routes = [
         ],
       },
     ],
-  },
-
-  // Herramienta de desarrollo: no exige sesion
-  {
-    path: 'catalogo',
-    canMatch: [devOnlyGuard],
-    loadComponent: () => import('./features/catalog/catalog-page'),
-    title: 'nav.catalog',
   },
 
   { path: '**', redirectTo: '' },

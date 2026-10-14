@@ -1,15 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import {
-  LucideBike,
-  LucideCarFront,
-  LucideFootprints,
-  LucideRepeat,
-  LucideStar,
-  LucideUsers,
-} from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LucideBike, LucideCarFront, LucideFootprints, LucideStar, LucideUsers } from '@icons';
+import { LOCALE } from '../../core/i18n/locale';
 import { formatCop } from '../../shared/map/routing.api';
 import { Avatar } from '../../shared/ui/avatar';
 import { formatTime } from '../trips/trip-status';
@@ -27,7 +20,6 @@ import { SearchResult } from './search.api';
     LucideBike,
     LucideCarFront,
     LucideFootprints,
-    LucideRepeat,
     LucideStar,
     LucideUsers,
   ],
@@ -90,16 +82,8 @@ import { SearchResult } from './search.api';
         </p>
       </div>
 
-      @if (result().series_id || result().rules.length) {
+      @if (result().rules.length) {
         <ul class="flex flex-wrap gap-1.5" [attr.aria-label]="'publish.steps.rules' | transloco">
-          @if (result().series_id) {
-            <li
-              class="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
-            >
-              <svg lucideRepeat class="size-3.5" aria-hidden="true"></svg>
-              {{ 'search.card.series' | transloco }}
-            </li>
-          }
           @for (rule of result().rules; track rule.kind) {
             <li class="rounded-full bg-glass px-2.5 py-1 text-xs font-medium">
               @if (rule.kind === 'custom') {
@@ -121,13 +105,10 @@ export class ResultCard {
   readonly result = input.required<SearchResult>();
   /** Origen y destino que eligio el pasajero, para proponerlos al reservar. */
   readonly places = input<SearchedPlaces | null>(null);
-  private readonly language = inject(LanguageService);
 
-  protected readonly money = computed(() =>
-    formatCop(this.result().price_per_seat, this.language.current()),
-  );
+  protected readonly money = computed(() => formatCop(this.result().price_per_seat, LOCALE));
 
   protected time(iso: string): string {
-    return formatTime(iso, this.language.current());
+    return formatTime(iso, LOCALE);
   }
 }

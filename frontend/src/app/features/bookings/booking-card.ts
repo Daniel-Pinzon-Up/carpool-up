@@ -1,15 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import {
-  LucideArrowRight,
-  LucideCarFront,
-  LucideMapPin,
-  LucideRepeat,
-  LucideUsers,
-  LucideWallet,
-} from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LucideArrowRight, LucideCarFront, LucideMapPin, LucideUsers, LucideWallet } from '@icons';
+import { LOCALE } from '../../core/i18n/locale';
 import { formatCop } from '../../shared/map/routing.api';
 import { Avatar } from '../../shared/ui/avatar';
 import { StatusBadge } from '../../shared/ui/status-badge';
@@ -32,7 +25,6 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
     LucideArrowRight,
     LucideCarFront,
     LucideMapPin,
-    LucideRepeat,
     LucideUsers,
     LucideWallet,
   ],
@@ -113,12 +105,6 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
           {{ 'trips.seats' | transloco: { count: b().seats } }}
         </span>
         <span>{{ money() }}</span>
-        @if (b().subscription_id) {
-          <span class="inline-flex items-center gap-1">
-            <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
-            {{ 'bookings.card.fromSubscription' | transloco }}
-          </span>
-        }
         @if (view() === 'passenger') {
           <span class="inline-flex items-center gap-1">
             <svg lucideCarFront class="size-4" aria-hidden="true"></svg>
@@ -150,12 +136,10 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
         </p>
       }
       @if (b().cancellation; as c) {
-        @if (c.status === 'pending') {
-          <p class="rounded-xl bg-warning/10 p-3 text-sm">
-            <span class="font-semibold">{{ 'bookings.card.cancelReason' | transloco }}:</span>
-            {{ c.reason }}
-          </p>
-        }
+        <p class="rounded-xl bg-warning/10 p-3 text-sm">
+          <span class="font-semibold">{{ 'bookings.card.cancelReason' | transloco }}:</span>
+          {{ c.reason }}
+        </p>
       }
       @if (b().cancel_reason && b().status !== 'cancel_requested') {
         <p class="text-sm text-muted">
@@ -173,19 +157,16 @@ import { BOOKING_PREFERENCE_KEYS, BOOKING_STATUS_TONE, Booking } from './booking
 export class BookingCard {
   readonly booking = input.required<Booking>();
   readonly view = input<'passenger' | 'driver'>('passenger');
-  private readonly language = inject(LanguageService);
 
   protected readonly b = this.booking;
   protected readonly tone = computed(() => BOOKING_STATUS_TONE[this.b().status]);
-  protected readonly when = computed(() =>
-    formatDeparture(this.b().pickup.eta, this.language.current()),
-  );
-  protected readonly money = computed(() => formatCop(this.b().amount, this.language.current()));
+  protected readonly when = computed(() => formatDeparture(this.b().pickup.eta, LOCALE));
+  protected readonly money = computed(() => formatCop(this.b().amount, LOCALE));
   protected readonly preferences = computed(() =>
     BOOKING_PREFERENCE_KEYS.filter((key) => this.b().preferences[key]),
   );
 
   protected time(iso: string): string {
-    return formatTime(iso, this.language.current());
+    return formatTime(iso, LOCALE);
   }
 }

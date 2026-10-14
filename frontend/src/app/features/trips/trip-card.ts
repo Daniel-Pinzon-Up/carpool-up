@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { LucideArrowRight, LucideBellDot, LucideRepeat, LucideUsers } from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LucideArrowRight, LucideBellDot, LucideUsers } from '@icons';
+import { LOCALE } from '../../core/i18n/locale';
 import { formatCop } from '../../shared/map/routing.api';
 import { StatusBadge } from '../../shared/ui/status-badge';
 import { TRIP_STATUS_TONE, formatDeparture } from './trip-status';
@@ -12,15 +12,7 @@ import { TripSummary } from './trips.api';
 @Component({
   selector: 'cp-trip-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    RouterLink,
-    TranslocoPipe,
-    StatusBadge,
-    LucideArrowRight,
-    LucideBellDot,
-    LucideRepeat,
-    LucideUsers,
-  ],
+  imports: [RouterLink, TranslocoPipe, StatusBadge, LucideArrowRight, LucideBellDot, LucideUsers],
   host: { class: 'block' },
   template: `
     <a
@@ -57,25 +49,14 @@ import { TripSummary } from './trips.api';
             {{ 'trips.pendingRequests' | transloco: { count: trip().pending_requests } }}
           </span>
         }
-        @if (trip().series_id) {
-          <span class="inline-flex items-center gap-1">
-            <svg lucideRepeat class="size-4" aria-hidden="true"></svg>
-            {{ 'trips.fromSeries' | transloco }}
-          </span>
-        }
       </p>
     </a>
   `,
 })
 export class TripCard {
   readonly trip = input.required<TripSummary>();
-  private readonly language = inject(LanguageService);
 
   protected readonly tone = computed(() => TRIP_STATUS_TONE[this.trip().status]);
-  protected readonly when = computed(() =>
-    formatDeparture(this.trip().departs_at, this.language.current()),
-  );
-  protected readonly money = computed(() =>
-    formatCop(this.trip().price_per_seat, this.language.current()),
-  );
+  protected readonly when = computed(() => formatDeparture(this.trip().departs_at, LOCALE));
+  protected readonly money = computed(() => formatCop(this.trip().price_per_seat, LOCALE));
 }

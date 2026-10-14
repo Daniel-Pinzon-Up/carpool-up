@@ -91,7 +91,6 @@ export interface PassengerHistoryEntry {
 
 export interface DriverHistoryEntry {
   trip_id: string;
-  series_id: string | null;
   departs_at: string;
   origin: string;
   destination: string;

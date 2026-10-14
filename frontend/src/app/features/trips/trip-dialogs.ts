@@ -1,15 +1,13 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
-import { MetaService } from '../../core/meta/meta.service';
 import { fieldError } from '../../shared/forms/validation';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassInput } from '../../shared/ui/glass-input';
 import { GlassModal } from '../../shared/ui/glass-modal';
-import { GlassSelect, SelectOption } from '../../shared/ui/glass-select';
 import { GlassTextarea } from '../../shared/ui/glass-textarea';
-import { SeriesWindow, addDays, pamplonaDate, pamplonaInstant } from './trips.api';
+import { addDays, pamplonaDate, pamplonaInstant } from './trips.api';
 
 export interface CancelDialogData {
   title: string;
@@ -70,14 +68,11 @@ export class CancelTripDialog {
   }
 }
 
-export type DuplicateResult =
-  { kind: 'trip'; departsAt: string } | { kind: 'series'; startDate: string; window: SeriesWindow };
-
-/** Nueva fecha para duplicar un viaje (fecha y hora) o una serie (inicio y ventana). */
+/** Nueva fecha y hora para duplicar un viaje; devuelve el instante de salida. */
 @Component({
   selector: 'cp-duplicate-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoPipe, GlassModal, GlassButton, GlassInput, GlassSelect],
+  imports: [ReactiveFormsModule, TranslocoPipe, GlassModal, GlassButton, GlassInput],
   template: `
     <cp-glass-modal [title]="'trips.duplicate.title' | transloco">
       <form
@@ -87,27 +82,17 @@ export type DuplicateResult =
         (ngSubmit)="submit()"
         novalidate
       >
-        <p class="text-muted">{{ 'trips.duplicate.' + data.kind + 'Hint' | transloco }}</p>
+        <p class="text-muted">{{ 'trips.duplicate.tripHint' | transloco }}</p>
         <cp-glass-input
           formControlName="date"
           type="date"
-          [label]="
-            (data.kind === 'trip' ? 'publish.when.date' : 'publish.when.startDate') | transloco
-          "
+          [label]="'publish.when.date' | transloco"
         />
-        @if (data.kind === 'trip') {
-          <cp-glass-input
-            formControlName="time"
-            type="time"
-            [label]="'publish.when.time' | transloco"
-          />
-        } @else {
-          <cp-glass-select
-            formControlName="window"
-            [label]="'publish.when.window' | transloco"
-            [options]="windowOptions()"
-          />
-        }
+        <cp-glass-input
+          formControlName="time"
+          type="time"
+          [label]="'publish.when.time' | transloco"
+        />
         @if (invalid()) {
           <p role="alert" class="text-sm text-danger">
             {{ 'trips.duplicate.invalid' | transloco }}
@@ -126,44 +111,19 @@ export type DuplicateResult =
   `,
 })
 export class DuplicateDialog {
-  protected readonly data = inject<{ kind: 'trip' | 'series'; time: string }>(DIALOG_DATA);
-  protected readonly ref = inject<DialogRef<DuplicateResult>>(DialogRef);
-  private readonly transloco = inject(TranslocoService);
-  private readonly meta = inject(MetaService);
+  protected readonly data = inject<{ time: string }>(DIALOG_DATA);
+  protected readonly ref = inject<DialogRef<string>>(DialogRef);
   protected readonly invalid = signal(false);
 
   protected readonly form = new FormGroup({
     date: new FormControl(addDays(pamplonaDate(new Date()), 1), { nonNullable: true }),
     time: new FormControl(this.data.time, { nonNullable: true }),
-    window: new FormControl('28', { nonNullable: true }),
   });
 
-  protected readonly windowOptions = computed<SelectOption[]>(() =>
-    (
-      (this.meta.settings()['series_window_options_days'] as SeriesWindow[]) ?? [15, 28, 'semester']
-    ).map((option) => ({
-      value: String(option),
-      label:
-        option === 'semester'
-          ? this.transloco.translate('publish.when.windowSemester')
-          : this.transloco.translate('publish.when.windowDays', { days: option }),
-    })),
-  );
-
   protected submit(): void {
-    const { date, time, window } = this.form.getRawValue();
-    const ok =
-      !!date && date >= pamplonaDate(new Date()) && (this.data.kind === 'series' || !!time);
+    const { date, time } = this.form.getRawValue();
+    const ok = !!date && !!time && date >= pamplonaDate(new Date());
     this.invalid.set(!ok);
-    if (!ok) return;
-    this.ref.close(
-      this.data.kind === 'trip'
-        ? { kind: 'trip', departsAt: pamplonaInstant(date, time) }
-        : {
-            kind: 'series',
-            startDate: date,
-            window: window === 'semester' ? 'semester' : Number(window),
-          },
-    );
+    if (ok) this.ref.close(pamplonaInstant(date, time));
   }
 }

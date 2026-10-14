@@ -31,7 +31,6 @@ const TERMINAL: PlaceValue = {
 
 const RESULT: SearchResult = {
   trip_id: 't1',
-  series_id: 's1',
   status: 'scheduled',
   departs_at: '2026-10-06T12:00:00Z',
   arrives_at: '2026-10-06T12:10:00Z',
@@ -197,7 +196,6 @@ describe('ResultCard', () => {
     expect(text).toContain('A 120 m de tu punto');
     expect(text).toContain('Cupos: 3');
     expect(text).toContain('Conductor nuevo');
-    expect(text).toContain('Serie');
     expect(text).toContain('Mascotas: No permitido');
     expect(text).toContain('Spark');
   });
