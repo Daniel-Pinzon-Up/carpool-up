@@ -23,8 +23,6 @@ ADMIN_ENDPOINTS = [
     ("POST", "/admin/places"),
     ("GET", "/admin/pico-placa"),
     ("POST", "/admin/pico-placa"),
-    ("GET", "/admin/legal"),
-    ("POST", "/admin/legal"),
     ("GET", "/admin/audit"),
 ]
 

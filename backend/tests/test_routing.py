@@ -1,6 +1,5 @@
-"""Vista previa de ruta: puntos, area de servicio, ETA con factor de trafico y precio."""
+"""Vista previa de ruta: puntos, area de servicio, ETA y precio sugerido."""
 
-from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -11,9 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.enums import PlaceKind, UserRole
 from app.core.geo import point
 from app.modules.places.models import Place
-from app.modules.routing.models import TrafficFactor
 from app.modules.routing.osrm import OsrmClient, cache_key
-from app.modules.routing.service import estimate_price, round_to_hundred, weekday_group
+from app.modules.routing.service import estimate_price, round_to_hundred
 from app.modules.users.models import User
 from tests.conftest import API, FakeProvider, UserFactory, auth
 
@@ -44,13 +42,6 @@ def test_price_formula_and_cap() -> None:
     assert estimate_price(6000, 600, 3, 0) == 0
 
 
-def test_weekday_groups_use_pamplona_time() -> None:
-    # Sabado 00:30 en Pamplona es sabado 05:30 UTC; viernes 23:30 en Pamplona es sabado 04:30 UTC.
-    assert weekday_group(datetime(2030, 3, 9, 5, 30, tzinfo=UTC)) == "saturday"
-    assert weekday_group(datetime(2030, 3, 9, 4, 30, tzinfo=UTC)) == "weekday"
-    assert weekday_group(datetime(2030, 3, 10, 18, 0, tzinfo=UTC)) == "sunday"
-
-
 def test_cache_key_ignores_insignificant_decimals() -> None:
     assert cache_key([(7.123451, -72.1)]) == cache_key([(7.1234512, -72.1)])
     assert cache_key([(7.1, -72.1), (7.2, -72.2)]) != cache_key([(7.2, -72.2), (7.1, -72.1)])
@@ -73,7 +64,7 @@ async def test_preview_returns_route_and_stop_etas(
     assert response.status_code == 200, response.text
     body = response.json()
     assert body["distance_m"] == 4000
-    assert body["duration_s"] == 600 and body["traffic_factor"] == 1.0
+    assert body["duration_s"] == 600
     assert [p["eta_offset_s"] for p in body["points"]] == [0, 300, 600]
     assert body["points"][2]["eta"].startswith("2030-03-04T12:10:00")
     assert body["geometry"][0] == [ORIGIN["lon"], ORIGIN["lat"]]
@@ -84,19 +75,6 @@ async def test_preview_returns_route_and_stop_etas(
             (DESTINATION["lat"], DESTINATION["lon"]),
         ]
     ]
-
-
-@pytest.mark.integration
-async def test_traffic_factor_of_the_departure_slot(
-    routing_api: AsyncClient, db: AsyncSession, make_user: UserFactory
-) -> None:
-    db.add(TrafficFactor(weekday_group="weekday", hour=7, factor=1.5, samples=10))
-    await db.flush()
-    driver = await make_user(UserRole.DRIVER)
-    rush = await preview(routing_api, driver, departs_at="2030-03-04T12:15:00Z")  # 7:15 local
-    calm = await preview(routing_api, driver, departs_at="2030-03-04T15:00:00Z")  # 10:00 local
-    assert rush.json()["traffic_factor"] == 1.5 and rush.json()["duration_s"] == 450
-    assert calm.json()["traffic_factor"] == 1.0 and calm.json()["duration_s"] == 300
 
 
 @pytest.mark.integration

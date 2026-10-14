@@ -15,27 +15,17 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 
 from app.core import realtime
-from app.core.clock import local_today, utcnow
+from app.core.clock import local_today
 from app.core.config import get_settings
 from app.core.db import get_session
 from app.core.email import OutgoingEmail
-from app.core.enums import (
-    Language,
-    LegalKind,
-    PlaceKind,
-    ReviewStatus,
-    Sex,
-    UserRole,
-    UserStatus,
-    VehicleType,
-)
+from app.core.enums import DocKind, PlaceKind, ReviewStatus, Sex, UserRole, UserStatus, VehicleType
 from app.core.geo import point
 from app.core.rate_limit import limiter
 from app.core.security import create_access_token, hash_password
 from app.main import create_app
 from app.modules.auth.router import get_email_queue
-from app.modules.documents.models import DriverLicense
-from app.modules.legal.models import LegalDocument
+from app.modules.documents.models import Document
 from app.modules.places.models import Place
 from app.modules.routing.osrm import Leg, RouteResult
 from app.modules.routing.router import get_route_provider
@@ -220,25 +210,6 @@ def su_headers(superadmin: User) -> dict[str, str]:
     return auth(superadmin)
 
 
-@pytest.fixture
-async def legal_docs(db: AsyncSession) -> list[LegalDocument]:
-    """Terminos y politica de datos vigentes en espanol (requisito del registro)."""
-    docs = [
-        LegalDocument(
-            kind=kind,
-            version="1.0",
-            language=Language.ES,
-            body_markdown="Texto legal de prueba con la longitud minima exigida por el esquema.",
-            published_at=utcnow(),
-            is_current=True,
-        )
-        for kind in LegalKind
-    ]
-    db.add_all(docs)
-    await db.flush()
-    return docs
-
-
 # --- Rutas sin OSRM ---------------------------------------------------------------------
 
 
@@ -300,8 +271,9 @@ async def make_driver(
 ) -> tuple[User, Vehicle]:
     user = await make_user(UserRole.DRIVER, sex=sex)
     db.add(
-        DriverLicense(
+        Document(
             user_id=user.id,
+            kind=DocKind.DRIVER_LICENSE,
             file_path="licenses/x.pdf",
             content_type="application/pdf",
             expires_on=local_today() + timedelta(days=365),

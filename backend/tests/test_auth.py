@@ -14,12 +14,11 @@ from app.core.clock import utcnow
 from app.core.enums import AuthPurpose, UserRole, UserStatus
 from app.core.security import create_challenge_token
 from app.modules.auth import codes as codes_module
-from app.modules.documents.models import IdentityDocument
-from app.modules.legal.models import LegalDocument, TermsAcceptance
+from app.modules.documents.models import Document
 from app.modules.users.models import User
 from tests.conftest import API, Outbox, UserFactory, auth
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("legal_docs")]
+pytestmark = pytest.mark.integration
 
 EMAIL = "laura.prueba@unipamplona.edu.co"
 PASSWORD = "clave-segura-123"
@@ -40,7 +39,6 @@ def form(**overrides: Any) -> dict[str, Any]:
         "program": "Ingenieria de Sistemas",
         "role": "passenger",
         "doc_kind": "student_card",
-        "preferred_language": "es",
         "accept_terms": "true",
         "accept_data_policy": "true",
     }
@@ -78,8 +76,8 @@ async def activate(db: AsyncSession, email: str = EMAIL) -> User:
 # --- Registro ---------------------------------------------------------------------------------
 
 
-async def test_register_creates_pending_account_document_and_acceptances(
-    api: AsyncClient, db: AsyncSession, outbox: Outbox, legal_docs: list[LegalDocument]
+async def test_register_creates_pending_account_document_and_acceptance(
+    api: AsyncClient, db: AsyncSession, outbox: Outbox
 ) -> None:
     response = await register(api, email="Laura.Prueba@UniPamplona.edu.co")
     assert response.status_code == 201, response.text
@@ -95,12 +93,9 @@ async def test_register_creates_pending_account_document_and_acceptances(
     assert user.two_factor_required is True
     assert user.password_hash.startswith("$argon2id$")
 
-    document = await db.scalar(select(IdentityDocument).where(IdentityDocument.user_id == user.id))
+    document = await db.scalar(select(Document).where(Document.user_id == user.id))
     assert document is not None and document.status == "pending"
-    accepted = await db.scalars(
-        select(TermsAcceptance.legal_document_id).where(TermsAcceptance.user_id == user.id)
-    )
-    assert set(accepted.all()) == {doc.id for doc in legal_docs}
+    assert user.terms_accepted_at is not None
 
     assert len(outbox.sent) == 1
     assert outbox.sent[0].subject == "Verifica tu correo"
@@ -150,15 +145,6 @@ async def test_register_rejects_large_files(api: AsyncClient, su_headers: dict[s
     response = await register(api, file=big)
     assert response.status_code == 413
     assert response.json()["code"] == "FILE_TOO_LARGE"
-
-
-async def test_register_needs_published_terms(api: AsyncClient, db: AsyncSession) -> None:
-    for doc in await db.scalars(select(LegalDocument)):
-        doc.is_current = False
-    await db.flush()
-    response = await register(api)
-    assert response.status_code == 503
-    assert response.json()["code"] == "LEGAL_DOCUMENTS_UNAVAILABLE"
 
 
 # --- Verificacion de correo -------------------------------------------------------------------
@@ -481,7 +467,6 @@ async def test_pending_accounts_see_their_profile_but_not_features(
     me = (await api.get(f"{API}/users/me", headers=headers)).json()
     assert me["status"] == "pending_approval"
     assert me["document"]["status"] == "pending"
-    assert me["pending_legal"] == []
     pin = await api.post(
         f"{API}/places/custom", json={"name": "Casa", "lat": 7.38, "lon": -72.65}, headers=headers
     )
@@ -505,20 +490,13 @@ async def test_new_document_replaces_pending_one(api: AsyncClient, outbox: Outbo
     assert history[0]["kind"] == "institutional_proof"
 
 
-async def test_profile_preferences_and_payment_note(
-    api: AsyncClient, make_user: UserFactory
-) -> None:
+async def test_profile_program_and_payment_note(api: AsyncClient, make_user: UserFactory) -> None:
     passenger = await make_user(UserRole.PASSENGER)
     updated = await api.patch(
-        f"{API}/users/me",
-        json={"preferred_language": "fr", "theme_preference": "dark"},
-        headers=auth(passenger),
+        f"{API}/users/me", json={"program": "Ingenieria de Sistemas"}, headers=auth(passenger)
     )
     assert updated.status_code == 200
-    assert (updated.json()["preferred_language"], updated.json()["theme_preference"]) == (
-        "fr",
-        "dark",
-    )
+    assert updated.json()["program"] == "Ingenieria de Sistemas"
 
     forbidden = await api.patch(
         f"{API}/users/me", json={"payment_note": "Nequi"}, headers=auth(passenger)
@@ -533,40 +511,6 @@ async def test_profile_preferences_and_payment_note(
     assert note.json()["payment_note"] == "Nequi 300 000 0000"
     cleared = await api.patch(f"{API}/users/me", json={"payment_note": ""}, headers=auth(driver))
     assert cleared.json()["payment_note"] is None
-
-
-async def test_new_legal_version_must_be_accepted(
-    api: AsyncClient, outbox: Outbox, su_headers: dict[str, str]
-) -> None:
-    body = await register_and_verify(api, outbox)
-    headers = {"Authorization": f"Bearer {body['access_token']}"}
-    published = await api.post(
-        f"{API}/admin/legal",
-        json={
-            "kind": "terms",
-            "version": "2.0",
-            "language": "es",
-            "body_markdown": "Nueva version de los terminos con suficiente longitud de texto.",
-        },
-        headers=su_headers,
-    )
-    new_id = published.json()["id"]
-    pending = (await api.get(f"{API}/users/me", headers=headers)).json()["pending_legal"]
-    assert [p["id"] for p in pending] == [new_id]
-
-    stale = await api.post(
-        f"{API}/legal/accept",
-        json={"document_ids": [pending[0]["id"], "00000000-0000-0000-0000-000000000000"]},
-        headers=headers,
-    )
-    assert stale.status_code == 422
-    assert stale.json()["code"] == "LEGAL_VERSION_NOT_CURRENT"
-
-    accepted = await api.post(
-        f"{API}/legal/accept", json={"document_ids": [new_id]}, headers=headers
-    )
-    assert accepted.status_code == 204
-    assert (await api.get(f"{API}/users/me", headers=headers)).json()["pending_legal"] == []
 
 
 async def test_active_user_reaches_features(

@@ -10,8 +10,8 @@ from PIL import Image
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import local_today
-from app.core.enums import ReviewStatus, UserRole, UserStatus
-from app.modules.documents.models import DriverLicense
+from app.core.enums import DocKind, ReviewStatus, UserRole, UserStatus
+from app.modules.documents.models import Document
 from app.modules.users.models import User
 from tests.conftest import API, UserFactory, auth
 
@@ -48,8 +48,9 @@ def png() -> bytes:
     return out.getvalue()
 
 
-async def approved_license(db: AsyncSession, user: User, days: int = 365) -> DriverLicense:
-    license_ = DriverLicense(
+async def approved_license(db: AsyncSession, user: User, days: int = 365) -> Document:
+    license_ = Document(
+        kind=DocKind.DRIVER_LICENSE,
         user_id=user.id,
         file_path="licenses/x.pdf",
         content_type="application/pdf",

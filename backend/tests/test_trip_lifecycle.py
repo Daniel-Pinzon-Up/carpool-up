@@ -7,19 +7,14 @@ from typing import Any
 import httpx
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import LOCAL_TZ, utcnow
-from app.core.enums import BookingStatus, SuspensionKind, TripStatus, UserRole
+from app.core.enums import BookingStatus, TripStatus, UserRole
 from app.core.realtime import user_channel
 from app.modules.bookings.models import Booking
-from app.modules.chat.models import Conversation
 from app.modules.places.models import Place
-from app.modules.routing.models import TrafficFactor
-from app.modules.routing.service import weekday_group
-from app.modules.suspensions.models import Suspension
-from app.modules.trips.jobs import mark_not_held, recompute_traffic_factors, send_trip_reminders
+from app.modules.trips.jobs import mark_not_held, send_trip_reminders
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
@@ -137,13 +132,9 @@ async def test_complete_trip_from_start_to_tickets(
     paid = (await routing_api.post(url, json={"paid": True}, headers=auth(driver[0]))).json()
     assert paid["paid_confirmed"] is True
 
-    # Se cierran el grupal y los directos de este viaje puntual (uno por pasajero).
-    open_chats = await db.scalar(
-        select(func.count()).where(
-            Conversation.trip_id == trip["id"], Conversation.closed_at.is_(None)
-        )
-    )
-    assert open_chats == 0
+    # El chat del viaje queda de solo lectura.
+    chat = await routing_api.get(f"{API}/conversations/{trip['id']}", headers=auth(rider))
+    assert chat.json()["closed"] is True
 
 
 async def test_start_rules(
@@ -186,19 +177,17 @@ async def test_repeated_no_shows_suspend_bookings(
         assert response.status_code == 200, response.text
         await act(routing_api, driver[0], f"/trips/{trip['id']}/finish")
 
-    ban = await db.scalar(select(Suspension).where(Suspension.user_id == passenger.id))
+    await db.refresh(passenger)
+    ban = passenger.booking_ban_until
     assert ban is not None
-    assert ban.kind == SuspensionKind.BOOKING_BAN
-    assert ban.created_by is None
-    assert ban.ends_at is not None
-    assert abs((ban.ends_at - utcnow()) - timedelta(days=7)) < timedelta(minutes=1)
+    assert abs((ban - utcnow()) - timedelta(days=7)) < timedelta(minutes=1)
     assert "booking_suspended" in await kinds(db, passenger)
     other = await published(routing_api, driver, places)
     response = await book(routing_api, passenger, other["id"], places)
     assert response.json()["code"] == "BOOKING_SUSPENDED"
 
 
-async def test_not_held_reminders_and_traffic_factors(
+async def test_not_held_and_reminders(
     routing_api: AsyncClient,
     db: AsyncSession,
     driver: tuple[User, Vehicle],
@@ -221,37 +210,3 @@ async def test_not_held_reminders_and_traffic_factors(
     assert row is not None
     await db.refresh(row)
     assert row.status == BookingStatus.EXPIRED
-
-    # Cinco viajes completados que tardaron 1,5 veces lo que dijo OSRM.
-    base = await db.get(Trip, soon["id"])
-    assert base is not None
-    departs = utcnow() - timedelta(days=1)
-    for n in range(5):
-        db.add(
-            Trip(
-                driver_id=base.driver_id,
-                vehicle_id=base.vehicle_id,
-                departs_at=departs,
-                seats_total=3,
-                price_per_seat=1000,
-                route=base.route,
-                distance_m=4000,
-                est_duration_s=600,
-                osrm_duration_s=600,
-                status=TripStatus.COMPLETED,
-                started_at=departs,
-                finished_at=departs + timedelta(seconds=900 + n),
-            )
-        )
-    await db.flush()
-    result = await recompute_traffic_factors(db)
-    assert result["slots"] == 1
-    factor = await db.scalar(
-        select(TrafficFactor).where(
-            TrafficFactor.weekday_group == weekday_group(departs),
-            TrafficFactor.hour == departs.astimezone(LOCAL_TZ).hour,
-        )
-    )
-    assert factor is not None
-    assert factor.factor == 1.5
-    assert factor.samples == 5

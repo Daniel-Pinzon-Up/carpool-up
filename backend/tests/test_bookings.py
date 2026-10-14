@@ -10,18 +10,15 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import LOCAL_TZ, utcnow
-from app.core.enums import BookingStatus, Sex, SuspensionKind, UserRole
+from app.core.enums import BookingStatus, Sex, UserRole
 from app.modules.bookings.jobs import auto_cancel_late_driver, expire_pending
 from app.modules.bookings.models import Booking
 from app.modules.notifications.models import Notification
 from app.modules.places.models import Place
-from app.modules.suspensions.models import Suspension
 from app.modules.trips.models import Trip
 from app.modules.trips.service import recheck_pico_placa
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
-from app.modules.waitlist.models import WaitlistEntry
-from app.modules.waitlist.offers import run_waitlist
 from tests.conftest import API, UserFactory, auth, make_driver
 from tests.test_trips import pico_placa, publish, trip_body
 
@@ -169,15 +166,7 @@ async def test_suspended_passenger_cannot_book(
     passenger: User,
 ) -> None:
     trip = await published(routing_api, driver, places)
-    db.add(
-        Suspension(
-            user_id=passenger.id,
-            kind=SuspensionKind.BOOKING_BAN,
-            reason="3 no-shows",
-            starts_at=utcnow() - timedelta(days=1),
-            ends_at=utcnow() + timedelta(days=6),
-        )
-    )
+    passenger.booking_ban_until = utcnow() + timedelta(days=6)
     await db.flush()
     response = await book(routing_api, passenger, trip["id"], places)
     assert response.status_code == 403
@@ -341,8 +330,7 @@ async def test_late_cancellation_needs_driver_decision(
     assert response.json()["code"] == "CANCEL_REASON_REQUIRED"
     response = await cancel(routing_api, passenger, booking["id"], "Me enferme hoy")
     assert response.json()["status"] == "cancel_requested"
-    request = response.json()["cancellation"]
-    assert request["status"] == "pending"
+    assert response.json()["cancellation"] == {"reason": "Me enferme hoy"}
     assert (await kinds(db, driver[0]))[-1] == "cancellation_requested"
     # Mientras tanto el cupo sigue ocupado.
     assert (await trip_view(routing_api, passenger, trip["id"]))["seats_available"] == 2
@@ -352,25 +340,19 @@ async def test_late_cancellation_needs_driver_decision(
     inbox = (await routing_api.get(f"{API}/bookings/inbox", headers=auth(driver[0]))).json()
     assert [b["id"] for b in inbox["cancellations"]] == [booking["id"]]
 
-    response = await routing_api.post(
-        f"{API}/cancellation-requests/{request['id']}/reject", headers=auth(driver[0])
-    )
+    url = f"{API}/bookings/{booking['id']}/cancellation"
+    response = await routing_api.post(f"{url}/reject", headers=auth(driver[0]))
     assert response.json()["status"] == "accepted"
-    assert response.json()["cancellation"]["status"] == "rejected"
+    assert response.json()["cancellation"] is None
     assert (await kinds(db, passenger))[-1] == "cancellation_rejected"
 
-    request = (await cancel(routing_api, passenger, booking["id"], "Sigo enfermo")).json()
-    response = await routing_api.post(
-        f"{API}/cancellation-requests/{request['cancellation']['id']}/accept",
-        headers=auth(driver[0]),
-    )
+    await cancel(routing_api, passenger, booking["id"], "Sigo enfermo")
+    response = await routing_api.post(f"{url}/accept", headers=auth(driver[0]))
     assert response.json()["status"] == "cancelled_by_passenger"
+    assert response.json()["cancel_reason"] == "Sigo enfermo"
     assert (await kinds(db, passenger))[-1] == "cancellation_accepted"
     assert (await trip_view(routing_api, passenger, trip["id"]))["seats_available"] == 3
-    response = await routing_api.post(
-        f"{API}/cancellation-requests/{request['cancellation']['id']}/accept",
-        headers=auth(driver[0]),
-    )
+    response = await routing_api.post(f"{url}/accept", headers=auth(driver[0]))
     assert response.json()["code"] == "CANCELLATION_NOT_PENDING"
 
 
@@ -514,107 +496,3 @@ async def test_trip_changes_respect_bookings(
     mine = (await routing_api.get(f"{API}/bookings/{second['id']}", headers=auth(other))).json()
     assert mine["penalty_free"] is True
     assert mine["amount"] == 1500
-
-
-# --- Lista de espera ------------------------------------------------------------------
-
-
-async def test_waitlist_offers_freed_seats_in_order(
-    routing_api: AsyncClient,
-    db: AsyncSession,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    passenger: User,
-    make_user: UserFactory,
-) -> None:
-    trip = await published(routing_api, driver, places, seats=1)
-    holder = (await book(routing_api, passenger, trip["id"], places)).json()
-    second, third = await make_user(UserRole.PASSENGER), await make_user(UserRole.PASSENGER)
-    body = {
-        "seats": 1,
-        "pickup_place_id": str(places[1].id),
-        "dropoff_place_id": str(places[2].id),
-    }
-    url = f"{API}/trips/{trip['id']}/waitlist"
-
-    # Con cupo libre no hace falta la fila.
-    response = await routing_api.post(url, json=body, headers=auth(second))
-    assert response.json()["code"] == "WAITLIST_NOT_NEEDED"
-    await decide(routing_api, driver[0], holder["id"], "accept")
-    response = await book(routing_api, second, trip["id"], places)
-    assert response.json()["code"] == "TRIP_FULL"
-
-    first_entry = (await routing_api.post(url, json=body, headers=auth(second))).json()
-    assert first_entry["status"] == "waiting"
-    assert first_entry["ahead"] == 0
-    second_entry = (await routing_api.post(url, json=body, headers=auth(third))).json()
-    assert second_entry["ahead"] == 1
-    assert (await routing_api.post(url, json=body, headers=auth(third))).json()["code"] == (
-        "WAITLIST_EXISTS"
-    )
-    view = await trip_view(routing_api, third, trip["id"])
-    assert view["my_waitlist"]["status"] == "waiting"
-
-    # Se libera el puesto: se ofrece al primero de la fila.
-    await cancel(routing_api, passenger, holder["id"])
-    mine = (await routing_api.get(f"{API}/waitlist/mine", headers=auth(second))).json()
-    assert mine[0]["status"] == "offered"
-    assert mine[0]["offer_expires_at"] is not None
-    assert (await kinds(db, second))[-1] == "waitlist_offer"
-    third_list = (await routing_api.get(f"{API}/waitlist/mine", headers=auth(third))).json()
-    assert third_list[0]["status"] == "waiting"
-
-    # Rechaza la oferta: pasa al siguiente, que confirma y queda como solicitud.
-    response = await routing_api.post(
-        f"{API}/waitlist/{first_entry['id']}/decline", headers=auth(second)
-    )
-    assert response.json()["status"] == "left"
-    response = await routing_api.post(
-        f"{API}/waitlist/{second_entry['id']}/confirm", headers=auth(third)
-    )
-    assert response.status_code == 200, response.text
-    assert response.json()["status"] == "converted"
-    booking = await db.get(Booking, response.json()["booking_id"])
-    assert booking is not None
-    assert booking.status == BookingStatus.REQUESTED
-    assert booking.pickup_name == "Sede Casona"
-    response = await routing_api.post(
-        f"{API}/waitlist/{second_entry['id']}/confirm", headers=auth(third)
-    )
-    assert response.json()["code"] == "WAITLIST_OFFER_EXPIRED"
-
-
-async def test_waitlist_offer_expires_and_moves_on(
-    routing_api: AsyncClient,
-    db: AsyncSession,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    passenger: User,
-    make_user: UserFactory,
-) -> None:
-    trip = await published(routing_api, driver, places, seats=1)
-    holder = (await book(routing_api, passenger, trip["id"], places)).json()
-    await decide(routing_api, driver[0], holder["id"], "accept")
-    second, third = await make_user(UserRole.PASSENGER), await make_user(UserRole.PASSENGER)
-    body = {"pickup_place_id": str(places[0].id), "dropoff_place_id": str(places[2].id)}
-    url = f"{API}/trips/{trip['id']}/waitlist"
-    first_entry = (await routing_api.post(url, json=body, headers=auth(second))).json()
-    second_entry = (await routing_api.post(url, json=body, headers=auth(third))).json()
-    await cancel(routing_api, passenger, holder["id"])
-
-    entry = await db.get(WaitlistEntry, first_entry["id"])
-    assert entry is not None
-    entry.offer_expires_at = utcnow() - timedelta(seconds=1)
-    await db.flush()
-    result = await run_waitlist(db)
-    assert result == {"expired": 1, "offered": 1}
-    assert (await kinds(db, second))[-1] == "waitlist_offer_expired"
-    later = await db.get(WaitlistEntry, second_entry["id"])
-    assert later is not None
-    await db.refresh(later)
-    assert later.status == "offered"
-
-    # Salir de la fila con una oferta abierta tampoco deja el cupo sin ofrecer.
-    response = await routing_api.delete(url, headers=auth(third))
-    assert response.status_code == 204
-    assert (await routing_api.delete(url, headers=auth(third))).status_code == 404

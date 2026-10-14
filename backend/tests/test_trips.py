@@ -1,4 +1,4 @@
-"""Viajes y series: validaciones, ocurrencias, pico y placa, edicion, cancelacion y duplicado."""
+"""Viajes: validaciones, pico y placa, edicion, cancelacion y duplicado."""
 
 from datetime import UTC, date, datetime, time, timedelta
 from typing import Any
@@ -15,8 +15,6 @@ from app.core.geo import point
 from app.modules.notifications.models import Notification
 from app.modules.pico_placa.models import PicoPlacaRule
 from app.modules.places.models import Place
-from app.modules.semesters.models import Semester
-from app.modules.series.service import finish_past_series, series_days, window_end
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
@@ -62,43 +60,8 @@ def trip_body(places: list[Place], vehicle: Vehicle, **overrides: Any) -> dict[s
     }
 
 
-def series_body(places: list[Place], vehicle: Vehicle, **overrides: Any) -> dict[str, Any]:
-    return {
-        "place_ids": [str(places[0].id), str(places[2].id)],
-        "weekdays": [0, 2, 4],
-        "departure_time": "07:00",
-        "start_date": next_monday().isoformat(),
-        "window": 28,
-        "vehicle_id": str(vehicle.id),
-        "seats": 4,
-        "price_per_seat": 1500,
-        "rules": [],
-        **overrides,
-    }
-
-
 async def publish(api: AsyncClient, user: User, body: dict[str, Any]) -> httpx.Response:
     return await api.post(f"{API}/trips", json=body, headers=auth(user))
-
-
-async def publish_series(api: AsyncClient, user: User, body: dict[str, Any]) -> httpx.Response:
-    return await api.post(f"{API}/series", json=body, headers=auth(user))
-
-
-# --- Unidades -------------------------------------------------------------------------
-
-
-def test_series_days_and_window_end() -> None:
-    monday = date(2026, 10, 5)
-    days = series_days(monday, monday + timedelta(days=27), [0, 2, 4])
-    assert len(days) == 12
-    assert {day.weekday() for day in days} == {0, 2, 4}
-    semester = Semester(ends_on=monday + timedelta(days=10))
-    assert window_end(monday, 28, semester) == monday + timedelta(days=10)
-    assert window_end(monday, 15, Semester(ends_on=monday + timedelta(days=90))) == monday + (
-        timedelta(days=14)
-    )
-    assert window_end(monday, "semester", semester) == semester.ends_on
 
 
 # --- Viaje puntual --------------------------------------------------------------------
@@ -115,7 +78,6 @@ async def test_publish_single_trip_with_route_eta_and_rules(
     assert response.status_code == 201, response.text
     trip = response.json()
     assert trip["status"] == "scheduled"
-    assert trip["series_id"] is None
     assert [s["kind"] for s in trip["stops"]] == ["origin", "stop", "destination"]
     assert trip["stop_count"] == 1
     assert trip["distance_m"] == 4000
@@ -417,200 +379,6 @@ async def test_my_trips_upcoming_and_history(
     assert upcoming["next_cursor"] is None
     history = (await routing_api.get(f"{API}/trips/mine?scope=history", headers=auth(user))).json()
     assert [t["id"] for t in history["items"]] == [second["id"]]
-
-
-# --- Series ---------------------------------------------------------------------------
-
-
-async def test_four_week_series_generates_occurrences_and_marks_pico_placa(
-    routing_api: AsyncClient,
-    db: AsyncSession,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    semester: Semester,
-    make_user: UserFactory,
-) -> None:
-    """Aceptacion del paso 6."""
-    user, vehicle = driver
-    await pico_placa(db, weekday=2, digits=[3])  # miercoles, placa terminada en 3
-    response = await publish_series(routing_api, user, series_body(places, vehicle))
-    assert response.status_code == 201, response.text
-    series = response.json()
-    start = next_monday()
-    assert series["window_start"] == start.isoformat()
-    assert series["window_end"] == (start + timedelta(days=27)).isoformat()
-    assert series["counts"] == {"total": 12, "scheduled": 8, "pico_placa": 4, "cancelled": 0}
-
-    occurrences = series["occurrences"]
-    departures = [datetime.fromisoformat(o["departs_at"]).astimezone(LOCAL_TZ) for o in occurrences]
-    assert {d.weekday() for d in departures} == {0, 2, 4}
-    assert all(d.time() == time(7, 0) for d in departures)
-    for occurrence, departure in zip(occurrences, departures, strict=True):
-        expected = "cancelled_pico_placa" if departure.weekday() == 2 else "scheduled"
-        assert occurrence["status"] == expected
-        assert occurrence["seats_total"] == 4
-        assert occurrence["price_per_seat"] == 1500
-    assert series["next_departure"] is not None
-
-    # Los demas usuarios solo ven las ocurrencias reservables y nunca la placa.
-    passenger = await make_user(UserRole.PASSENGER)
-    seen = (await routing_api.get(f"{API}/series/{series['id']}", headers=auth(passenger))).json()
-    assert len(seen["occurrences"]) == 8
-    assert seen["vehicle"]["plate"] is None
-
-
-async def test_series_never_passes_semester_end(
-    routing_api: AsyncClient, db: AsyncSession, driver: tuple[User, Vehicle], places: list[Place]
-) -> None:
-    today = local_today()
-    semester = Semester(
-        name="corto",
-        starts_on=today - timedelta(days=10),
-        ends_on=today + timedelta(days=12),
-        revalidation_deadline=today,
-    )
-    db.add(semester)
-    await db.flush()
-    user, vehicle = driver
-    start = today + timedelta(days=2)
-    body = series_body(places, vehicle, start_date=start.isoformat(), weekdays=list(range(7)))
-    series = (await publish_series(routing_api, user, body)).json()
-    assert series["window_end"] == semester.ends_on.isoformat()
-    last = max(datetime.fromisoformat(o["departs_at"]) for o in series["occurrences"])
-    assert last.astimezone(LOCAL_TZ).date() == semester.ends_on
-    assert series["counts"]["total"] == 11
-
-    whole = series_body(
-        places, vehicle, start_date=start.isoformat(), window="semester", departure_time="18:00"
-    )
-    assert (await publish_series(routing_api, user, whole)).json()[
-        "window_end"
-    ] == semester.ends_on.isoformat()
-
-
-async def test_series_validations(
-    routing_api: AsyncClient,
-    db: AsyncSession,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    semester: Semester,
-) -> None:
-    user, vehicle = driver
-    bad_window = await publish_series(routing_api, user, series_body(places, vehicle, window=10))
-    assert bad_window.json()["code"] == "SERIES_WINDOW_INVALID"
-
-    past = series_body(places, vehicle, start_date=(local_today() - timedelta(days=1)).isoformat())
-    assert (await publish_series(routing_api, user, past)).json()["code"] == "SERIES_START_IN_PAST"
-
-    outside = series_body(
-        places, vehicle, start_date=(semester.ends_on + timedelta(days=5)).isoformat()
-    )
-    assert (await publish_series(routing_api, user, outside)).json()[
-        "code"
-    ] == "SERIES_OUTSIDE_SEMESTER"
-
-    await pico_placa(db, weekday=2, digits=[3])
-    only_wednesdays = series_body(places, vehicle, weekdays=[2])
-    response = await publish_series(routing_api, user, only_wednesdays)
-    assert response.json()["code"] == "SERIES_EMPTY"
-    assert len(response.json()["details"]["pico_placa_dates"]) == 4
-
-    repeated = series_body(places, vehicle, weekdays=[1, 1])
-    assert (await publish_series(routing_api, user, repeated)).json()["code"] == "VALIDATION_ERROR"
-
-
-async def test_series_occurrences_cannot_overlap_other_trips(
-    routing_api: AsyncClient, driver: tuple[User, Vehicle], places: list[Place], semester: Semester
-) -> None:
-    user, vehicle = driver
-    monday = datetime.combine(next_monday(), time(7, 2), tzinfo=LOCAL_TZ)
-    assert (
-        await publish(routing_api, user, trip_body(places, vehicle, departs_at=monday.isoformat()))
-    ).status_code == 201
-    response = await publish_series(routing_api, user, series_body(places, vehicle))
-    assert response.status_code == 409
-    assert response.json()["details"]["dates"] == [next_monday().isoformat()]
-
-
-async def test_edit_series_regenerates_future_occurrences(
-    routing_api: AsyncClient, driver: tuple[User, Vehicle], places: list[Place], semester: Semester
-) -> None:
-    user, vehicle = driver
-    series = (await publish_series(routing_api, user, series_body(places, vehicle))).json()
-    first_ids = {o["id"] for o in series["occurrences"]}
-    response = await routing_api.patch(
-        f"{API}/series/{series['id']}",
-        json={"weekdays": [0, 3], "departure_time": "08:30", "seats": 2, "price_per_seat": 1000},
-        headers=auth(user),
-    )
-    assert response.status_code == 200, response.text
-    edited = response.json()
-    assert edited["weekdays"] == [0, 3]
-    assert edited["counts"] == {"total": 8, "scheduled": 8, "pico_placa": 0, "cancelled": 0}
-    departures = [
-        datetime.fromisoformat(o["departs_at"]).astimezone(LOCAL_TZ) for o in edited["occurrences"]
-    ]
-    assert {d.weekday() for d in departures} == {0, 3}
-    assert all(d.time() == time(8, 30) for d in departures)
-    assert all(o["seats_total"] == 2 and o["price_per_seat"] == 1000 for o in edited["occurrences"])
-    # Los lunes se actualizan en su lugar; los jueves son nuevos.
-    mondays = {
-        o["id"] for o, d in zip(edited["occurrences"], departures, strict=True) if d.weekday() == 0
-    }
-    assert mondays <= first_ids
-    assert len(mondays) == 4
-
-
-async def test_cancel_and_duplicate_series(
-    routing_api: AsyncClient,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    semester: Semester,
-    make_user: UserFactory,
-) -> None:
-    user, vehicle = driver
-    series = (await publish_series(routing_api, user, series_body(places, vehicle))).json()
-    url = f"{API}/series/{series['id']}"
-    response = await routing_api.post(
-        f"{url}/cancel", json={"reason": "Termino el curso"}, headers=auth(user)
-    )
-    assert response.status_code == 200
-    cancelled = response.json()
-    assert cancelled["status"] == "cancelled"
-    assert cancelled["counts"]["cancelled"] == 12
-    assert (await routing_api.patch(url, json={"seats": 1}, headers=auth(user))).json()[
-        "code"
-    ] == "SERIES_NOT_ACTIVE"
-
-    passenger = await make_user(UserRole.PASSENGER)
-    assert (await routing_api.get(url, headers=auth(passenger))).status_code == 404
-
-    response = await routing_api.post(
-        f"{url}/duplicate",
-        json={"start_date": next_monday().isoformat(), "window": 15},
-        headers=auth(user),
-    )
-    assert response.status_code == 201
-    copy = response.json()
-    assert copy["status"] == "active"
-    assert copy["counts"]["total"] == 7  # 15 dias desde un lunes: 3 lunes, 2 miercoles, 2 viernes
-    mine = (await routing_api.get(f"{API}/series/mine", headers=auth(user))).json()
-    assert [s["status"] for s in mine] == ["active", "cancelled"]
-
-
-async def test_finish_past_series(
-    routing_api: AsyncClient,
-    db: AsyncSession,
-    driver: tuple[User, Vehicle],
-    places: list[Place],
-    semester: Semester,
-) -> None:
-    user, vehicle = driver
-    series = (await publish_series(routing_api, user, series_body(places, vehicle))).json()
-    assert await finish_past_series(db, next_monday() + timedelta(days=27)) == 0
-    assert await finish_past_series(db, next_monday() + timedelta(days=28)) == 1
-    detail = (await routing_api.get(f"{API}/series/{series['id']}", headers=auth(user))).json()
-    assert detail["status"] == "finished"
 
 
 # --- Pico y placa y vehiculos ---------------------------------------------------------

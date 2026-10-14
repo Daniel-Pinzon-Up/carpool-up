@@ -7,50 +7,31 @@ no este clasificada aqui hace fallar la prueba: una ruta nueva obliga a decidir 
 """
 
 import re
-from datetime import timedelta
 from typing import Any
 
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.clock import utcnow
-from app.core.enums import (
-    BookingStatus,
-    CancelRequestStatus,
-    DocKind,
-    ReviewStatus,
-    TripStatus,
-    UserRole,
-    WaitlistStatus,
-)
+from app.core.enums import BookingStatus, DocKind, ReviewStatus, TripStatus, UserRole
 from app.main import create_app
 from app.modules.bookings.models import Booking
-from app.modules.cancellations.models import CancellationRequest
-from app.modules.documents.models import IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.notifications.models import Notification
 from app.modules.places.models import Place
 from app.modules.semesters.models import Semester
-from app.modules.tickets.models import Ticket
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
-from app.modules.waitlist.models import WaitlistEntry
 from tests.conftest import API, UserFactory, auth, make_driver
 from tests.test_chat import chats, ride
 from tests.test_ratings import finished_trip
-from tests.test_subscriptions import published_series, subscribe
 from tests.test_trips import tomorrow_at
 
 # Rutas con id que cualquier cuenta activa puede usar a proposito.
 OPEN_TO_ACTIVE = {
     ("GET", "/trips/{trip_id}"),  # detalle para reservar
     ("POST", "/trips/{trip_id}/bookings"),  # pedir cupo
-    ("POST", "/trips/{trip_id}/waitlist"),  # unirse a la lista de espera
-    ("DELETE", "/trips/{trip_id}/waitlist"),  # salir de la propia lista de espera
-    ("GET", "/series/{series_id}"),
-    ("GET", "/series/{series_id}/availability"),
-    ("POST", "/series/{series_id}/subscriptions"),  # suscribirse
     ("GET", "/users/{user_id}/ratings"),  # reputacion (sin autores)
     ("GET", "/users/{user_id}/rating-summary"),
     ("GET", "/vehicles/{vehicle_id}/photo"),  # foto del carro para reconocerlo
@@ -85,42 +66,21 @@ async def scenario(
     )
     assert contact.status_code == 201, contact.text
     notification = await db.scalar(select(Notification.id).where(Notification.user_id == owner.id))
-    series = await published_series(api, driver, places)
-    subscription = (await subscribe(api, owner, series["id"], places)).json()
     rider = await make_user(UserRole.PASSENGER)
     done = await finished_trip(
         api, db, driver, places, [rider], departs_at=tomorrow_at(days=3).isoformat()
     )
     ticket = await db.scalar(
-        select(Ticket.id)
-        .join(Booking, Booking.id == Ticket.booking_id)
-        .where(Booking.trip_id == done["id"])
+        select(Booking.id).where(Booking.trip_id == done["id"], Booking.ticket_code.is_not(None))
     )
-    waiting = WaitlistEntry(
-        trip_id=trip["id"],
-        passenger_id=owner.id,
-        seats=1,
-        pickup_place_id=places[0].id,
-        dropoff_place_id=places[2].id,
-        position=1,
-        status=WaitlistStatus.OFFERED,
-        offered_at=utcnow(),
-        offer_expires_at=utcnow() + timedelta(minutes=15),
-    )
-    request = CancellationRequest(
-        booking_id=booking["id"],
-        requested_by=owner.id,
-        reason="Me enfermé",
-        status=CancelRequestStatus.PENDING,
-    )
-    document = IdentityDocument(
+    document = Document(
         user_id=owner.id,
         kind=DocKind.STUDENT_CARD,
         file_path="identity/otro.png",
         content_type="image/png",
         status=ReviewStatus.APPROVED,
     )
-    db.add_all([waiting, request, document])
+    db.add(document)
     await db.flush()
     return {
         "owner": owner,
@@ -129,12 +89,8 @@ async def scenario(
         "conversation_id": conversation,
         "contact_id": contact.json()["id"],
         "notification_id": str(notification),
-        "series_id": series["id"],
-        "subscription_id": subscription["id"],
         "done_trip_id": done["id"],
         "ticket_id": str(ticket),
-        "entry_id": str(waiting.id),
-        "request_id": str(request.id),
         "document_id": str(document.id),
         "vehicle_id": str(driver[1].id),
     }
@@ -161,13 +117,8 @@ async def test_nobody_reaches_what_belongs_to_someone_else(
         ("POST", "/bookings/{booking_id}/boarded", other_driver, {}),
         ("POST", "/bookings/{booking_id}/no-show", other_driver, {}),
         ("POST", "/bookings/{booking_id}/cancel", stranger, {"reason": "No puedo ese dia"}),
-        ("POST", "/cancellation-requests/{request_id}/accept", other_driver, {}),
-        (
-            "POST",
-            "/cancellation-requests/{request_id}/reject",
-            other_driver,
-            {"reason": "No puedo ese dia"},
-        ),
+        ("POST", "/bookings/{booking_id}/cancellation/accept", other_driver, {}),
+        ("POST", "/bookings/{booking_id}/cancellation/reject", other_driver, {}),
         ("GET", "/conversations/{conversation_id}", stranger, None),
         ("GET", "/conversations/{conversation_id}/messages", stranger, None),
         ("POST", "/conversations/{conversation_id}/messages", stranger, {"body": "Hola"}),
@@ -175,28 +126,6 @@ async def test_nobody_reaches_what_belongs_to_someone_else(
         ("PATCH", "/me/trusted-contacts/{contact_id}", stranger, {"name": "Otro"}),
         ("DELETE", "/me/trusted-contacts/{contact_id}", stranger, None),
         ("POST", "/notifications/{notification_id}/read", stranger, {}),
-        ("PATCH", "/series/{series_id}", other_driver, {"seats": 2}),
-        ("POST", "/series/{series_id}/cancel", other_driver, {"reason": "Ya no voy"}),
-        (
-            "POST",
-            "/series/{series_id}/duplicate",
-            other_driver,
-            {"start_date": "2099-01-05", "window": 28},
-        ),
-        ("GET", "/subscriptions/{subscription_id}", stranger, None),
-        ("POST", "/subscriptions/{subscription_id}/accept", other_driver, {}),
-        (
-            "POST",
-            "/subscriptions/{subscription_id}/reject",
-            other_driver,
-            {"reason": "No puedo ese dia"},
-        ),
-        (
-            "POST",
-            "/subscriptions/{subscription_id}/cancel",
-            stranger,
-            {"reason": "No puedo ese dia"},
-        ),
         ("POST", "/tickets/{ticket_id}/paid", other_driver, {"paid": True}),
         ("PATCH", "/trips/{trip_id}", other_driver, {"seats": 2}),
         ("GET", "/trips/{trip_id}/bookings", other_driver, None),
@@ -228,8 +157,6 @@ async def test_nobody_reaches_what_belongs_to_someone_else(
             other_driver,
             None,
         ),
-        ("POST", "/waitlist/{entry_id}/confirm", stranger, {}),
-        ("POST", "/waitlist/{entry_id}/decline", stranger, {}),
     ]
 
     # Toda ruta con id queda clasificada: abierta a proposito o probada contra extranos.

@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import local_today, utcnow
-from app.core.enums import BookingStatus, SuspensionKind, TripStatus, UserRole, UserStatus
+from app.core.enums import BookingStatus, TripStatus, UserRole, UserStatus
 from app.main import create_app
 from app.modules.admin.users import end_expired_account_suspensions
 from app.modules.audit.models import AuditLog
@@ -21,7 +21,6 @@ from app.modules.bookings.models import Booking
 from app.modules.chat.models import Message
 from app.modules.places.models import Place
 from app.modules.ratings.models import Rating
-from app.modules.suspensions.models import Suspension
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
@@ -106,7 +105,8 @@ async def test_suspend_reinstate_and_block_accounts(
     assert response.status_code == 200, response.text
     detail = response.json()
     assert detail["status"] == "suspended"
-    assert detail["suspensions"][0]["kind"] == "account"
+    assert detail["suspension_reason"] == "Reportes de mal comportamiento"
+    assert detail["suspended_until"] is not None
     assert detail["active_bookings"] == 0
     row = await db.get(Booking, booking["id"])
     assert row is not None
@@ -192,34 +192,26 @@ async def test_temporary_suspension_ends_alone_and_bans_can_be_lifted(
         json={"reason": "Suspension corta", "days": 1},
         headers=auth(admin),
     )
-    suspension = await db.scalar(select(Suspension).where(Suspension.user_id == passenger.id))
-    assert suspension is not None
+    await db.refresh(passenger)
+    assert passenger.suspended_until is not None
     assert await end_expired_account_suspensions(db) == 0
-    suspension.starts_at = utcnow() - timedelta(days=2)
-    suspension.ends_at = utcnow() - timedelta(minutes=1)
+    passenger.suspended_until = utcnow() - timedelta(minutes=1)
     await db.flush()
     assert await end_expired_account_suspensions(db) == 1
     await db.refresh(passenger)
     assert passenger.status == UserStatus.ACTIVE
     assert "user.reinstate_auto" in await audit_actions(db)
 
-    ban = Suspension(
-        user_id=passenger.id,
-        kind=SuspensionKind.BOOKING_BAN,
-        reason="no_show_limit",
-        starts_at=utcnow() - timedelta(days=1),
-        ends_at=utcnow() + timedelta(days=6),
-    )
-    db.add(ban)
+    passenger.booking_ban_until = utcnow() + timedelta(days=6)
     await db.flush()
     detail = (await api.get(f"{API}/admin/users/{passenger.id}", headers=auth(admin))).json()
-    assert detail["active_ban"]["id"] == str(ban.id)
+    assert detail["booking_ban_until"] is not None
     response = await api.post(
-        f"{API}/admin/suspensions/{ban.id}/end",
+        f"{API}/admin/users/{passenger.id}/lift-ban",
         json={"reason": "No-show mal marcado"},
         headers=auth(admin),
     )
-    assert response.json()["active_ban"] is None
+    assert response.json()["booking_ban_until"] is None
     assert (await kinds(db, passenger))[-1] == "booking_ban_lifted"
     assert "suspension.end" in await audit_actions(db)
 

@@ -13,7 +13,7 @@ from app.core.storage import storage_root
 from app.modules.audit.models import AuditLog
 from app.modules.auth.models import UserSession
 from app.modules.bookings.models import Booking
-from app.modules.documents.models import IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.notifications.models import Notification
 from app.modules.places.models import Place
 from app.modules.safety.models import TrustedContact
@@ -48,7 +48,7 @@ async def test_passenger_deletes_account_and_personal_data_goes_away(
     file.write_bytes(b"\x89PNG\r\n\x1a\n")
     db.add_all(
         [
-            IdentityDocument(
+            Document(
                 user_id=user.id,
                 kind=DocKind.STUDENT_CARD,
                 file_path="identity/carnet.png",
@@ -81,7 +81,7 @@ async def test_passenger_deletes_account_and_personal_data_goes_away(
     assert user.full_name == DELETED_NAME
     assert user.deleted_at is not None
     assert user.program is None
-    for model in (IdentityDocument, TrustedContact, Notification):
+    for model in (Document, TrustedContact, Notification):
         assert await count(db, model, user) == 0
     assert not file.exists()
     sessions = (await db.scalars(select(UserSession).where(UserSession.user_id == user.id))).all()

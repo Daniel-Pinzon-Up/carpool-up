@@ -14,7 +14,7 @@ from app.core.clock import local_today
 from app.core.config import get_settings
 from app.core.enums import DocKind, ReviewStatus, Sex, UserRole, UserStatus
 from app.modules.audit.models import AuditLog
-from app.modules.documents.models import DriverLicense, IdentityDocument
+from app.modules.documents.models import Document
 from app.modules.documents.revalidation import run_revalidation
 from app.modules.notifications.models import Notification
 from app.modules.semesters.models import Semester
@@ -41,10 +41,10 @@ async def add_document(
     user: User,
     status: ReviewStatus = ReviewStatus.PENDING,
     semester: Semester | None = None,
-) -> IdentityDocument:
+) -> Document:
     # Hora explicita: dentro de la transaccion de prueba now() es igual para todas las filas.
     submitted = datetime(2030, 1, 1, tzinfo=UTC) + timedelta(seconds=next(_SEQUENCE))
-    document = IdentityDocument(
+    document = Document(
         created_at=submitted,
         updated_at=submitted,
         user_id=user.id,
@@ -122,7 +122,7 @@ async def test_only_admins_reach_the_queue(api: AsyncClient, make_user: UserFact
 async def test_approval_activates_account_and_can_fix_sex(
     api: AsyncClient, db: AsyncSession, make_user: UserFactory, admin: User
 ) -> None:
-    semester = await current_semester(db)
+    await current_semester(db)
     user = await make_user(status=UserStatus.PENDING_APPROVAL, sex=Sex.MALE)
     document = await add_document(db, user)
 
@@ -137,7 +137,7 @@ async def test_approval_activates_account_and_can_fix_sex(
     await db.refresh(document)
     assert user.status == UserStatus.ACTIVE
     assert user.sex == Sex.FEMALE
-    assert document.valid_until == semester.ends_on
+
     assert document.reviewed_by == admin.id
     assert await notifications_of(db, user) == ["document_approved"]
 
@@ -266,7 +266,7 @@ async def test_driver_license_flow(
     assert me["publish_blockers"] == ["no_active_vehicle"]  # el paso 4 exige un vehiculo
 
     replaced = await upload_license(api, driver, future + timedelta(days=30))
-    assert replaced["status"] == "pending" and replaced["id"] == license_id
+    assert replaced["status"] == "pending" and replaced["id"] != license_id
     assert (await api.get(f"{API}/users/me", headers=auth(driver))).json()["can_publish"] is False
 
 
@@ -282,7 +282,11 @@ async def test_license_rules(
     assert expired["status_code"] == 422 and expired["code"] == "LICENSE_EXPIRED"
 
     await upload_license(api, driver, local_today() + timedelta(days=10))
-    license_ = await db.scalar(select(DriverLicense).where(DriverLicense.user_id == driver.id))
+    license_ = await db.scalar(
+        select(Document).where(
+            Document.user_id == driver.id, Document.kind == DocKind.DRIVER_LICENSE
+        )
+    )
     assert license_ is not None
     license_.expires_on = local_today() - timedelta(days=1)  # vencio mientras esperaba revision
     await db.flush()

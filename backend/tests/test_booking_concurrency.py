@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 from app.core.clock import local_today, utcnow
 from app.core.enums import (
     BookingStatus,
+    DocKind,
     PlaceKind,
     ReviewStatus,
     Sex,
@@ -28,7 +29,7 @@ from app.core.security import hash_password
 from app.modules.bookings.models import Booking
 from app.modules.bookings.schemas import BookingCreate
 from app.modules.bookings.service import BookingService
-from app.modules.documents.models import DriverLicense
+from app.modules.documents.models import Document
 from app.modules.places.models import Place
 from app.modules.trips.models import Trip
 from app.modules.trips.schemas import TripCreate
@@ -75,7 +76,8 @@ async def test_concurrent_accepts_never_overbook(engine: AsyncEngine) -> None:
             user_ids = [driver.id, *(p.id for p in passengers)]
             place_ids = [p.id for p in places]
             session.add(
-                DriverLicense(
+                Document(
+                    kind=DocKind.DRIVER_LICENSE,
                     user_id=driver.id,
                     file_path="licenses/x.pdf",
                     content_type="application/pdf",

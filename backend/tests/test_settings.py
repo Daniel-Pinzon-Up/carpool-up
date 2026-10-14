@@ -17,7 +17,6 @@ async def test_lists_every_setting_with_defaults(
     by_key = {item["key"]: item for item in response.json()}
     assert set(by_key) == set(DEFINITIONS)
     assert by_key["cancel_free_hours"]["value"] == 2
-    assert by_key["series_window_options_days"]["value"] == [15, 28, "semester"]
     assert by_key["cost_per_km_car"]["value"] is None
 
 
@@ -58,9 +57,6 @@ async def test_update_is_validated_persisted_and_audited(
         ("cancel_free_hours", "2"),
         ("no_show_limit", 0),
         ("search_radius_meters", 10),
-        ("series_window_options_days", []),
-        ("series_window_options_days", [15, "series"]),
-        ("subscription_options_days", [8, "semester"]),
         ("max_price_per_seat", 2.5),
         ("service_area", {"min_lat": 7.5, "max_lat": 7.3, "min_lon": -72.7, "max_lon": -72.6}),
     ],

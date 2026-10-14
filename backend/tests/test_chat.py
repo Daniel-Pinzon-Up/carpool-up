@@ -1,4 +1,4 @@
-"""Chat y tiempo real: chats por reserva, mensajes, avisos, lectura, retencion y WebSocket."""
+"""Chat y tiempo real: chat del viaje, mensajes, avisos, lectura, retencion y WebSocket."""
 
 import json
 import uuid
@@ -13,10 +13,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 from app.core.clock import utcnow
-from app.core.enums import UserRole
+from app.core.enums import TripStatus, UserRole
 from app.core.realtime import conversation_channel, emit, user_channel
-from app.modules.chat.models import Conversation, Message
-from app.modules.chat.service import close_finished_conversations, purge_chat
+from app.modules.chat.models import Message
+from app.modules.chat.service import purge_chat
 from app.modules.live.connection import SEND_LIMIT, LiveConnection
 from app.modules.notifications.models import Notification
 from app.modules.places.models import Place
@@ -63,7 +63,7 @@ async def passenger(make_user: UserFactory) -> User:
     return await make_user(UserRole.PASSENGER)
 
 
-async def test_accepting_a_booking_opens_group_and_direct_chats(
+async def test_accepting_a_booking_opens_the_trip_chat(
     routing_api: AsyncClient,
     driver: tuple[User, Vehicle],
     places: list[Place],
@@ -72,21 +72,16 @@ async def test_accepting_a_booking_opens_group_and_direct_chats(
     events: EventLog,
 ) -> None:
     trip, _ = await ride(routing_api, driver, places, passenger)
-    mine = await chats(routing_api, passenger)
-    assert sorted(c["kind"] for c in mine) == ["direct", "trip_group"]
-    group = next(c for c in mine if c["kind"] == "trip_group")
-    direct = next(c for c in mine if c["kind"] == "direct")
+    (group,) = await chats(routing_api, passenger)
+    assert group["id"] == trip["id"] == group["trip_id"]
     assert group["title"] == "Ciudad Universitaria - Terminal"
     assert [m["is_driver"] for m in group["members"]] == [True, False]
-    assert direct["counterpart"] == driver[0].full_name
-    assert "email" not in str(mine)
-    driver_direct = next(c for c in await chats(routing_api, driver[0]) if c["kind"] == "direct")
-    assert driver_direct["counterpart"] == passenger.full_name
+    assert "email" not in str(group)
+    assert [c["id"] for c in await chats(routing_api, driver[0])] == [group["id"]]
 
     joined = await events.on(user_channel(passenger.id))
     assert {e["conversation_id"] for e in joined if e["type"] == "conversation.joined"} == {
-        group["id"],
-        direct["id"],
+        group["id"]
     }
     view = (await routing_api.get(f"{API}/trips/{trip['id']}", headers=auth(passenger))).json()
     assert view["chat_id"] == group["id"]
@@ -96,13 +91,12 @@ async def test_accepting_a_booking_opens_group_and_direct_chats(
     response = await routing_api.get(f"{API}/conversations/{group['id']}", headers=auth(stranger))
     assert response.status_code == 404
 
-    # Un segundo pasajero entra al mismo grupal, con su propio directo.
+    # Un segundo pasajero aceptado entra al mismo chat.
     other = await make_user(UserRole.PASSENGER)
     booking = (await book(routing_api, other, trip["id"], places)).json()
     await decide(routing_api, driver[0], booking["id"], "accept")
-    group = next(c for c in await chats(routing_api, other) if c["kind"] == "trip_group")
+    (group,) = await chats(routing_api, other)
     assert len(group["members"]) == 3
-    assert len([c for c in await chats(routing_api, driver[0]) if c["kind"] == "direct"]) == 2
 
 
 async def test_messages_are_broadcast_counted_and_read(
@@ -114,7 +108,7 @@ async def test_messages_are_broadcast_counted_and_read(
     events: EventLog,
 ) -> None:
     await ride(routing_api, driver, places, passenger)
-    group = next(c for c in await chats(routing_api, passenger) if c["kind"] == "trip_group")
+    group = (await chats(routing_api, passenger))[0]
     first = await say(routing_api, passenger, group["id"], "  Llego en 5 minutos  ")
     assert first["body"] == "Llego en 5 minutos"
     assert first["sender_name"] == passenger.full_name
@@ -179,7 +173,7 @@ async def test_history_pages_backwards_and_catches_up(
     passenger: User,
 ) -> None:
     await ride(routing_api, driver, places, passenger)
-    group = next(c for c in await chats(routing_api, passenger) if c["kind"] == "trip_group")
+    group = (await chats(routing_api, passenger))[0]
     sent = [await say(routing_api, passenger, group["id"], f"Mensaje {n}") for n in range(5)]
     url = f"{API}/conversations/{group['id']}/messages"
 
@@ -198,7 +192,7 @@ async def test_history_pages_backwards_and_catches_up(
     assert [m["body"] for m in newer] == ["Mensaje 3", "Mensaje 4"]
 
 
-async def test_leaving_and_cancelling_close_the_right_chats(
+async def test_leaving_and_cancelling_close_the_chat(
     routing_api: AsyncClient,
     driver: tuple[User, Vehicle],
     places: list[Place],
@@ -210,20 +204,20 @@ async def test_leaving_and_cancelling_close_the_right_chats(
     second = (await book(routing_api, other, trip["id"], places)).json()
     await decide(routing_api, driver[0], second["id"], "accept")
 
-    # Quien cancela sale del grupal; el directo con el conductor sigue.
+    # Quien cancela sale del chat del viaje.
     await routing_api.post(
         f"{API}/bookings/{booking['id']}/cancel", json={}, headers=auth(passenger)
     )
-    assert [c["kind"] for c in await chats(routing_api, passenger)] == ["direct"]
+    assert await chats(routing_api, passenger) == []
 
-    group = next(c for c in await chats(routing_api, other) if c["kind"] == "trip_group")
+    (group,) = await chats(routing_api, other)
     assert len(group["members"]) == 2
     await routing_api.post(
         f"{API}/trips/{trip['id']}/cancel",
         json={"reason": "Se dano el carro"},
         headers=auth(driver[0]),
     )
-    group = next(c for c in await chats(routing_api, other) if c["id"] == group["id"])
+    (group,) = await chats(routing_api, other)
     assert group["closed"] is True
     response = await routing_api.post(
         f"{API}/conversations/{group['id']}/messages", json={"body": "Hola"}, headers=auth(other)
@@ -232,7 +226,7 @@ async def test_leaving_and_cancelling_close_the_right_chats(
     assert response.json()["code"] == "CONVERSATION_CLOSED"
 
 
-async def test_retention_closes_finished_trips_and_purges_old_chats(
+async def test_retention_purges_old_chats(
     routing_api: AsyncClient,
     db: AsyncSession,
     driver: tuple[User, Vehicle],
@@ -240,26 +234,19 @@ async def test_retention_closes_finished_trips_and_purges_old_chats(
     passenger: User,
 ) -> None:
     trip, _ = await ride(routing_api, driver, places, passenger)
-    group = next(c for c in await chats(routing_api, passenger) if c["kind"] == "trip_group")
-    await say(routing_api, passenger, group["id"], "Gracias por el viaje")
+    await say(routing_api, passenger, trip["id"], "Gracias por el viaje")
     row = await db.get(Trip, trip["id"])
     assert row is not None
-    row.departs_at = utcnow() - timedelta(hours=5)
+    row.status = TripStatus.COMPLETED
+    row.finished_at = utcnow() - timedelta(days=1)
     await db.flush()
-
-    assert await close_finished_conversations(db) == 2
-    conversation = await db.get(Conversation, uuid.UUID(group["id"]))
-    assert conversation is not None
-    await db.refresh(conversation)
-    assert conversation.closed_at is not None
     assert await purge_chat(db) == 0
 
-    conversation.closed_at = utcnow() - timedelta(days=31)
+    row.finished_at = utcnow() - timedelta(days=31)
+    row.departs_at = utcnow() - timedelta(days=31)
     await db.flush()
     assert await purge_chat(db) == 1
-    left = await db.scalar(
-        select(func.count()).where(Message.conversation_id == uuid.UUID(group["id"]))
-    )
+    left = await db.scalar(select(func.count()).where(Message.trip_id == row.id))
     assert left == 0
 
 
@@ -287,7 +274,7 @@ async def test_live_connection_handles_client_messages(
     events: EventLog,
 ) -> None:
     await ride(routing_api, driver, places, passenger)
-    group = next(c for c in await chats(routing_api, passenger) if c["kind"] == "trip_group")
+    group = (await chats(routing_api, passenger))[0]
     group_id = uuid.UUID(group["id"])
 
     @asynccontextmanager

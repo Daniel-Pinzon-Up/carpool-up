@@ -17,8 +17,8 @@ from app.modules.audit.models import AuditLog
 from app.modules.live.connection import LiveConnection
 from app.modules.places.models import Place
 from app.modules.safety.location import location_channel, location_key
-from app.modules.safety.models import ShareLink
 from app.modules.safety.service import ADMIN_CHANNEL
+from app.modules.trips.models import Trip
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 from tests.conftest import API, EventLog, MemoryLocations, UserFactory, auth
@@ -61,8 +61,9 @@ async def test_share_link_shows_vehicle_route_and_location_without_names(
     assert response.status_code == 201, response.text
     link = response.json()
     assert link["path"] == f"/compartido/{link['token']}"
-    stored = await db.scalar(select(ShareLink).where(ShareLink.trip_id == trip["id"]))
-    assert stored is not None and stored.token_hash != link["token"]
+    stored = await db.get(Trip, trip["id"])
+    assert stored is not None
+    assert stored.share_token_hash is not None and stored.share_token_hash != link["token"]
 
     public = await routing_api.get(f"{API}/public/share/{link['token']}")
     assert public.status_code == 200, public.text
@@ -84,7 +85,7 @@ async def test_share_link_shows_vehicle_route_and_location_without_names(
     body = (await routing_api.get(f"{API}/public/share/{link['token']}")).json()
     assert body["location"]["lat"] == 7.38
 
-    stored.expires_at = utcnow() - timedelta(seconds=1)
+    stored.share_expires_at = utcnow() - timedelta(seconds=1)
     await db.flush()
     assert (await routing_api.get(f"{API}/public/share/{link['token']}")).status_code == 404
     assert (await routing_api.get(f"{API}/public/share/no-existe")).status_code == 404
