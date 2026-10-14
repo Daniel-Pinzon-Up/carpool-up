@@ -14,7 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import ConversationKind
 from app.modules.series.models import TripSeries
 from app.modules.trips.models import Trip
@@ -23,7 +23,7 @@ from app.modules.users.models import User
 MAX_MESSAGE_LENGTH = 1000
 
 
-class Conversation(UUIDPrimaryKey, Timestamps, Base):
+class Conversation(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Hilo de chat.
 
     trip_group: uno por ocurrencia (trip_id), con el conductor y los pasajeros aceptados.
@@ -87,7 +87,7 @@ class Conversation(UUIDPrimaryKey, Timestamps, Base):
     )
 
 
-class ConversationMember(Base):
+class ConversationMember(Authorship, Base):
     """Quien participa. left_at: salio (ya no lee ni escribe); last_read_at: hasta donde leyo."""
 
     __tablename__ = "conversation_members"
@@ -105,10 +105,10 @@ class ConversationMember(Base):
     last_read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     left_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    user: Mapped[User] = relationship(lazy="selectin")
+    user: Mapped[User] = relationship(foreign_keys=[user_id], lazy="selectin")
 
 
-class Message(UUIDPrimaryKey, Base):
+class Message(UUIDPrimaryKey, Authorship, Base):
     """Texto plano de hasta 1000 caracteres. hidden lo marca la moderacion (paso 12)."""
 
     __tablename__ = "messages"
@@ -131,4 +131,4 @@ class Message(UUIDPrimaryKey, Base):
     )
     hidden: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
-    sender: Mapped[User] = relationship(lazy="selectin")
+    sender: Mapped[User] = relationship(foreign_keys=[sender_id], lazy="selectin")

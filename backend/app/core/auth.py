@@ -8,6 +8,7 @@ from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.clock import utcnow
+from app.core.db import set_actor
 from app.core.deps import DbSession
 from app.core.enums import UserRole, UserStatus
 from app.core.errors import AppError, ForbiddenError
@@ -51,6 +52,7 @@ async def get_current_user(session: DbSession, claims: Claims) -> User:
     user = await session.get(User, claims.user_id)
     if user is None or user.deleted_at is not None or user.status == UserStatus.BLOCKED:
         raise UnauthorizedError()
+    set_actor(session, user.id)
     return user
 
 

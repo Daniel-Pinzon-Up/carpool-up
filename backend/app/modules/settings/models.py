@@ -5,10 +5,10 @@ from sqlalchemy import ForeignKey, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps
+from app.core.db import Authorship, Base, Timestamps
 
 
-class SystemSetting(Timestamps, Base):
+class SystemSetting(Timestamps, Authorship, Base):
     """Parametro global de negocio. La clave es natural y estable, por eso es la PK."""
 
     __tablename__ = "system_settings"

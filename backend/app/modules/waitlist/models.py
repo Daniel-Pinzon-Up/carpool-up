@@ -6,7 +6,7 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Sm
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import WaitlistStatus
 from app.modules.trips.models import Trip
 from app.modules.users.models import User
@@ -14,7 +14,7 @@ from app.modules.users.models import User
 OPEN_STATUSES = (WaitlistStatus.WAITING, WaitlistStatus.OFFERED)
 
 
-class WaitlistEntry(UUIDPrimaryKey, Timestamps, Base):
+class WaitlistEntry(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Fila de espera de un viaje lleno. Guarda lo necesario para crear la reserva al
     confirmar la oferta (puestos, lugares y preferencias)."""
 
@@ -56,4 +56,4 @@ class WaitlistEntry(UUIDPrimaryKey, Timestamps, Base):
     )
 
     trip: Mapped[Trip] = relationship(lazy="selectin")
-    passenger: Mapped[User] = relationship(lazy="selectin")
+    passenger: Mapped[User] = relationship(foreign_keys=[passenger_id], lazy="selectin")

@@ -16,6 +16,7 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
+from app.core.db import set_actor
 from app.core.enums import TripStatus
 from app.core.errors import AppError
 from app.core.realtime import conversation_channel, publish_now
@@ -180,6 +181,7 @@ class LiveConnection:
 
     async def can_drive(self, trip_id: uuid.UUID) -> bool:
         async with self.sessions() as session:
+            set_actor(session, self.user_id)
             trip = await session.get(Trip, trip_id)
             if (
                 trip is None
@@ -220,6 +222,7 @@ class LiveConnection:
         client_id: Any = None,
     ) -> None:
         async with self.sessions() as session:
+            set_actor(session, self.user_id)
             user = await session.get(User, self.user_id)
             if user is None:
                 await self.error("UNAUTHORIZED", client_id)

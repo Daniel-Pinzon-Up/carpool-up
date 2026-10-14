@@ -5,12 +5,12 @@ from sqlalchemy import DateTime, ForeignKey, Index, Text, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import CancelRequestStatus
 from app.modules.bookings.models import Booking
 
 
-class CancellationRequest(UUIDPrimaryKey, Timestamps, Base):
+class CancellationRequest(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Cancelacion tardia (menos de cancel_free_hours antes de salir): decide el conductor."""
 
     __tablename__ = "cancellation_requests"

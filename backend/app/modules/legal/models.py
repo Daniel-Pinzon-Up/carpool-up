@@ -5,11 +5,11 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Text, UniqueConstra
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import Language, LegalKind
 
 
-class LegalDocument(UUIDPrimaryKey, Timestamps, Base):
+class LegalDocument(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Terminos y condiciones y autorizacion de tratamiento de datos (Ley 1581 de 2012).
 
     Las versiones publicadas no se editan: un cambio es una version nueva.
@@ -35,7 +35,7 @@ class LegalDocument(UUIDPrimaryKey, Timestamps, Base):
     is_current: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
-class TermsAcceptance(UUIDPrimaryKey, Base):
+class TermsAcceptance(UUIDPrimaryKey, Authorship, Base):
     """Evidencia de que un usuario acepto una version concreta de un documento legal."""
 
     __tablename__ = "terms_acceptances"

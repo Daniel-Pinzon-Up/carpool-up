@@ -5,11 +5,11 @@ from sqlalchemy import Date, DateTime, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import DocKind, ReviewStatus
 
 
-class IdentityDocument(UUIDPrimaryKey, Timestamps, Base):
+class IdentityDocument(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Carnet estudiantil o constancia institucional. Uno por semestre a lo largo del tiempo."""
 
     __tablename__ = "identity_documents"
@@ -35,7 +35,7 @@ class IdentityDocument(UUIDPrimaryKey, Timestamps, Base):
     valid_until: Mapped[date | None] = mapped_column(Date)
 
 
-class DriverLicense(UUIDPrimaryKey, Timestamps, Base):
+class DriverLicense(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Licencia de conduccion (una por conductor). Subir otra la reemplaza y vuelve a revision."""
 
     __tablename__ = "driver_licenses"

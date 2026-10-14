@@ -1,10 +1,10 @@
 from sqlalchemy import CheckConstraint, Integer, Numeric, SmallInteger, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey
 
 
-class TrafficFactor(UUIDPrimaryKey, Timestamps, Base):
+class TrafficFactor(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Correccion de la duracion de OSRM por franja (seccion 5.4).
 
     ETA mostrada = duracion de OSRM * factor. Un job semanal (paso 10) lo recalcula con la

@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, UUIDPrimaryKey
+from app.core.db import Authorship, Base, UUIDPrimaryKey
 from app.modules.trips.models import Trip
 
 # Criterios por rol de quien recibe la calificacion (seccion 5.7).
@@ -24,7 +24,7 @@ PASSENGER_CRITERIA = ("punctuality", "courtesy", "compliance")
 MAX_COMMENT = 300
 
 
-class Rating(UUIDPrimaryKey, Base):
+class Rating(UUIDPrimaryKey, Authorship, Base):
     """Una calificacion de un participante a otro por un viaje completado.
 
     hidden oculta el comentario (moderacion, paso 12); la puntuacion se conserva.
@@ -62,7 +62,7 @@ class Rating(UUIDPrimaryKey, Base):
     )
 
 
-class RatingScore(Base):
+class RatingScore(Authorship, Base):
     """Estrellas (1 a 5) de un criterio."""
 
     __tablename__ = "rating_scores"

@@ -6,10 +6,10 @@ from sqlalchemy import DateTime, Float, ForeignKey, Integer, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.core.db import Authorship, Base
 
 
-class UserStats(Base):
+class UserStats(Authorship, Base):
     """Resumen calculado de cada usuario (seccion 5.3) para no recalcular en cada consulta.
 
     Se recalcula desde las tablas de origen al cerrar un viaje, al marcar un no-show, al

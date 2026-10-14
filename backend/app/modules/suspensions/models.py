@@ -5,15 +5,17 @@ from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import SuspensionKind
 
 
-class Suspension(UUIDPrimaryKey, Timestamps, Base):
+class Suspension(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Sancion temporal. booking_ban impide reservar; las de no-show son automaticas
     (created_by nulo, paso 10) y las demas las crea un administrador (paso 12)."""
 
     __tablename__ = "suspensions"
+    # created_by lo pone el servicio: nulo significa sancion automatica.
+    stamp_creator = False
     __table_args__ = (
         CheckConstraint("ends_at IS NULL OR ends_at > starts_at", name="period_order"),
         Index("ix_suspensions_user_kind", "user_id", "kind"),

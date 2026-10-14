@@ -16,14 +16,14 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import SeriesStatus, StopKind
 from app.modules.places.models import Place
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 
 
-class TripSeries(UUIDPrimaryKey, Timestamps, Base):
+class TripSeries(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Plantilla de un viaje recurrente. Al publicarla se generan todas sus ocurrencias."""
 
     __tablename__ = "trip_series"
@@ -62,14 +62,14 @@ class TripSeries(UUIDPrimaryKey, Timestamps, Base):
     cancel_reason: Mapped[str | None] = mapped_column(Text)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    driver: Mapped[User] = relationship(lazy="selectin")
+    driver: Mapped[User] = relationship(foreign_keys=[driver_id], lazy="selectin")
     vehicle: Mapped[Vehicle] = relationship(lazy="selectin")
     stops: Mapped[list["SeriesStop"]] = relationship(
         order_by="SeriesStop.position", cascade="all, delete-orphan", lazy="selectin"
     )
 
 
-class SeriesStop(UUIDPrimaryKey, Timestamps, Base):
+class SeriesStop(UUIDPrimaryKey, Timestamps, Authorship, Base):
     __tablename__ = "series_stops"
     __table_args__ = (UniqueConstraint("series_id", "position", name="uq_series_stops_position"),)
 

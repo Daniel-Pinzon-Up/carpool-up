@@ -5,12 +5,12 @@ from sqlalchemy import Boolean, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import PlaceKind
 from app.core.geo import lat_lon
 
 
-class Place(UUIDPrimaryKey, Timestamps, Base):
+class Place(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Punto predefinido (campus, sector, referencia) o pin libre de un usuario (custom)."""
 
     __tablename__ = "places"

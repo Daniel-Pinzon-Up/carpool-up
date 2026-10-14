@@ -5,11 +5,11 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, UUIDPrimaryKey
+from app.core.db import Authorship, Base, UUIDPrimaryKey
 from app.modules.bookings.models import Booking
 
 
-class Ticket(UUIDPrimaryKey, Base):
+class Ticket(UUIDPrimaryKey, Authorship, Base):
     """Comprobante informativo (sin pago en la app ni QR): uno por reserva que abordo.
 
     Se emite al finalizar el viaje. El conductor puede marcar que recibio el aporte.

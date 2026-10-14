@@ -16,14 +16,14 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.db import Base, Timestamps, UUIDPrimaryKey, pg_enum
+from app.core.db import Authorship, Base, Timestamps, UUIDPrimaryKey, pg_enum
 from app.core.enums import RuleKind, StopKind, TripStatus
 from app.modules.places.models import Place
 from app.modules.users.models import User
 from app.modules.vehicles.models import Vehicle
 
 
-class Trip(UUIDPrimaryKey, Timestamps, Base):
+class Trip(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Un viaje concreto: ocurrencia de una serie (series_id) o viaje puntual (series_id nulo).
 
     Asientos y precio son copia de la serie al generarse; el conductor puede ajustar una
@@ -84,7 +84,7 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     rating_reminded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    driver: Mapped[User] = relationship(lazy="selectin")
+    driver: Mapped[User] = relationship(foreign_keys=[driver_id], lazy="selectin")
     vehicle: Mapped[Vehicle] = relationship(lazy="selectin")
     stops: Mapped[list["TripStop"]] = relationship(
         order_by="TripStop.position", cascade="all, delete-orphan", lazy="selectin"
@@ -94,7 +94,7 @@ class Trip(UUIDPrimaryKey, Timestamps, Base):
     )
 
 
-class TripStop(UUIDPrimaryKey, Timestamps, Base):
+class TripStop(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Paradas ordenadas: el origen es la posicion 0 y el destino la ultima."""
 
     __tablename__ = "trip_stops"
@@ -113,7 +113,7 @@ class TripStop(UUIDPrimaryKey, Timestamps, Base):
     place: Mapped[Place] = relationship(lazy="selectin")
 
 
-class TripRule(UUIDPrimaryKey, Timestamps, Base):
+class TripRule(UUIDPrimaryKey, Timestamps, Authorship, Base):
     """Regla del viaje: allowed/not_allowed, o texto libre para custom."""
 
     __tablename__ = "trip_rules"
