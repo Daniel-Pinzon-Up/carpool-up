@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from app.core import realtime
 from app.core.clock import local_today, utcnow
 from app.core.config import get_settings
-from app.core.db import get_session
+from app.core.db import ACTOR_KEY, get_session
 from app.core.email import OutgoingEmail
 from app.core.enums import (
     Language,
@@ -169,7 +169,11 @@ async def api(db: AsyncSession, outbox: Outbox) -> AsyncIterator[AsyncClient]:
     app = create_app()
 
     async def override_session() -> AsyncIterator[AsyncSession]:
-        yield db
+        try:
+            yield db
+        finally:
+            # La sesion se comparte entre peticiones: el autor de una no pasa a la siguiente.
+            db.info.pop(ACTOR_KEY, None)
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_email_queue] = lambda: outbox
@@ -271,7 +275,11 @@ async def routing_api(
     app = create_app()
 
     async def override_session() -> AsyncIterator[AsyncSession]:
-        yield db
+        try:
+            yield db
+        finally:
+            # La sesion se comparte entre peticiones: el autor de una no pasa a la siguiente.
+            db.info.pop(ACTOR_KEY, None)
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_email_queue] = lambda: outbox
