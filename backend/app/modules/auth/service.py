@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.clock import utcnow
 from app.core.config import get_settings
+from app.core.db import set_actor
 from app.core.email import EmailQueue, code_email
 from app.core.enums import AuthPurpose, UserStatus
 from app.core.errors import AppError
@@ -154,6 +155,7 @@ class AuthService:
         )
 
     async def _open_session(self, user: User, device_label: str | None) -> Authenticated:
+        set_actor(self.session, user.id)
         now = utcnow()
         secret = new_refresh_secret()
         user_session = UserSession(
@@ -225,6 +227,7 @@ class AuthService:
             )
             self.users.add(user)
             await self.session.flush()
+            set_actor(self.session, user.id)
             await documents.attach(user, form.doc_kind, stored)
             result = await self._challenge(user, AuthPurpose.EMAIL_VERIFICATION)
         except Exception:
@@ -286,6 +289,7 @@ class AuthService:
         if not valid:
             await self.session.commit()  # el intento fallido queda contado
             raise InvalidCodeError()
+        set_actor(self.session, user.id)
         return user
 
     async def verify_email(
@@ -344,6 +348,7 @@ class AuthService:
                 "refresh_token_reuse", user_id=str(user_session.user_id), revoked=revoked
             )
             raise RefreshInvalidError("REFRESH_REUSED")
+        set_actor(self.session, user_session.user_id)
         user = await self.users.get(user_session.user_id)
         if user is None or user.status == UserStatus.BLOCKED:
             user_session.revoked_at = now
@@ -421,6 +426,7 @@ class AuthService:
         if not await self.codes.check(user.id, AuthPurpose.PASSWORD_RESET, code):
             await self.session.commit()
             raise InvalidCodeError()
+        set_actor(self.session, user.id)
         now = utcnow()
         user.password_hash = hash_password(new_password)
         user.two_factor_required = True
