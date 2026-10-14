@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  isDevMode,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
@@ -13,7 +6,6 @@ import {
   LucideEllipsis,
   LucideWifiOff,
   LucideDynamicIcon,
-  LucidePalette,
   LucidePanelLeftClose,
   LucidePanelLeftOpen,
 } from '@icons';
@@ -21,8 +13,6 @@ import { Brand } from '../../shared/ui/brand';
 import { ChatUnread } from '../../features/chat/chat.api';
 import { NotificationsStore } from '../notifications/notifications.store';
 import { RealtimeService } from '../ws/realtime.service';
-import { LanguageSelect } from '../../shared/ui/language-select';
-import { ThemeToggle } from '../../shared/ui/theme-toggle';
 import { AuthService } from '../auth/auth.service';
 import { NAV_BY_ROLE } from './navigation';
 
@@ -45,11 +35,8 @@ import { NAV_BY_ROLE } from './navigation';
     LucideBell,
     LucideEllipsis,
     LucideWifiOff,
-    LucidePalette,
     LucidePanelLeftClose,
     LucidePanelLeftOpen,
-    LanguageSelect,
-    ThemeToggle,
   ],
   template: `
     <a
@@ -101,17 +88,6 @@ import { NAV_BY_ROLE } from './navigation';
         }
 
         <div class="mt-auto flex flex-col gap-2">
-          @if (devMode) {
-            <a
-              routerLink="/catalogo"
-              routerLinkActive="bg-accent/15 !text-text"
-              class="flex min-h-12 items-center gap-3 rounded-2xl px-3 font-medium text-muted transition hover:bg-glass hover:text-text"
-              [class.justify-center]="collapsed()"
-            >
-              <svg lucidePalette class="size-6 shrink-0" aria-hidden="true"></svg>
-              <span [class.sr-only]="collapsed()">{{ 'nav.catalog' | transloco }}</span>
-            </a>
-          }
           <button
             type="button"
             (click)="collapsed.set(!collapsed())"
@@ -137,15 +113,6 @@ import { NAV_BY_ROLE } from './navigation';
         >
           <cp-brand class="sm:hidden" [size]="36" />
           <div class="ml-auto flex items-center gap-2">
-            @if (devMode) {
-              <a
-                routerLink="/catalogo"
-                class="glass-1 !rounded-full grid size-11 place-items-center sm:hidden"
-                [attr.aria-label]="'nav.catalog' | transloco"
-              >
-                <svg lucidePalette class="size-5" aria-hidden="true"></svg>
-              </a>
-            }
             @if (live.status() === 'reconnecting') {
               <span
                 class="glass-1 !rounded-full flex min-h-11 items-center gap-2 px-3 text-sm text-muted"
@@ -176,8 +143,6 @@ import { NAV_BY_ROLE } from './navigation';
                 </span>
               }
             </a>
-            <cp-language-select />
-            <cp-theme-toggle />
           </div>
         </header>
 
@@ -278,7 +243,6 @@ export class Shell {
   protected readonly collapsed = signal(
     globalThis.innerWidth !== undefined && globalThis.innerWidth < 1024,
   );
-  protected readonly devMode = isDevMode();
 
   /** Pendientes por destino de la navegacion: mensajes y avisos. */
   protected badge(key: string): number {

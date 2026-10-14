@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LucideArrowRight, LucideReceipt, LucideStar, LucideUsers } from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { formatCop } from '../../shared/map/routing.api';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { StatusBadge } from '../../shared/ui/status-badge';
@@ -93,15 +93,10 @@ export class RatingStateAction {
 })
 export class PassengerHistoryItem {
   readonly entry = input.required<PassengerHistoryEntry>();
-  private readonly language = inject(LanguageService);
   protected readonly e = this.entry;
   protected readonly tone = computed(() => BOOKING_STATUS_TONE[this.e().booking_status]);
-  protected readonly when = computed(() =>
-    formatDeparture(this.e().departs_at, this.language.current()),
-  );
-  protected readonly money = computed(() =>
-    formatCop(this.e().amount ?? 0, this.language.current()),
-  );
+  protected readonly when = computed(() => formatDeparture(this.e().departs_at, LOCALE));
+  protected readonly money = computed(() => formatCop(this.e().amount ?? 0, LOCALE));
 }
 
 /** Viaje pasado del conductor: estado, pasajeros, aportes y calificaciones pendientes. */
@@ -157,13 +152,8 @@ export class PassengerHistoryItem {
 })
 export class DriverHistoryItem {
   readonly entry = input.required<DriverHistoryEntry>();
-  private readonly language = inject(LanguageService);
   protected readonly e = this.entry;
   protected readonly tone = computed(() => TRIP_STATUS_TONE[this.e().trip_status]);
-  protected readonly when = computed(() =>
-    formatDeparture(this.e().departs_at, this.language.current()),
-  );
-  protected readonly money = computed(() =>
-    formatCop(this.e().contributions, this.language.current()),
-  );
+  protected readonly when = computed(() => formatDeparture(this.e().departs_at, LOCALE));
+  protected readonly money = computed(() => formatCop(this.e().contributions, LOCALE));
 }

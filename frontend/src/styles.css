@@ -1,9 +1,8 @@
 @import 'tailwindcss';
 
 /*
- * Sistema de diseno liquid glass.
- * Los colores salen solo de tokens CSS; no se usan variantes dark: de Tailwind para que
- * un contenedor con .theme-light o .theme-dark pueda forzar un tema (catalogo).
+ * Sistema de diseno liquid glass, en un solo tema claro.
+ * Los colores salen solo de tokens CSS (variables de :root).
  */
 
 @theme inline {
@@ -26,9 +25,7 @@
   --font-sans: 'Segoe UI Variable', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
 }
 
-/* Tema claro (por defecto) */
-:root,
-.theme-light {
+:root {
   --bg: #eaf3ff;
   --bg-blob-1: #9cc8ff;
   --bg-blob-2: #c8e0ff;
@@ -56,42 +53,6 @@
   --scrim: rgba(10, 31, 68, 0.35);
   --blob-opacity: 0.85;
   color-scheme: light;
-}
-
-/* Tema oscuro */
-.dark,
-.theme-dark {
-  --bg: #0a1f44;
-  --bg-blob-1: #1e5aa8;
-  --bg-blob-2: #0f2e5c;
-  --bg-blob-3: #0f5e5a;
-  --glass: rgba(255, 255, 255, 0.08);
-  --glass-strong: rgba(255, 255, 255, 0.12);
-  --glass-border: rgba(255, 255, 255, 0.22);
-  --glass-shine: rgba(255, 255, 255, 0.35);
-  --surface-1-solid: #12305f;
-  --surface-2-solid: #183a6f;
-  --text: #f2f7ff;
-  --text-muted: #b9cce8;
-  --primary: #90c5ff;
-  --on-primary: #0a1f44;
-  --accent: #3ddba7;
-  --chart-mark: #4a94ea;
-  --on-accent: #0a1f44;
-  --danger: #ffabab;
-  --on-danger: #0a1f44;
-  --warning: #ffc857;
-  --success: #3ddba7;
-  --focus-ring: #3ddba7;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --scrim: rgba(0, 0, 0, 0.55);
-  --blob-opacity: 0.4;
-  color-scheme: dark;
-}
-
-.theme-light,
-.theme-dark {
-  color: var(--text);
 }
 
 html {
@@ -205,24 +166,6 @@ body {
   .glass-2 {
     background: var(--surface-2-solid);
   }
-}
-
-.reduce-transparency .glass-1,
-.reduce-transparency .glass-2,
-.glass-1.reduce-transparency,
-.glass-2.reduce-transparency {
-  background: var(--surface-1-solid);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-.reduce-transparency .glass-2,
-.glass-2.reduce-transparency {
-  background: var(--surface-2-solid);
-}
-.reduce-transparency .app-backdrop::before,
-.reduce-transparency .app-backdrop::after,
-.reduce-transparency .app-backdrop > span {
-  opacity: 0;
 }
 
 /* Interaccion */

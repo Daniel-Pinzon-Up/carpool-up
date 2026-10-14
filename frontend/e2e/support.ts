@@ -46,18 +46,10 @@ export async function newPage(browser: Browser, info: TestInfo): Promise<Page> {
   return context.newPage();
 }
 
-/** Evita el onboarding de la primera visita y fija el tema antes de que arranque Angular. */
-export async function prepare(page: Page, theme: 'light' | 'dark' = 'light'): Promise<void> {
-  await page.addInitScript((value) => {
-    localStorage.setItem('cp.onboarded', 'true');
-    localStorage.setItem('cp.theme', value);
-  }, theme);
-  await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
-}
-
-export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
-  await page.evaluate((value) => localStorage.setItem('cp.theme', value), theme);
-  await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
+/** Evita el onboarding de la primera visita antes de que arranque Angular. */
+export async function prepare(page: Page): Promise<void> {
+  await page.addInitScript(() => localStorage.setItem('cp.onboarded', 'true'));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
 }
 
 /** Inicio de sesion con la pantalla real. */

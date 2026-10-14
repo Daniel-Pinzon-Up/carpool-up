@@ -12,7 +12,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideCircleCheck, LucideMapPin, LucideSiren } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { LiveEvent, RealtimeService } from '../../core/ws/realtime.service';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
@@ -150,7 +150,6 @@ export default class AdminEmergencies {
   private readonly api = inject(AdminApi);
   private readonly dialogs = inject(DialogService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly includeHandled = signal(false);
@@ -216,6 +215,6 @@ export default class AdminEmergencies {
   }
 
   protected when(iso: string): string {
-    return formatDeparture(iso, this.language.current());
+    return formatDeparture(iso, LOCALE);
   }
 }

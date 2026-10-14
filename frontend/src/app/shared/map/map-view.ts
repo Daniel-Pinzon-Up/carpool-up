@@ -8,13 +8,10 @@ import {
   input,
   output,
   signal,
-  untracked,
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import type { GeoJSONSource, Map as MapLibreMap, Marker } from 'maplibre-gl';
-import { LanguageService } from '../../core/i18n/language.service';
-import { ThemeService } from '../../core/theme/theme.service';
 import { MAP_BOUNDS, PAMPLONA_CENTER, ROUTE_COLORS, buildMapStyle } from './map-style';
 
 export type MarkerKind = 'origin' | 'stop' | 'destination' | 'pin' | 'vehicle';
@@ -116,8 +113,6 @@ export class MapView {
   readonly picked = output<PickedPoint>();
 
   private readonly container = viewChild.required<ElementRef<HTMLDivElement>>('container');
-  private readonly theme = inject(ThemeService);
-  private readonly language = inject(LanguageService);
   private map: MapLibreMap | null = null;
   private maplibre: typeof import('maplibre-gl') | null = null;
   private placedMarkers: Marker[] = [];
@@ -130,13 +125,6 @@ export class MapView {
     destroyRef.onDestroy(() => this.map?.remove());
     queueMicrotask(() => void this.init());
 
-    // Tema o idioma: se cambia el estilo y se vuelven a dibujar la ruta y los marcadores.
-    effect(() => {
-      const dark = this.theme.isDark();
-      const lang = this.language.current();
-      if (!untracked(this.ready)) return;
-      void buildMapStyle(dark, lang).then((style) => this.map?.setStyle(style));
-    });
     effect(() => {
       const route = this.route();
       if (this.ready()) this.drawRoute(route);
@@ -152,7 +140,7 @@ export class MapView {
       const [maplibre] = await Promise.all([import('maplibre-gl'), ensureMapStyles()]);
       await ensurePmtilesProtocol(maplibre);
       this.maplibre = maplibre;
-      const style = await buildMapStyle(this.theme.isDark(), this.language.current());
+      const style = await buildMapStyle();
       const map = new maplibre.Map({
         container: this.container().nativeElement,
         style,
@@ -183,7 +171,7 @@ export class MapView {
   private addRouteLayers(): void {
     const map = this.map;
     if (!map || map.getSource('route')) return;
-    const colors = this.theme.isDark() ? ROUTE_COLORS.dark : ROUTE_COLORS.light;
+    const colors = ROUTE_COLORS;
     map.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     map.addLayer({
       id: 'route-casing',

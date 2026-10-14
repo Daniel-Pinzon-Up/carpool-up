@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideShieldCheck, LucideSiren } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { Meter } from '../../shared/charts/meter';
 import { MonthColumns, MonthValue } from '../../shared/charts/month-columns';
 import { GlassCard } from '../../shared/ui/glass-card';
@@ -163,7 +163,6 @@ import { AdminApi, AdminOverview } from './admin.api';
 export default class AdminDashboard {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly roles = ['passenger', 'driver', 'admin', 'superadmin'];
@@ -180,7 +179,6 @@ export default class AdminDashboard {
   protected readonly loadError = signal<string | null>(null);
 
   protected readonly periods = computed(() => {
-    this.language.current();
     return ['7', '30', '90'].map((value) => ({
       value,
       label: this.transloco.translate('admin.dashboard.lastDays', { count: value }),
@@ -204,7 +202,7 @@ export default class AdminDashboard {
     (this.data()?.trips_per_day ?? []).map(({ day, count }) => {
       const [y, m, dd] = day.split('-').map(Number);
       const date = new Date(Date.UTC(y, m - 1, dd));
-      const lang = this.language.current();
+      const lang = LOCALE;
       return {
         label: date.toLocaleDateString(lang, { day: 'numeric', timeZone: 'UTC' }),
         title: date.toLocaleDateString(lang, {
@@ -259,7 +257,7 @@ export default class AdminDashboard {
   protected percent(value: number | null): string {
     return value === null
       ? '-'
-      : value.toLocaleString(this.language.current(), {
+      : value.toLocaleString(LOCALE, {
           style: 'percent',
           maximumFractionDigits: 0,
         });

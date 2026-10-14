@@ -17,8 +17,6 @@ import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { AuthService } from './core/auth/auth.service';
 import { errorInterceptor } from './core/http/error.interceptor';
-import { languageInterceptor } from './core/http/language.interceptor';
-import { DEFAULT_LANGUAGE, LANGUAGES, initialLanguage } from './core/i18n/language.service';
 import { TranslatedTitleStrategy } from './core/i18n/translated-title.strategy';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 
@@ -33,19 +31,15 @@ export const appConfig: ApplicationConfig = {
     { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
     // errorInterceptor va primero para ver la respuesta al final, despues de que authInterceptor
     // haya intentado renovar el token ante un 401.
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([errorInterceptor, languageInterceptor, authInterceptor]),
-    ),
+    provideHttpClient(withFetch(), withInterceptors([errorInterceptor, authInterceptor])),
     // Recupera la sesion con la cookie antes de evaluar las rutas.
     provideAppInitializer(() => inject(AuthService).restore()),
     provideTransloco({
       config: {
-        availableLangs: [...LANGUAGES],
-        defaultLang: initialLanguage(),
-        fallbackLang: DEFAULT_LANGUAGE,
-        missingHandler: { useFallbackTranslation: true, logMissingKey: isDevMode() },
-        reRenderOnLangChange: true,
+        // Solo espanol: los textos de la interfaz viven en public/i18n/es.json.
+        availableLangs: ['es'],
+        defaultLang: 'es',
+        missingHandler: { logMissingKey: isDevMode() },
         prodMode: !isDevMode(),
       },
       loader: TranslocoHttpLoader,

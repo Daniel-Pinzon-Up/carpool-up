@@ -3,7 +3,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideStar } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { ErrorState } from '../../shared/ui/error-state';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { Meter } from '../../shared/charts/meter';
 import { MonthColumns, MonthValue } from '../../shared/charts/month-columns';
 import { formatCop } from '../../shared/map/routing.api';
@@ -76,13 +76,10 @@ export class RatingBreakdown {
   readonly rating = input.required<RatingBlock>();
   /** A quien califican (no se llama "role" para no chocar con el atributo ARIA). */
   readonly target = input.required<TargetRole>();
-  private readonly language = inject(LanguageService);
   protected readonly criteria = computed(() => CRITERIA[this.target()]);
 
   protected fixed(value: number | null): string {
-    return value === null
-      ? '-'
-      : value.toLocaleString(this.language.current(), { maximumFractionDigits: 1 });
+    return value === null ? '-' : value.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
   }
 }
 
@@ -135,7 +132,6 @@ export class RatingBreakdown {
 })
 export class PassengerMetrics {
   private readonly api = inject(RatingsApi);
-  private readonly language = inject(LanguageService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
 
@@ -149,7 +145,7 @@ export class PassengerMetrics {
       { label: t('stats.trips'), value: String(s.trips) },
       {
         label: t('stats.spent'),
-        value: formatCop(s.spent, this.language.current()),
+        value: formatCop(s.spent, LOCALE),
         hint: t('stats.spentHint'),
       },
       { label: t('stats.cancellations'), value: String(s.cancellations) },
@@ -158,7 +154,7 @@ export class PassengerMetrics {
   });
   protected readonly months = computed<MonthValue[]>(() =>
     (this.stats()?.by_month ?? []).map((m) => ({
-      ...monthLabels(m.month, this.language.current()),
+      ...monthLabels(m.month, LOCALE),
       value: m.trips,
       display: this.transloco.translate('stats.tripsCount', { count: m.trips }),
     })),
@@ -237,7 +233,6 @@ export class PassengerMetrics {
 })
 export default class DriverStatsPage {
   private readonly api = inject(RatingsApi);
-  private readonly language = inject(LanguageService);
   private readonly transloco = inject(TranslocoService);
   private readonly toast = inject(ToastService);
 
@@ -260,7 +255,7 @@ export default class DriverStatsPage {
   });
   protected readonly months = computed<MonthValue[]>(() =>
     (this.stats()?.by_month ?? []).map((m) => ({
-      ...monthLabels(m.month, this.language.current()),
+      ...monthLabels(m.month, LOCALE),
       value: m.trips,
       display: this.transloco.translate('stats.tripsCount', { count: m.trips }),
     })),
@@ -280,13 +275,13 @@ export default class DriverStatsPage {
   }
 
   protected money(amount: number): string {
-    return formatCop(amount, this.language.current());
+    return formatCop(amount, LOCALE);
   }
 
   protected percent(value: number | null): string {
     return value === null
       ? '-'
-      : value.toLocaleString(this.language.current(), {
+      : value.toLocaleString(LOCALE, {
           style: 'percent',
           maximumFractionDigits: 0,
         });

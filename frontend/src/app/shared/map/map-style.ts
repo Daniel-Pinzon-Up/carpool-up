@@ -8,18 +8,15 @@ export const MAP_BOUNDS: [[number, number], [number, number]] = [
   [-72.55, 7.48],
 ];
 
-export const ROUTE_COLORS = {
-  light: { route: '#1E5AA8', casing: '#FFFFFF' },
-  dark: { route: '#5AA9FF', casing: '#0A1F44' },
-};
+export const ROUTE_COLORS = { route: '#1E5AA8', casing: '#FFFFFF' };
 
 /**
  * Estilo del mapa base de Protomaps con todo servido por la propia app:
  * teselas PMTiles, fuentes y sprites (la CSP no permite recursos externos).
  */
-export async function buildMapStyle(dark: boolean, lang: string): Promise<StyleSpecification> {
+export async function buildMapStyle(): Promise<StyleSpecification> {
   const { layers, namedFlavor } = await import('@protomaps/basemaps');
-  const flavor = dark ? 'dark' : 'light';
+  const flavor = 'light';
   const origin = globalThis.location?.origin ?? '';
   return {
     version: 8,
@@ -33,6 +30,6 @@ export async function buildMapStyle(dark: boolean, lang: string): Promise<StyleS
           '<a href="https://openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap</a>',
       },
     },
-    layers: layers('protomaps', namedFlavor(flavor), { lang }),
+    layers: layers('protomaps', namedFlavor(flavor), { lang: 'es' }),
   } as StyleSpecification;
 }

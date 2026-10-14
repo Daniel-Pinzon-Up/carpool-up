@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideStar } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
@@ -134,7 +134,6 @@ export default class RatePage {
   private readonly api = inject(RatingsApi);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly doneIcon = LucideStar;
   protected readonly commentMax = COMMENT_MAX;
@@ -209,6 +208,6 @@ export default class RatePage {
   }
 
   protected when(iso: string): string {
-    return formatDeparture(iso, this.language.current());
+    return formatDeparture(iso, LOCALE);
   }
 }

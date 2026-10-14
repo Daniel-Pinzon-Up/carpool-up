@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideSave } from '@icons';
 import { apiErrorMessage } from '../../../core/http/api-error-message';
-import { LanguageService } from '../../../core/i18n/language.service';
+import { LOCALE } from '../../../core/i18n/locale';
 import { GlassButton } from '../../../shared/ui/glass-button';
 import { GlassCard } from '../../../shared/ui/glass-card';
 import { GlassInput } from '../../../shared/ui/glass-input';
@@ -132,7 +132,6 @@ export function fromDraft(original: unknown, draft: string): unknown {
 export class ParametersPanel {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly filter = new FormControl('', { nonNullable: true });
@@ -200,7 +199,7 @@ export class ParametersPanel {
   }
 
   protected date(iso: string): string {
-    return new Date(iso).toLocaleString(this.language.current(), {
+    return new Date(iso).toLocaleString(LOCALE, {
       dateStyle: 'medium',
       timeStyle: 'short',
       timeZone: 'America/Bogota',

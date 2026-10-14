@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideEye, LucideEyeOff, LucideStar } from '@icons';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { ErrorState } from '../../shared/ui/error-state';
 import { GlassButton } from '../../shared/ui/glass-button';
@@ -102,7 +102,6 @@ type View = 'visible' | 'hidden';
 export default class AdminModeration {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly view = signal<View>('visible');
@@ -110,7 +109,6 @@ export default class AdminModeration {
   protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly tabs = computed(() => {
-    this.language.current();
     return (['visible', 'hidden'] as const).map((id) => ({
       id,
       label: this.transloco.translate(`admin.moderation.tabs.${id}`),
@@ -153,11 +151,11 @@ export default class AdminModeration {
   }
 
   protected average(value: number): string {
-    return value.toLocaleString(this.language.current(), { maximumFractionDigits: 1 });
+    return value.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
   }
 
   protected date(iso: string): string {
-    return new Date(iso).toLocaleDateString(this.language.current(), {
+    return new Date(iso).toLocaleDateString(LOCALE, {
       dateStyle: 'medium',
       timeZone: 'America/Bogota',
     });

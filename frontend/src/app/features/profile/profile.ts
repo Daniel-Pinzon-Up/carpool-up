@@ -9,22 +9,18 @@ import {
 import { PassengerMetrics } from '../stats/stats-views';
 import { DeleteAccountDialog } from './delete-account-dialog';
 import { TrustedContacts } from './trusted-contacts';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideLaptop, LucideLogOut, LucideShieldOff, LucideTrash2 } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { ThemePreference, ThemeService } from '../../core/theme/theme.service';
 import { Avatar } from '../../shared/ui/avatar';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
 import { GlassInput } from '../../shared/ui/glass-input';
-import { GlassSelect, SelectOption } from '../../shared/ui/glass-select';
-import { LanguageSelect } from '../../shared/ui/language-select';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { BadgeTone, StatusBadge } from '../../shared/ui/status-badge';
 import { ToastService } from '../../shared/ui/toast.service';
@@ -47,8 +43,6 @@ const DOC_TONES: Record<string, BadgeTone> = {
     GlassCard,
     GlassButton,
     GlassInput,
-    GlassSelect,
-    LanguageSelect,
     Skeleton,
     StatusBadge,
     TrustedContacts,
@@ -62,7 +56,6 @@ const DOC_TONES: Record<string, BadgeTone> = {
 })
 export default class Profile {
   protected readonly auth = inject(AuthService);
-  protected readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly transloco = inject(TranslocoService);
   private readonly toasts = inject(ToastService);
@@ -86,25 +79,8 @@ export default class Profile {
   });
 
   protected readonly sessions = resource({ loader: () => this.auth.sessions() });
-  protected readonly themeControl = new FormControl<string>(this.theme.preference(), {
-    nonNullable: true,
-  });
-
-  constructor() {
-    this.themeControl.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe((value) => this.theme.setPreference(value as ThemePreference));
-  }
-
-  protected themeOptions(): SelectOption[] {
-    return (['system', 'light', 'dark'] as const).map((value) => ({
-      value,
-      label: this.transloco.translate(`layout.theme.${value}`),
-    }));
-  }
-
   protected lastSeen(iso: string): string {
-    return new Date(iso).toLocaleString(this.transloco.getActiveLang(), {
+    return new Date(iso).toLocaleString('es', {
       dateStyle: 'medium',
       timeStyle: 'short',
     });

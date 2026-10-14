@@ -20,7 +20,7 @@ import {
   LucideSiren,
 } from '@icons';
 import { apiErrorCode, apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { LocationSharingService } from '../../core/location/location-sharing.service';
 import { formatCop } from '../../shared/map/routing.api';
 import { DialogService } from '../../shared/ui/dialog.service';
@@ -134,7 +134,6 @@ export class TripControl {
   private readonly dialogs = inject(DialogService);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
 
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -211,7 +210,7 @@ export class TripControl {
   }
 
   protected money(amount: number): string {
-    return formatCop(amount, this.language.current());
+    return formatCop(amount, LOCALE);
   }
 }
 
@@ -273,11 +272,8 @@ export class SafetyActions {
 export class MyTicket {
   readonly tripId = input.required<string>();
   private readonly api = inject(LifecycleApi);
-  private readonly language = inject(LanguageService);
   protected readonly ticket = signal<Ticket | null>(null);
-  protected readonly amount = computed(() =>
-    formatCop(this.ticket()?.amount ?? 0, this.language.current()),
-  );
+  protected readonly amount = computed(() => formatCop(this.ticket()?.amount ?? 0, LOCALE));
 
   constructor() {
     effect(() => {

@@ -11,15 +11,13 @@ import {
 } from '@angular/core';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { LucideCarFront, LucideClock, LucideLink2Off, LucideMapPin } from '@icons';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { MapMarker, MapView } from '../../shared/map/map-view';
 import { Brand } from '../../shared/ui/brand';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { GlassCard } from '../../shared/ui/glass-card';
-import { LanguageSelect } from '../../shared/ui/language-select';
 import { Skeleton } from '../../shared/ui/skeleton';
 import { StatusBadge } from '../../shared/ui/status-badge';
-import { ThemeToggle } from '../../shared/ui/theme-toggle';
 import { PublicTrip, LifecycleApi } from '../trips/lifecycle.api';
 import { TRIP_STATUS_TONE, formatDeparture, formatTime } from '../trips/trip-status';
 
@@ -38,11 +36,9 @@ const REFRESH_MS = 15_000;
     Brand,
     EmptyState,
     GlassCard,
-    LanguageSelect,
     MapView,
     Skeleton,
     StatusBadge,
-    ThemeToggle,
     LucideCarFront,
     LucideClock,
     LucideMapPin,
@@ -51,10 +47,6 @@ const REFRESH_MS = 15_000;
     <div class="mx-auto flex min-h-dvh max-w-4xl flex-col gap-4 px-4 py-4">
       <header class="flex items-center gap-3">
         <cp-brand [size]="40" />
-        <div class="ml-auto flex items-center gap-2">
-          <cp-language-select />
-          <cp-theme-toggle />
-        </div>
       </header>
       <main id="main" class="flex flex-col gap-4">
         @if (trip(); as t) {
@@ -133,7 +125,6 @@ export default class SharedTrip {
   readonly token = input.required<string>();
 
   private readonly api = inject(LifecycleApi);
-  private readonly language = inject(LanguageService);
   private readonly transloco = inject(TranslocoService);
 
   protected readonly goneIcon = LucideLink2Off;
@@ -181,10 +172,10 @@ export default class SharedTrip {
   }
 
   protected when(iso: string): string {
-    return formatDeparture(iso, this.language.current());
+    return formatDeparture(iso, LOCALE);
   }
 
   protected time(iso: string): string {
-    return formatTime(iso, this.language.current());
+    return formatTime(iso, LOCALE);
   }
 }

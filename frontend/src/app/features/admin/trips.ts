@@ -22,7 +22,7 @@ import {
 } from '@icons';
 import { firstValueFrom } from 'rxjs';
 import { apiErrorMessage } from '../../core/http/api-error-message';
-import { LanguageService } from '../../core/i18n/language.service';
+import { LOCALE } from '../../core/i18n/locale';
 import { DialogService } from '../../shared/ui/dialog.service';
 import { EmptyState } from '../../shared/ui/empty-state';
 import { ErrorState } from '../../shared/ui/error-state';
@@ -145,7 +145,6 @@ import { AdminApi, AdminMessage, AdminTripDetail, AdminTripRow } from './admin.a
 export default class AdminTrips {
   private readonly api = inject(AdminApi);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly filters = new FormGroup({
@@ -157,7 +156,6 @@ export default class AdminTrips {
   protected readonly loadError = signal<string | null>(null);
   protected readonly cursor = signal<string | null>(null);
   protected readonly statusOptions = computed(() => {
-    this.language.current();
     return [
       { value: '', label: this.transloco.translate('admin.users.any') },
       ...Object.keys(TRIP_STATUS_TONE).map((value) => ({
@@ -191,7 +189,7 @@ export default class AdminTrips {
   }
 
   protected when(iso: string): string {
-    return formatDeparture(iso, this.language.current());
+    return formatDeparture(iso, LOCALE);
   }
 }
 
@@ -381,7 +379,6 @@ export class AdminTripDetailPage {
   private readonly api = inject(AdminApi);
   private readonly dialogs = inject(DialogService);
   private readonly transloco = inject(TranslocoService);
-  private readonly language = inject(LanguageService);
   private readonly toast = inject(ToastService);
 
   protected readonly trip = signal<AdminTripDetail | null>(null);
@@ -463,6 +460,6 @@ export class AdminTripDetailPage {
   }
 
   protected when(iso: string): string {
-    return formatDeparture(iso, this.language.current());
+    return formatDeparture(iso, LOCALE);
   }
 }

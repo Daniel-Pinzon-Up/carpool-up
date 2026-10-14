@@ -33,32 +33,6 @@
       </cp-glass-card>
 
       <cp-glass-card>
-        <h2 class="mb-4 text-lg font-bold">{{ 'profile.preferences' | transloco }}</h2>
-        <div class="flex flex-col gap-4">
-          <div>
-            <p class="mb-1.5 text-sm font-medium">{{ 'layout.language' | transloco }}</p>
-            <cp-language-select />
-          </div>
-          <cp-glass-select
-            [formControl]="themeControl"
-            [label]="'layout.theme.label' | transloco"
-            [options]="themeOptions()"
-          />
-          <label class="flex min-h-11 cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              class="size-5 accent-[var(--accent)]"
-              [checked]="theme.reduceTransparency()"
-              (change)="theme.setReduceTransparency($any($event.target).checked)"
-            />
-            <span class="text-sm font-medium">{{
-              'catalog.controls.reduceTransparency' | transloco
-            }}</span>
-          </label>
-        </div>
-      </cp-glass-card>
-
-      <cp-glass-card>
         <h2 class="mb-4 text-lg font-bold">{{ 'profile.document' | transloco }}</h2>
         @if (me.document; as doc) {
           <div class="flex flex-wrap items-center gap-3">
