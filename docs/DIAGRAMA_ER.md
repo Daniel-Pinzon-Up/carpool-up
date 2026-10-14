@@ -18,6 +18,7 @@ Modelo de datos de Carpool UP: 35 tablas en PostgreSQL 16 con PostGIS, definidas
 - `geometry` son columnas de PostGIS: la ruta del viaje (`trips.route`) y la ubicación de cada lugar (`places.point`).
 - Los tipos con mayúscula (`TripStatus`, `BookingStatus`...) son enums de PostgreSQL.
 - Las relaciones marcadas como admin, conductor o superadmin son la persona que tomó la decisión: quién revisó un documento, quién atendió una emergencia, quién decidió una cancelación.
+- **Autoría:** todas las tablas tienen `created_by` (quién creó la fila) y `updated_by` (quién la cambió por última vez), llaves foráneas a `users` que se llenan solas con el usuario de la petición (migración `0013`). Quedan nulas cuando el cambio lo hace el sistema (tareas programadas, seed) o alguien sin sesión (registro); en `suspensions`, `created_by` nulo sigue indicando una sanción automática. En `audit_log` el autor es `created_by` y `updated_by` queda siempre nulo. Para no llenar los diagramas de flechas hacia `users`, estas llaves aparecen en el anexo pero no se dibujan como relaciones, salvo las que ya tenían un significado propio (`places`, `share_links`, `suspensions`, `system_settings`, `audit_log`).
 - Cada tabla muestra sus columnas clave. Todas las columnas están en el anexo del final.
 
 ## Diagrama general
@@ -299,7 +300,7 @@ erDiagram
   }
   audit_log {
     uuid id PK
-    uuid actor_id FK
+    uuid created_by FK "quien hizo la accion"
     text action
     text entity
     jsonb before
@@ -454,7 +455,7 @@ erDiagram
   }
   audit_log {
     uuid id PK
-    uuid actor_id FK
+    uuid created_by FK "quien hizo la accion"
     text action
     text entity
     jsonb before
@@ -800,7 +801,8 @@ Generado a partir de los modelos de SQLAlchemy.
 ```mermaid
 erDiagram
   audit_log {
-    uuid actor_id FK
+    uuid created_by FK
+    uuid updated_by FK
     text action
     text entity
     text entity_id
@@ -820,6 +822,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   bookings {
     uuid trip_id FK
@@ -850,6 +854,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   cancellation_requests {
     uuid booking_id FK
@@ -861,6 +867,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   conversation_members {
     uuid conversation_id PK,FK
@@ -868,6 +876,8 @@ erDiagram
     timestamptz joined_at
     timestamptz last_read_at
     timestamptz left_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   conversations {
     ConversationKind kind
@@ -879,6 +889,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   driver_licenses {
     uuid user_id FK
@@ -892,6 +904,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   emergency_events {
     uuid trip_id FK
@@ -904,6 +918,8 @@ erDiagram
     timestamptz handled_at
     text resolution
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   identity_documents {
     uuid user_id FK
@@ -919,6 +935,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   legal_documents {
     LegalKind kind
@@ -930,6 +948,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   messages {
     uuid conversation_id FK
@@ -938,6 +958,8 @@ erDiagram
     timestamptz sent_at
     bool hidden
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   notifications {
     uuid user_id FK
@@ -946,6 +968,8 @@ erDiagram
     timestamptz read_at
     timestamptz created_at
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   pico_placa_rules {
     VehicleType vehicle_type
@@ -957,6 +981,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   places {
     text name
@@ -967,11 +993,14 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid updated_by FK
   }
   rating_scores {
     uuid rating_id PK,FK
     text criterion PK
     int stars
+    uuid created_by FK
+    uuid updated_by FK
   }
   ratings {
     uuid trip_id FK
@@ -982,6 +1011,8 @@ erDiagram
     bool hidden
     timestamptz created_at
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   semesters {
     text name
@@ -991,6 +1022,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   series_stops {
     uuid series_id FK
@@ -1000,6 +1033,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   series_subscriptions {
     uuid series_id FK
@@ -1018,6 +1053,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   share_links {
     uuid trip_id FK
@@ -1026,6 +1063,7 @@ erDiagram
     timestamptz expires_at
     timestamptz created_at
     uuid id PK
+    uuid updated_by FK
   }
   suspensions {
     uuid user_id FK
@@ -1037,6 +1075,7 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid updated_by FK
   }
   system_settings {
     text key PK
@@ -1044,6 +1083,7 @@ erDiagram
     uuid updated_by FK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
   }
   terms_acceptances {
     uuid user_id FK
@@ -1051,6 +1091,8 @@ erDiagram
     timestamptz accepted_at
     text ip
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   tickets {
     uuid booking_id FK
@@ -1060,6 +1102,8 @@ erDiagram
     bool paid_confirmed
     timestamptz paid_confirmed_at
     uuid id PK
+    uuid created_by FK
+    uuid updated_by FK
   }
   traffic_factors {
     text weekday_group
@@ -1069,6 +1113,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trip_rules {
     uuid trip_id FK
@@ -1077,6 +1123,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trip_series {
     uuid driver_id FK
@@ -1095,6 +1143,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trip_stops {
     uuid trip_id FK
@@ -1105,6 +1155,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trips {
     uuid driver_id FK
@@ -1128,6 +1180,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   trusted_contacts {
     uuid user_id FK
@@ -1137,6 +1191,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   user_sessions {
     uuid user_id FK
@@ -1150,6 +1206,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   user_stats {
     uuid user_id PK,FK
@@ -1161,6 +1219,8 @@ erDiagram
     int passenger_no_shows
     jsonb criteria
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   users {
     text email
@@ -1182,6 +1242,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   vehicles {
     uuid owner_id FK
@@ -1200,6 +1262,8 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
   waitlist_entries {
     uuid trip_id FK
@@ -1216,8 +1280,10 @@ erDiagram
     uuid id PK
     timestamptz created_at
     timestamptz updated_at
+    uuid created_by FK
+    uuid updated_by FK
   }
-  users |o--o{ audit_log : "actor_id"
+  users |o--o{ audit_log : "created_by"
   users ||--o{ auth_codes : "user_id"
   trips ||--o{ bookings : "trip_id"
   users ||--o{ bookings : "passenger_id"
