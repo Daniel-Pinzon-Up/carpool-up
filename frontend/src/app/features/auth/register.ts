@@ -6,10 +6,8 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LucideArrowLeft,
   LucideArrowRight,
-  LucideBriefcase,
   LucideCar,
   LucideCircleAlert,
-  LucideGraduationCap,
   LucideLock,
   LucideMail,
   LucideUser,
@@ -103,7 +101,7 @@ export default class Register {
   );
   protected readonly role = this.fb.group({ role: ['', Validators.required] });
   protected readonly document = this.fb.group({
-    doc_kind: ['', Validators.required],
+    doc_kind: ['identity_document'],
     file: this.fb.control<File | null>(null, Validators.required),
   });
   protected readonly terms = this.fb.group({
@@ -136,18 +134,6 @@ export default class Register {
       description: this.transloco.translate(`register.role.${c.value}.body`),
     }));
   });
-  protected readonly docChoices = computed<Choice[]>(() => {
-    this.lang();
-    return [
-      { value: 'student_card', icon: LucideGraduationCap },
-      { value: 'institutional_proof', icon: LucideBriefcase },
-    ].map((c) => ({
-      ...c,
-      title: this.transloco.translate(`register.document.${c.value}.title`),
-      description: this.transloco.translate(`register.document.${c.value}.body`),
-    }));
-  });
-
   constructor() {
     void this.meta.load();
   }

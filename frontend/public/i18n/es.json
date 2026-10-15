@@ -386,7 +386,7 @@
     "emailPlaceholder": "nombre@unipamplona.edu.co",
     "emailHint": "Debe terminar en {{suffix}}.",
     "fullName": "Nombre completo",
-    "fullNameHint": "Como aparece en tu carnet o constancia.",
+    "fullNameHint": "Como aparece en tu documento de identidad.",
     "sex": "Sexo",
     "sexHint": "Debe coincidir con tu documento. Permite ofrecer y reservar viajes solo para mujeres.",
     "sexOptions": {
@@ -469,6 +469,10 @@
       "institutional_proof": {
         "title": "Constancia institucional",
         "body": "Si eres docente o personal administrativo."
+      },
+      "identity_document": {
+        "title": "Documento de identidad",
+        "body": "Sube una foto o PDF de tu documento de identidad (cédula o tarjeta de identidad)."
       },
       "file": "Foto o PDF del documento",
       "privacy": "Solo lo ven los administradores. Quitamos los datos ocultos de las fotos, como la ubicación."

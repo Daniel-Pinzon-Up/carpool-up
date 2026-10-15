@@ -386,7 +386,7 @@
     "emailPlaceholder": "nom@unipamplona.edu.co",
     "emailHint": "Il doit se terminer par {{suffix}}.",
     "fullName": "Nom complet",
-    "fullNameHint": "Tel qu'il figure sur votre carte ou attestation.",
+    "fullNameHint": "Tel qu'il figure sur votre pièce d'identité.",
     "sex": "Sexe",
     "sexHint": "Il doit correspondre à votre document. Il permet les trajets réservés aux femmes.",
     "sexOptions": {
@@ -469,6 +469,10 @@
       "institutional_proof": {
         "title": "Attestation institutionnelle",
         "body": "Si vous êtes enseignant ou personnel administratif."
+      },
+      "identity_document": {
+        "title": "Pièce d'identité",
+        "body": "Téléversez une photo ou un PDF de votre pièce d'identité (carte d'identité)."
       },
       "file": "Photo ou PDF du document",
       "privacy": "Seuls les administrateurs le voient. Nous retirons les données cachées des photos, comme la localisation."

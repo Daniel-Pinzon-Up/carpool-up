@@ -1,7 +1,7 @@
 export type UserRole = 'passenger' | 'driver' | 'admin' | 'superadmin';
 export type UserStatus = 'pending_email' | 'pending_approval' | 'active' | 'suspended' | 'blocked';
 export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'expired';
-export type DocKind = 'student_card' | 'institutional_proof';
+export type DocKind = 'student_card' | 'institutional_proof' | 'identity_document';
 export type LegalKind = 'terms' | 'data_policy';
 export type ThemeValue = 'system' | 'light' | 'dark';
 export type LanguageValue = 'es' | 'en' | 'pt' | 'fr';

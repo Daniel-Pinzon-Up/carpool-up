@@ -90,12 +90,7 @@
       }
       @case ('document') {
         <div [formGroup]="document" class="flex flex-col gap-5">
-          <cp-choice-cards
-            formControlName="doc_kind"
-            [label]="'register.document.label' | transloco"
-            [choices]="docChoices()"
-            [error]="err('doc_kind')"
-          />
+          <p class="text-sm">{{ 'register.document.identity_document.body' | transloco }}</p>
           <cp-file-drop
             formControlName="file"
             [label]="'register.document.file' | transloco"
