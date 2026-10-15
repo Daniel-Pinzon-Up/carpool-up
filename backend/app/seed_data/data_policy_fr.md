@@ -7,7 +7,7 @@ Conformément à la **loi colombienne 1581 de 2012** et à ses décrets d’appl
 ## 1. Données collectées
 
 - Identification et contact : nom, adresse institutionnelle, programme ou service, sexe et photo de profil facultative.
-- Documents : carte étudiante ou attestation institutionnelle et, pour les conducteurs, permis de conduire et informations sur le véhicule.
+- Documents : pièce d’identité et, pour les conducteurs, permis de conduire et informations sur le véhicule.
 - Utilisation du service : trajets, réservations, notes, messages de la discussion et position du conducteur pendant un trajet en cours.
 - Contacts de confiance que vous enregistrez volontairement.
 
@@ -20,7 +20,7 @@ Conformément à la **loi colombienne 1581 de 2012** et à ses décrets d’appl
 
 ## 3. Données sensibles et visibilité
 
-- Votre adresse e-mail, votre téléphone, votre carte et votre permis ne sont **jamais** montrés aux autres utilisateurs.
+- Votre adresse e-mail, votre téléphone, votre pièce d’identité et votre permis ne sont **jamais** montrés aux autres utilisateurs.
 - La plaque du véhicule et la note de paiement du conducteur ne sont montrées qu’aux passagers dont la réservation est acceptée.
 - La position en direct n’est partagée que pendant le trajet, avec ses participants ou avec la personne qui reçoit le lien temporaire.
 - Les messages de la discussion sont supprimés après le délai de conservation publié.

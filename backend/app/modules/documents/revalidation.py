@@ -1,4 +1,4 @@
-"""Revalidacion semestral del carnet o constancia (seccion 7.1).
+"""Revalidacion semestral del documento de identidad (seccion 7.1).
 
 1. Cuando hay un semestre vigente, los documentos aprobados de otros semestres vencen y se
    avisa a sus duenos para que suban el nuevo.

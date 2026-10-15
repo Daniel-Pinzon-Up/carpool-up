@@ -8,8 +8,8 @@ Carpool UP (Carpool Universitario) est une plateforme permettant aux étudiants,
 
 ## 2. Qui peut l’utiliser
 
-- Uniquement les personnes ayant une adresse institutionnelle se terminant par `.edu.co` et une carte étudiante ou une attestation institutionnelle en cours de validité, approuvée par un administrateur.
-- La carte ou l’attestation doit être revalidée chaque semestre universitaire dans le délai publié.
+- Uniquement les personnes ayant une adresse institutionnelle se terminant par `.edu.co` et une pièce d’identité approuvée par un administrateur.
+- La pièce d’identité doit être revalidée chaque semestre universitaire dans le délai publié.
 - Chaque personne n’a qu’un seul compte et est responsable des informations qu’elle enregistre.
 
 ## 3. Caractère non commercial

@@ -7,7 +7,7 @@ En cumplimiento de la **Ley 1581 de 2012** y sus decretos reglamentarios, al reg
 ## 1. Datos que se recogen
 
 - Identificación y contacto: nombre, correo institucional, programa o dependencia, sexo y foto de perfil opcional.
-- Documentos: carnet estudiantil o constancia institucional y, para conductores, licencia de conducción y datos del vehículo.
+- Documentos: documento de identidad y, para conductores, licencia de conducción y datos del vehículo.
 - Uso del servicio: viajes, reservas, calificaciones, mensajes del chat y ubicación del conductor mientras un viaje está en curso.
 - Contactos de confianza que usted registre voluntariamente.
 
@@ -20,7 +20,7 @@ En cumplimiento de la **Ley 1581 de 2012** y sus decretos reglamentarios, al reg
 
 ## 3. Datos sensibles y visibilidad
 
-- Su correo, teléfono, carnet y licencia **nunca** se muestran a otros usuarios.
+- Su correo, teléfono, documento de identidad y licencia **nunca** se muestran a otros usuarios.
 - La placa del vehículo y la nota de pago del conductor solo se muestran a pasajeros con reserva aceptada.
 - La ubicación en vivo solo se comparte durante el viaje y con sus participantes o con quien reciba el enlace temporal.
 - Los mensajes del chat se eliminan después del plazo de retención publicado.

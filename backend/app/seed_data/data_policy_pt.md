@@ -7,7 +7,7 @@ Em cumprimento da **Lei 1581 de 2012** da Colômbia e seus decretos regulamentar
 ## 1. Dados coletados
 
 - Identificação e contato: nome, e-mail institucional, curso ou setor, sexo e foto de perfil opcional.
-- Documentos: carteirinha estudantil ou declaração institucional e, para motoristas, habilitação e dados do veículo.
+- Documentos: documento de identidade e, para motoristas, habilitação e dados do veículo.
 - Uso do serviço: viagens, reservas, avaliações, mensagens do chat e localização do motorista enquanto uma viagem está em andamento.
 - Contatos de confiança que você cadastrar voluntariamente.
 
@@ -20,7 +20,7 @@ Em cumprimento da **Lei 1581 de 2012** da Colômbia e seus decretos regulamentar
 
 ## 3. Dados sensíveis e visibilidade
 
-- Seu e-mail, telefone, carteirinha e habilitação **nunca** são mostrados a outros usuários.
+- Seu e-mail, telefone, documento de identidade e habilitação **nunca** são mostrados a outros usuários.
 - A placa do veículo e a nota de pagamento do motorista só são mostradas a passageiros com reserva aceita.
 - A localização ao vivo só é compartilhada durante a viagem, com seus participantes ou com quem receber o link temporário.
 - As mensagens do chat são apagadas depois do prazo de retenção publicado.

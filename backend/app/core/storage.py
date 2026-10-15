@@ -1,4 +1,4 @@
-"""Archivos privados (carnets, constancias, licencias).
+"""Archivos privados (documentos de identidad, licencias).
 
 Se guardan fuera de la raiz publica con nombre aleatorio y solo se sirven por endpoints
 autenticados. El tipo se detecta por los primeros bytes, no por la extension ni por el

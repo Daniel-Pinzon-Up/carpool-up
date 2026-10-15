@@ -8,8 +8,8 @@ Carpool UP (Carpool Universitario) is a platform for students, teaching staff an
 
 ## 2. Who can use it
 
-- Only people with an institutional email ending in `.edu.co` and a valid student ID or institutional certificate approved by an administrator.
-- The student ID or certificate must be revalidated every academic semester within the published deadline.
+- Only people with an institutional email ending in `.edu.co` and an identity document approved by an administrator.
+- The identity document must be revalidated every academic semester within the published deadline.
 - Each person has a single account and is responsible for the information they register.
 
 ## 3. Non-commercial nature

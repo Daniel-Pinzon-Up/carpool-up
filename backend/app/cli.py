@@ -13,7 +13,7 @@ de un archivo ignorado por git; nunca se escribe en el repositorio.
 
 verify-email sirve para las personas de prueba sin buzon real: hace lo mismo que escribir el
 codigo (pasa de pending_email a pending_approval y quita el segundo factor), y la cuenta sigue
-el camino normal: un administrador aprueba su carnet desde el panel. forget-unverified borra
+el camino normal: un administrador aprueba su documento desde el panel. forget-unverified borra
 solo cuentas en pending_email (sin viajes ni historial) para repetir un registro desde cero.
 
 token y e2e-users se niegan a correr en produccion; email-test tambien sirve alli para

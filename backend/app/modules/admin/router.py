@@ -33,7 +33,7 @@ async def approval_queue(
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = DEFAULT_LIMIT,
     cursor: str | None = None,
 ) -> Page[ApprovalItem]:
-    """Carnets, constancias o licencias por revisar, en orden de llegada."""
+    """Documentos de identidad o licencias por revisar, en orden de llegada."""
     return await ApprovalService(session).queue(type, status, limit, cursor)
 
 
@@ -53,7 +53,7 @@ async def approval_detail(
 async def approve(
     approval_id: uuid.UUID, body: ApproveRequest, session: DbSession, actor: AdminActor
 ) -> ApprovalItem:
-    """Aprueba. En carnets puede corregir el sexo declarado y activa la cuenta pendiente."""
+    """Aprueba. En documentos de identidad corrige el sexo y activa la cuenta pendiente."""
     return await ApprovalService(session).approve(approval_id, actor, body.sex)
 
 
@@ -69,7 +69,7 @@ async def reject(
 async def approval_file(
     approval_id: uuid.UUID, session: DbSession, _: AdminOrSuper
 ) -> FileResponse:
-    """Archivo del carnet, constancia o licencia. Sin cache."""
+    """Archivo del documento de identidad o la licencia. Sin cache."""
     return await ApprovalService(session).file(approval_id)
 
 

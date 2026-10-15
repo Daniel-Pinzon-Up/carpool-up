@@ -10,7 +10,7 @@ from app.core.enums import DocKind, ReviewStatus
 
 
 class IdentityDocument(UUIDPrimaryKey, Timestamps, Authorship, Base):
-    """Carnet estudiantil o constancia institucional. Uno por semestre a lo largo del tiempo."""
+    """Documento de identidad (o carnet y constancia antiguos). Uno por semestre."""
 
     __tablename__ = "identity_documents"
     __table_args__ = (Index("ix_identity_documents_user_created", "user_id", "created_at"),)

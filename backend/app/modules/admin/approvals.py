@@ -1,4 +1,4 @@
-"""Cola de aprobacion de carnets, constancias y licencias (administrador y superadmin)."""
+"""Cola de aprobacion de documentos de identidad y licencias (administrador y superadmin)."""
 
 import uuid
 from typing import Any, cast

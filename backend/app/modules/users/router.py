@@ -68,7 +68,7 @@ async def upload_document(
     kind: Annotated[DocKind, Form()],
     document: Annotated[UploadFile, File(description="JPG, PNG, WebP o PDF")],
 ) -> DocumentSummary:
-    """Sube un carnet o constancia nuevo. Si hay uno pendiente de revision, lo reemplaza."""
+    """Sube un documento de identidad nuevo. Si hay uno pendiente de revision, lo reemplaza."""
     return DocumentSummary.model_validate(
         await DocumentService(session).upload(user, kind, document)
     )

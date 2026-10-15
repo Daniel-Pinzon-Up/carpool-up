@@ -7,7 +7,7 @@ In compliance with Colombian **Law 1581 of 2012** and its regulatory decrees, by
 ## 1. Data collected
 
 - Identification and contact: name, institutional email, programme or department, sex and an optional profile photo.
-- Documents: student ID or institutional certificate and, for drivers, driving licence and vehicle details.
+- Documents: identity document and, for drivers, driving licence and vehicle details.
 - Use of the service: trips, bookings, ratings, chat messages and the driver’s location while a trip is in progress.
 - Trusted contacts that you register voluntarily.
 
@@ -20,7 +20,7 @@ In compliance with Colombian **Law 1581 of 2012** and its regulatory decrees, by
 
 ## 3. Sensitive data and visibility
 
-- Your email, phone number, student ID and licence are **never** shown to other users.
+- Your email, phone number, identity document and licence are **never** shown to other users.
 - The vehicle plate and the driver’s payment note are only shown to passengers with an accepted booking.
 - The live location is only shared during the trip, with its participants or with whoever receives the temporary link.
 - Chat messages are deleted after the published retention period.

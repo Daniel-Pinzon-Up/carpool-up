@@ -8,8 +8,8 @@ Carpool UP (Carpool Universitario) es una plataforma para que estudiantes, docen
 
 ## 2. Quién puede usarla
 
-- Solo personas con correo institucional terminado en `.edu.co` y carnet o constancia institucional vigente aprobada por un administrador.
-- El carnet o la constancia se revalidan cada semestre académico dentro del plazo publicado.
+- Solo personas con correo institucional terminado en `.edu.co` y documento de identidad aprobado por un administrador.
+- El documento de identidad se revalida cada semestre académico dentro del plazo publicado.
 - Cada persona tiene una sola cuenta y es responsable de la información que registra.
 
 ## 3. Naturaleza no comercial

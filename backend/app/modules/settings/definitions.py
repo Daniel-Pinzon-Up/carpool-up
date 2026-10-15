@@ -125,7 +125,7 @@ DEFINITIONS: dict[str, SettingDefinition] = {
             "revalidation_days",
             PositiveInt,
             30,
-            "Dias desde el inicio del semestre para revalidar el carnet.",
+            "Dias desde el inicio del semestre para revalidar el documento de identidad.",
         ),
         _define(
             "password_min_length",

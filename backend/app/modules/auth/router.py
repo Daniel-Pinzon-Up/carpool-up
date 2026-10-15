@@ -98,7 +98,9 @@ async def register(
     doc_kind: Annotated[DocKind, Form()],
     accept_terms: Annotated[bool, Form()],
     accept_data_policy: Annotated[bool, Form()],
-    document: Annotated[UploadFile, File(description="Carnet o constancia: JPG, PNG, WebP o PDF")],
+    document: Annotated[
+        UploadFile, File(description="Documento de identidad: JPG, PNG, WebP, PDF")
+    ],
     program: Annotated[str | None, Form()] = None,
     preferred_language: Annotated[Language, Form()] = Language.ES,
 ) -> AuthResult:
