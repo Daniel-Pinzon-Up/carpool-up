@@ -59,6 +59,7 @@ ADMIN_ROLES = frozenset({UserRole.ADMIN, UserRole.SUPERADMIN})
 class DocKind(StrEnum):
     STUDENT_CARD = "student_card"
     INSTITUTIONAL_PROOF = "institutional_proof"
+    IDENTITY_DOCUMENT = "identity_document"
 
 
 class ReviewStatus(StrEnum):

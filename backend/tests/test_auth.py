@@ -39,7 +39,7 @@ def form(**overrides: Any) -> dict[str, Any]:
         "sex": "female",
         "program": "Ingenieria de Sistemas",
         "role": "passenger",
-        "doc_kind": "student_card",
+        "doc_kind": "identity_document",
         "preferred_language": "es",
         "accept_terms": "true",
         "accept_data_policy": "true",
@@ -97,6 +97,7 @@ async def test_register_creates_pending_account_document_and_acceptances(
 
     document = await db.scalar(select(IdentityDocument).where(IdentityDocument.user_id == user.id))
     assert document is not None and document.status == "pending"
+    assert document.kind == "identity_document"
     accepted = await db.scalars(
         select(TermsAcceptance.legal_document_id).where(TermsAcceptance.user_id == user.id)
     )
