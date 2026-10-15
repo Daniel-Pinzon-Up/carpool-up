@@ -47,9 +47,8 @@ test('registro, verificacion, aprobacion y eliminacion de la cuenta', async ({ p
   await page.getByRole('button', { name: 'Continuar' }).click();
   await page.getByText('Pasajero', { exact: true }).click();
   await page.getByRole('button', { name: 'Continuar' }).click();
-  await page.getByText('Carnet estudiantil', { exact: true }).click();
   await page.locator('input[type="file"]').setInputFiles({
-    name: 'carnet.png',
+    name: 'documento.png',
     mimeType: 'image/png',
     buffer: PNG,
   });
@@ -65,7 +64,7 @@ test('registro, verificacion, aprobacion y eliminacion de la cuenta', async ({ p
   await page.getByRole('button', { name: 'Verificar' }).click();
   await expect(page).toHaveURL(/\/cuenta\/estado$/);
 
-  // --- El administrador aprueba el carnet ---------------------------------------------------
+  // --- El administrador aprueba el documento ------------------------------------------------
   const { accounts, password: adminPassword } = credentials();
   const api = await request.newContext({
     baseURL: info.project.use.baseURL,
@@ -85,7 +84,7 @@ test('registro, verificacion, aprobacion y eliminacion de la cuenta', async ({ p
   const item = (queue.items as { id: string; applicant: { id: string } }[]).find(
     (i) => i.applicant.id === userId,
   );
-  expect(item, 'el carnet nuevo esta en la cola de aprobaciones').toBeTruthy();
+  expect(item, 'el documento nuevo esta en la cola de aprobaciones').toBeTruthy();
   const approved = await api.post(`/api/v1/admin/approvals/${item!.id}/approve`, {
     headers,
     data: {},
