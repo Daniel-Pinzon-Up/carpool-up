@@ -21,6 +21,8 @@ const BY_ROLE: Record<Role, string[]> = {
   superadmin: ['/admin/configuracion'],
 };
 const THEMES = ['light', 'dark'] as const;
+/** --bg de cada tema en styles.css. */
+const BACKGROUND = { light: 'rgb(234, 243, 255)', dark: 'rgb(10, 31, 68)' } as const;
 
 /**
  * Navega dentro de la app, sin recargar (como al tocar un enlace): una recarga completa
@@ -38,6 +40,11 @@ async function audit(page: Page, path: string, theme: 'light' | 'dark'): Promise
   // Si la sesion se perdiera, la app redirigiria y axe revisaria otra pantalla.
   expect(new URL(page.url()).pathname).toBe(path);
   await expect(page.locator('html')).toHaveClass(theme === 'dark' ? /\bdark\b/ : /^(?!.*\bdark\b)/);
+  // En un equipo lento la clase llega antes que el repintado: axe mediria colores mezclados.
+  await expect(page.locator('body')).toHaveCSS('background-color', BACKGROUND[theme]);
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
   expect(await seriousViolations(page)).toEqual([]);
 }
 
