@@ -48,6 +48,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { key: 'trips', path: '/admin/viajes', icon: LucideRoute },
     { key: 'emergencies', path: '/admin/emergencias', icon: LucideSiren },
     { key: 'moderation', path: '/admin/moderacion', icon: LucideMessageSquareWarning },
+    { key: 'profile', path: '/perfil', icon: LucideCircleUser },
   ],
   superadmin: [
     { key: 'dashboard', path: '/admin', icon: LucideLayoutDashboard },
@@ -57,5 +58,6 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { key: 'emergencies', path: '/admin/emergencias', icon: LucideSiren },
     { key: 'moderation', path: '/admin/moderacion', icon: LucideMessageSquareWarning },
     { key: 'settings', path: '/admin/configuracion', icon: LucideSettings },
+    { key: 'profile', path: '/perfil', icon: LucideCircleUser },
   ],
 };

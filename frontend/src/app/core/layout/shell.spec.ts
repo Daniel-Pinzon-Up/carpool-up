@@ -52,6 +52,12 @@ describe('Shell', () => {
     expect(fixture.nativeElement.querySelector('#cp-more-menu')).toBeNull();
   });
 
+  it('todos los roles llegan al perfil, donde se cierra la sesion', () => {
+    for (const items of Object.values(NAV_BY_ROLE)) {
+      expect(items.map((item) => item.path)).toContain('/perfil');
+    }
+  });
+
   it('solo el superadmin ve la configuracion en la navegacion', () => {
     expect(NAV_BY_ROLE.admin.some((item) => item.key === 'settings')).toBe(false);
     expect(NAV_BY_ROLE.superadmin.some((item) => item.key === 'settings')).toBe(true);
