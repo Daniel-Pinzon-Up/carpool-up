@@ -11,6 +11,7 @@ describe('toApiError', () => {
       code: 'TRIP_FULL',
       message: 'No seats left',
       details: { available: 0 },
+      status: 409,
     });
   });
 

@@ -1,8 +1,9 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AuthResult } from './auth.models';
-import { AuthService } from './auth.service';
+import { AuthService, isSessionRejected } from './auth.service';
+import { errorInterceptor } from '../http/error.interceptor';
 import { authenticated } from '../../../testing/auth-fixtures';
 
 function challenge(result: AuthResult['result']): AuthResult {
@@ -132,5 +133,37 @@ describe('AuthService', () => {
     await expect(logout).rejects.toBeTruthy();
     expect(service.accessToken()).toBeNull();
     expect(service.user()).toBeNull();
+  });
+});
+
+describe('isSessionRejected', () => {
+  it('reconoce el 401 crudo y el ya normalizado por errorInterceptor', () => {
+    expect(isSessionRejected(new HttpErrorResponse({ status: 401 }))).toBe(true);
+    expect(
+      isSessionRejected({ code: 'REFRESH_INVALID', message: '', details: {}, status: 401 }),
+    ).toBe(true);
+    expect(isSessionRejected({ code: 'NETWORK_ERROR', message: '', details: {}, status: 0 })).toBe(
+      false,
+    );
+    expect(isSessionRejected(null)).toBe(false);
+  });
+
+  it('restore no reintenta ni demora el arranque cuando no hay sesion', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const service = TestBed.inject(AuthService);
+    const http = TestBed.inject(HttpTestingController);
+    const restore = service.restore();
+    http
+      .expectOne('/api/v1/auth/refresh')
+      .flush({ code: 'REFRESH_INVALID' }, { status: 401, statusText: 'Unauthorized' });
+    await restore;
+    expect(service.accessToken()).toBeNull();
+    http.verify();
   });
 });

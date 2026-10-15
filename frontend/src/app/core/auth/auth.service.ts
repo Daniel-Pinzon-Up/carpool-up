@@ -11,6 +11,7 @@ import {
   PendingChallenge,
   SessionInfo,
 } from './auth.models';
+import { ApiError } from '../http/api-error';
 
 const API = '/api/v1';
 const CHALLENGE_KEY = 'cp.challenge';
@@ -25,9 +26,14 @@ const VERIFY_ENDPOINT: Record<ChallengePurpose, string> = {
 export const RESTORE_RETRIES = [1000, 2000, 4000];
 const MAX_RETRY_AFTER_MS = 10_000;
 
-/** El servidor dijo que la sesion no sirve (no es un fallo pasajero). */
+/**
+ * El servidor dijo que la sesion no sirve (no es un fallo pasajero). El error llega crudo
+ * (HttpErrorResponse) o ya normalizado por errorInterceptor (ApiError con status).
+ */
 export function isSessionRejected(error: unknown): boolean {
-  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
+  const status =
+    error instanceof HttpErrorResponse ? error.status : (error as ApiError | null)?.status;
+  return status === 401 || status === 403;
 }
 
 /** Respeta Retry-After (429) si viene, con un tope; si no, la espera por defecto. */
