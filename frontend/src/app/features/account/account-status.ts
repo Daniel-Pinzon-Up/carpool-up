@@ -4,13 +4,11 @@ import { Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import {
   LucideBan,
-  LucideBriefcase,
   LucideCalendarX,
   LucideCircleAlert,
   LucideClock,
   LucideDynamicIcon,
   LucideFileWarning,
-  LucideGraduationCap,
   LucideIcon,
   LucideLogOut,
   LucideRefreshCw,
@@ -21,7 +19,6 @@ import { DocKind } from '../../core/auth/auth.models';
 import { apiErrorMessage } from '../../core/http/api-error-message';
 import { MetaService } from '../../core/meta/meta.service';
 import { fieldError } from '../../shared/forms/validation';
-import { Choice, ChoiceCards } from '../../shared/ui/choice-cards';
 import { FileDrop } from '../../shared/ui/file-drop';
 import { GlassButton } from '../../shared/ui/glass-button';
 import { GlassCard } from '../../shared/ui/glass-card';
@@ -39,7 +36,7 @@ const ICONS: Record<Situation, LucideIcon> = {
 
 /**
  * Lo unico que ve una cuenta que aun no esta activa: su estado, que sigue
- * y como subir o reemplazar su carnet o constancia.
+ * y como subir o reemplazar su documento de identidad.
  */
 @Component({
   selector: 'cp-account-status',
@@ -49,7 +46,6 @@ const ICONS: Record<Situation, LucideIcon> = {
     TranslocoPipe,
     GlassCard,
     GlassButton,
-    ChoiceCards,
     FileDrop,
     LucideDynamicIcon,
     LucideCircleAlert,
@@ -95,12 +91,7 @@ const ICONS: Record<Situation, LucideIcon> = {
             </div>
           }
           <form [formGroup]="form" (ngSubmit)="upload()" novalidate class="flex flex-col gap-4">
-            <cp-choice-cards
-              formControlName="kind"
-              [label]="'register.document.label' | transloco"
-              [choices]="docChoices()"
-              [error]="err('kind')"
-            />
+            <p class="text-sm">{{ 'register.document.identity_document.body' | transloco }}</p>
             <cp-file-drop
               formControlName="file"
               [label]="'register.document.file' | transloco"
@@ -149,7 +140,7 @@ export default class AccountStatus {
   protected readonly error = signal<string | null>(null);
   protected readonly submitted = signal(false);
   protected readonly form = inject(FormBuilder).nonNullable.group({
-    kind: [this.auth.user()?.document?.kind ?? '', Validators.required],
+    kind: ['identity_document'],
     file: inject(FormBuilder).control<File | null>(null, Validators.required),
   });
 
@@ -175,17 +166,6 @@ export default class AccountStatus {
   );
   protected readonly reason = computed(() => this.auth.user()?.document?.rejection_reason ?? null);
   protected readonly firstName = computed(() => this.auth.user()?.full_name.split(' ')[0] ?? '');
-  protected readonly docChoices = computed<Choice[]>(() =>
-    [
-      { value: 'student_card', icon: LucideGraduationCap },
-      { value: 'institutional_proof', icon: LucideBriefcase },
-    ].map((c) => ({
-      ...c,
-      title: this.transloco.translate(`register.document.${c.value}.title`),
-      description: this.transloco.translate(`register.document.${c.value}.body`),
-    })),
-  );
-
   constructor() {
     void this.meta.load();
   }

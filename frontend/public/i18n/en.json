@@ -361,7 +361,7 @@
     },
     "safety": {
       "title": "Your safety first",
-      "body": "Only the university community with a verified ID can join. You can share your trip live and there is an emergency button."
+      "body": "Only the university community with a verified identity document can join. You can share your trip live and there is an emergency button."
     },
     "createAccount": "Create my account",
     "haveAccount": "I already have an account",
@@ -512,11 +512,11 @@
     },
     "expired": {
       "title": "Your document expired",
-      "body": "Every semester you must upload your current ID or certificate to keep using the app."
+      "body": "Every semester you must upload your identity document again to keep using the app."
     },
     "missing": {
       "title": "Your document is missing",
-      "body": "Upload your ID or certificate so we can activate your account."
+      "body": "Upload your identity document so we can activate your account."
     },
     "suspended": {
       "title": "Your account is suspended",
@@ -575,7 +575,7 @@
     "subtitle": "Review documents in order of arrival. Compare the name and sex with the document.",
     "refresh": "Refresh",
     "tabs": {
-      "identity": "IDs and certificates ({{count}})",
+      "identity": "Identity documents ({{count}})",
       "license": "Licenses ({{count}})",
       "licenseName": "Driver's license"
     },
@@ -636,7 +636,7 @@
     "kinds": {
       "document_approved": "We approved your document. Your account is active.",
       "document_rejected": "We rejected your document: {{reason}}",
-      "document_expired": "Your ID expired. Upload the one for semester {{semester}} before {{deadline}}.",
+      "document_expired": "Your document expired. Upload the one for semester {{semester}} before {{deadline}}.",
       "license_approved": "We approved your driver's license.",
       "license_rejected": "We rejected your license: {{reason}}",
       "account_revalidation_required": "You did not revalidate your document for semester {{semester}}. Upload a new one to keep using the app.",
@@ -1428,7 +1428,7 @@
         "account": "Account suspension",
         "booking_ban": "Booking ban"
       },
-      "document": "Student ID or certificate",
+      "document": "Identity document",
       "license": "Driving licence",
       "noDocument": "Not submitted",
       "lastLogin": "Last sign-in",
@@ -1621,7 +1621,7 @@
     "q": {
       "who": {
         "q": "Who can use Carpool UP?",
-        "a": "Anyone in the university community with an institutional email ending in {{suffix}}. When you sign up you upload your student ID or certificate, and an administrator reviews it before activating your account."
+        "a": "Anyone in the university community with an institutional email ending in {{suffix}}. When you sign up you upload your identity document, and an administrator reviews it before activating your account."
       },
       "code": {
         "q": "I did not get the code. What should I do?",
@@ -1629,7 +1629,7 @@
       },
       "revalidate": {
         "q": "Why do I have to upload my document every semester?",
-        "a": "To confirm you are still part of the university. You have {{days}} days from the start of the semester to upload your current ID or certificate."
+        "a": "To confirm you are still part of the university. You have {{days}} days from the start of the semester to upload your identity document again."
       },
       "search": {
         "q": "How do I find a ride?",

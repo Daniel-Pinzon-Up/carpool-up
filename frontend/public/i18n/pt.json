@@ -361,7 +361,7 @@
     },
     "safety": {
       "title": "Sua segurança em primeiro lugar",
-      "body": "Só entra a comunidade universitária com documento verificado. Você pode compartilhar a viagem ao vivo e há um botão de emergência."
+      "body": "Só entra a comunidade universitária com documento de identidade verificado. Você pode compartilhar a viagem ao vivo e há um botão de emergência."
     },
     "createAccount": "Criar minha conta",
     "haveAccount": "Já tenho conta",
@@ -512,11 +512,11 @@
     },
     "expired": {
       "title": "Seu documento venceu",
-      "body": "A cada semestre você deve enviar seu documento vigente para continuar usando o app."
+      "body": "A cada semestre você deve enviar de novo seu documento de identidade para continuar usando o app."
     },
     "missing": {
       "title": "Falta seu documento",
-      "body": "Envie seu documento para que possamos ativar sua conta."
+      "body": "Envie seu documento de identidade para que possamos ativar sua conta."
     },
     "suspended": {
       "title": "Sua conta está suspensa",
@@ -575,7 +575,7 @@
     "subtitle": "Analise os documentos por ordem de chegada. Compare o nome e o sexo com o documento.",
     "refresh": "Atualizar",
     "tabs": {
-      "identity": "Carteirinhas e declarações ({{count}})",
+      "identity": "Documentos de identidade ({{count}})",
       "license": "Carteiras de motorista ({{count}})",
       "licenseName": "Carteira de motorista"
     },
@@ -1428,7 +1428,7 @@
         "account": "Suspensão da conta",
         "booking_ban": "Suspensão de reservas"
       },
-      "document": "Carteirinha ou declaração",
+      "document": "Documento de identidade",
       "license": "Habilitação",
       "noDocument": "Não enviado",
       "lastLogin": "Último acesso",
@@ -1621,7 +1621,7 @@
     "q": {
       "who": {
         "q": "Quem pode usar o Carpool UP?",
-        "a": "Qualquer pessoa da comunidade universitária com um e-mail institucional terminado em {{suffix}}. Ao se cadastrar você envia sua carteirinha ou declaração, e um administrador a revisa antes de ativar sua conta."
+        "a": "Qualquer pessoa da comunidade universitária com um e-mail institucional terminado em {{suffix}}. Ao se cadastrar você envia seu documento de identidade, e um administrador o revisa antes de ativar sua conta."
       },
       "code": {
         "q": "Não recebi o código. O que faço?",
@@ -1629,7 +1629,7 @@
       },
       "revalidate": {
         "q": "Por que preciso enviar meu documento a cada semestre?",
-        "a": "Para confirmar que você continua vinculado à universidade. Você tem {{days}} dias desde o início do semestre para enviar a carteirinha ou declaração vigente."
+        "a": "Para confirmar que você continua vinculado à universidade. Você tem {{days}} dias desde o início do semestre para enviar de novo seu documento de identidade."
       },
       "search": {
         "q": "Como encontro uma viagem?",

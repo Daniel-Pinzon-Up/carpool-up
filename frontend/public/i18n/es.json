@@ -361,7 +361,7 @@
     },
     "safety": {
       "title": "Tu seguridad primero",
-      "body": "Solo entra la comunidad universitaria con carnet verificado. Puedes compartir tu viaje en vivo y tienes un botón de emergencia."
+      "body": "Solo entra la comunidad universitaria con documento de identidad verificado. Puedes compartir tu viaje en vivo y tienes un botón de emergencia."
     },
     "createAccount": "Crear mi cuenta",
     "haveAccount": "Ya tengo cuenta",
@@ -512,11 +512,11 @@
     },
     "expired": {
       "title": "Tu documento venció",
-      "body": "Cada semestre debes subir tu carnet o constancia vigente para seguir usando la app."
+      "body": "Cada semestre debes subir de nuevo tu documento de identidad para seguir usando la app."
     },
     "missing": {
       "title": "Falta tu documento",
-      "body": "Sube tu carnet o constancia para que podamos activar tu cuenta."
+      "body": "Sube tu documento de identidad para que podamos activar tu cuenta."
     },
     "suspended": {
       "title": "Tu cuenta está suspendida",
@@ -575,7 +575,7 @@
     "subtitle": "Revisa los documentos en orden de llegada. Compara el nombre y el sexo con el documento.",
     "refresh": "Actualizar",
     "tabs": {
-      "identity": "Carnets y constancias ({{count}})",
+      "identity": "Documentos de identidad ({{count}})",
       "license": "Licencias ({{count}})",
       "licenseName": "Licencia de conducción"
     },
@@ -636,7 +636,7 @@
     "kinds": {
       "document_approved": "Aprobamos tu documento. Tu cuenta está activa.",
       "document_rejected": "Rechazamos tu documento: {{reason}}",
-      "document_expired": "Tu carnet venció. Sube el del semestre {{semester}} antes del {{deadline}}.",
+      "document_expired": "Tu documento venció. Sube el del semestre {{semester}} antes del {{deadline}}.",
       "license_approved": "Aprobamos tu licencia de conducción.",
       "license_rejected": "Rechazamos tu licencia: {{reason}}",
       "account_revalidation_required": "No revalidaste tu documento para el semestre {{semester}}. Sube uno nuevo para seguir usando la app.",
@@ -1428,7 +1428,7 @@
         "account": "Suspensión de la cuenta",
         "booking_ban": "Suspensión de reservas"
       },
-      "document": "Carnet o constancia",
+      "document": "Documento de identidad",
       "license": "Licencia",
       "noDocument": "Sin enviar",
       "lastLogin": "Último ingreso",
@@ -1621,7 +1621,7 @@
     "q": {
       "who": {
         "q": "¿Quién puede usar Carpool UP?",
-        "a": "Cualquier persona de la comunidad universitaria con un correo institucional terminado en {{suffix}}. Al registrarte subes tu carnet o constancia y un administrador lo revisa antes de activar tu cuenta."
+        "a": "Cualquier persona de la comunidad universitaria con un correo institucional terminado en {{suffix}}. Al registrarte subes tu documento de identidad y un administrador lo revisa antes de activar tu cuenta."
       },
       "code": {
         "q": "No me llegó el código, ¿qué hago?",
@@ -1629,7 +1629,7 @@
       },
       "revalidate": {
         "q": "¿Por qué debo subir mi documento cada semestre?",
-        "a": "Para confirmar que sigues vinculado a la universidad. Tienes {{days}} días desde el inicio del semestre para subir el carnet o la constancia vigente."
+        "a": "Para confirmar que sigues vinculado a la universidad. Tienes {{days}} días desde el inicio del semestre para subir de nuevo tu documento de identidad."
       },
       "search": {
         "q": "¿Cómo encuentro un viaje?",

@@ -361,7 +361,7 @@
     },
     "safety": {
       "title": "Votre sécurité d'abord",
-      "body": "Seule la communauté universitaire avec une carte vérifiée peut entrer. Vous pouvez partager votre trajet en direct et un bouton d'urgence est disponible."
+      "body": "Seule la communauté universitaire avec une pièce d'identité vérifiée peut entrer. Vous pouvez partager votre trajet en direct et un bouton d'urgence est disponible."
     },
     "createAccount": "Créer mon compte",
     "haveAccount": "J'ai déjà un compte",
@@ -512,11 +512,11 @@
     },
     "expired": {
       "title": "Votre document a expiré",
-      "body": "Chaque semestre, vous devez envoyer votre carte ou attestation en cours de validité pour continuer à utiliser l'app."
+      "body": "Chaque semestre, vous devez renvoyer votre pièce d'identité pour continuer à utiliser l'app."
     },
     "missing": {
       "title": "Votre document manque",
-      "body": "Envoyez votre carte ou attestation pour que nous puissions activer votre compte."
+      "body": "Envoyez votre pièce d'identité pour que nous puissions activer votre compte."
     },
     "suspended": {
       "title": "Votre compte est suspendu",
@@ -575,7 +575,7 @@
     "subtitle": "Vérifiez les documents par ordre d'arrivée. Comparez le nom et le sexe avec le document.",
     "refresh": "Actualiser",
     "tabs": {
-      "identity": "Cartes et attestations ({{count}})",
+      "identity": "Pièces d'identité ({{count}})",
       "license": "Permis ({{count}})",
       "licenseName": "Permis de conduire"
     },
@@ -636,7 +636,7 @@
     "kinds": {
       "document_approved": "Nous avons approuvé votre document. Votre compte est actif.",
       "document_rejected": "Nous avons refusé votre document : {{reason}}",
-      "document_expired": "Votre carte a expiré. Envoyez celle du semestre {{semester}} avant le {{deadline}}.",
+      "document_expired": "Votre document a expiré. Envoyez celui du semestre {{semester}} avant le {{deadline}}.",
       "license_approved": "Nous avons approuvé votre permis de conduire.",
       "license_rejected": "Nous avons refusé votre permis : {{reason}}",
       "account_revalidation_required": "Vous n'avez pas revalidé votre document pour le semestre {{semester}}. Envoyez-en un nouveau pour continuer à utiliser l'app.",
@@ -1428,7 +1428,7 @@
         "account": "Suspension du compte",
         "booking_ban": "Interdiction de réserver"
       },
-      "document": "Carte ou attestation",
+      "document": "Pièce d'identité",
       "license": "Permis",
       "noDocument": "Non envoyé",
       "lastLogin": "Dernière connexion",
@@ -1621,7 +1621,7 @@
     "q": {
       "who": {
         "q": "Qui peut utiliser Carpool UP ?",
-        "a": "Toute personne de la communauté universitaire ayant une adresse institutionnelle se terminant par {{suffix}}. À l’inscription, vous envoyez votre carte ou attestation, et un administrateur la vérifie avant d’activer votre compte."
+        "a": "Toute personne de la communauté universitaire ayant une adresse institutionnelle se terminant par {{suffix}}. À l’inscription, vous envoyez votre pièce d’identité, et un administrateur la vérifie avant d’activer votre compte."
       },
       "code": {
         "q": "Je n’ai pas reçu le code. Que faire ?",
@@ -1629,7 +1629,7 @@
       },
       "revalidate": {
         "q": "Pourquoi dois-je envoyer mon document chaque semestre ?",
-        "a": "Pour confirmer que vous faites toujours partie de l’université. Vous avez {{days}} jours après le début du semestre pour envoyer votre carte ou attestation en cours."
+        "a": "Pour confirmer que vous faites toujours partie de l’université. Vous avez {{days}} jours après le début du semestre pour renvoyer votre pièce d’identité."
       },
       "search": {
         "q": "Comment trouver un trajet ?",
