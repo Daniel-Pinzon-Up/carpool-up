@@ -59,7 +59,7 @@ Cada módulo repite la misma estructura, así es fácil encontrar dónde está c
 |--------|-----------|
 | `auth` | Registro, ingreso, códigos por correo, segundo factor, sesiones y recuperación de contraseña |
 | `users` | Perfil propio y eliminación de cuenta con anonimización |
-| `documents` | Carné o constancia y licencia de conducción; revalidación semestral |
+| `documents` | Documento de identidad y licencia de conducción; revalidación semestral |
 | `legal` | Términos y política de datos versionados y su aceptación |
 | `semesters` · `places` · `pico_placa` · `settings` | Catálogos y parámetros que configura el superadmin |
 | `vehicles` | Vehículos del conductor y requisitos para publicar |

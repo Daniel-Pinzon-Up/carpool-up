@@ -97,7 +97,7 @@ erDiagram
     uuid user_id FK
     uuid semester_id FK
     uuid reviewed_by FK
-    DocKind kind "carnet o constancia"
+    DocKind kind "documento de identidad"
     ReviewStatus status
   }
   driver_licenses {
@@ -474,7 +474,7 @@ erDiagram
 
 ### 2. Documentos y legal
 
-Carnet o constancia por semestre, licencia de conducción, versiones de términos y política de datos, y su aceptación.
+Documento de identidad por semestre, licencia de conducción, versiones de términos y política de datos, y su aceptación.
 
 ```mermaid
 erDiagram
@@ -494,7 +494,7 @@ erDiagram
     uuid user_id FK
     uuid semester_id FK
     uuid reviewed_by FK
-    DocKind kind "carnet o constancia"
+    DocKind kind "documento de identidad"
     ReviewStatus status
   }
   driver_licenses {

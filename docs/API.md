@@ -144,7 +144,7 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `POST /auth/password/forgot` | Público | 5/min | `{email}`. Misma respuesta exista o no la cuenta. |
 | `POST /auth/password/reset` | Público | 10/min | `{challenge_id, code, new_password}`. Revoca todas las sesiones y vuelve a pedir 2FA. |
 | `GET, PATCH /users/me` | Sesión (cualquier estado) | | Perfil propio con `document` y `pending_legal`. Se puede cambiar `program`, `preferred_language`, `theme_preference` y `payment_note` (solo conductores). |
-| `GET, POST /users/me/documents` | Sesión (cualquier estado) | | Historial y carga de carnet o constancia (multipart: `kind`, `document`). |
+| `GET, POST /users/me/documents` | Sesión (cualquier estado) | | Historial y carga del documento de identidad (multipart: `kind`, `document`). |
 | `POST /legal/accept` | Sesión | | `{document_ids}` de versiones vigentes pendientes. |
 | `POST /users/me/delete` | Sesión | | `{password}`. Elimina la cuenta propia (Ley 1581): anonimiza nombre, correo, foto, programa y contraseña; borra documentos, licencia, contactos de confianza y avisos; cancela sus viajes y reservas futuros con aviso; cierra todas sus sesiones. Conserva los registros operativos. 204. Errores `PASSWORD_INCORRECT` (422), `ACCOUNT_DELETE_TRIP_IN_PROGRESS` y `ACCOUNT_DELETE_NOT_ALLOWED` (superadmin) (409). |
 
@@ -155,9 +155,9 @@ El refresh token viaja en la cookie HttpOnly `cp_refresh` (ruta `/api/v1/auth`).
 | `GET /admin/approvals?type=&status=&limit=&cursor=` | Admin o superadmin | Cola en orden de llegada. `type`: `identity` (por defecto) o `license`; `status`: `pending` por defecto. |
 | `GET /admin/approvals/counts` | Admin o superadmin | Pendientes por tipo. |
 | `GET /admin/approvals/{id}` | Admin o superadmin | Detalle de un elemento. |
-| `POST /admin/approvals/{id}/approve` | Admin o superadmin | `{sex?}` para corregir el sexo en carnets. Activa la cuenta si estaba en `pending_approval`. |
+| `POST /admin/approvals/{id}/approve` | Admin o superadmin | `{sex?}` para corregir el sexo en documentos de identidad. Activa la cuenta si estaba en `pending_approval`. |
 | `POST /admin/approvals/{id}/reject` | Admin o superadmin | `{reason}` (5 a 300 caracteres); el usuario lo ve. |
-| `GET /admin/files/{id}` | Admin o superadmin | Archivo del carnet, constancia o licencia, sin caché. |
+| `GET /admin/files/{id}` | Admin o superadmin | Archivo del documento de identidad o la licencia, sin caché. |
 | `POST /admin/admins` | Superadmin | `{email, full_name, sex, password}`. |
 | `PATCH /admin/users/{id}/role` | Superadmin | `{role}`: `passenger`, `driver` o `admin`. |
 | `GET /users/me/documents/{id}/file` | Dueño | Archivo propio. |

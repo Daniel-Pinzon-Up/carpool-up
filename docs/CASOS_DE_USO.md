@@ -37,11 +37,11 @@ En PowerShell, desde la carpeta del proyecto (con `make` en Git Bash los comando
    ```powershell
    .\make.ps1 verify-email sofia.martinez@unipamplona.edu.co
    ```
-3. **Laura, Valentina, Lucía y Andrés.** Cada uno se registra en `/registro` como cualquier estudiante (Andrés con el rol Conductor), con sexo y carnet correctos. En `/verificar` el código nunca llega; en su lugar:
+3. **Laura, Valentina, Lucía y Andrés.** Cada uno se registra en `/registro` como cualquier estudiante (Andrés con el rol Conductor), con sexo y documento de identidad correctos. En `/verificar` el código nunca llega; en su lugar:
    ```powershell
    .\make.ps1 verify-email laura.gomez@unipamplona.edu.co
    ```
-   La cuenta queda "En revisión", igual que si hubiera escrito el código. Al entrar con su correo y contraseña ve `/cuenta/estado`, y Sofía aprueba su carnet en Aprobaciones. A Andrés no se le registra licencia ni vehículo todavía: eso es el caso 2.
+   La cuenta queda "En revisión", igual que si hubiera escrito el código. Al entrar con su correo y contraseña ve `/cuenta/estado`, y Sofía aprueba su documento de identidad en Aprobaciones. A Andrés no se le registra licencia ni vehículo todavía: eso es el caso 2.
 4. **Linda y Jhonatan** ya están activos. Linda tiene la licencia aprobada y el Renault 9 `ABC123`.
 5. **Daniel** tiene un registro anterior que nunca se verificó. Antes del caso 1 se borra para registrarse desde cero (solo borra cuentas sin verificar):
    ```powershell
@@ -79,7 +79,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 ## Caso 1. Registro de un pasajero hasta su primer viaje posible
 
-**Objetivo:** el registro en cuatro pasos, la verificación del correo con sus límites y la aprobación del carnet con corrección del sexo.
+**Objetivo:** el registro en cuatro pasos, la verificación del correo con sus límites y la aprobación del documento de identidad con corrección del sexo.
 
 **Precondiciones:** Daniel no tiene cuenta (preparación, paso 5). Hay un semestre vigente (2026-2).
 
@@ -88,15 +88,15 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 1. Abre https://localhost en una ventana privada: ve la bienvenida de 3 pasos (propuesta, cómo funciona, seguridad) y elige "Crear cuenta".
 2. Paso 1, Tus datos: escribe `daniel.pinzonqui@gmail.com`. Al continuar el campo lo rechaza (debe terminar en `.edu.co`; si llegara al servidor, `EMAIL_NOT_INSTITUTIONAL`: "Usa tu correo institucional"). Corrige a `daniel.pinzonqui@unipamplona.edu.co`. Con una contraseña de 8 caracteres ve "Mínimo 10 caracteres". Por error elige sexo "Mujer".
 3. Paso 2, Tu rol: elige Pasajero.
-4. Paso 3, Tu documento: elige Carnet estudiantil y sube una foto JPG de 7 MB: "El archivo pesa más de 5 MB. Usa uno más liviano." (`FILE_TOO_LARGE`). Sube una foto de 2 MB.
+4. Paso 3, Tu documento: sube una foto JPG de 7 MB de su documento de identidad: "El archivo pesa más de 5 MB. Usa uno más liviano." (`FILE_TOO_LARGE`). Sube una foto de 2 MB.
 5. Paso 4, Confirmación: sin marcar las dos casillas no puede crear la cuenta. Las marca y la crea.
 6. Llega a `/verificar` con el correo enmascarado (`da**************@unipamplona.edu.co`). En su buzón institucional llega "Verifica tu correo" con un código de 6 dígitos. Escribe 5 códigos equivocados: al quinto el código deja de servir y cualquier intento responde "El código no es correcto o ya venció" (`CODE_INVALID`), aunque luego escriba el correcto que le llegó.
 7. Pide un código nuevo: el botón está deshabilitado hasta pasar 60 s. Llega un segundo correo con otro código; el primero ya no sirve. Con el nuevo verifica.
 8. Queda en `/cuenta/estado`: "Tu cuenta está en revisión". No puede entrar a Buscar.
-9. Sofía (administradora) abre Aprobaciones > Carnets: ve el nombre, el programa y "Declarado al registrarse: Mujer", pero no el correo. Corrige el sexo a Hombre y aprueba.
+9. Sofía (administradora) abre Aprobaciones > Documentos de identidad: ve el nombre, el programa y "Declarado al registrarse: Mujer", pero no el correo. Corrige el sexo a Hombre y aprueba.
 10. Daniel recibe el aviso "Tu documento fue aprobado" y, al recargar, entra a `/buscar`.
 
-**Verificación adicional:** en Configuración > Auditoría aparece la aprobación con el sexo antes (`female`) y después (`male`). La foto del carnet ya no tiene metadatos EXIF (ubicación GPS). Al cerrar sesión y volver a entrar, Daniel no recibe código: la verificación del correo contó como segundo factor.
+**Verificación adicional:** en Configuración > Auditoría aparece la aprobación con el sexo antes (`female`) y después (`male`). La foto del documento ya no tiene metadatos EXIF (ubicación GPS). Al cerrar sesión y volver a entrar, Daniel no recibe código: la verificación del correo contó como segundo factor.
 
 **Prueba automatizada relacionada:** `frontend/e2e/account.spec.ts` (registro, código y aprobación), `backend/tests/test_auth.py`, `backend/tests/test_approvals.py`.
 
@@ -106,7 +106,7 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 **Objetivo:** requisitos para publicar: licencia aprobada y vigente, y un vehículo activo con placa y capacidad válidas.
 
-**Precondiciones:** Andrés se registró como Conductor y su carnet está aprobado (preparación, paso 3).
+**Precondiciones:** Andrés se registró como Conductor y su documento de identidad está aprobado (preparación, paso 3).
 
 **Pasos y resultados esperados**
 
@@ -460,13 +460,13 @@ El caso 20 elimina la cuenta de Jhonatan: conviene dejarlo para el final.
 
 ## Caso 19. Nuevo semestre y nueva versión de los términos
 
-**Objetivo:** la revalidación semestral del carnet y la aceptación obligatoria de términos nuevos.
+**Objetivo:** la revalidación semestral del documento de identidad y la aceptación obligatoria de términos nuevos.
 
 **Pasos y resultados esperados**
 
 1. El superadmin crea el semestre 2027-1 (1 de febrero a 30 de junio). Si se cruza con otro semestre: `SEMESTER_OVERLAP`.
-2. Al empezar 2027-1, el carnet de Laura (aprobado en 2026-2) vence y recibe el aviso de revalidación. Tiene hasta el plazo del semestre (30 días desde el inicio, por defecto) para subir el nuevo.
-3. Jhonatan no lo sube a tiempo: al pasar el plazo su cuenta vuelve a "En revisión" y solo ve su estado hasta que se apruebe un carnet nuevo. Administradores y superadmin no revalidan.
+2. Al empezar 2027-1, el documento de identidad de Laura (aprobado en 2026-2) vence y recibe el aviso de revalidación. Tiene hasta el plazo del semestre (30 días desde el inicio, por defecto) para subir el nuevo.
+3. Jhonatan no lo sube a tiempo: al pasar el plazo su cuenta vuelve a "En revisión" y solo ve su estado hasta que se apruebe un documento nuevo. Administradores y superadmin no revalidan.
 4. El superadmin publica los términos versión 1.1 en español. Publicar otra vez la versión 1.1 en español responde `LEGAL_VERSION_EXISTS`.
 5. En su siguiente ingreso, cada persona con la app en español ve la pantalla de términos y no puede seguir sin aceptarlos. Quien la usa en inglés (por ejemplo Daniel, si cambia el idioma antes) sigue con la versión inglesa vigente hasta que se publique la suya.
 6. Laura acepta y continúa; la aceptación queda guardada con la versión exacta.

@@ -106,7 +106,7 @@ Cuando un conductor acepta una reserva, el pasajero se entera sin recargar la p�
 5. **En Angular**, las pantallas se suscriben con `realtime.on('tipo')`. Por ejemplo, la de emergencias escucha `emergency` y `emergency.handled`.
 6. **Si se cae la conexión**, el servicio reconecta solo al volver internet o al regresar a la pestaña, y las pantallas recargan lo que haga falta.
 
-## 5. Subida segura de documentos (carnet y licencia)
+## 5. Subida segura de documentos (documento de identidad y licencia)
 
 `backend/app/core/storage.py`, `save_private_file`
 

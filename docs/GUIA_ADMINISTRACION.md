@@ -19,14 +19,14 @@ Resumen del periodo elegido (7, 30 o 90 días): viajes completados, cancelacione
 
 ## 3. Aprobaciones
 
-Cola en orden de llegada, con dos pestañas: **carnets y constancias**, y **licencias**.
+Cola en orden de llegada, con dos pestañas: **documentos de identidad** y **licencias**.
 
 1. Abre el documento en el visor seguro (no queda guardado en el navegador).
 2. Compara el nombre y el sexo con lo que la persona declaró. Si el sexo no coincide, corrígelo al aprobar: de él depende el acceso a los viajes solo para mujeres.
 3. **Aprobar** activa la cuenta (o habilita a conducir, si es una licencia) y avisa a la persona.
 4. **Rechazar** pide un motivo que la persona verá. Escribe qué debe corregir.
 
-Cada semestre las personas revalidan su carnet dentro del plazo del semestre (Configuración > Semestres).
+Cada semestre las personas revalidan su documento de identidad dentro del plazo del semestre (Configuración > Semestres).
 
 ## 4. Usuarios
 
@@ -66,7 +66,7 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 | Pestaña | Para qué |
 |---------|----------|
 | **Parámetros** | Reglas del negocio (tabla de abajo). El servidor valida cada valor antes de guardarlo. |
-| **Semestres** | Inicio, fin y plazo de revalidación. Las series y la vigencia de los carnets dependen de ellos. |
+| **Semestres** | Inicio, fin y plazo de revalidación. Las series y la vigencia de los documentos de identidad dependen de ellos. |
 | **Lugares** | Sedes, barrios y puntos de referencia del buscador. Desactivar en vez de borrar: los viajes antiguos los siguen usando. Las coordenadas del seed son aproximadas: revísalas. |
 | **Pico y placa** | Tipo de vehículo, día, dígitos restringidos y vigencia. Al guardar, los viajes futuros afectados se cancelan solos con aviso; si una regla deja de aplicar, vuelven. Las reglas del seed son de ejemplo: ajústalas al decreto vigente. |
 | **Legal** | Publica una versión nueva de los términos o de la política de datos por idioma. Queda vigente de inmediato y todos deben aceptarla en su próximo ingreso. Los textos del seed son un borrador pendiente de revisión jurídica. |
@@ -89,7 +89,7 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 | `rating_window_days` | 7 | Días para calificar después del viaje |
 | `chat_retention_days` | 30 | Días que se conserva el chat después del viaje |
 | `pending_request_hours` | 24 | Horas tras las que vence una solicitud sin respuesta |
-| `revalidation_days` | 30 | Días desde el inicio del semestre para revalidar el carnet |
+| `revalidation_days` | 30 | Días desde el inicio del semestre para revalidar el documento de identidad |
 | `password_min_length` | 10 | Longitud mínima de la contraseña |
 | `login_max_attempts` / `login_lockout_minutes` | 5 / 15 | Intentos fallidos antes del bloqueo temporal, y su duración |
 | `auth_code_minutes` / `auth_code_max_attempts` / `auth_code_resend_seconds` | 10 / 5 / 60 | Vigencia, intentos y espera de los códigos por correo |
@@ -107,7 +107,7 @@ Comentarios de las calificaciones, en dos pestañas: **visibles** y **ocultos**.
 
 ## 9. Datos personales (Ley 1581)
 
-- Nadie ve el correo, el teléfono, el carnet ni la licencia de otra persona. La placa solo la ven los pasajeros con reserva aceptada y quien tenga el enlace de un viaje compartido.
+- Nadie ve el correo, el teléfono, el documento de identidad ni la licencia de otra persona. La placa solo la ven los pasajeros con reserva aceptada y quien tenga el enlace de un viaje compartido.
 - Cada persona puede **eliminar su cuenta** desde su perfil: se anonimizan sus datos, se borran sus documentos y contactos, y se conservan solo los registros operativos de los viajes. Una cuenta eliminada ya no aparece en el panel.
 
 ## 10. Mantenimiento

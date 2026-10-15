@@ -128,7 +128,7 @@ Con SMTP real, la prueba E2E de registro (`account.spec.ts`) ya no encuentra el 
 
 - El contenedor `backup` hace un `pg_dump` al arrancar y luego cada 24 horas, y conserva los 7 últimos en `backups/`. Si la base no responde, reintenta cada 5 minutos.
 - Conviene copiar la carpeta `backups/` fuera del servidor (otro disco o almacenamiento de la universidad).
-- Los archivos privados (carnets, licencias, fotos) viven en el volumen `storage`; respáldalo junto con la base.
+- Los archivos privados (documentos de identidad, licencias, fotos) viven en el volumen `storage`; respáldalo junto con la base.
 
 **Comprobar un respaldo sin tocar nada** (restaura el último en una base aparte, compara filas y la borra):
 
